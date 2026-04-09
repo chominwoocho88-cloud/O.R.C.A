@@ -2,7 +2,7 @@ name: ARIA Daily Report
 
 on:
   schedule:
-    - cron: '30 22 * * 0-4'   # 매일 평일 오전 8시 KST 자동 실행
+    - cron: '30 22 * * 0-4'   # 매일 평일 오전 7시 KST 자동 실행
   workflow_dispatch:           # 버튼 눌렀을 때 즉시 실행
 
 jobs:
