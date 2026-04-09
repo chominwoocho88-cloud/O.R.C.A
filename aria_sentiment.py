@@ -190,31 +190,30 @@ def get_percentile(score, history):
 
 
 def make_component_bar(score, max_val=20):
-    """점수를 시각적 바로 변환"""
     abs_score = abs(score)
-    bar_len   = round(abs_score / max_val * 6)
-    bar       = "#" * bar_len
-    empty     = "." * (6 - bar_len)
+    bar_len   = round(abs_score / max_val * 5)
+    bar       = "█" * bar_len
+    empty     = "░" * (5 - bar_len)
     if score > 0:
-        return "[" + bar + empty + "] +" + str(score) + "점"
+        return "[" + bar + empty + "] +" + str(score)
     elif score < 0:
-        return "[" + bar + empty + "] " + str(score) + "점"
+        return "[" + bar + empty + "] " + str(score)
     else:
-        return "[......] 0점"
+        return "[░░░░░] 0"
 
 
-def make_history_chart(history, days=14):
+def make_history_chart(history, days=10):
     recent = history[-days:]
     if not recent:
         return "No data"
     lines = []
     for h in recent:
         score      = h["score"]
-        bar_len    = int(score / 5)
-        bar        = "#" * bar_len
-        empty      = " " * (20 - bar_len)
+        bar_len    = int(score / 10)
+        bar        = "█" * bar_len
+        empty      = "░" * (10 - bar_len)
         date_short = h["date"][5:]
-        lines.append(date_short + " [" + bar + empty + "] " + str(score) + " " + h.get("emoji", ""))
+        lines.append(date_short + " " + bar + empty + " " + str(score) + h.get("emoji", ""))
     return "\n".join(lines)
 
 
@@ -270,12 +269,13 @@ def send_sentiment_report(data):
 
     percentile = get_percentile(score, history)
 
-    # 구성 요소 바
+    # 구성 요소 바 (짧게)
     comp_lines = []
     for name, info in components.items():
-        bar = make_component_bar(info["score"])
-        comp_lines.append("  " + name.ljust(6) + " " + bar)
-        comp_lines.append("           " + info["reason"])
+        bar    = make_component_bar(info["score"])
+        reason = info["reason"][:20]
+        comp_lines.append(name[:5] + " " + bar)
+        comp_lines.append("  " + reason)
 
     # 히스토리 차트
     chart = make_history_chart(history)
@@ -287,17 +287,17 @@ def send_sentiment_report(data):
 
     # 투자 시사점
     if score <= 20:
-        insight = "극단 공포 - 역사적 분할매수 최적 타이밍"
+        insight = "극단공포 - 분할매수 최적 타이밍"
     elif score <= 35:
-        insight = "공포 구간 - 분할매수 적극 검토 시점"
+        insight = "공포 - 분할매수 적극 검토"
     elif score <= 50:
-        insight = "공포 우위 - 신중한 접근, 분할매수 유지"
+        insight = "공포우위 - 신중한 분할매수 유지"
     elif score <= 65:
-        insight = "중립 구간 - 추세 확인 후 대응"
+        insight = "중립 - 추세 확인 후 대응"
     elif score <= 80:
-        insight = "탐욕 구간 - 리스크 관리 강화"
+        insight = "탐욕 - 리스크 관리 강화"
     else:
-        insight = "극단 탐욕 - 비중 축소 및 현금 확보 고려"
+        insight = "극단탐욕 - 비중 축소 고려"
 
     lines = [
         emoji + " <b>ARIA 시장 감정지수</b>",
@@ -306,15 +306,14 @@ def send_sentiment_report(data):
         "오늘: <b>" + str(score) + "/100</b> (" + level + ")",
         "추세: " + arrow + " | 7일 평균: " + str(trend.get("avg_7d", "-")),
         "",
-        "━━ 구성 요소별 분석 ━━",
+        "━━ 구성요소 분석 ━━",
         "<pre>" + "\n".join(comp_lines) + "</pre>",
         "",
-        "━━ " + str(len(history[-14:])) + "일 추이 ━━",
+        "━━ " + str(len(history[-10:])) + "일 추이 ━━",
         "<pre>" + chart + "</pre>",
         "",
-        "━━ 30일 통계 ━━",
         "최저: " + str(min_30) + " | 최고: " + str(max_30) + " | 평균: " + str(avg_30),
-        "현재 위치: 하위 " + str(percentile) + "% 구간",
+        "현재: 하위 " + str(percentile) + "% 구간",
         "",
         "💡 " + insight,
     ]
