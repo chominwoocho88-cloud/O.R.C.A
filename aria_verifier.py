@@ -267,6 +267,16 @@ def run_verification():
 
     accuracy = update_accuracy(verification, accuracy)
     save_accuracy(accuracy)
+
+    # 가중치 자동 업데이트 (자기학습)
+    try:
+        from aria_weights import update_weights_from_accuracy
+        changes = update_weights_from_accuracy(accuracy)
+        if changes:
+            print("Weight updates: " + str(len(changes)) + " changes applied")
+    except ImportError:
+        pass
+
     send_verification_report(verification, accuracy)
 
     today_acc = verification.get("summary", {}).get("accuracy_today", 0)
