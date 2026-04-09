@@ -37,7 +37,9 @@ jobs:
         run: |
           git config user.name "ARIA Bot"
           git config user.email "aria@github-actions"
+          git stash
           git pull --rebase origin main
+          git stash pop
           git add memory.json reports/ || true
           git diff --staged --quiet || git commit -m "ARIA: $(date +'%Y-%m-%d') 분석 저장"
           git push
