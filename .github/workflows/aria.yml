@@ -23,6 +23,17 @@ jobs:
       - name: Install dependencies
         run: pip install anthropic rich httpx
 
+      - name: Fix encoding
+        run: |
+          for f in aria_multi_agent.py aria_verifier.py aria_sentiment.py aria_portfolio.py aria_telegram.py; do
+            if [ -f "$f" ]; then
+              sed -i 's/\u201c/"/g' $f
+              sed -i 's/\u201d/"/g' $f
+              sed -i "s/\u2018/'/g" $f
+              sed -i "s/\u2019/'/g" $f
+            fi
+          done
+
       - name: Run ARIA
         env:
           PYTHONIOENCODING: utf-8
@@ -40,6 +51,6 @@ jobs:
           git stash
           git pull --rebase origin main
           git stash pop
-          git add memory.json reports/ || true
+          git add memory.json reports/ sentiment.json accuracy.json || true
           git diff --staged --quiet || git commit -m "ARIA: $(date +'%Y-%m-%d') 분석 저장"
           git push
