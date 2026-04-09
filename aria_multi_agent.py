@@ -380,6 +380,9 @@ def main():
     try:
         from aria_telegram import send_start_notification, send_report, send_error
         from aria_verifier import run_verification
+        from aria_sentiment import run_sentiment
+        from aria_portfolio import run_portfolio
+        from aria_rotation import run_rotation
 
         # 1. 어제 예측 먼저 채점
         print("\n=== Verifying yesterday predictions ===")
@@ -394,6 +397,18 @@ def main():
 
         print_report(report, len(memory) + 1)
         send_report(report, len(memory) + 1)
+
+        # 감정지수 트래킹
+        print("\n=== Sentiment Tracking ===")
+        run_sentiment(report)
+
+        # 섹터 로테이션 추적
+        print("\n=== Sector Rotation ===")
+        run_rotation(report)
+
+        # 포트폴리오 분석
+        print("\n=== Portfolio Analysis ===")
+        run_portfolio(report)
 
         save_memory(memory, report)
         path = save_report(report)
