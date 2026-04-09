@@ -67,7 +67,7 @@ def call_api(system: str, user: str, use_search: bool = False, model: str = MODE
                 if blk and getattr(blk, "type", "") == "tool_use":
                     search_count += 1
                     q = getattr(blk, "input", {}).get("query", "")
-                    console.print(f"    [dim]검색 [{search_count}]: {q}[/dim]")
+                    console.print(f"    [dim] [{search_count}]: {q}[/dim]")
             elif t == "content_block_delta":
                 d = getattr(ev, "delta", None)
                 if d and getattr(d, "type", "") == "text_delta":
@@ -437,7 +437,7 @@ def main():
         console.print(f"[dim]Saved: {path}[/dim]")
 
     except Exception as e:
-        console.print(f"[bold red]오류: {e}[/bold red]")
+        console.print(f"[bold red]: {e}[/bold red]")
         sys.exit(1)
 
 if __name__ == "__main__":
