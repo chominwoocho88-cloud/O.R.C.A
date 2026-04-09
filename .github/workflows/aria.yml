@@ -32,10 +32,11 @@ jobs:
           GH_REPO:           ${{ secrets.GH_REPO }}
         run: python aria_multi_agent.py
 
-      - name: Save memory
+- name: Save memory
         run: |
           git config user.name  "ARIA Bot"
           git config user.email "aria@github-actions"
+          git pull --rebase origin main
           git add memory.json reports/ || true
           git diff --staged --quiet || git commit -m "ARIA: $(date +'%Y-%m-%d') 분석 저장"
           git push
