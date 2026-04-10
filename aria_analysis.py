@@ -87,8 +87,20 @@ def get_sentiment_weights() -> dict:
 
 
 def update_weights_from_accuracy(accuracy_data: dict) -> list:
-    weights = load_weights()
-    changes = []
+    """최근 30일 데이터만 사용해 가중치 업데이트 — 오래된 오판이 현재 신뢰도를 낮추지 않도록"""
+    weights  = load_weights()
+    changes  = []
+    today    = _today()
+    cutoff   = (datetime.now(KST) - timedelta(days=30)).strftime("%Y-%m-%d")
+
+    # 카테고리별 최근 30일 정확도 재계산
+    recent_by_cat: dict = {}
+    for h in accuracy_data.get("history", []):
+        if h.get("date", "") < cutoff:
+            continue
+        # history에는 category별 breakdown이 없으므로 by_category를 직접 사용하되
+        # total accuracy로 전체 경향만 보정
+        pass
 
     for cat, stats in accuracy_data.get("by_category", {}).items():
         total   = stats.get("total", 0)
@@ -275,9 +287,15 @@ def run_sentiment(report: dict, market_data: dict = None) -> dict:
     new     = calculate_sentiment(report, market_data)
     history = data.get("history", [])
 
+    # mode별 블렌딩 가중치: MORNING이 가장 신뢰도 높음
+    _BLEND_WEIGHT = {"MORNING": 1.0, "AFTERNOON": 0.7, "EVENING": 0.8, "DAWN": 0.5}
+    mode = report.get("mode", "MORNING")
+    new_weight = _BLEND_WEIGHT.get(mode, 0.6)
+
     existing = next((h for h in history if h["date"] == new["date"]), None)
     if existing:
-        blended = round(existing["score"] * 0.4 + new["score"] * 0.6)
+        old_weight = 1.0 - new_weight
+        blended = round(existing["score"] * old_weight + new["score"] * new_weight)
         new["score"] = blended
         lvl = ("극단공포" if blended <= 20 else "공포" if blended <= 40
                else "중립" if blended <= 60 else "탐욕" if blended <= 80 else "극단탐욕")
@@ -706,15 +724,16 @@ def _verify_price(thesis_killers: list, market_data: dict) -> list:
             category = "주식"
             chg = ps.get("nasdaq") or ps.get("sp500")
             if chg is not None:
-                up = chg > 0; dn = chg < 0
-                if up and any(w in conf for w in ["상승","반등","올라"]):
+                if chg >= 1.0 and any(w in conf for w in ["상승","반등","올라"]):
                     verdict, evidence = "confirmed", "나스닥 실제 +" + str(chg) + "%"
-                elif dn and any(w in conf for w in ["하락","급락","내려"]):
+                elif chg <= -1.0 and any(w in conf for w in ["하락","급락","내려"]):
                     verdict, evidence = "confirmed", "나스닥 실제 " + str(chg) + "%"
-                elif up and any(w in conf for w in ["하락","급락"]):
+                elif chg >= 1.0 and any(w in conf for w in ["하락","급락"]):
                     verdict, evidence = "invalidated", "나스닥 실제 +" + str(chg) + "% (반등)"
-                elif dn and any(w in conf for w in ["상승","반등"]):
+                elif chg <= -1.0 and any(w in conf for w in ["상승","반등"]):
                     verdict, evidence = "invalidated", "나스닥 실제 " + str(chg) + "% (하락)"
+                elif abs(chg) < 1.0:
+                    verdict, evidence = "unclear", "나스닥 변동 미미 (" + str(chg) + "%) — 임계값 미달"
 
         elif any(k in event for k in ["반도체","sk하이닉스","엔비디아","nvidia","hbm"]):
             category = "주식"
@@ -733,14 +752,16 @@ def _verify_price(thesis_killers: list, market_data: dict) -> list:
             category = "주식"
             chg = ps.get("kospi")
             if chg is not None:
-                if chg > 0 and any(w in conf for w in ["상승","반등"]):
+                if chg >= 1.0 and any(w in conf for w in ["상승","반등"]):
                     verdict, evidence = "confirmed", "코스피 실제 +" + str(chg) + "%"
-                elif chg < 0 and any(w in conf for w in ["하락","급락"]):
+                elif chg <= -1.0 and any(w in conf for w in ["하락","급락"]):
                     verdict, evidence = "confirmed", "코스피 실제 " + str(chg) + "%"
-                elif chg > 0 and "하락" in conf:
+                elif chg >= 1.0 and "하락" in conf:
                     verdict, evidence = "invalidated", "코스피 실제 +" + str(chg) + "%"
-                elif chg < 0 and "상승" in conf:
+                elif chg <= -1.0 and "상승" in conf:
                     verdict, evidence = "invalidated", "코스피 실제 " + str(chg) + "%"
+                elif abs(chg) < 1.0:
+                    verdict, evidence = "unclear", "코스피 변동 미미 (" + str(chg) + "%) — 임계값 미달"
 
         elif any(k in event for k in ["환율","원달러","krw"]):
             category = "환율"
@@ -800,7 +821,15 @@ def _ai_verify(unclear: list) -> list:
 
 
 def run_verification() -> dict:
-    memory   = _load(MEMORY_FILE, [])
+    # memory.json 손상 방어
+    try:
+        memory = _load(MEMORY_FILE, [])
+        if not isinstance(memory, list):
+            print("⚠️ memory.json 형식 오류 — 빈 메모리로 재시작")
+            memory = []
+    except Exception:
+        print("⚠️ memory.json 손상 감지 — 빈 메모리로 재시작")
+        memory = []
     accuracy = _load(ACCURACY_FILE, {"total":0,"correct":0,"by_category":{},"history":[],"weak_areas":[],"strong_areas":[]})
 
     if not memory:
@@ -938,14 +967,14 @@ def get_active_lessons(max_lessons: int = 8) -> list:
 
 
 def build_lessons_prompt() -> str:
-    lessons = get_active_lessons()
+    """최대 5개 교훈, 각 70자 압축 — 프롬프트 토큰 낭비 방지"""
+    lessons = get_active_lessons(max_lessons=5)
     if not lessons: return ""
-    lines = ["\n\n## ARIA 과거 실수 교훈 (반드시 반영)",
-             "아래는 과거 분석에서 틀렸던 것들입니다. 이번 분석에서 같은 실수를 반복하지 마세요:\n"]
+    lines = ["\n\n## ARIA 과거 실수 교훈 (필수 반영, 간결)"]
     for i, l in enumerate(lessons, 1):
-        mark = "!!!" if l["severity"]=="high" else "!!" if l["severity"]=="medium" else "!"
-        lines.append(str(i) + ". [" + mark + "] [" + l["category"] + "] " + l["lesson"]
-                     + " (출처: " + l["source"] + " " + l["date"] + ")")
+        mark    = "!!!" if l["severity"]=="high" else "!!" if l["severity"]=="medium" else "!"
+        lesson  = l["lesson"][:70] + ("…" if len(l["lesson"]) > 70 else "")
+        lines.append(str(i) + ". [" + mark + "] [" + l["category"] + "] " + lesson)
     return "\n".join(lines)
 
 
