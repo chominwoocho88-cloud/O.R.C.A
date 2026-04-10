@@ -42,9 +42,17 @@ def _now() -> datetime:
     return datetime.now(KST)
 
 def load_memory() -> list:
-    if MEMORY_FILE.exists():
+    if not MEMORY_FILE.exists():
+        return []
+    try:
         return json.loads(MEMORY_FILE.read_text(encoding="utf-8"))
-    return []
+    except json.JSONDecodeError as e:
+        print("⚠️ memory.json 손상 감지 (" + str(e) + ") — 빈 메모리로 재시작")
+        # 손상된 파일 백업
+        backup = MEMORY_FILE.with_suffix(".json.bak")
+        MEMORY_FILE.rename(backup)
+        print("백업 저장: " + str(backup))
+        return []
 
 def save_memory(memory: list, analysis: dict):
     memory = [m for m in memory if m.get("analysis_date") != analysis.get("analysis_date")]
@@ -160,6 +168,18 @@ def main():
     ))
 
     try:
+        # 중복 실행 방어: MORNING은 오늘 이미 리포트가 있으면 스킵
+        if MODE == "MORNING":
+            existing = list(REPORTS_DIR.glob(today + "_morning.json")) if REPORTS_DIR.exists() else []
+            if existing:
+                console.print("[yellow]⚠️ 오늘 MORNING 분석이 이미 존재합니다: " + str(existing[0].name) + "[/yellow]")
+                console.print("[yellow]   중복 실행을 방지하려면 해당 파일을 삭제 후 재실행하세요.[/yellow]")
+                # workflow_dispatch 수동 실행은 경고만, 스케줄은 중단
+                import os as _os
+                if _os.environ.get("GITHUB_EVENT_NAME") == "schedule":
+                    console.print("[red]스케줄 실행 중복 감지 — 종료[/red]")
+                    return
+
         # 1. 실시간 데이터 수집
         print("\n=== 실시간 시장 데이터 수집 ===")
         market_data = fetch_all_market_data()
