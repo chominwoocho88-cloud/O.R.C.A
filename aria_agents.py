@@ -18,10 +18,11 @@ from rich.console import Console
 KST     = timezone(timedelta(hours=9))
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
-MODEL_HUNTER   = "claude-haiku-4-5-20251001"
-MODEL_ANALYST  = "claude-sonnet-4-6"
-MODEL_DEVIL    = "claude-sonnet-4-6"
-MODEL_REPORTER = "claude-opus-4-6"
+MODEL_HUNTER        = "claude-haiku-4-5-20251001"
+MODEL_ANALYST       = "claude-sonnet-4-6"
+MODEL_DEVIL         = "claude-sonnet-4-6"
+MODEL_REPORTER_FULL = "claude-opus-4-6"    # MORNING 풀 리포트 전용
+MODEL_REPORTER_LITE = "claude-sonnet-4-6"  # AFTERNOON/EVENING/DAWN — 비용 40% 절감
 
 console = Console()
 client  = anthropic.Anthropic(api_key=API_KEY)
@@ -336,11 +337,15 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
         "analyst": analyst,
         "devil":   devil,
     }
+    # MORNING만 Opus, 나머지는 Sonnet (비용 최적화)
+    reporter_model = MODEL_REPORTER_FULL if mode == "MORNING" else MODEL_REPORTER_LITE
+    max_tok        = 4000 if mode == "MORNING" else 2500
+
     raw = call_api(
         REPORTER_SYSTEM,
         "Mode: " + mode + "\nData:\n" + json.dumps(payload, ensure_ascii=False)
-        + past_ctx + acc_ctx + real_data_ctx + "\n\nReturn JSON.",
-        model=MODEL_REPORTER, max_tokens=4000,
+        + past_ctx + acc_ctx + real_data_ctx + devil_override + "\n\nReturn JSON.",
+        model=reporter_model, max_tokens=max_tok,
     )
     result = parse_json(raw)
     result["mode"] = mode
