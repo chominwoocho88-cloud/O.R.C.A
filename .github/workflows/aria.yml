@@ -184,7 +184,7 @@ jobs:
           git config user.name "ARIA Bot"
           git config user.email "aria@github-actions"
           git fetch origin main
-          git reset --hard origin main
+          git reset --hard origin/main
           git add memory.json reports/ sentiment.json accuracy.json \
                   rotation.json aria_weights.json aria_lessons.json \
                   aria_cost.json aria_market_data.json morning_baseline.json || true
