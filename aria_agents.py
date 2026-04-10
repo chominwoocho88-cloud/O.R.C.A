@@ -155,7 +155,7 @@ def agent_hunter(date_str: str, mode: str, market_data: dict = None) -> dict:
             pass
 
     queries    = _HUNTER_QUERIES.get(mode, _HUNTER_QUERIES["MORNING"])
-    search_str = " AND ".join(queries[:3])
+    search_str = " AND ".join(queries[:2])  # 4회 → 2회로 축소 (비용 절감)
 
     raw = call_api(
         HUNTER_SYSTEM,
@@ -214,7 +214,7 @@ def agent_analyst(hunter_data: dict, mode: str, lessons_prompt: str = "") -> dic
     raw = call_api(
         mode_ctx + "\n\n" + ANALYST_SYSTEM_BASE,
         "Hunter data:\n" + json.dumps(slim, ensure_ascii=False) + "\n\nReturn JSON.",
-        model=MODEL_ANALYST, max_tokens=2500,
+        model=MODEL_ANALYST, max_tokens=1800,  # 2500 → 1800 절감
     )
     result = parse_json(raw)
     console.print("  [green]Done: " + str(result.get("market_regime", ""))
