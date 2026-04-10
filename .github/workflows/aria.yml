@@ -2,14 +2,10 @@ name: ARIA Daily Report
 
 on:
   schedule:
-    - cron: '30 19 * * 0-4'   # 04:30 KST - 새벽 (DAWN)
-    - cron: '30 22 * * 0-4'   # 07:30 KST - 아침 (MORNING)
-    - cron: '30 5  * * 1-5'   # 14:30 KST - 오후 (AFTERNOON)
-    - cron: '30 11 * * 1-5'   # 20:30 KST - 저녁 (EVENING)
+    - cron: '30 22 * * 0-4'   # 07:30 KST - 아침 (MORNING) 월~금
     - cron: '0 22  * * 0'     # 일요일 07:00 KST - 주간 리포트
     - cron: '0 21  1 * *'     # 매월 1일 06:00 KST - 월간 리포트
-    - cron: '*/30 0-6,14-21 * * 1-5'  # 장중만 - 한국(KST 09-16) + 미국(KST 23:30-06:00)
-  workflow_dispatch:
+  workflow_dispatch:           # 수동 실행 (필요할 때만)
 
 jobs:
   run-aria:
@@ -46,41 +42,8 @@ jobs:
                   print('Fixed: ' + f)
           EOF
 
-      # ── 변동성 체크 ─────────────────────────────────────────────────────────
-      - name: Volatility Check
-        if: github.event.schedule == '*/30 * * * *'
-        env:
-          PYTHONIOENCODING: utf-8
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          TELEGRAM_TOKEN:    ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
-          ARIA_MODE:         MORNING
-        run: |
-          python3 << 'EOF'
-          import subprocess
-          from aria_data import fetch_all_market_data
-          from aria_notify import send_message
-          data   = fetch_all_market_data()
-          alert  = data.get("volatility_alert", {})
-          level  = alert.get("level", "normal")
-          alerts = alert.get("alerts", [])
-          print("Volatility: " + level)
-          if level == "critical":
-              print("CRITICAL — 긴급 분석 실행")
-              subprocess.run(["python", "aria_main.py"], check=True)
-          elif level == "elevated":
-              print("ELEVATED — 경보 전송")
-              send_message(
-                  "⚠️ <b>ARIA 변동성 경보</b>\n\n"
-                  + "\n".join(["• " + a for a in alerts])
-                  + "\n\n다음 정규 분석 시 반영됩니다."
-              )
-          else:
-              print("Normal — 스킵")
-          EOF
-
-      # ── 주간 리포트 ─────────────────────────────────────────────────────────
-      - name: Run Weekly + Calendar + Lessons
+      # ── 주간 리포트 (일요일) ────────────────────────────────────────────────
+      - name: Run Weekly + Lessons
         if: github.event.schedule == '0 22 * * 0'
         env:
           PYTHONIOENCODING: utf-8
@@ -102,7 +65,7 @@ jobs:
           extract_weekly_lessons(memory, accuracy)
           EOF
 
-      # ── 월간 리포트 ─────────────────────────────────────────────────────────
+      # ── 월간 리포트 (매월 1일) ──────────────────────────────────────────────
       - name: Run Monthly + Lessons
         if: github.event.schedule == '0 21 1 * *'
         env:
@@ -124,20 +87,7 @@ jobs:
           extract_monthly_lessons(memory, accuracy)
           EOF
 
-      # ── DAWN ────────────────────────────────────────────────────────────────
-      - name: Run ARIA DAWN
-        if: github.event.schedule == '30 19 * * 0-4'
-        env:
-          PYTHONIOENCODING: utf-8
-          ARIA_MODE:         DAWN
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          TELEGRAM_TOKEN:    ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
-          GH_TOKEN:          ${{ secrets.GH_TOKEN }}
-          GH_REPO:           ${{ secrets.GH_REPO }}
-        run: python aria_main.py
-
-      # ── MORNING ─────────────────────────────────────────────────────────────
+      # ── MORNING (월~금 07:30 KST) ───────────────────────────────────────────
       - name: Run ARIA MORNING
         if: >
           github.event.schedule == '30 22 * * 0-4' ||
@@ -145,32 +95,6 @@ jobs:
         env:
           PYTHONIOENCODING: utf-8
           ARIA_MODE:         MORNING
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          TELEGRAM_TOKEN:    ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
-          GH_TOKEN:          ${{ secrets.GH_TOKEN }}
-          GH_REPO:           ${{ secrets.GH_REPO }}
-        run: python aria_main.py
-
-      # ── AFTERNOON ───────────────────────────────────────────────────────────
-      - name: Run ARIA AFTERNOON
-        if: github.event.schedule == '30 5 * * 1-5'
-        env:
-          PYTHONIOENCODING: utf-8
-          ARIA_MODE:         AFTERNOON
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          TELEGRAM_TOKEN:    ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
-          GH_TOKEN:          ${{ secrets.GH_TOKEN }}
-          GH_REPO:           ${{ secrets.GH_REPO }}
-        run: python aria_main.py
-
-      # ── EVENING ─────────────────────────────────────────────────────────────
-      - name: Run ARIA EVENING
-        if: github.event.schedule == '30 11 * * 1-5'
-        env:
-          PYTHONIOENCODING: utf-8
-          ARIA_MODE:         EVENING
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_TOKEN:    ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -188,7 +112,5 @@ jobs:
           git add memory.json reports/ sentiment.json accuracy.json \
                   rotation.json aria_weights.json aria_lessons.json \
                   aria_cost.json aria_market_data.json morning_baseline.json || true
-          git diff --staged --quiet || git commit -m "ARIA: $(date +'%Y-%m-%d %H:%M') [${ARIA_MODE:-AUTO}] 저장"
+          git diff --staged --quiet || git commit -m "ARIA: $(date +'%Y-%m-%d %H:%M') [MORNING] 저장"
           git push || (echo "Push 실패 — rebase 후 재시도" && git pull --rebase origin main && git push)
-        env:
-          ARIA_MODE: ${{ env.ARIA_MODE }}
