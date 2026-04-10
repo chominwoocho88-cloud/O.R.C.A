@@ -71,20 +71,31 @@ def add_lesson(source, category, lesson_text, severity="medium"):
 
 
 def get_active_lessons(max_lessons=8):
-    """오늘 분석에 주입할 교훈 목록 반환 (최신 + 반복된 것 우선)"""
+    """오늘 분석에 주입할 교훈 목록 (만료 기간 적용)"""
     data    = load_lessons()
     lessons = data.get("lessons", [])
-    if not lessons:
-        return []
+    today   = datetime.now(KST).strftime("%Y-%m-%d")
 
-    # 심각도 + 반복 횟수로 정렬
+    # 만료 기간 체크
+    expiry_days = {"high": 30, "medium": 14, "low": 7}
+    active = []
+    for l in lessons:
+        days = expiry_days.get(l.get("severity", "medium"), 14)
+        try:
+            lesson_date = datetime.strptime(l["date"], "%Y-%m-%d")
+            today_date  = datetime.strptime(today, "%Y-%m-%d")
+            if (today_date - lesson_date).days <= days:
+                active.append(l)
+        except:
+            active.append(l)
+
+    # 우선순위 정렬
     def priority(l):
-        sev_score = 3 if l["severity"] == "high" else 2 if l["severity"] == "medium" else 1
-        return sev_score * 2 + l.get("reinforced", 0)
+        sev = 3 if l["severity"] == "high" else 2 if l["severity"] == "medium" else 1
+        return sev * 2 + l.get("reinforced", 0)
 
-    sorted_lessons = sorted(lessons, key=priority, reverse=True)
+    sorted_lessons = sorted(active, key=priority, reverse=True)
 
-    # 적용 횟수 증가
     for l in sorted_lessons[:max_lessons]:
         l["applied"] = l.get("applied", 0) + 1
     save_lessons(data)
