@@ -513,7 +513,7 @@ def main():
             console.print("[dim]Morning baseline saved[/dim]")
 
         print("\n=== Sentiment Tracking ===")
-        run_sentiment(report)
+        run_sentiment(report, market_data)
 
         print("\n=== Sector Rotation ===")
         run_rotation(report)
