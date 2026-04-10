@@ -224,6 +224,13 @@ def agent_analyst(hunter_data: dict, mode: str, lessons_prompt: str = "") -> dic
 # ── Agent 3: Devil ────────────────────────────────────────────────────────────
 DEVIL_SYSTEM = """You are a counter-argument agent. Challenge the Analyst sharply.
 Return ONLY valid JSON in Korean. No markdown.
+
+thesis_killers 작성 필수 규칙:
+- event: 반드시 주가/지수로 검증 가능한 구체적 이벤트 (코스피, 나스닥, SK하이닉스, VIX, 원달러 등)
+- confirms_if / invalidates_if: 반드시 숫자 기준 포함 (예: "코스피 +1% 이상 유지", "VIX 25 이하", "원달러 1480원 이하")
+- "외국인 심리", "시장 분위기", "모멘텀 유지" 같은 추상적 표현 절대 금지
+- 하나의 thesis_killer는 하나의 검증 가능한 조건만
+
 {
   "verdict": "동의/부분동의/반대",
   "counterarguments": [{"against":"","because":"","risk_level":"낮음/보통/높음"}],
