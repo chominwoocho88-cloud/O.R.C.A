@@ -860,12 +860,15 @@ def run_verification() -> dict:
 
     unclear = [r for r in results if r["verdict"] == "unclear"]
     if unclear:
+        print("[2단계] AI 보완 채점 (" + str(len(unclear)) + "개)")
         ai = _ai_verify(unclear)
         ai_map = {r["event"]: r for r in ai}
         for r in results:
             if r["verdict"] == "unclear" and r["event"] in ai_map:
                 r.update({k: ai_map[r["event"]].get(k, r[k])
                            for k in ["verdict", "evidence", "category"]})
+    else:
+        print("[2단계] unclear 없음 — AI 호출 스킵")
 
     changes = update_weights_from_accuracy(accuracy)
     if changes: print("Weight updates: " + str(len(changes)))
