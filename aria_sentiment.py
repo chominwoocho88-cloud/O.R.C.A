@@ -304,9 +304,9 @@ def save_sentiment(data):
     )
 
 
-def update_sentiment(report):
+def update_sentiment(report, market_data=None):
     data    = load_sentiment()
-    new     = calculate_sentiment(report)
+    new     = calculate_sentiment(report, market_data)
     history = data.get("history", [])
 
     # 같은 날 재실행 시 평균값 사용 (안정화)
@@ -408,8 +408,8 @@ def send_sentiment_report(data):
     print("Sentiment report sent. Score: " + str(score) + " / " + level)
 
 
-def run_sentiment(report):
-    data = update_sentiment(report)
+def run_sentiment(report, market_data=None):
+    data = update_sentiment(report, market_data)
     send_sentiment_report(data)
     return data
 
