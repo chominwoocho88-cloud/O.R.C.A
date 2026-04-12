@@ -1,0 +1,68 @@
+{
+  "total": 2,
+  "correct": 0,
+  "by_category": {
+    "주식": {
+      "total": 2,
+      "correct": 0
+    }
+  },
+  "history": [
+    {
+      "date": "2026-04-07",
+      "total": 1,
+      "correct": 0,
+      "accuracy": 0.0
+    },
+    {
+      "date": "2026-04-08",
+      "total": 0,
+      "correct": 0,
+      "accuracy": 0
+    },
+    {
+      "date": "2026-04-09",
+      "total": 0,
+      "correct": 0,
+      "accuracy": 0
+    },
+    {
+      "date": "2026-04-10",
+      "total": 1,
+      "correct": 0,
+      "accuracy": 0.0
+    }
+  ],
+  "history_by_category": [
+    {
+      "date": "2026-04-07",
+      "by_category": {
+        "주식": {
+          "total": 1,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "date": "2026-04-08",
+      "by_category": {}
+    },
+    {
+      "date": "2026-04-09",
+      "by_category": {}
+    },
+    {
+      "date": "2026-04-10",
+      "by_category": {
+        "주식": {
+          "total": 1,
+          "correct": 0
+        }
+      }
+    }
+  ],
+  "weak_areas": [
+    "주식 (0%)"
+  ],
+  "strong_areas": []
+}
