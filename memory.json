@@ -138,5 +138,4759 @@
       }
     ],
     "_data_quality": "ok"
+  },
+  {
+    "analysis_date": "2026-01-13",
+    "market_regime": "위험선호",
+    "trend_phase": "상승추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "트럼프 취임 기대감과 AI 테마가 글로벌 증시를 견인하나, 원달러 1452원 고공행진과 VIX 18대 잔존으로 상승 탄력은 제한적",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (19,454 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19,069 이하)"
+      },
+      {
+        "event": "엔비디아 AI 테마 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 상승 (137.18 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 하락 (131.74 이하)"
+      },
+      {
+        "event": "반도체 섹터 (SK하이닉스) 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (200,124 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (192,276 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 16.84 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 20.58 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "원달러 환율 방향성",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,440원 이하 하락 (외국인 자금 유입 우호)",
+        "invalidates_if": "원달러 1,465원 이상 상승 (외국인 이탈 압력 강화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "원화 자산 (코스피)",
+        "reason": "원달러 1,452원 고환율 지속으로 외국인 환차손 부담 증가, 순매도 압력 상존",
+        "severity": "높음"
+      },
+      {
+        "zone": "채권·현금성 자산",
+        "reason": "Fear&Greed 55(탐욕) 구간 진입으로 안전자산 선호 약화, 채권 자금 이탈",
+        "severity": "보통"
+      },
+      {
+        "zone": "중국·신흥국 증시",
+        "reason": "트럼프 취임 후 관세 정책 불확실성으로 신흥국 리스크 프리미엄 확대",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 AI·반도체 빅테크",
+        "reason": "연초 AI 테마 재점화, 엔비디아 +0.82% 선도 및 나스닥 상승 흐름 유지",
+        "momentum": "강함"
+      },
+      {
+        "zone": "국내 반도체 대형주 (SK하이닉스)",
+        "reason": "글로벌 HBM 수요 기대감, 엔비디아 연동 상승 흐름으로 외국인 관심 유입",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "S&P500 대형주",
+        "reason": "트럼프 취임 기대감으로 친기업 정책 수혜 예상, 지수 +0.41% 안정적 상승",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1,452.3원 (고환율 지속 — 연초 대비 원화 약세 구간)",
+      "kospi_flow": "외국인 환차손 부담으로 순매수 전환 제한적, 기관 중심 방어 흐름",
+      "assessment": "코스피는 글로벌 위험선호 분위기에도 원달러 1,450원 이상 고환율이 외국인 유입을 차단하는 구조적 걸림돌로 작용 중. 삼성전자·SK하이닉스의 실적 모멘텀 없이는 지수 2,550선 돌파가 어렵고, 단기적으로 2,500~2,540 박스권 등락 가능성이 높음."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 18.71
+  },
+  {
+    "analysis_date": "2026-01-14",
+    "market_regime": "위험선호",
+    "trend_phase": "상승추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "AI 인프라 기대감 속 기술주 전반 강세, Fear&Greed 57로 탐욕 구간 진입 — 단기 과열 여부 확인 필요",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +0.5% 이상 상승 (19470 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19180 이하)"
+      },
+      {
+        "event": "엔비디아 AI 인프라 기대감 유지 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 (138.74 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 (133.30 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 모멘텀",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (202370 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (194430 이하)"
+      },
+      {
+        "event": "VIX 공포지수 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 16.5 이하로 하락 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 20.2 이상으로 상승 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +0.5% 이상 (2539 이상)",
+        "invalidates_if": "코스피 -1% 이하 (2501 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "달러 현금/단기채",
+        "reason": "위험선호 심리 확대로 안전자산 수요 약화, Fear&Greed 탐욕 구간 진입",
+        "severity": "낮음"
+      },
+      {
+        "zone": "방어주(유틸리티·필수소비재)",
+        "reason": "AI·기술주 중심 자금 쏠림으로 상대적 소외",
+        "severity": "보통"
+      },
+      {
+        "zone": "원화 자산(환율 리스크)",
+        "reason": "원달러 1449.8 고환율 지속으로 외국인 원화 자산 매력 저하",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·반도체 (엔비디아, SK하이닉스)",
+        "reason": "AI 인프라 투자 기대감 지속, 엔비디아 +1.18% / SK하이닉스 +1.12% 동반 강세",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 대형 기술주",
+        "reason": "금리 안정 기대 + AI 수요 확대 내러티브 유효, 나스닥 +0.58% 상승",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "국내 반도체·IT (삼성전자)",
+        "reason": "글로벌 반도체 랠리 동조화, 삼성전자 +0.70% 상승",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1449.8원 (고환율 지속)",
+      "kospi_flow": "코스피 +0.23% 소폭 상승, 글로벌 대비 상승폭 제한적 — 원화 약세가 외국인 순매수 제약 요인",
+      "assessment": "원달러 1450원 근접 고환율 부담으로 코스피 상승 탄력 제한. 반도체(SK하이닉스·삼성전자) 글로벌 랠리 동조는 긍정적이나, 환율 안정(1430원 이하 복귀) 없이는 외국인 대규모 유입 기대 어려움. 단기적으로 반도체 중심 선별 접근 유효."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 18.35
+  },
+  {
+    "analysis_date": "2026-01-15",
+    "market_regime": "위험선호",
+    "trend_phase": "상승추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "CPI 예상치 부합으로 금리인하 기대 회복, 반도체 주도 위험선호 강세장 재개",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (상승 모멘텀 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (19,900 돌파)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19,506 하회)"
+      },
+      {
+        "event": "반도체 섹터 방향성 (엔비디아 주가)",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 (142.94 돌파)",
+        "invalidates_if": "엔비디아 -2% 이하 (137.34 하회)"
+      },
+      {
+        "event": "SK하이닉스 반도체 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (208,900 돌파)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (200,704 하회)"
+      },
+      {
+        "event": "VIX 공포지수 완화 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 14.51 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 17.73 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +0.8% 이상 (2,569 돌파)",
+        "invalidates_if": "코스피 -1% 이하 (2,522 하회)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "달러 현금 및 단기채",
+        "reason": "CPI 부합으로 금리인하 기대 재부상, 안전자산 매력 감소",
+        "severity": "보통"
+      },
+      {
+        "zone": "경기방어주 (유틸리티·필수소비재)",
+        "reason": "위험선호 심리 강화로 방어섹터 자금 이탈 가속",
+        "severity": "보통"
+      },
+      {
+        "zone": "원달러 환율 (원화 약세 압력)",
+        "reason": "1,443원대 고환율 유지, 외국인 한국 증시 매수 제약 요인",
+        "severity": "높음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "반도체·AI 기술주 (엔비디아·SK하이닉스·삼성전자)",
+        "reason": "CPI 완화 + 금리인하 기대 + AI 수요 강세 삼중 호재 집중",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 성장주",
+        "reason": "실질금리 하락 기대 → 고밸류에이션 성장주 재평가 수요",
+        "momentum": "강함"
+      },
+      {
+        "zone": "코스피 반도체·IT 섹터",
+        "reason": "글로벌 반도체 랠리 동조, 외국인 순매수 기대",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1,443.6원 (달러 강세 지속, 고환율 부담)",
+      "kospi_flow": "외국인 반도체 중심 순매수 유입 기대, 고환율이 추가 매수 제약",
+      "assessment": "SK하이닉스(+3.23%)·삼성전자(+2.45%) 반도체 쌍끌이 상승이 코스피를 견인했으나, 원달러 1,443원대 고환율이 외국인 추가 유입을 제한하는 구조적 부담 요인. 글로벌 위험선호 지속 시 코스피 2,570~2,600 단기 목표 가능하나 환율 안정 여부가 핵심 변수."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 16.12
+  },
+  {
+    "analysis_date": "2026-01-16",
+    "market_regime": "위험선호",
+    "trend_phase": "상승추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "빅테크 실적 기대와 달러 약세가 맞물려 나스닥·반도체 중심 위험선호 강세, 코스피도 동반 상승하며 전반적 매수 우위 국면",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (빅테크 실적 기대 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (20154 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19754 이하)"
+      },
+      {
+        "event": "엔비디아·반도체 섹터 모멘텀 유지 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 (146.77 이상), SK하이닉스 +2% 이상 (212772 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 (141.01 이하), SK하이닉스 -2% 이하 (204428 이하)"
+      },
+      {
+        "event": "VIX 공포지수 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 14.26 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 17.42 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +0.8% 이상 (2582 이상) 및 외국인 순매수 유지",
+        "invalidates_if": "코스피 -0.8% 이하 (2541 이하) 및 외국인 순매도 전환"
+      },
+      {
+        "event": "원달러 환율 달러 약세 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1430 이하 (달러 추가 약세)",
+        "invalidates_if": "원달러 1455 이상 (달러 강세 반전)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "달러 자산·미국 단기채",
+        "reason": "달러 약세 기조 속 달러 표시 안전자산 매력 감소, 위험자산으로 자금 이동",
+        "severity": "보통"
+      },
+      {
+        "zone": "방어주·유틸리티 섹터",
+        "reason": "Fear&Greed 66(Greed) 수준의 위험선호 환경에서 방어 섹터 상대적 외면",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "나스닥·빅테크 (엔비디아·AI 관련주)",
+        "reason": "빅테크 실적 시즌 기대감 + 엔비디아 +2.68% 주도, AI 수요 내러티브 강화",
+        "momentum": "강함"
+      },
+      {
+        "zone": "한국 반도체 (SK하이닉스·삼성전자)",
+        "reason": "글로벌 반도체 강세 동조, 달러 약세로 외국인 원화 자산 매력 상승",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "신흥국·아시아 증시",
+        "reason": "달러 약세로 신흥국 통화 부담 완화, 글로벌 위험선호 자금 유입",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1440.2 (달러 약세 수혜 구간, 단기 1430~1455 레인지 관찰 필요)",
+      "kospi_flow": "외국인 반도체 중심 순매수 추정, 코스피 +0.53% 동반 상승으로 수급 긍정적",
+      "assessment": "달러 약세와 글로벌 반도체 강세가 코스피 외국인 유입을 지지하는 환경. SK하이닉스(+1.86%)·삼성전자(+1.19%) 동반 상승으로 반도체 중심 매수세 유효. 단, 원달러 1440대는 여전히 역사적 고환율 구간으로 환율 재강세 시 외국인 이탈 리스크 상존. 빅테크 실적 발표 결과가 내일 코스피 방향성 핵심 변수."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 15.84
+  },
+  {
+    "analysis_date": "2026-01-17",
+    "market_regime": "위험선호",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "주간 고점 부근에서 전반적 숨고르기, Fear&Greed 64(탐욕) 유지 속 기술주 미세 조정 국면",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (20000선 돌파 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +0.8% 이상 상승하여 20100 이상 마감",
+        "invalidates_if": "나스닥 -1.0% 이하 하락하여 19740 이하 마감"
+      },
+      {
+        "event": "엔비디아 주가 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2.0% 이상 상승하여 145.5 이상 마감",
+        "invalidates_if": "엔비디아 -2.0% 이하 하락하여 139.8 이하 마감"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2.0% 이상 상승하여 211600 이상 마감",
+        "invalidates_if": "SK하이닉스 -2.0% 이하 하락하여 203300 이하 마감"
+      },
+      {
+        "event": "VIX 공포지수 변동",
+        "timeframe": "1일",
+        "confirms_if": "VIX 14.6 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 17.8 이상으로 10% 이상 상승"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +0.8% 이상 상승하여 2579 이상 마감",
+        "invalidates_if": "코스피 -1.0% 이하 하락하여 2532 이하 마감"
+      },
+      {
+        "event": "원달러 환율 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1430원 이하로 하락 (원화 강세 전환)",
+        "invalidates_if": "원달러 1455원 이상으로 상승 (원화 추가 약세)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥 기술주 (엔비디아, 반도체)",
+        "reason": "엔비디아 -0.88%, 나스닥 -0.09% 등 주간 고점 부근 차익실현 매물 출현",
+        "severity": "낮음"
+      },
+      {
+        "zone": "한국 반도체 (SK하이닉스, 삼성전자)",
+        "reason": "SK하이닉스 -0.58%, 삼성전자 -0.34% 동반 하락, 원달러 1441원대 고환율 부담",
+        "severity": "보통"
+      },
+      {
+        "zone": "원화 자산 전반",
+        "reason": "원달러 1441원 고환율 지속으로 외국인 원화 자산 매력 저하",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 대형주 (S&P500 가치주)",
+        "reason": "S&P500 0.00% 보합 유지, VIX 16.21 안정권, Fear&Greed 64 탐욕 구간 지지",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "달러 자산 및 달러 인덱스",
+        "reason": "원달러 1441원 고환율 유지, 달러 강세 흐름 지속",
+        "momentum": "강함"
+      },
+      {
+        "zone": "코스피 저평가 가치주",
+        "reason": "코스피 2558 수준에서 밸류에이션 매력 부각, 소폭 낙폭(-0.13%) 제한적",
+        "momentum": "약함"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 16.21
+  },
+  {
+    "analysis_date": "2026-01-22",
+    "market_regime": "위험선호",
+    "trend_phase": "상승추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "트럼프 StarGate AI 인프라 5000억달러 발표로 AI·반도체 섹터 급등, 위험선호 심리 강하게 확산",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 상승 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (20374 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19972 이하)"
+      },
+      {
+        "event": "엔비디아 AI 수혜 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 상승 (153.91 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 하락 (144.95 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +3% 이상 상승 (223716 이상)",
+        "invalidates_if": "SK하이닉스 -3% 이하 하락 (210684 이하)"
+      },
+      {
+        "event": "VIX 공포지수 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 13.37 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 16.34 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 상승 (2615 이상)",
+        "invalidates_if": "코스피 -1% 이하 하락 (2563 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "달러 현금·단기채",
+        "reason": "위험선호 심리 강화로 안전자산 매력 감소, Fear&Greed 72(Greed) 수준",
+        "severity": "보통"
+      },
+      {
+        "zone": "전통 에너지·경기방어주",
+        "reason": "AI 인프라 테마로 자금이 기술·성장주로 집중 이동",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI 인프라·데이터센터 관련주 (엔비디아·AMD 등)",
+        "reason": "StarGate 5000억달러 투자 발표로 직접 수혜 기대감 급상승",
+        "momentum": "강함"
+      },
+      {
+        "zone": "HBM·반도체 메모리 (SK하이닉스·삼성전자)",
+        "reason": "AI 서버 확대로 HBM 수요 급증 기대, SK하이닉스 +4.73% 선반영",
+        "momentum": "강함"
+      },
+      {
+        "zone": "국내 AI·전력인프라 관련 중소형주",
+        "reason": "글로벌 AI 투자 확대 수혜 기대감으로 코스피 동반 상승",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1433.4원 (달러 강세 지속, 원화 약세 구간)",
+      "kospi_flow": "외국인 AI·반도체 수급 유입 기대, 삼성전자·SK하이닉스 동반 강세로 코스피 견인",
+      "assessment": "원달러 1433원대 고환율 부담에도 AI 테마 훈풍이 반도체 대형주를 중심으로 코스피를 지지. 단, 원화 약세 지속 시 외국인 순매수 지속 여부 불확실. 단기 과열 경계 필요(Fear&Greed 72)"
+    },
+    "mode": "MORNING",
+    "vix_at_time": 14.85
+  },
+  {
+    "analysis_date": "2026-01-23",
+    "market_regime": "위험선호",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "StarGate 발표 후 차익실현 압력으로 기술주 전반 소폭 조정, Fear&Greed 69로 탐욕 구간 유지 중 단기 숨고르기 국면",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 반등 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 반등 (20311 이상)",
+        "invalidates_if": "나스닥 -1% 이하 추가 하락 (19910 이하)"
+      },
+      {
+        "event": "엔비디아 차익실현 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 (150.15 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 (144.27 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (219708 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (211092 이하)"
+      },
+      {
+        "event": "VIX 공포지수 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 13.5 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 16.5 이상으로 10% 이상 상승"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +0.8% 이상 (2603 이상)",
+        "invalidates_if": "코스피 -0.8% 이하 (2562 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "AI 테마 고밸류 기술주 (엔비디아, 나스닥 상위)",
+        "reason": "StarGate 발표 이후 단기 급등에 따른 차익실현 매물 출회",
+        "severity": "보통"
+      },
+      {
+        "zone": "한국 반도체 (SK하이닉스, 삼성전자)",
+        "reason": "엔비디아 조정 연동 및 원달러 1435 고환율 부담으로 외국인 매도 압력",
+        "severity": "보통"
+      },
+      {
+        "zone": "원화 자산 전반",
+        "reason": "원달러 1435.6 고환율 지속으로 외국인 환차손 우려 및 신흥국 자금 이탈",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 대형 가치주 및 S&P500 방어 섹터",
+        "reason": "기술주 차익실현 자금이 헬스케어·유틸리티 등 방어주로 로테이션",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "AI 인프라 수혜 실적주 (데이터센터·전력)",
+        "reason": "StarGate 500억 달러 투자 발표로 실질 수혜 인프라 섹터 자금 유입 기대",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "코스피 저PBR·배당주",
+        "reason": "Fear&Greed 69 탐욕 구간에서 밸류에이션 부담 낮은 저PBR주 선별 매수",
+        "momentum": "약함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1435.6",
+      "kospi_flow": "외국인 소폭 순매도 추정, 반도체 중심 차익실현 압력 지속",
+      "assessment": "원달러 1435 고환율이 외국인 수급의 구조적 부담 요인으로 작용 중. 코스피는 나스닥 조정 연동 하락(-0.24%)으로 독자적 반등 모멘텀 부재. SK하이닉스·삼성전자 모두 엔비디아 약세 연동 하락하며 반도체 섹터 단기 관망 국면. 코스피 2550~2600 박스권 내 등락 예상, 환율 안정(1420 이하) 여부가 외국인 복귀의 선결 조건."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 15.03
+  },
+  {
+    "analysis_date": "2026-01-24",
+    "market_regime": "위험선호",
+    "trend_phase": "상승추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "AI 낙관론 기반 기술주 전반 상승, Fear&Greed 70(탐욕) 수준에서 과열 경계 필요",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +0.5% 이상 상승 (20330 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (20027 이하)"
+      },
+      {
+        "event": "엔비디아 AI 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 상승 (152.77 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 하락 (146.77 이하)"
+      },
+      {
+        "event": "반도체 섹터 (SK하이닉스) 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (223000 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (214228 이하)"
+      },
+      {
+        "event": "VIX 공포지수 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 13.30 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 16.25 이상으로 10% 이상 상승"
+      },
+      {
+        "event": "원달러 환율 방향성",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1420원 이하로 하락 (원화 강세)",
+        "invalidates_if": "원달러 1450원 이상으로 상승 (원화 약세)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "방어주/유틸리티",
+        "reason": "위험선호 심리 강화로 안전자산 수요 감소, Fear&Greed 70 탐욕 구간 진입",
+        "severity": "보통"
+      },
+      {
+        "zone": "채권/금",
+        "reason": "AI 성장주 랠리 지속으로 안전자산 대비 기회비용 증가",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI/반도체 (엔비디아, SK하이닉스, 삼성전자)",
+        "reason": "AI 투자 낙관론 지속, 엔비디아 +1.74% 및 SK하이닉스 +1.49% 동반 상승",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 기술주 전반",
+        "reason": "S&P500 대비 나스닥 아웃퍼폼(+0.59% vs +0.29%), 기술주 집중 매수세 확인",
+        "momentum": "강함"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "글로벌 위험선호 심리 연동, 반도체 대형주 동반 강세",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1432.8원 (달러 강세 구간 유지, 1430원대 지지)",
+      "kospi_flow": "반도체 주도 상승 (+0.32%), 삼성전자·SK하이닉스 외국인 매수 유입 추정",
+      "assessment": "원달러 1430원대 고환율 부담에도 AI 반도체 모멘텀이 코스피를 지지. 단, 환율이 1450원 돌파 시 외국인 이탈 리스크 증가. 삼성전자 61600원·SK하이닉스 218600원 레벨 유지 여부가 단기 코스피 방향성의 핵심 변수."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 14.77
+  },
+  {
+    "analysis_date": "2026-01-27",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "DeepSeek R1 공개로 AI 인프라 투자 논리 붕괴 우려, 엔비디아 -17% 충격이 글로벌 반도체·AI 밸류체인 전반으로 전이 중",
+    "thesis_killers": [
+      {
+        "event": "엔비디아 추가 낙폭 vs 기술적 반등",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +5% 이상 반등 (116.78 → 122.6 이상)",
+        "invalidates_if": "엔비디아 -5% 이하 추가 하락 (116.78 → 110.9 이하)"
+      },
+      {
+        "event": "나스닥 기술주 방향성",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +2% 이상 반등 (19341 → 19728 이상)",
+        "invalidates_if": "나스닥 -2% 이하 추가 하락 (19341 → 18954 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 충격 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +5% 이상 회복 (195800 → 205590 이상)",
+        "invalidates_if": "SK하이닉스 -5% 이하 추가 하락 (195800 → 186010 이하)"
+      },
+      {
+        "event": "VIX 공포지수 방향성",
+        "timeframe": "1일",
+        "confirms_if": "VIX 17.0 이하로 10% 이상 하락 (현재 18.96)",
+        "invalidates_if": "VIX 21.0 이상으로 10% 이상 상승 (현재 18.96)"
+      },
+      {
+        "event": "원달러 환율 안전자산 수요",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1440 이하로 하락 (위험선호 회복)",
+        "invalidates_if": "원달러 1465 이상으로 상승 (추가 위험회피)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "엔비디아·AI 인프라 반도체 (GPU 설계·HBM)",
+        "reason": "DeepSeek R1이 저비용 모델로 AI 학습 효율화 입증 → 고가 GPU 수요 전제 흔들림, 엔비디아 -17% 역대 최대 시총 증발",
+        "severity": "높음"
+      },
+      {
+        "zone": "SK하이닉스·삼성전자 HBM 밸류체인",
+        "reason": "AI 가속기 수요 축소 우려로 HBM 공급 과잉 리스크 부각, SK하이닉스 -10.45%·삼성전자 -6.49%",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 자금",
+        "reason": "반도체 비중 높은 코스피 구조적 취약성 노출, 원달러 1449 고환율 지속으로 외국인 매도 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "나스닥 AI·클라우드 고밸류 성장주",
+        "reason": "AI 인프라 CAPEX 축소 기대 → 데이터센터 관련 마이크로소프트·아마존·메타 동반 약세 가능성",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI 소프트웨어·애플리케이션 레이어",
+        "reason": "AI 추론 비용 급감 시 오히려 AI 서비스 확산 수혜 — 저비용 AI 모델이 소프트웨어 기업 마진 개선으로 연결",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "미국 국채·달러 안전자산",
+        "reason": "VIX 18.96 상승, Fear&Greed 38(공포) 진입으로 리스크오프 자금 국채 유입",
+        "momentum": "강함"
+      },
+      {
+        "zone": "중국 AI·테크 (DeepSeek 수혜)",
+        "reason": "DeepSeek R1 공개 주체가 중국 스타트업 → 중국 AI 경쟁력 재평가, 홍콩 H주 일부 반사 수혜 가능",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 18.96
+  },
+  {
+    "analysis_date": "2026-01-28",
+    "market_regime": "위험선호",
+    "trend_phase": "상승추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "DeepSeek 쇼크 과잉반응 되돌림으로 기술주 전반 강반등, 단기 과매수 여부가 내일 지속성의 핵심 관건",
+    "thesis_killers": [
+      {
+        "event": "나스닥 반등 지속성 확인",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 19624 대비 +1% 이상 (19820 돌파)",
+        "invalidates_if": "나스닥 19624 대비 -1.5% 이하 (19330 하회)"
+      },
+      {
+        "event": "엔비디아 반등 지속성 확인",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 124.92 대비 +3% 이상 (128.60 돌파)",
+        "invalidates_if": "엔비디아 124.92 대비 -4% 이하 (119.92 하회)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 202400 대비 +2% 이상 (206450 돌파)",
+        "invalidates_if": "SK하이닉스 202400 대비 -3% 이하 (196330 하회)"
+      },
+      {
+        "event": "VIX 공포지수 추가 완화",
+        "timeframe": "1일",
+        "confirms_if": "VIX 17.84 대비 10% 이상 하락 (16.05 이하)",
+        "invalidates_if": "VIX 17.84 대비 10% 이상 상승 (19.62 이상)"
+      },
+      {
+        "event": "원달러 환율 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1444.7 대비 -0.5% 이상 하락 (1437 이하)",
+        "invalidates_if": "원달러 1444.7 대비 +0.5% 이상 상승 (1452 이상)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "AI 인프라·데이터센터 관련주",
+        "reason": "DeepSeek 저비용 모델 등장으로 고비용 GPU 수요 지속성에 대한 구조적 의구심 잔존, 반등에도 불구 투자자 일부 차익실현 유인",
+        "severity": "보통"
+      },
+      {
+        "zone": "달러 자산 (단기)",
+        "reason": "위험선호 회복으로 안전자산 달러 수요 일부 완화, 원달러 1444 수준 유지 중",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "반도체 대형주 (엔비디아·SK하이닉스·삼성전자)",
+        "reason": "과잉 낙폭 인식 + 기술적 반등 매수세 유입, 엔비디아 +6.97%·SK하이닉스 +3.37% 주도",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 기술주 전반",
+        "reason": "DeepSeek 공포 소화 후 저가 매수 유입, Fear&Greed 44(중립) 수준으로 추가 상승 여력 보유",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "코스피 IT·반도체 섹터",
+        "reason": "글로벌 반도체 반등 연동, 외국인 순매수 기대감 형성",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1444.7원 (달러 강세 고착, 원화 여전히 약세 구간)",
+      "kospi_flow": "코스피 +0.58% 소폭 동반 상승, 글로벌 대비 상승폭 제한적 — 외국인 수급 방향이 관건",
+      "assessment": "반도체 대형주 반등에도 원달러 1444 고착으로 외국인 환차손 부담 지속. SK하이닉스·삼성전자 기술적 반등은 유효하나 원화 추가 약세 시 코스피 상승 모멘텀 제한. 1450원 돌파 여부가 외국인 수급의 핵심 변수."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 17.84
+  },
+  {
+    "analysis_date": "2026-01-29",
+    "market_regime": "혼조",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "FOMC 대기·빅테크 실적 앞두고 관망세 속 소폭 상승, Fear&Greed 45(중립)로 방향성 불확실",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (FOMC 대기 변동성)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (19877 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19486 이하)"
+      },
+      {
+        "event": "엔비디아 주가 방향성 (반도체 섹터 리더)",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 상승 (129.08 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 하락 (124.02 이하)"
+      },
+      {
+        "event": "VIX 공포지수 변화 (FOMC 불확실성 반영)",
+        "timeframe": "1일",
+        "confirms_if": "VIX 15.88 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 19.40 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "SK하이닉스 주가 방향성 (국내 반도체 수급)",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (208284 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (200116 이하)"
+      },
+      {
+        "event": "원달러 환율 방향성 (위험선호 판단 지표)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1430원 이하 하락 (원화 강세 +0.9% 이상)",
+        "invalidates_if": "원달러 1455원 이상 상승 (원화 약세 +0.8% 이상)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "빅테크 고밸류 성장주",
+        "reason": "FOMC 금리 동결 예상이지만 매파적 발언 가능성에 차익실현 압력 존재",
+        "severity": "보통"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "원달러 1442원대 고환율 지속으로 외국인 환차손 부담, 신흥국 자금이탈 리스크",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "국내 반도체 (SK하이닉스·삼성전자)",
+        "reason": "엔비디아 +1.3% 상승 연동 및 AI 수요 기대감, HBM 공급 모멘텀 유효",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "미국 대형 기술주 (나스닥)",
+        "reason": "빅테크 실적 기대감 선반영, Fear&Greed 45로 추가 매수 여력 존재",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "단기 현금·MMF",
+        "reason": "FOMC 결과 확인 전 관망 자금 단기 파킹 수요 증가",
+        "momentum": "약함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1442.9",
+      "kospi_flow": "외국인 수급 불안정, 원화 약세 지속으로 순매수 전환 제한적",
+      "assessment": "코스피는 반도체 종목 강세에도 불구하고 원달러 1440원대 고환율과 FOMC 불확실성이 지수 상단을 제약. 외국인 적극 매수 전환을 위해서는 원달러 1420원대 복귀가 선행 필요. 단기 2550~2590 박스권 횡보 예상."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 17.64
+  },
+  {
+    "analysis_date": "2026-01-30",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "Microsoft 클라우드 성장 둔화 실망으로 기술주 전반 매도세, 반도체 섹터 동반 약세 및 위험회피 심리 확산",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 추가 하락 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 반등 (19684 이상)",
+        "invalidates_if": "나스닥 -1% 이하 추가 하락 (19295 이하)"
+      },
+      {
+        "event": "엔비디아 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 반등 (124.88 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 추가 하락 (119.98 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 16.31 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 19.93 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "SK하이닉스 국내 반도체 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 반등 (204,612 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 추가 하락 (196,588 이하)"
+      },
+      {
+        "event": "원달러 환율 리스크오프 압력",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1436 이하 (위험선호 회복)",
+        "invalidates_if": "원달러 1456 이상 (추가 달러 강세·위험회피 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "빅테크·클라우드 성장주",
+        "reason": "Microsoft 클라우드 성장 둔화로 AI 투자 수익성 우려 확산, 밸류에이션 프리미엄 재평가 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "반도체·AI 인프라주 (엔비디아·SK하이닉스·삼성전자)",
+        "reason": "AI 수요 성장 스토리 훼손 우려로 -1.76%~-3.25% 동반 하락, 단기 매도세 지속",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "글로벌 기술주 약세 및 원달러 1446 수준 유지로 외국인 이탈 압력 상존",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "방어주·배당주 (유틸리티·필수소비재)",
+        "reason": "VIX 18대 진입 및 Fear&Greed 43 중립권에서 위험회피 선호 방어 섹터로 자금 이동",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "달러 자산·단기 국채",
+        "reason": "원달러 1446 고점 유지, 글로벌 불확실성 확대 시 달러 안전자산 선호 강화",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "저PBR·가치주 섹터",
+        "reason": "기술주 고밸류 재평가 국면에서 상대적 저평가 가치주로의 로테이션 가능성",
+        "momentum": "약함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1446.1 (달러 강세 지속, 원화 약세 압력)",
+      "kospi_flow": "외국인 매도 우위 추정, 반도체 대형주 중심 하락 (-0.42%), 삼성전자·SK하이닉스 동반 약세",
+      "assessment": "Microsoft 실적 쇼크가 국내 AI·반도체 수출 기대감을 훼손하며 코스피 하방 압력 가중. 원달러 1446 수준은 외국인 수급 이탈을 자극하는 레벨로, 1450 돌파 여부가 단기 핵심 변수. Fear&Greed 43 중립권은 추가 공포 확산 시 30 이하 탐욕→공포 전환 가능성을 내포."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 18.12
+  },
+  {
+    "analysis_date": "2026-01-31",
+    "market_regime": "혼조",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "FOMC 금리 동결·인하 중단 시사에도 기술주 중심 반등, 인플레 우려와 위험선호가 혼재하는 불안정한 균형 상태",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (FOMC 후속 반응)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (19820 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19431 이하)"
+      },
+      {
+        "event": "엔비디아 반도체 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 상승 (127.38 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 하락 (122.38 이하)"
+      },
+      {
+        "event": "VIX 공포지수 변화 (금리 동결 충격 흡수 여부)",
+        "timeframe": "1일",
+        "confirms_if": "VIX 14.79 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 18.07 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (207,468원 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (199,332원 이하)"
+      },
+      {
+        "event": "원달러 환율 안정성 (외국인 자금 흐름 신호)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1430원 이하로 하락 (달러 약세·위험선호 복귀)",
+        "invalidates_if": "원달러 1460원 이상으로 상승 (달러 강세·위험회피 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "미국 장기채 (TLT 등)",
+        "reason": "FOMC 인하 중단 시사로 장기금리 상승 압력, 채권 가격 하락 리스크 확대",
+        "severity": "높음"
+      },
+      {
+        "zone": "한국 내수·금융주",
+        "reason": "고환율(1443원) 지속 및 미국 고금리 장기화로 국내 경기 둔화 우려 심화",
+        "severity": "보통"
+      },
+      {
+        "zone": "이머징마켓 전반",
+        "reason": "달러 강세 환경 지속 시 이머징 통화 약세 및 자본 유출 압력",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·반도체 빅테크 (엔비디아, SK하이닉스)",
+        "reason": "금리 우려에도 AI 수요 내러티브 강세, 엔비디아 +2%·SK하이닉스 +1.4% 동반 상승",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 기술주 섹터",
+        "reason": "FOMC 불확실성 해소 후 기술주 중심 안도 매수, Fear&Greed 48로 중립 구간 유지",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "현금·단기 머니마켓",
+        "reason": "고금리 동결 지속으로 단기 고수익 현금성 자산 매력도 유지",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1443.3원 — 달러 강세 지속 구간, 고환율 부담 해소 미흡",
+      "kospi_flow": "코스피 +0.50% 소폭 상승, 외국인 반도체 매수세 유입이 지수 방어 역할. 그러나 고환율로 외국인 순매수 지속성 불확실",
+      "assessment": "반도체(SK하이닉스·삼성전자) 동반 상승으로 코스피 하방 지지되나, 원달러 1443원 고환율과 미국 금리 동결 장기화 시사가 외국인 자금 유입 제약 요인. 단기 반등은 가능하나 추세 전환 신호로 보기 어려운 혼조 국면"
+    },
+    "mode": "MORNING",
+    "vix_at_time": 16.43
+  },
+  {
+    "analysis_date": "2026-02-03",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "트럼프 관세 25% 공식화로 글로벌 무역전쟁 현실화, 반도체·기술주 중심 리스크오프 본격화",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 추가 하락 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 반등 (19630p 이상)",
+        "invalidates_if": "나스닥 -1.5% 이하 추가 하락 (19053p 이하)"
+      },
+      {
+        "event": "엔비디아 반등 강도 확인",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 반등 (121.47달러 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 추가 하락 (114.39달러 이하)"
+      },
+      {
+        "event": "SK하이닉스 낙폭 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 반등 (198084원 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 추가 하락 (190316원 이하)"
+      },
+      {
+        "event": "VIX 공포지수 방향성",
+        "timeframe": "1일",
+        "confirms_if": "VIX 17.5 이하로 10% 이상 하락 (공포 완화)",
+        "invalidates_if": "VIX 21.4 이상으로 10% 이상 상승 (공포 심화)"
+      },
+      {
+        "event": "원달러 환율 방향성",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1440원 이하로 하락 (위험선호 회복)",
+        "invalidates_if": "원달러 1475원 이상으로 상승 (추가 달러강세·위험회피)"
+      },
+      {
+        "event": "코스피 지지선 확인",
+        "timeframe": "1일",
+        "confirms_if": "코스피 2560p 이상 회복 (+0.9% 이상)",
+        "invalidates_if": "코스피 2510p 이하 이탈 (-1.1% 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "반도체·AI 하드웨어 (엔비디아, SK하이닉스, 삼성전자)",
+        "reason": "관세 부과로 공급망 비용 급등, 중국 수출 제한 직격 — 엔비디아 -5.57%, SK하이닉스 -4.52% 선반영",
+        "severity": "높음"
+      },
+      {
+        "zone": "나스닥 기술 성장주",
+        "reason": "금리 불확실성 + 무역전쟁 동시 압박, 리스크오프 집중 매도",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 순매도",
+        "reason": "원달러 1458원대 약세 지속, 신흥국 자금 이탈 가속",
+        "severity": "높음"
+      },
+      {
+        "zone": "캐나다·멕시코 연계 자동차·소재 섹터",
+        "reason": "25% 관세 직접 피해 섹터, 공급망 재편 불확실성",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "달러 및 미국 단기채 (안전자산)",
+        "reason": "VIX 19.42, Fear&Greed 35 — 전형적 리스크오프 국면, 현금·달러 선호",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금(Gold) 및 방어주",
+        "reason": "무역전쟁 장기화 헤지 수요, 인플레이션 기대 상승",
+        "momentum": "강함"
+      },
+      {
+        "zone": "미국 내수 중심 소비재·유틸리티",
+        "reason": "관세 영향 상대적으로 낮은 내수주로 로테이션 기대",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 19.42
+  },
+  {
+    "analysis_date": "2026-02-04",
+    "market_regime": "전환중",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "캐나다·멕시코 관세 유예로 안도 반등하였으나 Fear&Greed 40(공포권) 유지로 추세 전환 확신 부재",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 연속 상승 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 (19,774 이상)",
+        "invalidates_if": "나스닥 -1% 이하 (19,383 이하)"
+      },
+      {
+        "event": "엔비디아 반도체 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 (123.90 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 (119.04 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (203,800 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (195,804 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 16.16 이하 (현재 17.96 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 19.76 이상 (현재 17.96 대비 10% 이상 상승)"
+      },
+      {
+        "event": "원달러 환율 안정화 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,440원 이하 하락 (위험선호 강화)",
+        "invalidates_if": "원달러 1,465원 이상 상승 (위험회피 재부각)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "미국 소형·중소형주",
+        "reason": "관세 불확실성 30일 유예에 불과, 구조적 리스크 미해소로 안전자산 선호 잔존",
+        "severity": "보통"
+      },
+      {
+        "zone": "신흥국 통화·채권",
+        "reason": "원달러 1,452원대 고환율 지속, 달러 강세 압력으로 신흥국 자금 이탈 경계",
+        "severity": "보통"
+      },
+      {
+        "zone": "경기민감 소비재",
+        "reason": "Fear&Greed 40 공포권 유지, 소비 심리 회복 지연으로 경기민감 섹터 기피",
+        "severity": "높음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·반도체 대형주 (엔비디아·SK하이닉스)",
+        "reason": "엔비디아 +3%, SK하이닉스 +2.88% 동반 급등, AI 수요 구조적 성장 재확인",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 빅테크",
+        "reason": "관세 유예 안도 + 기술주 실적 기대감으로 나스닥 +1.22% 주도 반등",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "코스피 반도체·수출주",
+        "reason": "글로벌 반도체 랠리 연동, 삼성전자 +1.74%·SK하이닉스 +2.88% 동반 상승",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1,452.4원 (고환율 지속)",
+      "kospi_flow": "외국인 반도체 중심 순매수 유입 추정, 코스피 +0.64% 글로벌 대비 소폭 언더퍼폼",
+      "assessment": "반도체 섹터 강세로 코스피 동반 상승하였으나 원달러 1,452원 고환율이 외국인 매수 여력을 제한. 30일 관세 유예 기간 내 미·캐나다·멕시코 협상 결과에 따라 수출 의존도 높은 한국 증시 방향성 결정될 전망. 단기 반등 신뢰도는 보통 수준."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 17.96
+  },
+  {
+    "analysis_date": "2026-02-05",
+    "market_regime": "혼조",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "Alphabet 실적 호조로 기술주 중심 소폭 상승하나 Fear&Greed 43(중립)·VIX 17대 유지로 추세 전환 확신 부재",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (Alphabet 실적 모멘텀 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (19894 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19497 이하)"
+      },
+      {
+        "event": "엔비디아 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 (126.56 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 (121.60 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 15.52 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 18.96 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "SK하이닉스 한국 반도체 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (206448 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (198352 이하)"
+      },
+      {
+        "event": "원달러 환율 방향성 (외국인 수급 신호)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1430 이하 (위험선호·외국인 유입 신호)",
+        "invalidates_if": "원달러 1465 이상 (위험회피·외국인 이탈 신호)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "경기소비재·오프라인 유통",
+        "reason": "AI 광고 수익 급증으로 디지털 전환 가속, 전통 광고·오프라인 채널 예산 축소 우려",
+        "severity": "보통"
+      },
+      {
+        "zone": "고배당 방어주 (유틸리티·통신)",
+        "reason": "기술주 모멘텀 재점화 시 성장주로 자금 이동, 방어 섹터 상대적 매력 감소",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI 인프라·클라우드 (엔비디아·TSMC·SK하이닉스)",
+        "reason": "Alphabet AI 광고 수익 급증이 AI 수요 실증 → HBM·GPU 수요 기대 강화",
+        "momentum": "강함"
+      },
+      {
+        "zone": "국내 대형 기술주 (삼성전자·SK하이닉스)",
+        "reason": "글로벌 AI 투자 사이클 수혜 기대, 외국인 순매수 유입 가능성",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "디지털 광고·플랫폼 (네이버·카카오)",
+        "reason": "Alphabet AI 광고 모델 성공이 국내 플랫폼 AI 광고 수익 기대감 자극",
+        "momentum": "약함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1449.6 (달러 강세 지속, 고환율 부담 구간)",
+      "kospi_flow": "외국인 순매수 소폭 유입 추정, 코스피 +0.29% 미약한 동조화",
+      "assessment": "원달러 1449 수준은 수입물가·기업 외화비용 부담 요인. 글로벌 기술주 랠리에도 환율 부담으로 코스피 상승폭 제한. SK하이닉스·삼성전자가 AI 수혜 기대로 선방하나 환율이 1465 이상으로 상승 시 외국인 이탈 위험 존재. 원달러 1430 하향 안정이 코스피 추세 반전의 핵심 조건."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 17.24
+  },
+  {
+    "analysis_date": "2026-02-06",
+    "market_regime": "위험선호",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "Amazon 실적 기대와 AI 클라우드 모멘텀으로 기술주 중심 완만한 상승세, 단 Fear&Greed 중립권에서 추가 촉매 필요",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (Amazon 실적 반응)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (19990 돌파)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19594 하회)"
+      },
+      {
+        "event": "엔비디아 AI 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 (129.40 돌파)",
+        "invalidates_if": "엔비디아 -2% 이하 (124.33 하회)"
+      },
+      {
+        "event": "반도체 섹터 (SK하이닉스) 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (209,300원 돌파)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (201,100원 하회)"
+      },
+      {
+        "event": "VIX 공포지수 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 15.20 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 18.57 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "원달러 환율 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,435원 이하로 하락",
+        "invalidates_if": "원달러 1,460원 이상으로 상승"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "고PER 성장주 (비AI 섹터)",
+        "reason": "AI 테마 집중 속 실적 기반 없는 성장주 차별화 압력",
+        "severity": "보통"
+      },
+      {
+        "zone": "원화 자산 (환율 부담)",
+        "reason": "원달러 1,447원 고환율 유지로 외국인 원화 자산 매력 저하",
+        "severity": "보통"
+      },
+      {
+        "zone": "전통 소비재·유통 섹터",
+        "reason": "Amazon 실적 기대가 오프라인 유통 대비 클라우드·AI 집중 부각",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI 클라우드 및 데이터센터 관련주",
+        "reason": "Amazon AWS 성장세 확인 시 클라우드 수혜주 전반 모멘텀 강화",
+        "momentum": "강함"
+      },
+      {
+        "zone": "HBM·고대역폭메모리 (SK하이닉스, 삼성전자)",
+        "reason": "엔비디아 +2.25% 상승 및 AI 수요 지속으로 HBM 공급사 동반 수혜",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "미국 대형 기술주 (나스닥 상위)",
+        "reason": "VIX 16.88 안정권, Fear&Greed 중립에서 실적 모멘텀 시 자금 유입 가속 가능",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1,447.2원 (고환율 유지)",
+      "kospi_flow": "외국인 반도체 중심 선별 매수 추정, 환율 부담으로 전면 매수 제한적",
+      "assessment": "코스피 +0.30%로 미국 대비 소폭 언더퍼폼. SK하이닉스(+1.38%)·삼성전자(+1.02%) AI 수혜 유효하나, 원달러 1,447원 고환율이 외국인 유입 걸림돌. 내일 Amazon 실적 발표 후 HBM 수요 확인 여부가 국내 반도체주 추가 상승 핵심 변수."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 16.88
+  },
+  {
+    "analysis_date": "2026-02-07",
+    "market_regime": "위험선호",
+    "trend_phase": "상승추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "Amazon 실적 서프라이즈와 고용 호조가 기술주 및 반도체 섹터 전반의 매수세를 견인하며 위험선호 심리가 우세하나, 원달러 1443 고공행진으로 외국인 수급 불확실성 잔존",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (Amazon 실적 모멘텀 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (20154 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19754 이하)"
+      },
+      {
+        "event": "엔비디아 반도체 섹터 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 (133.95 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 (128.69 이하)"
+      },
+      {
+        "event": "SK하이닉스 국내 반도체 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (214608 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (206192 이하)"
+      },
+      {
+        "event": "VIX 공포지수 안정화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 14.32 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 17.51 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "원달러 환율 외국인 수급 영향",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1430 이하로 하락 (외국인 매수 우호적 환경)",
+        "invalidates_if": "원달러 1455 이상으로 상승 (외국인 수급 이탈 압력 증가)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "원화 자산 (코스피 외국인 수급)",
+        "reason": "원달러 1443 고공행진 지속으로 환차손 우려, 외국인 매수 유인 약화",
+        "severity": "보통"
+      },
+      {
+        "zone": "경기방어주/유틸리티",
+        "reason": "고용 호조 및 위험선호 심리 강화로 방어섹터 자금 이탈 가속",
+        "severity": "낮음"
+      },
+      {
+        "zone": "채권 (안전자산)",
+        "reason": "고용 호조로 연준 금리인하 기대 후퇴, 채권 가격 하락 압력",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 빅테크/클라우드 (Amazon, Microsoft)",
+        "reason": "Amazon 실적 서프라이즈로 클라우드·AI 성장 내러티브 재확인, 섹터 전반 매수세",
+        "momentum": "강함"
+      },
+      {
+        "zone": "AI 반도체 (엔비디아, SK하이닉스)",
+        "reason": "엔비디아 +3.51%, SK하이닉스 +2.53% 동반 급등으로 HBM 수요 기대 강화",
+        "momentum": "강함"
+      },
+      {
+        "zone": "코스피 IT/반도체 섹터",
+        "reason": "글로벌 반도체 모멘텀 수혜, 삼성전자·SK하이닉스 동반 상승으로 외국인 순매수 유입 가능성",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 15.92
+  },
+  {
+    "analysis_date": "2026-02-10",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "관세 확전·중국 보복 우려로 반도체 중심 글로벌 매도세 확산, 공포 구간 진입 초입",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (반등 vs 추가 하락)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 반등 (19905 이상)",
+        "invalidates_if": "나스닥 -1.5% 이하 추가 하락 (19318 이하)"
+      },
+      {
+        "event": "반도체 섹터 방향성 (엔비디아 기준)",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 (128.09 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 (120.63 이하)"
+      },
+      {
+        "event": "SK하이닉스 낙폭 과대 반등 여부",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +3% 이상 (207854 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (197764 이하)"
+      },
+      {
+        "event": "VIX 공포지수 추가 확대 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 16.0 이하로 하락 (현재 대비 -10% 이상)",
+        "invalidates_if": "VIX 19.6 이상으로 상승 (현재 대비 +10% 이상)"
+      },
+      {
+        "event": "원달러 환율 방향성 (위험회피 강도 측정)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1440원 이하로 하락 (위험선호 회복)",
+        "invalidates_if": "원달러 1465원 이상으로 상승 (위험회피 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "반도체 (SK하이닉스·삼성전자·엔비디아)",
+        "reason": "대중 수출 규제·관세 확전 시 HBM·메모리 수요 직격, 단일 섹터 최대 피해 예상",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "원화 약세(1451원대) + 글로벌 위험회피 동반 외국인 순매도 압력 지속",
+        "severity": "높음"
+      },
+      {
+        "zone": "나스닥 대형 기술주 (빅테크)",
+        "reason": "관세 보복 시 중국 매출 비중 높은 빅테크 실적 하향 리스크 재부각",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "달러 및 달러 단기국채 (TBill)",
+        "reason": "위험회피 심화 구간에서 달러 강세·안전자산 선호 자금 유입",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금(Gold) 및 금 관련 ETF",
+        "reason": "관세 불확실성·지정학 리스크 헤지 수요, Fear&Greed 41 구간에서 전통 안전자산 선호",
+        "momentum": "강함"
+      },
+      {
+        "zone": "국내 방어주·고배당 (유틸리티·통신)",
+        "reason": "코스피 하락 국면 내 낙폭 상대적으로 제한, 배당 수익률 매력 부각",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1451.8원 (달러 강세·원화 약세 지속)",
+      "kospi_flow": "외국인 반도체 중심 순매도 압력 지속, 기관 저가 매수 유입 가능성 제한적",
+      "assessment": "코스피는 반도체 비중 과대(삼성·하이닉스 합산 시총 30%+)로 글로벌 관세 리스크에 구조적 취약. 원달러 1450원 이상 유지 시 외국인 이탈 가속 우려. 2500선 지지 여부가 단기 핵심 관전 포인트이며, 관세 협상 뉴스보다 반도체 주가 수치 자체로 매일 방향성 재확인 필요."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 17.83
+  },
+  {
+    "analysis_date": "2026-02-11",
+    "market_regime": "전환중",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "실적 시즌 긍정적 흐름 속 소폭 반등이나 Fear&Greed 44(중립)·VIX 17대 유지로 추세 전환 확신 부족, 내일 방향성이 핵심 분기점",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (19,923 돌파)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19,529 이탈)"
+      },
+      {
+        "event": "엔비디아 반도체 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 상승 (129.45 돌파)",
+        "invalidates_if": "엔비디아 -2% 이하 하락 (124.37 이탈)"
+      },
+      {
+        "event": "VIX 공포지수 방향성",
+        "timeframe": "1일",
+        "confirms_if": "VIX 15.40 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 18.83 이상으로 10% 이상 상승"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (208,896 돌파)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (200,704 이탈)"
+      },
+      {
+        "event": "원달러 환율 방향성 (리스크온 신호)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,435원 이하로 하락 (원화 강세)",
+        "invalidates_if": "원달러 1,462원 이상으로 상승 (원화 약세)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "달러 현금·단기채",
+        "reason": "원달러 1,448원대 고공 유지로 달러 강세 부담, 단기 안전자산 선호 잔존",
+        "severity": "보통"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "Fear&Greed 44 중립권으로 외국인 적극 매수 유입 미확인, 원화 약세 부담 지속",
+        "severity": "보통"
+      },
+      {
+        "zone": "경기민감 소재·화학 섹터",
+        "reason": "글로벌 수요 불확실성 지속, 반등 랠리에서 소외된 섹터 자금 이탈",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·반도체 섹터 (엔비디아·SK하이닉스·삼성전자)",
+        "reason": "엔비디아 +2.05%, SK하이닉스 +1.49%, 삼성전자 +1.37% 동반 상승으로 실적 시즌 긍정적 모멘텀 반영",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "나스닥 대형 기술주",
+        "reason": "S&P500·나스닥 동반 반등, 실적 시즌 호조 기대감으로 기술주 중심 매수세 유입",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "코스피 반도체·IT 대형주",
+        "reason": "글로벌 반도체 상승 흐름 동조화, 삼성전자·SK하이닉스 동반 1%대 반등",
+        "momentum": "약함"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 17.12
+  },
+  {
+    "analysis_date": "2026-02-12",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "CPI 예상 상회로 금리인하 기대 후퇴, 관세 인플레 우려 겹치며 기술주·반도체 중심 전방위 매도세",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (CPI 충격 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 반등 (19600 이상 회복)",
+        "invalidates_if": "나스닥 -1% 이하 추가 하락 (19220 이하)"
+      },
+      {
+        "event": "반도체 섹터 방향성 (엔비디아·SK하이닉스 낙폭 과대 반발 여부)",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 (123.94 이상), SK하이닉스 +2% 이상 (201552 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 (116.72 이하), SK하이닉스 -2% 이하 (193648 이하)"
+      },
+      {
+        "event": "VIX 공포지수 방향성 (시장 불안 완화 여부)",
+        "timeframe": "1일",
+        "confirms_if": "VIX 17.29 이하 (현재 19.21 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 21.13 이상 (현재 19.21 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 반등 (2567 이상)",
+        "invalidates_if": "코스피 -1% 이하 추가 하락 (2516 이하)"
+      },
+      {
+        "event": "원달러 환율 방향성 (위험선호 복귀 여부)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1445 이하 하락 (달러 약세 전환)",
+        "invalidates_if": "원달러 1470 이상 상승 (달러 강세 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥·기술주 (엔비디아 -5.19%)",
+        "reason": "CPI 상회로 고금리 장기화 우려, 고밸류 기술주 할인율 상승 직격",
+        "severity": "높음"
+      },
+      {
+        "zone": "국내 반도체 (SK하이닉스 -3.51%, 삼성전자 -2.70%)",
+        "reason": "엔비디아 급락 연동 + 원달러 강세로 외국인 이탈 가속",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 전반",
+        "reason": "글로벌 위험회피 심리 + 관세 인플레 우려로 신흥국 자금 이탈",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "달러·달러 자산 (원달러 1458.4)",
+        "reason": "금리인하 기대 후퇴 + 관세 불확실성으로 달러 안전자산 선호",
+        "momentum": "강함"
+      },
+      {
+        "zone": "단기채·MMF",
+        "reason": "고금리 유지 전망 강화로 단기 고수익 현금성 자산 매력 부각",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "방어주·에너지 섹터",
+        "reason": "인플레 헤지 수요 + Fear&Greed 37 구간에서 경기방어주 선호",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1458.4원 (달러 강세 지속, 외국인 환차손 부담 확대)",
+      "kospi_flow": "외국인 순매도 압력 지속, 반도체 비중 높은 코스피 구조적 취약",
+      "assessment": "CPI 쇼크 + 원달러 1458 수준에서 외국인 이탈 지속 가능성 높음. 코스피 2500선 지지 여부가 핵심 관전 포인트. Fear&Greed 37(공포) 구간이나 추가 악재 시 2500 하회 위험 존재"
+    },
+    "mode": "MORNING",
+    "vix_at_time": 19.21
+  },
+  {
+    "analysis_date": "2026-02-13",
+    "market_regime": "위험선호",
+    "trend_phase": "상승추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "CPI 충격 진정과 엔비디아 GTC 기대감으로 기술·반도체 중심 강한 반등, 단기 과열 여부가 다음 방향성 결정",
+    "thesis_killers": [
+      {
+        "event": "나스닥 연속 상승 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (20100 돌파)",
+        "invalidates_if": "나스닥 -1.5% 이하 하락 (19610 하회)"
+      },
+      {
+        "event": "엔비디아 GTC 기대 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 상승 (136.8 돌파)",
+        "invalidates_if": "엔비디아 -3% 이하 하락 (128.8 하회)"
+      },
+      {
+        "event": "반도체 섹터 (SK하이닉스) 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (212400 돌파)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (204000 하회)"
+      },
+      {
+        "event": "VIX 공포지수 안정 유지",
+        "timeframe": "1일",
+        "confirms_if": "VIX 14.5 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 17.5 이상으로 10% 이상 상승"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 상승 (2600 돌파)",
+        "invalidates_if": "코스피 -1% 이하 하락 (2548 하회)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "원달러 환율 고위험 구간 (1447)",
+        "reason": "원화 약세 지속으로 외국인 국내 주식 차익실현 압력 상존, 환헤지 비용 증가",
+        "severity": "보통"
+      },
+      {
+        "zone": "삼성전자 (60100)",
+        "reason": "단기 +4.34% 급등 후 단기 차익실현 매물 출회 가능, 실적 모멘텀 대비 밸류에이션 부담",
+        "severity": "낮음"
+      },
+      {
+        "zone": "채권·달러 자산",
+        "reason": "CPI 충격 진정으로 위험선호 전환, 안전자산 매력 일시 감소",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "엔비디아·AI 반도체 밸류체인",
+        "reason": "GTC 2026 기대감 및 엔비디아 +10.42% 급등으로 AI 인프라 투자 사이클 재확인, 수급 집중",
+        "momentum": "강함"
+      },
+      {
+        "zone": "SK하이닉스 (208200)",
+        "reason": "HBM 수요 강세 및 엔비디아 연동 수혜 부각, 외국인 순매수 유입 가능성",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 기술주 전반",
+        "reason": "CPI 안도 + Fed 금리 경로 불확실성 완화 기대로 멀티플 확장 국면 재진입",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "코스피 IT·반도체 섹터",
+        "reason": "글로벌 반도체 랠리 수혜, 외국인 매수세 유입 기대",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 15.97
+  },
+  {
+    "analysis_date": "2026-02-14",
+    "market_regime": "위험선호",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "밸런타인데이 소폭 강세 마감, 나스닥 20000선 재도전 앞두고 기술주·반도체 동반 상승이나 추세 확인 필요",
+    "thesis_killers": [
+      {
+        "event": "나스닥 20000선 돌파 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 20000 이상 종가 마감 (+0.1% 이상)",
+        "invalidates_if": "나스닥 19800 이하 하락 (-0.9% 이하)"
+      },
+      {
+        "event": "엔비디아 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 (138달러 돌파)",
+        "invalidates_if": "엔비디아 -2% 이하 (132달러 하회)"
+      },
+      {
+        "event": "SK하이닉스 한국 반도체 모멘텀",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (215500원 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (206900원 이하)"
+      },
+      {
+        "event": "VIX 공포지수 안정성",
+        "timeframe": "1일",
+        "confirms_if": "VIX 14.00 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 17.18 이상으로 10% 이상 상승"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 2600선 회복 (+0.7% 이상)",
+        "invalidates_if": "코스피 2555 이하 하락 (-1.0% 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "원달러 환율 고착 (1445원대)",
+        "reason": "원화 약세 지속으로 외국인 한국 자산 환차손 부담, 코스피 추가 상승 제약",
+        "severity": "높음"
+      },
+      {
+        "zone": "나스닥 20000선 저항",
+        "reason": "연초 강세장 마무리 구간에서 20000선 심리적 저항 및 차익 실현 매물 집중",
+        "severity": "보통"
+      },
+      {
+        "zone": "미국 국채 (단기)",
+        "reason": "Fear&Greed 54 중립권, 위험선호 완전 전환 전 안전자산 일부 포지션 유지",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·반도체 섹터 (엔비디아·SK하이닉스·삼성전자)",
+        "reason": "엔비디아 +1.87%, SK하이닉스 +1.44%, 삼성전자 +1.16% 동반 상승으로 AI 투자 사이클 모멘텀 유효",
+        "momentum": "강함"
+      },
+      {
+        "zone": "S&P500 대형 기술주",
+        "reason": "VIX 15.62 안정권, Fear&Greed 중립에서 탐욕 전환 기대감으로 기술주 점진적 매수세 유입",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "코스피 반도체·IT 종목",
+        "reason": "글로벌 반도체 훈풍 연동 상승, 삼성전자 60000원대 회복 시도 지속",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1445.1",
+      "kospi_flow": "외국인 순매수 여부 불확실, 원화 약세 구간에서 환헤지 비용 부담으로 대규모 유입 제한적",
+      "assessment": "코스피 2581은 반도체 강세 수혜를 받으나 원달러 1445원 고환율이 외국인 복귀 속도를 제약. 나스닥 20000 돌파 성공 시 코스피 2600 재도전 가능하나, 환율 1430원 이하 안정 없이는 지속적 상승 동력 부족. 단기 박스권(2550~2620) 내 등락 예상."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 15.62
+  },
+  {
+    "analysis_date": "2026-02-19",
+    "market_regime": "혼조",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "대통령의 날 연휴 복귀 후 전 자산군 소폭 하락 마감, VIX 15대 안정·Fear&Greed 중립으로 방향성 탐색 국면",
+    "thesis_killers": [
+      {
+        "event": "나스닥 20000선 회복 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 20000선 상향 돌파 및 +0.5% 이상 마감",
+        "invalidates_if": "나스닥 -1% 이하 하락으로 19750선 이탈"
+      },
+      {
+        "event": "엔비디아 주가 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 상승 (137.5달러 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 하락 (132달러 이하)"
+      },
+      {
+        "event": "VIX 공포지수 변화",
+        "timeframe": "1일",
+        "confirms_if": "VIX 14.2 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 17.4 이상으로 10% 이상 상승"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (214200원 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (205800원 이하)"
+      },
+      {
+        "event": "코스피 지수 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 상승 (2603선 이상)",
+        "invalidates_if": "코스피 -1% 이하 하락 (2552선 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "반도체 (엔비디아·SK하이닉스·삼성전자)",
+        "reason": "연휴 복귀 후 차익실현 매물 + AI 수요 불확실성 관망, 3종목 모두 하락 마감",
+        "severity": "보통"
+      },
+      {
+        "zone": "나스닥 기술주 전반",
+        "reason": "20000선 저항 근처에서 방향성 미결정, 소폭 하락으로 모멘텀 약화",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 대형주 (S&P500 방어주)",
+        "reason": "VIX 15대 저위험 환경에서 방어적 포지션 선호, S&P500 낙폭 나스닥 대비 최소화",
+        "momentum": "약함"
+      },
+      {
+        "zone": "현금·단기채",
+        "reason": "Fear&Greed 52 중립 구간에서 관망세 유지, 뚜렷한 방향성 부재로 현금 비중 유지",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1446.4원 (달러 강세 지속)",
+      "kospi_flow": "코스피 -0.13% 소폭 하락, 외국인 수급 중립~소폭 매도 추정",
+      "assessment": "원달러 1446원대 고착화로 외국인 환차손 부담 지속. 삼성전자(-0.33%)·SK하이닉스(-0.57%) 동반 약세로 반도체 주도 반등 동력 미약. 코스피 2578선은 단기 지지 테스트 구간이며, 원화 추가 약세 시 외국인 이탈 가속 위험 존재."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 15.79
+  },
+  {
+    "analysis_date": "2026-02-20",
+    "market_regime": "위험선호",
+    "trend_phase": "상승추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "연초 고점 재도전 국면에서 기술주·반도체 중심 완만한 상승 지속, VIX 15대 안정 속 추가 돌파 여부가 핵심 분기점",
+    "thesis_killers": [
+      {
+        "event": "나스닥 20,000선 돌파 유지 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 종가 20,200 이상 (현재 대비 +1% 이상)",
+        "invalidates_if": "나스닥 종가 19,800 이하 (현재 대비 -1% 이하)"
+      },
+      {
+        "event": "엔비디아 방향성 (고점 재도전 모멘텀 확인)",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 종가 138.8 이상 (+2% 이상)",
+        "invalidates_if": "엔비디아 종가 133.8 이하 (-2% 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 강도 확인",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 종가 216,500 이상 (+2% 이상)",
+        "invalidates_if": "SK하이닉스 종가 208,000 이하 (-2% 이하)"
+      },
+      {
+        "event": "VIX 공포지수 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 13.9 이하 (현재 15.46 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 17.0 이상 (현재 15.46 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 연초 고점 돌파 시도",
+        "timeframe": "1일",
+        "confirms_if": "코스피 종가 2,610 이상 (+1% 이상)",
+        "invalidates_if": "코스피 종가 2,558 이하 (-1% 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "원화 자산 (원달러 1,444)",
+        "reason": "원달러 1,440원대 고착화로 외국인 환차손 부담 지속, 한국 자산 매력도 상대적 저하",
+        "severity": "보통"
+      },
+      {
+        "zone": "경기방어·유틸리티 섹터",
+        "reason": "VIX 15대 안정·Fear&Greed 55(Greed) 환경에서 위험자산 선호로 방어주 자금 이탈",
+        "severity": "낮음"
+      },
+      {
+        "zone": "채권 (단기물)",
+        "reason": "위험선호 심리 회복으로 안전자산 채권 수요 감소 압력",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 대형 기술주 (나스닥)",
+        "reason": "나스닥 20,000선 회복·엔비디아 +1.35% 주도로 AI·빅테크 모멘텀 재점화",
+        "momentum": "강함"
+      },
+      {
+        "zone": "반도체 섹터 (SK하이닉스·삼성전자)",
+        "reason": "SK하이닉스 +1.14%, 삼성전자 +0.99% 동반 상승, HBM 수요 기대 지속",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "코스피 대형주",
+        "reason": "글로벌 위험선호 분위기 연동, 반도체 대장주 상승이 지수 견인",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1,444.2원 (달러 강세 기조 지속)",
+      "kospi_flow": "외국인 반도체 중심 선별적 순매수 추정, 환율 부담으로 대규모 유입은 제한적",
+      "assessment": "코스피는 글로벌 기술주 상승에 연동하여 완만한 반등을 보이나, 원달러 1,440원대 고착이 외국인 매수 의지를 제한하는 핵심 변수. SK하이닉스·삼성전자 반도체 투톱이 지수를 견인하는 구조이며, 2,600선 돌파 여부가 단기 추세 전환의 기준점."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 15.46
+  },
+  {
+    "analysis_date": "2026-02-21",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "소비자신뢰 급락·Walmart 쇼크·엔비디아 -13%의 삼중 충격으로 전방위 위험회피 심화, 반도체 섹터 낙폭 과대 구간 진입 여부가 내일 핵심 변수",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 추가 하락 vs 반등 확인",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 19392 대비 +1.5% 이상 반등 (19683 이상)",
+        "invalidates_if": "나스닥 -1.5% 이하 추가 하락 (19103 이하)"
+      },
+      {
+        "event": "엔비디아 주가 안정 vs 추가 급락",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 118.23 대비 +3% 이상 반등 (121.78 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 추가 하락 (114.68 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 낙폭 소화 여부",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 198400 대비 +3% 이상 반등 (204352 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 추가 하락 (194432 이하)"
+      },
+      {
+        "event": "VIX 공포지수 방향성",
+        "timeframe": "1일",
+        "confirms_if": "VIX 19.84 대비 10% 이상 하락 (17.86 이하)",
+        "invalidates_if": "VIX 19.84 대비 10% 이상 상승 (21.82 이상)"
+      },
+      {
+        "event": "원달러 환율 안정 vs 추가 강달러",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1459.3 대비 -10원 이하 하락 (1449.3 이하, 원화 강세)",
+        "invalidates_if": "원달러 1459.3 대비 +10원 이상 상승 (1469.3 이상, 원화 추가 약세)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "반도체·AI 빅테크 (엔비디아, SK하이닉스, 삼성전자)",
+        "reason": "엔비디아 -13% 충격으로 AI 밸류에이션 전반 재평가, 기관 강제 손절 물량 출회 우려",
+        "severity": "높음"
+      },
+      {
+        "zone": "미국 소비재·유통 (Walmart 연동 섹터)",
+        "reason": "Walmart 가이던스 쇼크로 소비 경기 둔화 우려 확산, 소비재 전반 멀티플 압축",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "글로벌 위험회피 심화로 신흥국 자금 이탈, 원달러 1459 수준의 환율 부담 가중",
+        "severity": "높음"
+      },
+      {
+        "zone": "나스닥 성장주 전반",
+        "reason": "소비자신뢰지수 급락으로 경기 침체 내러티브 부각, Fear&Greed 30 진입으로 심리적 매도 압력",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 단기 국채 (T-Bill) 및 달러 현금",
+        "reason": "위험회피 극대화 구간에서 안전자산 선호, VIX 19.84 상승 압력 지속",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금(Gold) 및 귀금속",
+        "reason": "경기 둔화 우려와 달러 강세 병존 속 실물 안전자산으로 자금 이동",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "방어주 (헬스케어·유틸리티·필수소비재)",
+        "reason": "소비 경기 둔화 신호에 따른 경기방어 섹터 로테이션 수요",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 19.84
+  },
+  {
+    "analysis_date": "2026-02-24",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "경기침체 우려와 관세 불확실성이 맞물려 전 자산군에 걸친 리스크오프 흐름 지속, Fear&Greed 28(공포) 구간에서 추가 하락 압력 상존",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (19,474 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (19,088 이하)"
+      },
+      {
+        "event": "반도체 섹터 방향성 (엔비디아)",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 상승 (118.31 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 하락 (113.67 이하)"
+      },
+      {
+        "event": "VIX 공포지수 방향성",
+        "timeframe": "1일",
+        "confirms_if": "VIX 20.64 대비 10% 이상 하락 (18.58 이하)",
+        "invalidates_if": "VIX 20.64 대비 10% 이상 상승 (22.70 이상)"
+      },
+      {
+        "event": "SK하이닉스 반도체 수요 신뢰도",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (198,492 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (190,708 이하)"
+      },
+      {
+        "event": "원달러 환율 리스크오프 강도",
+        "timeframe": "1일",
+        "confirms_if": "원달러 환율 1,450 이하로 하락 (원화 강세 전환)",
+        "invalidates_if": "원달러 환율 1,480 이상으로 상승 (원화 추가 약세)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "반도체/AI 기술주 (엔비디아, SK하이닉스, 삼성전자)",
+        "reason": "경기침체 우려로 AI 설비투자 축소 가능성 부각, 반도체 수요 전망 하향 조정",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "원달러 1,462 수준의 원화 약세 지속으로 외국인 자금 이탈 가속화",
+        "severity": "높음"
+      },
+      {
+        "zone": "미국 소비재·경기민감주",
+        "reason": "관세 불확실성에 따른 소비 둔화 및 기업 마진 압박 우려",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 국채 (안전자산)",
+        "reason": "경기침체 우려 확산으로 채권 수요 증가, 금리 하락 기대 심리 반영",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금·달러 현금성 자산",
+        "reason": "Fear&Greed 28 공포 구간에서 방어적 포지셔닝 강화",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "배당·유틸리티·헬스케어 방어주",
+        "reason": "침체 우려 환경에서 경기방어 섹터로의 로테이션 시도",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1,462.8 (달러 강세 지속, 원화 약세 압력)",
+      "kospi_flow": "외국인 순매도 우세 추정, 반도체 대형주 중심 하락 압력 집중",
+      "assessment": "코스피는 2,527 지지선 테스트 중. 원달러 1,480 돌파 시 추가 하락 가능성 높음. 삼성전자 57,000·SK하이닉스 194,600 모두 약세권으로 반도체 비중 축소 구간. Fear&Greed 28 극단적 공포 진입으로 단기 기술적 반등 가능성 존재하나 펀더멘털 리스크 해소 전까지 반등 신뢰도 낮음."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 20.64
+  },
+  {
+    "analysis_date": "2026-02-25",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "트럼프 관세 4월 확전 예고와 경기침체 우려로 전방위 매도세, Fear&Greed 24로 공포 국면 진입",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (추가 하락 vs 기술적 반등)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 반등 (18836 기준 19119 돌파)",
+        "invalidates_if": "나스닥 -1.5% 이하 추가 하락 (18553 이탈)"
+      },
+      {
+        "event": "엔비디아·반도체 섹터 낙폭 과대 반등 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 (114.34 돌파), SK하이닉스 +2% 이상 (191964 돌파)",
+        "invalidates_if": "엔비디아 -3% 이하 (107.68 이탈), SK하이닉스 -2% 이하 (184436 이탈)"
+      },
+      {
+        "event": "VIX 공포지수 추가 확대 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 20.0 이하로 10% 이상 하락 (공포 완화)",
+        "invalidates_if": "VIX 24.5 이상으로 10% 이상 상승 (공포 심화)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 반등 (2529 돌파) 및 외국인 순매수 전환",
+        "invalidates_if": "코스피 -1% 이하 추가 하락 (2479 이탈)"
+      },
+      {
+        "event": "원달러 환율 위험회피 강도",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1460 이하로 하락 (위험선호 회복 신호)",
+        "invalidates_if": "원달러 1480 이상으로 상승 (달러 강세·원화 추가 약세)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥 기술주 (엔비디아·반도체)",
+        "reason": "관세 확전으로 공급망 타격 우려 + 엔비디아 -4.29% 급락, 고밸류에이션 부담 극대화",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 수출 대형주 (삼성전자·SK하이닉스)",
+        "reason": "미국 관세 4월 확전 시 반도체·IT 직접 타격 + 원달러 1469 원화 약세 압박",
+        "severity": "높음"
+      },
+      {
+        "zone": "경기민감 소비재·산업재 섹터",
+        "reason": "경기침체 논쟁 본격화로 실적 전망 하향 조정 압력",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "달러 현금 및 단기 국채 (TBill)",
+        "reason": "Fear&Greed 24 공포 국면에서 안전자산 선호 급증, VIX 22.27 상승 지속",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금(Gold) 및 엔화",
+        "reason": "경기침체 우려 + 관세 불확실성 확대로 전통적 안전자산 수요 집중",
+        "momentum": "강함"
+      },
+      {
+        "zone": "국내 방어주 (통신·유틸리티·필수소비재)",
+        "reason": "코스피 하락 국면에서 상대적 낙폭 방어, 배당 매력 부각",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 22.27
+  },
+  {
+    "analysis_date": "2026-02-26",
+    "market_regime": "혼조",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "엔비디아 실적 호조에도 본장 혼조 마감, Fear&Greed 25(공포) 구간에서 상승 동력 제한적 — 반도체 주도 단기 반등 시도 vs. 거시 불확실성 충돌",
+    "thesis_killers": [
+      {
+        "event": "엔비디아 실적 후 나스닥 방향성 확인",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 상승 (19167 이상)",
+        "invalidates_if": "나스닥 -1.0% 이하 하락 (18695 이하)"
+      },
+      {
+        "event": "반도체 섹터 SK하이닉스 추종 여부",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2.0% 이상 (193400원 이상)",
+        "invalidates_if": "SK하이닉스 -2.0% 이하 (185800원 이하)"
+      },
+      {
+        "event": "VIX 공포지수 방향성",
+        "timeframe": "1일",
+        "confirms_if": "VIX 19.70 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 24.07 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 외국인 수급 반응",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +0.8% 이상 (2528 이상)",
+        "invalidates_if": "코스피 -0.8% 이하 (2488 이하)"
+      },
+      {
+        "event": "원달러 환율 방향성 (위험선호 지표)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1455원 이하 하락 (원화 강세, 위험선호 확인)",
+        "invalidates_if": "원달러 1480원 이상 상승 (원화 약세, 위험회피 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "성장주·고밸류 기술주",
+        "reason": "Fear&Greed 25 공포 구간 + VIX 21.88 고위험 수준, 실적 호조에도 본장 혼조로 차익 실현 압력 상존",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 중소형 내수주",
+        "reason": "원달러 1468원 고환율 지속으로 수입비용 증가 및 외국인 이탈 리스크",
+        "severity": "보통"
+      },
+      {
+        "zone": "신흥국 ETF·자산",
+        "reason": "달러 강세 기조 유지 및 글로벌 위험회피 심리로 자금 이탈 지속",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI 반도체 (엔비디아·SK하이닉스·삼성전자)",
+        "reason": "엔비디아 실적 호조로 HBM 수요 가시성 확보, 반도체 밸류체인 단기 모멘텀 유효",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "미국 방어주·배당주",
+        "reason": "VIX 고공 + 공포 구간에서 안전자산 선호 유지, S&P500 보합권 방어",
+        "momentum": "약함"
+      },
+      {
+        "zone": "달러 자산·미국 단기채",
+        "reason": "원달러 1468원 수준의 달러 강세 지속, 달러 표시 자산 매력 유지",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1468.1원 — 고환율 구간 지속, 1470원 저항선 근접",
+      "kospi_flow": "외국인 소폭 순매수 추정(+0.14% 마감), 반도체 대형주 중심 방어적 매수 유입 — 수급 주도권 불분명",
+      "assessment": "엔비디아 호실적이 SK하이닉스·삼성전자로 단기 낙수 기대되나, 원달러 1468원 고환율과 Fear&Greed 25 공포 구간이 상단을 제한. 코스피 2500선 지지 여부가 핵심 — 내일 2488 이탈 시 추가 하방 위험 경계 필요"
+    },
+    "mode": "MORNING",
+    "vix_at_time": 21.88
+  },
+  {
+    "analysis_date": "2026-02-27",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "엔비디아 실적 실망 매도 + PCE 대기 심리로 기술주 전반 약세, Fear&Greed 24(공포) 구간에서 관망 우세",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (PCE 발표 전 포지션 확인)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 반등 (18847 기준 19035 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (18847 기준 18659 이하)"
+      },
+      {
+        "event": "엔비디아 주가 방향성 (실적 실망 매도 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 반등 (114.42 기준 116.71 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 추가 하락 (114.42 기준 112.13 이하)"
+      },
+      {
+        "event": "반도체 섹터 SK하이닉스 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (188400 기준 192168 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (188400 기준 184632 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 22.14 대비 10% 이상 하락 (19.93 이하)",
+        "invalidates_if": "VIX 22.14 대비 10% 이상 상승 (24.35 이상)"
+      },
+      {
+        "event": "원달러 환율 방향성 (외국인 자금 이탈 신호)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1469.8 대비 -10원 이상 하락 (1459.8 이하, 위험선호 회복)",
+        "invalidates_if": "원달러 1469.8 대비 +10원 이상 상승 (1479.8 이상, 달러 강세 지속)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥/기술주 (엔비디아 중심 반도체 섹터)",
+        "reason": "엔비디아 실적 가이던스 실망 + AI 투자 대비 수익화 의구심으로 매도세 지속",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "원달러 1469.8원 고공행진 + 글로벌 위험회피로 외국인 순매도 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "성장주/고밸류에이션 섹터",
+        "reason": "Fear&Greed 24(공포) + PCE 발표 대기로 고위험 자산 전반 축소",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "현금 및 단기채 (미국 T-Bill)",
+        "reason": "PCE 발표 불확실성 + VIX 22 이상 공포 구간에서 안전자산 선호",
+        "momentum": "강함"
+      },
+      {
+        "zone": "방어주 (헬스케어·유틸리티·필수소비재)",
+        "reason": "시장 전반 약세 국면에서 저베타 섹터로 자금 이동",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "달러화",
+        "reason": "글로벌 위험회피 심리 강화로 달러 인덱스 상승 압력 유지",
+        "momentum": "강함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1469.8원 (달러 강세 지속, 고환율 구간)",
+      "kospi_flow": "외국인 매도 우위 추정, 반도체(삼성전자 -0.71%, SK하이닉스 -0.63%) 동반 약세",
+      "assessment": "코스피 2504선 지지 여부가 핵심 — 엔비디아 여진 + PCE 결과에 따라 2480 지지선 테스트 가능성 존재. 원달러 1480원 돌파 시 외국인 이탈 가속화 위험 경보"
+    },
+    "mode": "MORNING",
+    "vix_at_time": 22.14
+  },
+  {
+    "analysis_date": "2026-02-28",
+    "market_regime": "전환중",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "PCE 부합 및 월말 숏커버링으로 기술적 반등 달성했으나, Fear&Greed 31(공포) 구간에서 추세 전환 확인 필요",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 반등 지속성 확인",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (19353 돌파)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (18970 하회)"
+      },
+      {
+        "event": "엔비디아 반도체 모멘텀 유지 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 상승 (123.75 돌파)",
+        "invalidates_if": "엔비디아 -3% 이하 하락 (116.55 하회)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (200532 돌파)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (192668 하회)"
+      },
+      {
+        "event": "VIX 공포지수 완화 지속",
+        "timeframe": "1일",
+        "confirms_if": "VIX 17.88 이하 (현재 19.87 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 21.86 이상 (현재 19.87 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 상승 (2556 돌파)",
+        "invalidates_if": "코스피 -1% 이하 하락 (2506 하회)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "성장주·고밸류 기술주",
+        "reason": "Fear&Greed 31 공포 구간 지속, 월말 반등 후 차익실현 매물 출회 가능성",
+        "severity": "보통"
+      },
+      {
+        "zone": "원화 자산 (원달러 1461)",
+        "reason": "원달러 환율 1461 고공 유지로 외국인 환손실 부담, 한국 시장 자금 이탈 압력",
+        "severity": "보통"
+      },
+      {
+        "zone": "경기민감 소비재",
+        "reason": "PCE 부합에도 실질 소비 둔화 우려, 고금리 장기화 리스크 잔존",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI 반도체 (엔비디아·SK하이닉스)",
+        "reason": "엔비디아 +4.99%, SK하이닉스 +4.35% 동반 급등으로 AI 수요 모멘텀 재확인",
+        "momentum": "강함"
+      },
+      {
+        "zone": "대형 기술주 (나스닥)",
+        "reason": "PCE 예상 부합으로 연준 긴축 완화 기대 재점화, 기술주 밸류에이션 부담 경감",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "삼성전자·한국 반도체",
+        "reason": "글로벌 반도체 랠리 동조화, 삼성전자 +2.87% 저점 매수 유입",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1461.2 (달러 강세 지속, 고환율 구간)",
+      "kospi_flow": "코스피 +1.09% 상승, 반도체 주도 외국인 순매수 유입 추정",
+      "assessment": "원달러 1461 고환율이 외국인 수익률 잠식 요인으로 작용 중. 반도체 글로벌 랠리 수혜로 단기 반등 달성했으나 환율 안정(1440 이하) 없이는 지속적 외국인 매수 기대 제한적. Fear&Greed 31 구간에서 저가 분할 매수 접근 유효하나 추세 전환 신호 추가 확인 필요."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 19.87
+  },
+  {
+    "analysis_date": "2026-03-03",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "트럼프 관세 충격으로 나스닥 -2.64%, 엔비디아 -8.69% 급락 — 공포 심리(F&G 30) 지배, 반도체·기술주 전방위 매도세",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (반등 vs 추가 하락)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 반등 (19,450 이상 회복)",
+        "invalidates_if": "나스닥 -1.5% 이하 추가 하락 (18,873 이하)"
+      },
+      {
+        "event": "엔비디아 낙폭 과대 반등 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 반등 (120.28 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 추가 하락 (113.28 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 20.05 이하 (현재 22.28 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 24.51 이상 (현재 22.28 대비 10% 이상 상승)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (202,368원 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (194,432원 이하)"
+      },
+      {
+        "event": "원달러 환율 방향성 (위험회피 강도 측정)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,445원 이하 (위험선호 회복 신호)",
+        "invalidates_if": "원달러 1,465원 이상 (달러 추가 강세, 위험회피 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥 기술주 (엔비디아·반도체)",
+        "reason": "트럼프 관세 충격 + 엔비디아 -8.69% 급락으로 AI·반도체 밸류에이션 재조정 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 자금",
+        "reason": "글로벌 위험회피 심화, 원달러 1,453원대 — 신흥국 자금 이탈 가속",
+        "severity": "높음"
+      },
+      {
+        "zone": "삼성전자·SK하이닉스",
+        "reason": "엔비디아 급락 연동, 반도체 수출 관세 우려로 동반 하락",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "달러·미국 국채 (안전자산)",
+        "reason": "VIX 22.28 + Fear&Greed 30 — 위험회피 국면에서 전통 안전자산 수요 집중",
+        "momentum": "강함"
+      },
+      {
+        "zone": "방어주·배당주 섹터",
+        "reason": "기술주 급락 대비 상대적 낙폭 제한, 경기방어 섹터 로테이션 조짐",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "금(Gold)",
+        "reason": "관세 불확실성·달러 강세 속 인플레 헤지 수요 유입 가능",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1,453.1원 (달러 강세 지속, 관세 우려로 원화 약세 압력)",
+      "kospi_flow": "외국인 매도 우세 — 코스피 -0.82%, 반도체 양대주 동반 하락으로 수급 악화",
+      "assessment": "코스피는 나스닥 대비 낙폭이 제한적이나(나스닥 -2.64% vs 코스피 -0.82%), 원달러 1,453원 고착화 시 외국인 추가 이탈 위험. 삼성전자 58,700원·SK하이닉스 198,400원 지지 여부가 단기 관건. 관세 충격이 장기화될 경우 수출 의존도 높은 한국 증시 특성상 하방 압력 지속 예상."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 22.28
+  },
+  {
+    "analysis_date": "2026-03-04",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "캐나다·멕시코 관세 발효 확정으로 전 섹터 동반 급락, Fear&Greed 25(공포) 구간 진입하며 투자심리 극도로 위축",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 추가 하락 vs 반등 방향성",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 반등 (18,859 이상 회복)",
+        "invalidates_if": "나스닥 -1.5% 이하 추가 하락 (18,302 이하 이탈)"
+      },
+      {
+        "event": "엔비디아·반도체 섹터 낙폭 과대 반발 매수 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 (114.35 이상), SK하이닉스 +2% 이상 (196,452 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 (107.69 이하), SK하이닉스 -2% 이하 (188,748 이하)"
+      },
+      {
+        "event": "VIX 공포지수 추가 확대 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 22.38 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 27.36 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 하단 지지력 확인",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 (2,528 이상 회복)",
+        "invalidates_if": "코스피 -1% 이하 (2,478 이하 이탈)"
+      },
+      {
+        "event": "원달러 환율 추가 강달러 압력 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,450 이하 (달러 약세 전환)",
+        "invalidates_if": "원달러 1,470 이상 (달러 추가 강세)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥 기술주 (엔비디아·반도체 중심)",
+        "reason": "관세 충격에 따른 공급망 비용 상승 우려 및 AI 투자 심리 냉각, 엔비디아 -4.93% 급락",
+        "severity": "높음"
+      },
+      {
+        "zone": "한국 IT·반도체 (삼성전자·SK하이닉스)",
+        "reason": "글로벌 반도체 수요 감소 우려 및 외국인 매도세, 양 종목 동반 -2%대 하락",
+        "severity": "높음"
+      },
+      {
+        "zone": "신흥국 위험자산",
+        "reason": "달러 강세(원달러 1,459.8) 및 글로벌 무역전쟁 재점화로 신흥국 자금 이탈 가속",
+        "severity": "높음"
+      },
+      {
+        "zone": "성장주·소비재 섹터",
+        "reason": "관세로 인한 물가 상승·소비 위축 우려, Fear&Greed 25로 투자심리 극도 위축",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "달러·미국채 (안전자산)",
+        "reason": "관세 불확실성 고조로 달러 강세 지속, 원달러 1,459.8 수준 유지",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금(Gold) 및 원자재 헤지 자산",
+        "reason": "무역전쟁 인플레이션 헤지 수요 증가 예상",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "방어주·내수 소비재",
+        "reason": "관세 직접 영향 낮은 내수 방어섹터로 상대적 자금 이동 가능성",
+        "momentum": "약함"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 24.87
+  },
+  {
+    "analysis_date": "2026-03-05",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "관세 유예 기대감과 엔비디아 급등으로 기술적 반등 시도 중이나, Fear&Greed 24·VIX 23.95·S&P500 -1.22% 등 위험회피 신호가 우세한 혼조 국면",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (반등 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (18468 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (18102 이하)"
+      },
+      {
+        "event": "엔비디아 추가 상승 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 (118.89 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 (111.97 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 21.56 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 26.35 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (195636 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (187964 이하)"
+      },
+      {
+        "event": "코스피 지수 반등 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 (2523 이상)",
+        "invalidates_if": "코스피 -1% 이하 (2473 이하)"
+      },
+      {
+        "event": "원달러 환율 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1450 이하 (위험선호 자금 유입)",
+        "invalidates_if": "원달러 1475 이상 (달러 강세·자금 이탈 가속)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "미국 대형 기술주 (나스닥 제외 종목)",
+        "reason": "S&P500 -1.22% 하락, Fear&Greed 24로 기술주 외 성장주 전반 매도 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "원달러 1462 고공 유지로 외국인 환차손 부담, 코스피 -0.19% 소폭 하락",
+        "severity": "보통"
+      },
+      {
+        "zone": "삼성전자·SK하이닉스 국내 반도체",
+        "reason": "엔비디아 +3.97% 급등에도 국내 반도체 동반 하락, 디커플링 심화",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "엔비디아·AI 반도체 (미국)",
+        "reason": "관세 유예 기대감 + AI 수요 내러티브 재점화로 단독 급등 +3.97%",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 기술 성장주",
+        "reason": "S&P500 대비 낙폭 제한(-0.35%), 기술적 반등 매수세 유입",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "달러 현금·단기채",
+        "reason": "VIX 23.95·Fear 24 구간에서 안전자산 선호, 위험자산 대비 현금 비중 확대",
+        "momentum": "강함"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 23.95
+  },
+  {
+    "analysis_date": "2026-03-06",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "AI 투자 불확실성과 엔비디아 급락이 기술주 전반을 압박, Fear&Greed 25(공포) 구간에서 위험회피 심리 지배",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (18,277 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (17,915 이하)"
+      },
+      {
+        "event": "엔비디아 AI 수요 신호",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 반등 (115.40 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 추가 하락 (108.68 이하)"
+      },
+      {
+        "event": "반도체 섹터 (SK하이닉스) 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 반등 (194,004 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (186,396 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 21.70 이하 (현재 24.11 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 26.52 이상 (현재 24.11 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 외국인 수급 반응",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 상승 (2,519.77 이상)",
+        "invalidates_if": "코스피 -1% 이하 하락 (2,469.87 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "AI·반도체 기술주 (엔비디아, SK하이닉스, 삼성전자)",
+        "reason": "AI 투자 불확실성 지속으로 엔비디아 -2.94% 급락, 반도체 밸류에이션 재평가 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "나스닥 성장주 전반",
+        "reason": "나스닥 -1.03% 하락, 고PER 기술주 중심 매도세 확산",
+        "severity": "높음"
+      },
+      {
+        "zone": "한국 수출주 (코스피 외국인)",
+        "reason": "원달러 1,463.5원 고환율 지속, 외국인 환차손 부담으로 신흥국 이탈 가능성",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "달러 및 달러 현금성 자산",
+        "reason": "원달러 1,463.5원 고환율 유지, 위험회피 시 달러 선호 강화",
+        "momentum": "강함"
+      },
+      {
+        "zone": "방어주·저변동성 섹터 (유틸리티, 헬스케어)",
+        "reason": "VIX 24.11 공포 구간에서 방어적 포지션 선호, S&P500 낙폭(-0.14%) 나스닥 대비 제한적",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "단기채·MMF",
+        "reason": "Fear&Greed 25(극도 공포) 구간, 현금화 및 단기 안전자산 대기 수요 증가",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 24.11
+  },
+  {
+    "analysis_date": "2026-03-07",
+    "market_regime": "혼조",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "기술주 반등과 양호한 고용지표에도 Fear&Greed 27(공포) + VIX 23대 유지로 본격 위험선호 전환 미확인, 단기 기술적 반등 수준",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (18340 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (17976 이하)"
+      },
+      {
+        "event": "엔비디아 반도체 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 상승 (118.15 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 하락 (113.51 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (197680 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (189924 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 20.84 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 25.48 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 상승 (2534 이상)",
+        "invalidates_if": "코스피 -1% 이하 하락 (2484 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "미국 중소형 성장주",
+        "reason": "VIX 23대 + Fear&Greed 27로 위험회피 심리 잔존, 고베타 자산 기피",
+        "severity": "높음"
+      },
+      {
+        "zone": "원화 자산 (원달러 1459.6 고환율)",
+        "reason": "원달러 1460 근접 고환율 유지로 외국인 환차손 부담, 자금 이탈 압력",
+        "severity": "보통"
+      },
+      {
+        "zone": "경기민감 소비재 섹터",
+        "reason": "고용 양호에도 소비심리 위축 지속, 섹터 로테이션 수혜 제한적",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI 반도체 (엔비디아·SK하이닉스)",
+        "reason": "엔비디아 +3.38%, SK하이닉스 +1.89% 동반 강세로 AI 수요 기대 자금 유입",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 대형 기술주",
+        "reason": "고용지표 양호로 경기연착륙 기대, 기술주 밸류에이션 부담 완화 기대 매수",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "국내 반도체·IT (삼성전자·SK하이닉스)",
+        "reason": "글로벌 반도체 반등 연동 + 코스피 외국인 순매수 기대",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1459.6 (고환율 지속, 1460 저항선 근접)",
+      "kospi_flow": "코스피 +0.58% 반도체 주도 상승, 외국인 수급 개선 여부 미확인",
+      "assessment": "반도체 종목 기술적 반등은 긍정적이나 원달러 1460 고환율이 외국인 유입 제약 요인. Fear&Greed 27 공포 구간에서 코스피 본격 상승 전환보다는 종목 차별화 장세 예상. SK하이닉스 중심 반도체 섹터 단기 트레이딩 유효, 지수 전체 추세 전환 확신은 유보"
+    },
+    "mode": "MORNING",
+    "vix_at_time": 23.16
+  },
+  {
+    "analysis_date": "2026-03-10",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "관세 전면전 우려로 기술주 중심 급락, Fear&Greed 19(극도 공포) 진입 — 단기 반등 가능성과 추가 하락 기로",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (반등 vs 추가 하락)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 반등 (17730 이상 회복)",
+        "invalidates_if": "나스닥 -1.5% 이하 추가 하락 (17206 이하 이탈)"
+      },
+      {
+        "event": "엔비디아 주가 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 반등 (110.84 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 추가 하락 (104.38 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +3% 이상 반등 (189726 이상)",
+        "invalidates_if": "SK하이닉스 -3% 이하 추가 하락 (178674 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 25.00 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 30.00 이상으로 10% 이상 추가 상승"
+      },
+      {
+        "event": "원달러 환율 방향성 (위험회피 강도)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1460원 이하로 하락 (위험선호 회복)",
+        "invalidates_if": "원달러 1490원 이상으로 상승 (위험회피 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥 기술주 (엔비디아, 반도체)",
+        "reason": "관세 전면전 우려로 공급망 타격 예상, 엔비디아 -7.09% 급락 주도",
+        "severity": "높음"
+      },
+      {
+        "zone": "한국 반도체 (SK하이닉스, 삼성전자)",
+        "reason": "미국 기술주 급락 동조 + 대미 수출 관세 리스크 직접 노출",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "원달러 1472원 수준의 원화 약세, 외국인 차익실현 압력 증가",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "달러 및 달러 자산 (현금)",
+        "reason": "극도 공포 국면에서 안전자산 선호, 원달러 상승이 달러 수요 반영",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금(Gold) 및 방어주",
+        "reason": "VIX 27.86 고점권, Fear&Greed 19 극도 공포 — 전통 안전자산 수요 유입",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "단기 역발상 매수 (극도 공포 반등 트레이드)",
+        "reason": "Fear&Greed 19는 역사적 단기 반등 구간, 기술적 과매도 신호",
+        "momentum": "약함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1472.4 (달러 강세 / 원화 약세 심화)",
+      "kospi_flow": "코스피 -0.86%로 나스닥 대비 상대적 방어, 그러나 외국인 매도 압력 지속 우려",
+      "assessment": "원달러 1472원은 2022년 이후 고점권 재진입으로 외국인 이탈 가속화 리스크. 코스피 2487은 2500선 하방 이탈 상태로 2450 지지선 테스트 가능성 존재. 반도체 양대주(SK하이닉스, 삼성전자) 동반 급락으로 코스피 추가 하방 압력이 크며, 원화 추가 약세 시 외국인 순매도 확대 경계 필요."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 27.86
+  },
+  {
+    "analysis_date": "2026-03-11",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "경기침체 우려로 전 자산군 동반 하락, Fear&Greed 17(극단적 공포) 속 반도체·기술주 중심 매도세 지속",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 반등 (17476 이상)",
+        "invalidates_if": "나스닥 -1% 이하 추가 하락 (17130 이하)"
+      },
+      {
+        "event": "엔비디아 주가 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 반등 (107.54 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 추가 하락 (103.32 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 반등 (184620 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 추가 하락 (177380 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 10% 이상 하락 (26.04 이하)",
+        "invalidates_if": "VIX 10% 이상 상승 (31.82 이상)"
+      },
+      {
+        "event": "원달러 환율 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1470원 이하로 하락 (위험선호 복귀 신호)",
+        "invalidates_if": "원달러 1490원 이상으로 추가 상승 (위험회피 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "반도체·기술주 (엔비디아, SK하이닉스, 삼성전자)",
+        "reason": "경기침체 우려로 실적 하향 가능성, 수요 감소 우려 확산",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "원달러 1478원대 달러 강세 속 신흥국 자금 이탈 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "성장주·고밸류 섹터",
+        "reason": "Fear&Greed 17 극단적 공포 수준, 리스크 자산 전반 디레이팅",
+        "severity": "높음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 국채·달러 현금",
+        "reason": "경기침체 헤지 수요로 안전자산 선호 강화",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금(Gold) 및 방어주",
+        "reason": "VIX 28.93 고점권, 극단적 공포 시 전통 안전자산 수요 집중",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "역발상 저점 매수 대기 자금",
+        "reason": "Fear&Greed 17 역사적 극단 공포 구간, 단기 반등 기대 저점 매수 대기",
+        "momentum": "약함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1478.3원 (달러 강세 지속, 연고점 근접)",
+      "kospi_flow": "외국인 순매도 압력 지속, 반도체 비중 높은 코스피 구조적 취약",
+      "assessment": "원달러 1478원은 수입물가 상승 및 외국인 이탈 이중 압박 구간. 삼성전자·SK하이닉스 동반 하락으로 코스피 지지력 약화. 1490원 돌파 시 추가 하방 위험 확대, 1460원 이하 복귀 전까지 비중 확대 자제 권고."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 28.93
+  },
+  {
+    "analysis_date": "2026-03-12",
+    "market_regime": "전환중",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "CPI 안도 반등으로 기술주 중심 단기 회복세이나, VIX 27·극단적 공포지수 20으로 추세 전환 확신 불가",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (반등 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (17,664 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (17,315 이하)"
+      },
+      {
+        "event": "반도체 섹터 방향성 (엔비디아 연속성)",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 (112.02 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 (106.58 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 모멘텀 지속",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (188,292 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (181,108 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 (위험선호 전환 신호)",
+        "timeframe": "1일",
+        "confirms_if": "VIX 24.69 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 30.17 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "원달러 환율 방향성 (외국인 자금 유출입 신호)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,460 이하 (위험선호·외국인 유입)",
+        "invalidates_if": "원달러 1,490 이상 (위험회피·외국인 이탈)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "소형주·성장주 (극단적 공포 구간)",
+        "reason": "Fear&Greed 20 극단적 공포 구간에서 리스크 자산 전반 투매 압력 지속",
+        "severity": "높음"
+      },
+      {
+        "zone": "원화 자산 전반",
+        "reason": "원달러 1,473원대 고환율로 외국인 환차손 부담 지속, 신흥국 자금이탈 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "중소형 반도체·부품주",
+        "reason": "대형주(SK하이닉스·삼성전자) 중심 선별 매수, 중소형주 수급 이탈",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·HBM 반도체 대형주 (엔비디아·SK하이닉스)",
+        "reason": "CPI 안도로 금리 부담 완화 기대, 엔비디아 +3.15%·SK하이닉스 +1.99% 선도 매수",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "나스닥 빅테크 (기술주 중심)",
+        "reason": "인플레 둔화 신호에 금리 민감 기술주 저가 매수세 유입",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "코스피 대형주 (삼성전자·SK하이닉스)",
+        "reason": "글로벌 반도체 랠리 동조화, 외국인 선물 포지션 단기 환원 가능성",
+        "momentum": "약함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1,473.9원 (고환율 유지)",
+      "kospi_flow": "코스피 +0.48% 동반 상승이나 나스닥 대비 상승 폭 제한적, 외국인 순매수 여부 확인 필요",
+      "assessment": "글로벌 CPI 안도 수혜로 반도체 중심 단기 반등 유효하나, 원달러 1,473원·VIX 27·Fear&Greed 20의 삼중 악재로 추세 반전 확신 불가. 내일 원달러 1,460 이하 진입 여부가 외국인 복귀 신호의 핵심 기준."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 27.43
+  },
+  {
+    "analysis_date": "2026-03-13",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "관세 보복 우려 재부각으로 기술주·반도체 중심 급락, Fear&Greed 17(극단적 공포) 속 전방위 위험자산 회피 심화",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (반등 vs 추가 하락)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 상승 (17293 이상)",
+        "invalidates_if": "나스닥 -1.5% 이하 하락 (16782 이하)"
+      },
+      {
+        "event": "엔비디아 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 (106.6 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 (100.4 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 26.7 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 32.6 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "SK하이닉스 국내 반도체 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (181400 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (174200 이하)"
+      },
+      {
+        "event": "원달러 환율 방향성 (위험회피 강도)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1470 이하 (달러 약세·위험선호 회복)",
+        "invalidates_if": "원달러 1495 이상 (달러 강세·위험회피 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥·기술주 (엔비디아, AI 섹터)",
+        "reason": "관세 보복 우려로 글로벌 공급망 리스크 부각, 엔비디아 -4.84% 등 고밸류 기술주 집중 매도",
+        "severity": "높음"
+      },
+      {
+        "zone": "국내 반도체 (SK하이닉스, 삼성전자)",
+        "reason": "미중 관세 갈등 직격탄, 수출 민감 섹터 외국인 순매도 가속",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 전반",
+        "reason": "원달러 1481원 수준의 환율 약세 + 외국인 이탈로 신흥국 자금 유출 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "위험자산 전반 (암호화폐, 소형주)",
+        "reason": "Fear&Greed 17 극단적 공포 구간, 안전자산 쏠림으로 위험자산 전방위 청산",
+        "severity": "높음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 국채 (단기물 중심)",
+        "reason": "극단적 공포 국면에서 안전자산 선호 급등, 채권 수요 집중",
+        "momentum": "강함"
+      },
+      {
+        "zone": "달러·엔화·금",
+        "reason": "관세 갈등 불확실성 확대로 전통 안전자산 수요 증가, 원달러 1481 수준 유지",
+        "momentum": "강함"
+      },
+      {
+        "zone": "내수·방어주 (유틸리티, 필수소비재)",
+        "reason": "관세 영향 제한적인 내수 방어 섹터로 상대적 자금 이동",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 29.62
+  },
+  {
+    "analysis_date": "2026-03-14",
+    "market_regime": "전환중",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "극단적 공포 속 기술주 급반등, 단기 기술적 반등 vs 추세 전환 여부 미결",
+    "thesis_killers": [
+      {
+        "event": "나스닥 반등 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (17931 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (17576 이하)"
+      },
+      {
+        "event": "엔비디아 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 (116.04 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 (109.28 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (189108 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (181692 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화",
+        "timeframe": "1일",
+        "confirms_if": "VIX 23.59 이하 (현재 26.21 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 28.83 이상 (현재 26.21 대비 10% 이상 상승)"
+      },
+      {
+        "event": "원달러 환율 안정",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1460 이하로 하락 (위험선호 강화)",
+        "invalidates_if": "원달러 1485 이상으로 상승 (위험회피 재개)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "미국 소형주 (Russell 2000)",
+        "reason": "고금리 장기화 우려 및 경기침체 민감도 높음, 극단적 공포(F&G 22) 환경에서 기관 이탈",
+        "severity": "높음"
+      },
+      {
+        "zone": "신흥국 채권",
+        "reason": "원달러 1472 고환율 지속, 달러 강세 기조 속 신흥국 자금 유출 압력",
+        "severity": "보통"
+      },
+      {
+        "zone": "경기소비재 / 오프라인 유통",
+        "reason": "관세 불확실성으로 소비 심리 위축, 마진 압박 우려 지속",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·반도체 대형주 (엔비디아, SK하이닉스)",
+        "reason": "엔비디아 +8.8%, SK하이닉스 +4.27% 급등, AI 수요 내러티브 재부각으로 집중 매수",
+        "momentum": "강함"
+      },
+      {
+        "zone": "미국 대형 기술주 (나스닥 상위)",
+        "reason": "나스닥 +4.22% 급반등, 과매도 구간에서 기술적 되돌림 수요 유입",
+        "momentum": "강함"
+      },
+      {
+        "zone": "코스피 반도체·IT 섹터",
+        "reason": "삼성전자 +3.35%, 글로벌 반도체 랠리 동조화, 외국인 단기 순매수 유입 가능",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1472.1 (달러 강세 지속, 고환율 부담 구간)",
+      "kospi_flow": "코스피 +1.44% 반등, 반도체 중심 외국인 매수 유입 추정, 단 고환율로 외국인 지속 유입 불확실",
+      "assessment": "코스피는 글로벌 기술주 반등에 동조하며 단기 반등 성공. 그러나 원달러 1472 고환율 유지 시 외국인 추가 매수 동력 제한적. 삼성전자·SK하이닉스 실적 가시성이 단기 방향성 결정 변수. Fear&Greed 22(극단적 공포) 구간으로 추가 하락 리스크 상존, 반등 지속성 확인 필요."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 26.21
+  },
+  {
+    "analysis_date": "2026-03-17",
+    "market_regime": "전환중",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "Fear&Greed 26(공포) 속 기술주 반등 지속, FOMC 기대감이 단기 상승 동력이나 VIX 25 수준에서 추세 전환 확신 부족",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (반등 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (18,078 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (17,720 이하)"
+      },
+      {
+        "event": "엔비디아 반도체 섹터 모멘텀 유지",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 상승 (118.80 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 하락 (114.10 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 (리스크온 전환 신호)",
+        "timeframe": "1일",
+        "confirms_if": "VIX 22.52 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 27.52 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "SK하이닉스 국내 반도체 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (192,000원 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (184,440원 이하)"
+      },
+      {
+        "event": "코스피 외국인 수급 반응",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +0.8% 이상 상승 (2,522 이상)",
+        "invalidates_if": "코스피 -0.8% 이하 하락 (2,482 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "소비재·경기민감주",
+        "reason": "Fear&Greed 26 극단적 공포 구간, 경기 둔화 우려로 소비 관련 섹터 자금 이탈 지속",
+        "severity": "높음"
+      },
+      {
+        "zone": "원화 자산 (원달러 1468)",
+        "reason": "원달러 1468원 고환율 유지로 외국인 원화 자산 매력 감소, 환차손 부담",
+        "severity": "보통"
+      },
+      {
+        "zone": "중소형 성장주",
+        "reason": "VIX 25 이상 고변동성 환경에서 리스크 회피 심리로 중소형 성장주 선택적 매도",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·반도체 대형주 (엔비디아·SK하이닉스)",
+        "reason": "엔비디아 +3.35%, SK하이닉스 +1.51% 동반 상승, AI 수요 기대감 중심의 선별적 매수세 유입",
+        "momentum": "강함"
+      },
+      {
+        "zone": "미국 대형 기술주 (나스닥)",
+        "reason": "FOMC 금리 동결 기대감으로 금리 민감 기술주 저가 매수 유입, 나스닥 +0.82% 반등",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "안전자산 대안 (배당·가치주)",
+        "reason": "공포 구간에서 변동성 헷지 목적의 방어적 가치주·고배당주 선호 자금 일부 유입",
+        "momentum": "약함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1468.3원 (고환율 지속)",
+      "kospi_flow": "코스피 +0.54% 상승, 반도체 대형주 주도, 외국인 순매수 여부 확인 필요",
+      "assessment": "원달러 1468원 고환율 부담에도 글로벌 반도체 모멘텀 수혜로 코스피 소폭 동반 상승. 단, Fear&Greed 26 공포 구간에서 외국인 수급이 지속적 유입으로 전환되지 않으면 반등 지속성 제한적. FOMC 결과 확인 전까지 2,480~2,530 박스권 횡보 가능성 높음."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 25.02
+  },
+  {
+    "analysis_date": "2026-03-18",
+    "market_regime": "전환중",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "FOMC 비둘기파 발언에 기술주 강반등했으나 Fear&Greed 32(공포) 구간 유지, 추세 전환 확인 필요",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (FOMC 랠리 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (18454 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (18089 이하)"
+      },
+      {
+        "event": "엔비디아 반도체 섹터 모멘텀",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 (122.75 이상)",
+        "invalidates_if": "엔비디아 -2% 이하 (117.93 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 (22.28 기준)",
+        "timeframe": "1일",
+        "confirms_if": "VIX 20.05 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 24.51 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "SK하이닉스 국내 반도체 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (197880 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (190120 이하)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +0.8% 이상 (2544 이상)",
+        "invalidates_if": "코스피 -0.8% 이하 (2504 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "원달러 환율 고착 (1461원대)",
+        "reason": "달러 강세 지속으로 외국인 환차손 부담, 국내 증시 자금 이탈 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "Fear&Greed 32 공포 구간",
+        "reason": "투자 심리 회복 미완성, 반등 랠리 신뢰도 낮아 단기 차익실현 매물 출회 가능",
+        "severity": "보통"
+      },
+      {
+        "zone": "전통 경기민감주·소재 섹터",
+        "reason": "FOMC 비둘기파 수혜가 기술주에 집중, 경기침체 우려 완전 해소 안 된 상태",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·반도체 섹터 (엔비디아·SK하이닉스)",
+        "reason": "FOMC 금리 동결로 성장주 할인율 완화, 엔비디아 +3.36% / SK하이닉스 +3.08% 강세",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 기술주 대형주",
+        "reason": "비둘기파 발언으로 유동성 기대감 재부각, 나스닥 +2.07% 주도",
+        "momentum": "강함"
+      },
+      {
+        "zone": "삼성전자·국내 IT 대형주",
+        "reason": "글로벌 반도체 랠리 동조, 삼성전자 +2.13% 상승 동참",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1461.4원 (달러 강세 지속, 고환율 부담 구간)",
+      "kospi_flow": "코스피 +0.89% 상승, 글로벌 대비 상대적 약세 — 외국인 환헤지 부담으로 유입 제한적",
+      "assessment": "FOMC 훈풍에도 원달러 1461원 고착으로 외국인 순매수 본격화 어려움. 코스피는 글로벌 기술주 랠리에 동조하나 환율 리스크로 상승 탄력 제한. SK하이닉스·삼성전자 반도체 투 톱이 지수 방어 역할, 내일 VIX 20 이하 하락 및 원달러 1450원 하회 여부가 추세 전환 핵심 변수."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 22.28
+  },
+  {
+    "analysis_date": "2026-03-19",
+    "market_regime": "위험회피",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "관세 불확실성 속 전반적 관망세, Fear&Greed 31로 공포 구간 유지되며 기술주 중심 약세 압력 지속",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 18160 대비 +1% 이상 상승 (18341 초과)",
+        "invalidates_if": "나스닥 18160 대비 -1% 이하 하락 (17978 미만)"
+      },
+      {
+        "event": "엔비디아 반도체 대표주 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 상승 (121.67 초과)",
+        "invalidates_if": "엔비디아 -2% 이하 하락 (116.89 미만)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 22.56 대비 10% 이상 하락 (20.30 이하)",
+        "invalidates_if": "VIX 22.56 대비 10% 이상 상승 (24.82 초과)"
+      },
+      {
+        "event": "SK하이닉스 국내 반도체 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (196,248원 초과)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (188,552원 미만)"
+      },
+      {
+        "event": "원달러 환율 리스크 방향성",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1462.8 대비 -0.5% 이상 하락 (1455.5 이하, 원화 강세)",
+        "invalidates_if": "원달러 1462.8 대비 +0.5% 이상 상승 (1470.1 초과, 원화 약세)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥 기술주 (엔비디아, 반도체)",
+        "reason": "관세 불확실성 지속 및 Fear&Greed 31 공포 구간, 기술주 밸류에이션 부담 속 매도 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "국내 수출주 (삼성전자, SK하이닉스)",
+        "reason": "원달러 1462.8 고환율 유지로 수입 비용 부담, 글로벌 반도체 수요 우려 동반",
+        "severity": "보통"
+      },
+      {
+        "zone": "코스피 외국인 자금",
+        "reason": "위험회피 심리 강화로 신흥국 시장 자금 이탈 압력, 원화 약세 지속",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 단기채 및 달러 현금성 자산",
+        "reason": "VIX 22.56 고공포 구간에서 안전자산 선호, 관망세 자금의 현금 보유 확대",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "금(Gold) 및 방어주",
+        "reason": "관세 불확실성 장기화 시 인플레 헤지 수요 및 경기방어 섹터 선호",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "코스피 저평가 가치주",
+        "reason": "코스피 2519 수준에서 밸류에이션 매력 부각, 단기 역발상 매수 유입 가능성",
+        "momentum": "약함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1462.8 (원화 약세 지속, 고환율 구간)",
+      "kospi_flow": "외국인 순매도 압력 우세, 기관 방어적 대응 예상",
+      "assessment": "원달러 1462.8 고환율과 글로벌 위험회피 심리 동조로 코스피 추가 하락 압력 잠재. 삼성전자·SK하이닉스 모두 -0.5% 내외 약세로 반도체 섹터 주도력 약화. Fear&Greed 31 공포 구간이지만 극단적 공포(20 이하) 미도달로 단기 반등 트리거 부재. 원화 추가 약세(1470원 돌파) 여부가 핵심 리스크 변수."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 22.56
+  },
+  {
+    "analysis_date": "2026-03-20",
+    "market_regime": "전환중",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "기술주·AI 랠리로 단기 반등 신호 포착되나, Fear&Greed 36(공포 구간) 잔존으로 추세 전환 확신 부족",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (반등 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 18503 대비 +1% 이상 상승 (18688 이상)",
+        "invalidates_if": "나스닥 18503 대비 -1% 이하 하락 (18318 이하)"
+      },
+      {
+        "event": "엔비디아 AI 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 125.61 대비 +3% 이상 상승 (129.38 이상)",
+        "invalidates_if": "엔비디아 125.61 대비 -3% 이하 하락 (121.84 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 197800 대비 +2% 이상 상승 (201756 이상)",
+        "invalidates_if": "SK하이닉스 197800 대비 -2% 이하 하락 (193844 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 (20.96 기준)",
+        "timeframe": "1일",
+        "confirms_if": "VIX 20.96 대비 10% 이상 하락 (18.86 이하)",
+        "invalidates_if": "VIX 20.96 대비 10% 이상 상승 (23.06 이상)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 2538 대비 +1% 이상 상승 (2563 이상)",
+        "invalidates_if": "코스피 2538 대비 -1% 이하 하락 (2512 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "경기민감 소비재·전통 제조업",
+        "reason": "AI·기술주 집중 수급 쏠림으로 상대적 자금 이탈 압력",
+        "severity": "보통"
+      },
+      {
+        "zone": "채권·안전자산 (단기)",
+        "reason": "기술주 랠리 국면에서 위험자산 선호 전환 초입, 채권 매력 상대 약화",
+        "severity": "낮음"
+      },
+      {
+        "zone": "원화 자산 (환율 리스크)",
+        "reason": "원달러 1456 고환율 유지로 외국인 원화 자산 수익률 희석 우려",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·반도체 섹터 (엔비디아, SK하이닉스)",
+        "reason": "엔비디아 +5.31%, SK하이닉스 +2.81% 동반 급등으로 AI 투자 기대 재점화",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 대형 기술주",
+        "reason": "나스닥 +1.90% 주도 랠리, S&P500 대비 초과 상승으로 기술주 집중 매수",
+        "momentum": "강함"
+      },
+      {
+        "zone": "코스피 반도체·IT",
+        "reason": "삼성전자 +2.10%, SK하이닉스 +2.81% 동반 강세로 국내 반도체 수급 개선",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1456.2 (고환율 유지, 달러 강세 기조 지속)",
+      "kospi_flow": "코스피 +0.74% 상승, 글로벌 대비 상대적 언더퍼폼 — 외국인 순매수 여부 확인 필요",
+      "assessment": "반도체 수혜로 코스피 동반 상승했으나 Fear&Greed 36(공포) 구간과 원달러 1456 고환율이 외국인 적극 매수를 제한. 나스닥·엔비디아 모멘텀이 내일도 유지될 경우 SK하이닉스·삼성전자 추가 상승 가능하나, 환율 개선 없이는 코스피 상승폭 제한적 전망"
+    },
+    "mode": "MORNING",
+    "vix_at_time": 20.96
+  },
+  {
+    "analysis_date": "2026-03-21",
+    "market_regime": "위험선호",
+    "trend_phase": "상승추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "관세 낙관론 + 기술주 주도 반등으로 위험선호 재개, 단 Fear&Greed 42(중립)로 추세 지속성 검증 필요",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (상승 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (19112 이상)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (18734 이하)"
+      },
+      {
+        "event": "반도체 섹터 (엔비디아) 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 상승 (136.44 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 하락 (128.50 이하)"
+      },
+      {
+        "event": "반도체 섹터 (SK하이닉스) 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (208284원 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (200116원 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 17.35 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 21.21 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +0.8% 이상 (2583 이상)",
+        "invalidates_if": "코스피 -0.8% 이하 (2542 이하)"
+      },
+      {
+        "event": "원달러 환율 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1435원 이하 (위험선호 강화)",
+        "invalidates_if": "원달러 1465원 이상 (달러 강세 재개)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "채권·달러 안전자산",
+        "reason": "관세 낙관론 확산으로 안전자산 매도세, 위험자산으로 자금 이동",
+        "severity": "보통"
+      },
+      {
+        "zone": "경기방어주 (유틸리티·필수소비재)",
+        "reason": "기술주 급등 국면에서 방어 섹터 상대적 소외",
+        "severity": "낮음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·반도체 섹터 (엔비디아, SK하이닉스, 삼성전자)",
+        "reason": "엔비디아 +5.46%, SK하이닉스 +3.23% 주도 — AI 수요 기대 + 관세 리스크 완화",
+        "momentum": "강함"
+      },
+      {
+        "zone": "나스닥 기술 대형주",
+        "reason": "매크로 불확실성 완화 시 베타 높은 기술주 집중 매수",
+        "momentum": "강함"
+      },
+      {
+        "zone": "코스피 외국인 (반도체·IT)",
+        "reason": "글로벌 반도체 랠리 연동 + 원화 약세 속 저평가 매력",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1448.7",
+      "kospi_flow": "코스피 +0.96% 상승, 반도체 중심 외국인 순매수 유입 추정",
+      "assessment": "원달러 1448원대 고환율 지속으로 외국인 환차손 부담 존재. 그러나 SK하이닉스·삼성전자의 글로벌 반도체 랠리 동조로 코스피 반도체 섹터는 긍정적. 원화가 1430원대로 절상되지 않으면 외국인 대규모 순매수 전환은 제한적."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 19.28
+  },
+  {
+    "analysis_date": "2026-03-24",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "관세 우려 재점화로 엔비디아 -13% 급락, 반도체 섹터 전반 패닉 매도 — 공포지수 29로 단기 낙폭 과대 구간 진입",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (반등 vs 추가 하락)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 반등 (18340 이상 회복)",
+        "invalidates_if": "나스닥 -1.5% 이하 추가 하락 (17800 하회)"
+      },
+      {
+        "event": "엔비디아 주가 안정화 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 반등 (118.51 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 추가 하락 (111.56 하회)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 반등 (194,616원 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 추가 하락 (186,984원 하회)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 21.23 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 25.95 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "원달러 환율 안정 (리스크오프 강도 측정)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1450원 이하로 하락 (위험선호 회복)",
+        "invalidates_if": "원달러 1475원 이상 상승 (추가 리스크오프 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "반도체 섹터 (엔비디아·SK하이닉스·삼성전자)",
+        "reason": "관세 우려 재점화로 AI 수요 불확실성 급증, 엔비디아 -13% 트리거 패닉 매도",
+        "severity": "높음"
+      },
+      {
+        "zone": "나스닥 기술주 전반",
+        "reason": "고밸류에이션 기술주 관세 리스크 노출 확대, Fear&Greed 29로 투자심리 급격 위축",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 자금",
+        "reason": "원달러 1463원대 약세 속 외국인 반도체 비중 축소, 한국 수출주 관세 직격탄 우려",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "달러·미국채 (안전자산)",
+        "reason": "VIX 23.59 상승 및 리스크오프 전환으로 달러 강세·채권 수요 증가",
+        "momentum": "강함"
+      },
+      {
+        "zone": "방어주·유틸리티·헬스케어",
+        "reason": "기술주 대비 관세 영향 낮은 내수 방어 섹터로 로테이션 기대",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "낙폭과대 단기 역발상 매수 대기",
+        "reason": "Fear&Greed 29 극단적 공포 구간, 단기 기술적 반등 트레이더 저가 매수 대기",
+        "momentum": "약함"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 23.59
+  },
+  {
+    "analysis_date": "2026-03-25",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "반도체 수출 규제 우려로 기술주 전반 급락, Fear&Greed 24(공포) 수준에서 투자심리 극도로 위축",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 확인",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 반등 (18094 이상)",
+        "invalidates_if": "나스닥 -1.5% 이하 추가 하락 (17558 이하)"
+      },
+      {
+        "event": "엔비디아 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 반등 (112.91 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 추가 하락 (106.33 이하)"
+      },
+      {
+        "event": "SK하이닉스 국내 반도체 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 반등 (190332 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 추가 하락 (182868 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 22.38 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 27.36 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 반등 (2528 이상)",
+        "invalidates_if": "코스피 -1% 이하 추가 하락 (2478 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "반도체·기술주 (엔비디아, SK하이닉스, 삼성전자)",
+        "reason": "반도체 수출 규제 우려 확산으로 실적 전망 하향, 엔비디아 -4.69% 급락 주도",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "원달러 1468.8원 고환율 지속 및 반도체 비중 높은 한국 증시 동반 매도",
+        "severity": "높음"
+      },
+      {
+        "zone": "나스닥 성장주 전반",
+        "reason": "Fear&Greed 24(극도 공포) 구간 진입, 리스크오프 심리 확대로 고밸류 성장주 전반 매도",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 단기 국채 (T-Bill, 2년물)",
+        "reason": "VIX 24.87 고공포 환경에서 안전자산 선호 강화, 현금성 자산으로 자금 이동",
+        "momentum": "강함"
+      },
+      {
+        "zone": "달러 현금 및 달러 인덱스",
+        "reason": "원달러 1468.8원 수준의 강달러 지속, 신흥국 통화 대비 달러 강세 심화",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금(Gold) 및 방어주",
+        "reason": "지정학적 규제 리스크 확대 국면에서 실물 안전자산 및 유틸리티·헬스케어 섹터 대안 수요",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1468.8원 (고환율 지속, 외국인 이탈 압력 가중)",
+      "kospi_flow": "외국인 반도체 중심 순매도 추정, 삼성전자·SK하이닉스 동반 -2%대 하락으로 지수 하방 압력",
+      "assessment": "반도체 수출 규제 우려가 코스피 핵심 섹터를 직격하는 구조적 악재. 원달러 1468원대 고환율이 외국인 환차손 우려를 키워 수급 개선 난망. 단기 반등 시 1468원 이하 환율 안정 및 SK하이닉스 190,000원 회복 여부가 핵심 확인 포인트."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 24.87
+  },
+  {
+    "analysis_date": "2026-03-26",
+    "market_regime": "위험회피",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "보통",
+    "one_line_summary": "관세 협상 결과 대기 속 전반적 약세 압력, Fear&Greed 23(공포 구간)으로 단기 반등 가능성 잠재하나 방향성 불확실",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (17910 초과)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (17556 하회)"
+      },
+      {
+        "event": "엔비디아 반도체 대표주 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 상승 (110.73 초과)",
+        "invalidates_if": "엔비디아 -2% 이하 하락 (106.39 하회)"
+      },
+      {
+        "event": "VIX 공포지수 방향성",
+        "timeframe": "1일",
+        "confirms_if": "VIX 10% 이상 하락 (22.61 이하)",
+        "invalidates_if": "VIX 10% 이상 상승 (27.63 초과)"
+      },
+      {
+        "event": "SK하이닉스 국내 반도체 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (188,904원 초과)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (181,496원 하회)"
+      },
+      {
+        "event": "원달러 환율 방향성",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,455원 이하 (위험선호 복귀 신호)",
+        "invalidates_if": "원달러 1,485원 이상 (추가 위험회피 강화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥 기술주 (엔비디아, 반도체)",
+        "reason": "관세 불확실성 및 고밸류 기술주 매도 압력 지속, 엔비디아 -0.97%로 약세",
+        "severity": "높음"
+      },
+      {
+        "zone": "국내 반도체 (SK하이닉스, 삼성전자)",
+        "reason": "글로벌 반도체 업황 불확실성 및 외국인 수급 이탈 우려",
+        "severity": "보통"
+      },
+      {
+        "zone": "코스피 전반",
+        "reason": "원달러 1469.9원 고환율 지속으로 외국인 자금 유출 압력, 코스피 -0.22%",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "단기 현금 및 안전자산",
+        "reason": "VIX 25.12 유지, Fear&Greed 23 공포 구간에서 현금 비중 확대 선호",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "저평가 가치주 및 배당주",
+        "reason": "극단적 공포 구간(23)에서 역발상 매수 대기 자금 유입 가능성",
+        "momentum": "약함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1469.9",
+      "kospi_flow": "외국인 순매도 압력 우세, 원화 약세로 수입 물가 부담 가중",
+      "assessment": "원달러 1470원 근접으로 환율 부담 높음. 코스피 2500선 지지 여부가 핵심 관전 포인트. 반도체 대형주 동반 약세로 국내 증시 하방 압력 유지. 관세 협상 결과가 명확해지기 전까지 방향성 베팅보다 관망 유리."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 25.12
+  },
+  {
+    "analysis_date": "2026-03-27",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "자동차 관세 25% 쇼크로 전 시장 급락, Fear&Greed 18(극도공포) 속 반도체·수출주 집중 타격",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 반등 또는 추가 하락",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 반등 (17582 이상)",
+        "invalidates_if": "나스닥 -1.5% 이하 추가 하락 (17063 이하)"
+      },
+      {
+        "event": "엔비디아 주가 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 반등 (106.90 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 추가 하락 (100.68 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 반등 (181152 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 추가 하락 (174048 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 24.90 이하 (현재 27.67 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 30.44 이상 (현재 27.67 대비 10% 이상 상승)"
+      },
+      {
+        "event": "원달러 환율 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1460 이하로 하락 (위험선호 회복)",
+        "invalidates_if": "원달러 1490 이상으로 상승 (추가 위험회피 심화)"
+      },
+      {
+        "event": "코스피 수출주 낙폭 회복 여부",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 반등 (2477 이상)",
+        "invalidates_if": "코스피 -1.5% 이하 추가 하락 (2416 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "국내 자동차·부품주 (현대차·기아·현대모비스)",
+        "reason": "미국 자동차 관세 25% 직격탄, 대미 수출 비중 높아 실적 타격 직접적",
+        "severity": "높음"
+      },
+      {
+        "zone": "국내 반도체 (삼성전자·SK하이닉스)",
+        "reason": "엔비디아 -4.4% 연동 급락, 관세 확산 우려로 수출 심리 악화",
+        "severity": "높음"
+      },
+      {
+        "zone": "나스닥 기술 성장주",
+        "reason": "관세 쇼크 → 경기침체 우려 → 고밸류 성장주 디레이팅 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 전반 외국인 수급",
+        "reason": "원달러 1478원대 약세 + Fear&Greed 18 극도공포, 외국인 이탈 가속",
+        "severity": "높음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 국채 (안전자산)",
+        "reason": "VIX 27.67 급등, 극도공포 구간에서 채권 수요 급증",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금(Gold) 및 달러 현금",
+        "reason": "관세 불확실성 장기화 우려, 달러 강세·금 안전자산 선호",
+        "momentum": "강함"
+      },
+      {
+        "zone": "내수·방어주 (유틸리티·필수소비재)",
+        "reason": "수출 타격 우려 속 관세 영향 제한적 섹터로 상대적 자금 이동",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 27.67
+  },
+  {
+    "analysis_date": "2026-03-28",
+    "market_regime": "전환중",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "낮음",
+    "one_line_summary": "극도의 공포(F&G 20) 속 기술적 반등 시도 중이나 VIX 26대 유지로 추세 전환 확인 불가",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (반등 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (17634 돌파)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (17287 하회)"
+      },
+      {
+        "event": "엔비디아 반도체 섹터 모멘텀",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 (110.50 돌파)",
+        "invalidates_if": "엔비디아 -3% 이하 (104.06 하회)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 23.82 이하 (현재 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 29.12 이상 (현재 대비 10% 이상 상승)"
+      },
+      {
+        "event": "SK하이닉스 반도체 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (184,008원 돌파)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (176,792원 하회)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 (2493 돌파)",
+        "invalidates_if": "코스피 -1% 이하 (2443 하회)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "고밸류 성장주 / 나스닥 상단",
+        "reason": "VIX 26대 지속 및 Fear&Greed 20(극도 공포) 구간에서 리스크 자산 프리미엄 미회복",
+        "severity": "높음"
+      },
+      {
+        "zone": "원화 자산 (원달러 1474원대)",
+        "reason": "달러 강세 지속으로 외국인 환헤지 비용 부담, 신흥국 자금 이탈 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "소형 기술주 / 코스닥",
+        "reason": "극도 공포 구간에서 유동성 리스크 회피, 대형주 중심 선별적 매수",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI 반도체 대형주 (엔비디아, SK하이닉스)",
+        "reason": "엔비디아 +3.36%, SK하이닉스 +1.58% 동반 상승으로 HBM 수요 기대 유입",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "달러 및 달러 표시 자산",
+        "reason": "원달러 1474원대 달러 강세 지속, 안전자산 선호 흐름 유지",
+        "momentum": "강함"
+      },
+      {
+        "zone": "삼성전자 / 코스피 대형주",
+        "reason": "삼성전자 +1.30% 반등 시도, 낙폭 과대 구간 가치 매수 유입 조짐",
+        "momentum": "약함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1474.2원 (달러 강세 지속, 신흥국 통화 약세 압력)",
+      "kospi_flow": "코스피 +0.64% 기술적 반등이나 외국인 수급 방향 미확인, 원화 약세로 외국인 유입 제한적",
+      "assessment": "극도 공포 구간(F&G 20)에서 단기 기술적 반등 시도 중이나, 원달러 1474원대 달러 강세와 VIX 26 유지로 추세 반전 신호 부재. 반도체(SK하이닉스·삼성전자) 동반 상승이 유일한 긍정 시그널이며, 내일 나스닥·VIX 수치 확인 전까지 방향성 판단 보류 권고."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 26.47
+  },
+  {
+    "analysis_date": "2026-03-31",
+    "market_regime": "위험회피",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "낮음",
+    "one_line_summary": "극단적 공포(F&G 21) 속 월말 관망, 4월 관세 발표 앞두고 방향성 탐색 중",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (관세 발표 선반영 여부)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 상승 (17568 돌파)",
+        "invalidates_if": "나스닥 -1% 이하 하락 (17220 하회)"
+      },
+      {
+        "event": "엔비디아 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +2% 이상 (111.63 돌파)",
+        "invalidates_if": "엔비디아 -2% 이하 (107.25 하회)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 23.68 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 28.94 이상으로 10% 이상 상승"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (185436 돌파)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (178164 하회)"
+      },
+      {
+        "event": "원달러 환율 변동성 (위험회피 강도)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1460 이하로 하락 (위험선호 전환)",
+        "invalidates_if": "원달러 1490 이상으로 상승 (위험회피 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥 기술주 전반",
+        "reason": "관세 불확실성 + VIX 26대 고공행진으로 위험자산 노출 축소",
+        "severity": "높음"
+      },
+      {
+        "zone": "소형 성장주",
+        "reason": "극단적 공포(F&G 21) 구간에서 유동성 우선 확보, 고베타 종목 회피",
+        "severity": "높음"
+      },
+      {
+        "zone": "원화 자산",
+        "reason": "원달러 1472 고착화로 외국인 환헤지 비용 부담 증가",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI 반도체 (엔비디아·SK하이닉스)",
+        "reason": "엔비디아 +2% 선도, HBM 수요 구조적 성장 스토리 유효",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "코스피 대형주 (삼성전자·SK하이닉스)",
+        "reason": "글로벌 낙폭 과대 인식 + 저PBR 밸류에이션 매력 부각",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "달러 현금·단기채",
+        "reason": "불확실성 극대화 구간에서 안전자산 선호, 현금 비중 확대",
+        "momentum": "강함"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1472.6 (고환율 지속, 달러 강세 압력 유효)",
+      "kospi_flow": "코스피 +0.52% 소폭 반등, 글로벌 대비 상대적 선방이나 외국인 순매수 전환 여부 불확실",
+      "assessment": "4월 관세 발표 전 코스피는 기술적 반등 시도 중이나, 원달러 1472 고착·VIX 26대·F&G 극단적 공포가 동시 존재해 추세 상승 전환 근거 미약. 반도체 대형주 중심 단기 트레이딩 관점 유효하나 방향성 베팅은 4월 1일 관세 발표 확인 후 접근 권고."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 26.31
+  },
+  {
+    "analysis_date": "2026-04-01",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "상호관세 충격으로 전 자산군 동반 급락, Fear&Greed 8로 극단적 공포 — 반도체 섹터 중심 패닉 셀링 진행 중",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 추가 하락 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 16387 대비 +2% 이상 반등 (16715 이상)",
+        "invalidates_if": "나스닥 -2% 이하 추가 하락 (16059 이하)"
+      },
+      {
+        "event": "코스피 낙폭 확대 여부",
+        "timeframe": "1일",
+        "confirms_if": "코스피 2390 대비 +1.5% 이상 반등 (2426 이상)",
+        "invalidates_if": "코스피 -2% 이하 추가 하락 (2342 이하)"
+      },
+      {
+        "event": "반도체 섹터 (SK하이닉스) 패닉 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 163800 대비 +3% 이상 반등 (168714 이상)",
+        "invalidates_if": "SK하이닉스 -3% 이하 추가 하락 (158886 이하)"
+      },
+      {
+        "event": "VIX 공포지수 진정 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 35.27 대비 15% 이상 하락 (30 이하)",
+        "invalidates_if": "VIX 35.27 대비 10% 이상 추가 상승 (38.8 이상)"
+      },
+      {
+        "event": "원달러 환율 추가 급등 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1494.7 대비 -0.5% 이상 하락 (1487 이하, 달러 약세 전환)",
+        "invalidates_if": "원달러 +0.5% 이상 추가 상승 (1502 이상 돌파)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "반도체 (SK하이닉스, 삼성전자, 엔비디아)",
+        "reason": "상호관세로 인한 공급망 붕괴 우려 + 대중 수출 직격탄, 엔비디아 -12% 연쇄 하락",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 수급",
+        "reason": "원달러 1494.7 수준에서 외국인 환차손 우려 → 한국 증시 이탈 가속",
+        "severity": "높음"
+      },
+      {
+        "zone": "나스닥 성장주 전반",
+        "reason": "관세 충격으로 글로벌 성장 둔화 우려 + 금리 불확실성 재부각",
+        "severity": "높음"
+      },
+      {
+        "zone": "위험자산 전반 (신흥국 포함)",
+        "reason": "Fear&Greed 8 극단적 공포 — 현금화 패닉 바잉 부재",
+        "severity": "높음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 국채 (단기물)",
+        "reason": "극단적 공포 국면에서 안전자산 수요 집중, 경기침체 우려 선반영",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금 (Gold)",
+        "reason": "관세 전쟁 장기화 시 인플레+경기침체 헤지 수요, 달러 불신 구조적 강화",
+        "momentum": "강함"
+      },
+      {
+        "zone": "엔화 (JPY)",
+        "reason": "위험회피 극단 국면에서 엔 캐리 트레이드 청산 → 엔화 강세 수요",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 35.27
+  },
+  {
+    "analysis_date": "2026-04-02",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "관세 충격 2일차 패닉 매도로 VIX 45 돌파, Fear&Greed 5 극단적 공포 — 단기 반등 가능성과 추가 하락 리스크가 공존하는 변곡점",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (패닉 지속 vs 자율반등)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +2% 이상 반등 (15899 이상)",
+        "invalidates_if": "나스닥 -2% 이하 추가 하락 (15276 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 40.78 이하 (현재 45.31 대비 10% 이상 하락)",
+        "invalidates_if": "VIX 49.84 이상 (현재 45.31 대비 10% 이상 상승)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 낙폭 회복",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +3% 이상 (163,458원 이상)",
+        "invalidates_if": "SK하이닉스 -3% 이하 (153,842원 이하)"
+      },
+      {
+        "event": "코스피 외국인 수급 반응",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1.5% 이상 (2371 이상) 및 외국인 순매수 전환",
+        "invalidates_if": "코스피 -1.5% 이하 (2301 이하)"
+      },
+      {
+        "event": "원달러 환율 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,480원 이하로 하락 (위험선호 복귀 신호)",
+        "invalidates_if": "원달러 1,510원 이상 상승 (추가 자본유출 신호)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "나스닥 기술주 (엔비디아, 반도체)",
+        "reason": "관세 충격으로 공급망 비용 급등 우려, 엔비디아 -6.46% 선도 하락",
+        "severity": "높음"
+      },
+      {
+        "zone": "한국 수출주 (삼성전자, SK하이닉스)",
+        "reason": "미국 관세 직격탄 + 원달러 1498원으로 외국인 환 손실 가중",
+        "severity": "높음"
+      },
+      {
+        "zone": "이머징 마켓 전반",
+        "reason": "VIX 45 극단적 공포 구간, 안전자산 선호로 이머징 전반 자금 이탈",
+        "severity": "높음"
+      },
+      {
+        "zone": "위험자산 전반 (S&P500 성장주)",
+        "reason": "Fear&Greed 5 극단 공포, 패닉 셀링으로 무차별 매도 진행 중",
+        "severity": "높음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "달러 및 미국 단기국채",
+        "reason": "VIX 45 구간 전형적 안전자산 도피, 원달러 1498원이 달러 강세 반영",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금 (Gold)",
+        "reason": "극단적 공포 구간에서 전통 안전자산 수요 집중",
+        "momentum": "강함"
+      },
+      {
+        "zone": "역내 방어주 (유틸리티·내수소비)",
+        "reason": "관세 영향 최소 섹터로 상대적 자금 유입 기대",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 45.31
+  },
+  {
+    "analysis_date": "2026-04-03",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "VIX 52, Fear&Greed 4 — 극단적 공포 구간. 미국 휴장 속 아시아 패닉 지속, 반도체 종목 간 극단적 괴리 발생.",
+    "thesis_killers": [
+      {
+        "event": "코스피 방향성 (아시아 패닉 지속 여부)",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 반등 (2350 이상 회복)",
+        "invalidates_if": "코스피 -1% 이하 추가 하락 (2305 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 모멘텀 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (168,700원 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (162,100원 이하)"
+      },
+      {
+        "event": "삼성전자 낙폭 확대 여부",
+        "timeframe": "1일",
+        "confirms_if": "삼성전자 -1% 이내 방어 (48,600원 이상 유지)",
+        "invalidates_if": "삼성전자 -2% 이하 추가 하락 (48,100원 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 52.33 대비 10% 이상 하락 (47 이하)",
+        "invalidates_if": "VIX 52.33 대비 10% 이상 상승 (57.5 이상)"
+      },
+      {
+        "event": "원달러 환율 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,470원 이하로 하락 (원화 강세 전환)",
+        "invalidates_if": "원달러 1,510원 이상 상승 (원화 추가 약세)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "삼성전자 / 코스피 대형주",
+        "reason": "외국인 순매도 지속, 원화 약세(1488.5) 가속화로 환차손 우려 복합 작용",
+        "severity": "높음"
+      },
+      {
+        "zone": "엔비디아 / 미국 빅테크",
+        "reason": "엔비디아 -2.30%, 고밸류 기술주 전반 매도 압력. VIX 52 수준에서 리스크 자산 전면 회피",
+        "severity": "높음"
+      },
+      {
+        "zone": "신흥국 전반",
+        "reason": "Fear&Greed 4 극단적 공포 — 글로벌 자금 안전자산 도피, 신흥국 전반 자금 이탈",
+        "severity": "높음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "SK하이닉스 / HBM 관련주",
+        "reason": "SK하이닉스 +4.29% 단독 강세 — AI 메모리 수요 기대감 또는 숏커버링 유입 추정",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "달러 / 엔화 등 안전자산",
+        "reason": "원달러 1488.5 고점권 — 달러 강세 수혜 자산으로 자금 집중",
+        "momentum": "강함"
+      },
+      {
+        "zone": "현금 및 단기 국채",
+        "reason": "VIX 52, 극단적 공포 구간에서 현금 비중 확대 수요 급증",
+        "momentum": "강함"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 52.33
+  },
+  {
+    "analysis_date": "2026-04-07",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "트럼프 상호관세 발효로 글로벌 증시 동반 폭락, VIX 52 돌파·Fear&Greed 4로 패닉 국면 진입",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 추가 하락 또는 반등 방향성",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +2% 이상 반등 (15899 이상)",
+        "invalidates_if": "나스닥 -2% 이하 추가 하락 (15276 이하)"
+      },
+      {
+        "event": "코스피 추가 하락 또는 반등 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +2% 이상 반등 (2374 이상)",
+        "invalidates_if": "코스피 -2% 이하 추가 하락 (2281 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +3% 이상 반등 (170362 이상)",
+        "invalidates_if": "SK하이닉스 -3% 이하 추가 하락 (160438 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 47 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 57 이상으로 10% 이상 추가 상승"
+      },
+      {
+        "event": "원달러 환율 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1460 이하로 하락 (위험선호 회복 신호)",
+        "invalidates_if": "원달러 1510 이상으로 상승 (달러 추가 강세·자금이탈 심화)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "반도체 섹터 (SK하이닉스, 삼성전자, 엔비디아)",
+        "reason": "관세 부과로 수출 타격 우려, 글로벌 IT 수요 둔화 전망 반영",
+        "severity": "높음"
+      },
+      {
+        "zone": "한국 증시 (코스피)",
+        "reason": "외국인 대규모 매도, 원달러 1488 돌파로 환율 리스크 중첩",
+        "severity": "높음"
+      },
+      {
+        "zone": "미국 성장주·나스닥",
+        "reason": "관세 인플레이션 재점화 우려로 금리 경로 불확실성 확대",
+        "severity": "높음"
+      },
+      {
+        "zone": "신흥국 전반",
+        "reason": "달러 강세·무역전쟁 본격화로 신흥국 자산 회피 심리 극대화",
+        "severity": "높음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "달러·달러 현금성 자산",
+        "reason": "극단적 위험회피로 달러 수요 급증, 원달러 1488 반영",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금 (안전자산)",
+        "reason": "패닉 국면에서 전통적 안전자산으로 자금 이동",
+        "momentum": "강함"
+      },
+      {
+        "zone": "미국 단기국채 (T-bill)",
+        "reason": "VIX 52 이상 극공포 구간에서 현금 등가 자산 선호",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1488.5 (연중 최고치 경신, 위기 수준)",
+      "kospi_flow": "외국인 대규모 순매도 지속, 반도체 중심 수급 붕괴",
+      "assessment": "원달러 1488 돌파는 2009년 금융위기 이후 준위기 수준으로, 한국 증시는 관세 직격탄(반도체·전자 수출 비중 과대)과 환율 이중 압박에 노출. 단기 추가 하락 가능성 높으며, 코스피 2200~2280 구간이 다음 기술적 지지선으로 주목. 한국은행 구두개입 또는 외환 스무딩 여부가 단기 변수."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 52.33
+  },
+  {
+    "analysis_date": "2026-04-08",
+    "market_regime": "위험선호",
+    "trend_phase": "하락추세",
+    "confidence_overall": "낮음",
+    "one_line_summary": "극단적 공포(F&G 7) 속 기술적 반등 — VIX 46대 유지로 추세 전환 확인 불가, 단기 데드캣 가능성 경계",
+    "thesis_killers": [
+      {
+        "event": "나스닥 연속 상승 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 상승 (16178 이상)",
+        "invalidates_if": "나스닥 -1.5% 이하 하락 (15700 이하)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 42 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 52 이상으로 10% 이상 상승"
+      },
+      {
+        "event": "반도체 섹터 (엔비디아) 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +5% 이상 (99 이상)",
+        "invalidates_if": "엔비디아 -5% 이하 (89.6 이하)"
+      },
+      {
+        "event": "SK하이닉스 반등 지속 여부",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +3% 이상 (182,100 이상)",
+        "invalidates_if": "SK하이닉스 -3% 이하 (171,500 이하)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 (2444 이상)",
+        "invalidates_if": "코스피 -1% 이하 (2396 이하)"
+      },
+      {
+        "event": "원달러 환율 안정 여부",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1450 이하로 하락",
+        "invalidates_if": "원달러 1490 이상으로 상승"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "고베타 성장주 / 나스닥 전반",
+        "reason": "VIX 46대 — 극단적 변동성 환경에서 반등 후 재매도 압력 상존",
+        "severity": "높음"
+      },
+      {
+        "zone": "한국 코스피 소형주",
+        "reason": "원달러 1471 고점권, 외국인 환차손 부담으로 추가 이탈 가능",
+        "severity": "높음"
+      },
+      {
+        "zone": "신흥국 전반",
+        "reason": "달러 강세 지속 + Fear&Greed 7 — 극단적 공포 구간 리스크오프 잔존",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "반도체 대형주 (SK하이닉스, 엔비디아)",
+        "reason": "AI 수요 기대감 속 낙폭과대 인식 — 단기 저점매수 유입",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "미국 단기 국채 / 달러 현금",
+        "reason": "VIX 46 환경에서 안전자산 선호 지속, 현금 비중 확대 흐름",
+        "momentum": "강함"
+      },
+      {
+        "zone": "삼성전자 / 코스피 대형주",
+        "reason": "기관 저가매수 + 반도체 섹터 동반 반등, 단기 기술적 매수세",
+        "momentum": "형성중"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1471.2 (달러 강세 지속, 고환율 부담 구간)",
+      "kospi_flow": "외국인 순매수 전환 여부 미확인 — 반등은 기술적, 수급 확인 필요",
+      "assessment": "코스피 +3.95% 반등에도 원달러 1471 유지로 실질 외국인 수익률 제한적. VIX 46 환경에서 단순 기술적 반등 가능성 높아 추세 전환 판단 시기상조. 내일 SK하이닉스 176,800 지지 및 코스피 2420 이상 유지 여부가 핵심 확인 포인트."
+    },
+    "mode": "MORNING",
+    "vix_at_time": 46.98
+  },
+  {
+    "analysis_date": "2026-04-09",
+    "market_regime": "전환중",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "낮음",
+    "one_line_summary": "트럼프 90일 관세 유예로 나스닥 역대급 급등했으나 VIX 33·공포지수 17로 구조적 불안 여전, 내일 되돌림 또는 추가 상승 여부가 추세 전환 진위를 판가름",
+    "thesis_killers": [
+      {
+        "event": "나스닥 방향성 (급등 이후 지속 vs 되돌림)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1% 이상 추가 상승 (17,295 이상 마감)",
+        "invalidates_if": "나스닥 -2% 이하 하락 (16,782 이하 마감)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 30.00 이하로 하락 (현재 33.62 대비 -10% 초과)",
+        "invalidates_if": "VIX 37.00 이상으로 재상승 (현재 33.62 대비 +10% 초과)"
+      },
+      {
+        "event": "엔비디아·반도체 섹터 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 (107.63 이상 마감)",
+        "invalidates_if": "엔비디아 -3% 이하 (101.36 이하 마감)"
+      },
+      {
+        "event": "SK하이닉스 국내 반도체 추종 강도",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 (187,272원 이상 마감)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (179,928원 이하 마감)"
+      },
+      {
+        "event": "원달러 환율 안정 여부 (위험선호 신호)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,440원 이하로 하락",
+        "invalidates_if": "원달러 1,470원 이상으로 재상승"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 상승 (2,494 이상 마감)",
+        "invalidates_if": "코스피 -1% 이하 하락 (2,444 이하 마감)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "중국 노출 고관세 수혜 취소 섹터",
+        "reason": "90일 유예는 중국 제외 — 중국향 매출 비중 높은 종목은 안도 랠리 수혜 제한",
+        "severity": "높음"
+      },
+      {
+        "zone": "달러 및 미국 단기국채",
+        "reason": "위험선호 급반전으로 안전자산 수요 일시 급감, 단기 자금 위험자산으로 이동",
+        "severity": "보통"
+      },
+      {
+        "zone": "방어주·유틸리티·금",
+        "reason": "극단적 공포 완화 시 방어 포지션 청산 압력 발생",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 대형 기술주 (나스닥100)",
+        "reason": "관세 유예로 공급망 불확실성 단기 해소, 엔비디아 +10.79% 주도 반도체·AI 섹터 집중 매수",
+        "momentum": "강함"
+      },
+      {
+        "zone": "국내 반도체 (SK하이닉스·삼성전자)",
+        "reason": "글로벌 반도체 랠리 동조 + 원달러 소폭 강세 전환 기대, HBM 수요 회복 기대 선반영",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "코스피 수출주 (IT·자동차)",
+        "reason": "관세 유예로 수출 환경 단기 개선 기대, 외국인 저가 매수 유입 가능성",
+        "momentum": "형성중"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 33.62
+  },
+  {
+    "analysis_date": "2026-04-10",
+    "market_regime": "위험회피",
+    "trend_phase": "하락추세",
+    "confidence_overall": "높음",
+    "one_line_summary": "CPI 상회 + 중국 125% 보복관세 충격으로 나스닥 -4.3%, VIX 40 돌파, Fear&Greed 12 극단적 공포 — 복합 매크로 악재가 동시 점화된 패닉 국면",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 방향성 (패닉 지속 vs 기술적 반등)",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +2% 이상 반등 (16,715p 이상 회복)",
+        "invalidates_if": "나스닥 -2% 이하 추가 하락 (16,059p 이하 붕괴)"
+      },
+      {
+        "event": "VIX 공포지수 방향성 (패닉 완화 여부)",
+        "timeframe": "1일",
+        "confirms_if": "VIX 36.65 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 44.79 이상으로 10% 이상 추가 상승"
+      },
+      {
+        "event": "반도체 섹터 방향성 (엔비디아 기준)",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +3% 이상 반등 (100.75 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 추가 하락 (94.89 이하)"
+      },
+      {
+        "event": "SK하이닉스 반도체 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 반등 (179,724원 이상)",
+        "invalidates_if": "SK하이닉스 -2% 이하 추가 하락 (172,676원 이하)"
+      },
+      {
+        "event": "원달러 환율 방향성 (위험회피 강도 측정)",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1,453원 이하로 하락 (위험회피 완화)",
+        "invalidates_if": "원달러 1,482원 이상으로 상승 (위험회피 심화)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1.5% 이상 반등 (2,468p 이상) 및 외국인 순매수 전환",
+        "invalidates_if": "코스피 -1.5% 이하 추가 하락 (2,395p 이하)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "글로벌 반도체/기술주 (엔비디아, SK하이닉스, 삼성전자)",
+        "reason": "중국 125% 보복관세로 공급망 타격 우려 + CPI 상회로 금리 인하 기대 후퇴, 고밸류 기술주 할인율 상승 직격",
+        "severity": "높음"
+      },
+      {
+        "zone": "코스피 외국인 자금",
+        "reason": "원달러 1,467원대 약세 + 글로벌 위험회피 심화로 신흥국 자금 이탈 가속",
+        "severity": "높음"
+      },
+      {
+        "zone": "성장주/고PER 섹터",
+        "reason": "CPI 상회로 인플레 재점화 우려, 연준 금리 인하 경로 불확실성 급증",
+        "severity": "높음"
+      },
+      {
+        "zone": "중국 관련 수출주 (국내 IT, 부품)",
+        "reason": "미중 관세 보복 125% 발동으로 중국향 매출 비중 높은 종목 실적 리스크 현실화",
+        "severity": "높음"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "미국 달러 및 단기 국채 (T-bill)",
+        "reason": "VIX 40 돌파 극단적 공포 구간에서 안전자산 수요 집중, 달러 인덱스 강세",
+        "momentum": "강함"
+      },
+      {
+        "zone": "금(Gold) / 귀금속",
+        "reason": "인플레 상회 + 지정학 리스크 동시 발생으로 실물 헤지 수요 증가",
+        "momentum": "강함"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 40.72
+  },
+  {
+    "analysis_date": "2026-04-11",
+    "market_regime": "전환중",
+    "trend_phase": "횡보추세",
+    "confidence_overall": "낮음",
+    "one_line_summary": "극단적 공포(F&G 16) 속 기술주 반등이 나타났으나 VIX 37대 고공행진으로 지속성 불확실, 단기 베어마켓 랠리 가능성 경계 필요",
+    "thesis_killers": [
+      {
+        "event": "나스닥 기술주 반등 지속성 확인",
+        "timeframe": "1일",
+        "confirms_if": "나스닥 +1.5% 이상 상승 (17000선 돌파)",
+        "invalidates_if": "나스닥 -1.5% 이하 하락 (16474선 이탈)"
+      },
+      {
+        "event": "VIX 공포지수 완화 여부",
+        "timeframe": "1일",
+        "confirms_if": "VIX 33.80 이하로 10% 이상 하락",
+        "invalidates_if": "VIX 41.32 이상으로 10% 이상 상승"
+      },
+      {
+        "event": "반도체 섹터 (엔비디아) 방향성",
+        "timeframe": "1일",
+        "confirms_if": "엔비디아 +5% 이상 상승 (109.99 돌파)",
+        "invalidates_if": "엔비디아 -5% 이하 하락 (99.51 이탈)"
+      },
+      {
+        "event": "반도체 섹터 (SK하이닉스) 방향성",
+        "timeframe": "1일",
+        "confirms_if": "SK하이닉스 +2% 이상 상승 (185028 돌파)",
+        "invalidates_if": "SK하이닉스 -2% 이하 하락 (177772 이탈)"
+      },
+      {
+        "event": "코스피 외국인 수급 방향성",
+        "timeframe": "1일",
+        "confirms_if": "코스피 +1% 이상 상승 (2493 돌파)",
+        "invalidates_if": "코스피 -1% 이하 하락 (2444 이탈)"
+      },
+      {
+        "event": "원달러 환율 안정성 확인",
+        "timeframe": "1일",
+        "confirms_if": "원달러 1445원 이하로 하락 (위험선호 강화)",
+        "invalidates_if": "원달러 1480원 이상으로 상승 (달러 강세 재개)"
+      }
+    ],
+    "outflows": [
+      {
+        "zone": "고밸류에이션 성장주",
+        "reason": "VIX 37대 고공행진으로 변동성 프리미엄 급등, 멀티플 압축 지속",
+        "severity": "높음"
+      },
+      {
+        "zone": "신흥국 채권·통화",
+        "reason": "원달러 1460대 유지로 달러 강세 기조 지속, 신흥국 자금이탈 압력",
+        "severity": "높음"
+      },
+      {
+        "zone": "국내 중소형 수출주",
+        "reason": "미중 관세 불확실성 잔존으로 실적 가시성 저하, 기관 포지션 축소",
+        "severity": "보통"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI·반도체 대형주 (엔비디아·SK하이닉스·삼성전자)",
+        "reason": "엔비디아 +7%대 급등 주도로 반도체 섹터 전반 모멘텀 회복, 낙폭과대 매수세 유입",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "미국 나스닥 기술주 ETF",
+        "reason": "극단적 공포 구간(F&G 16)에서 역발상 매수세 유입, 단기 기술적 반등 동력",
+        "momentum": "형성중"
+      },
+      {
+        "zone": "단기 미국채 (2년물·3개월물)",
+        "reason": "VIX 고공행진 속 안전자산 수요 병존, 리스크헤지 수단으로 단기채 선호",
+        "momentum": "약함"
+      }
+    ],
+    "mode": "MORNING",
+    "vix_at_time": 37.56
   }
 ]
