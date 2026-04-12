@@ -351,8 +351,17 @@ def _send_sentiment_report(data: dict):
         bar = "█" * (s // 10) + "░" * (10 - s // 10)
         chart_lines.append(h["date"][5:] + " " + bar + " " + str(s) + h.get("emoji", ""))
 
-    fg_note = ("\n<i>Fear&Greed " + str(cur.get("fear_greed")) + " 실수치 반영</i>"
-               if cur.get("fear_greed") is not None else "")
+    # Fear&Greed와 ARIA 감정지수 구분 표시 (사용자 혼동 방지)
+    fg_val  = cur.get("fear_greed")
+    fg_line = ""
+    if fg_val is not None:
+        if fg_val <= 20:   fg_label = "극단공포"
+        elif fg_val <= 40: fg_label = "공포"
+        elif fg_val <= 60: fg_label = "중립"
+        elif fg_val <= 80: fg_label = "탐욕"
+        else:              fg_label = "극단탐욕"
+        fg_line = ("\n<i>외부지표 Fear&Greed: " + str(fg_val)
+                   + " (" + fg_label + ") ← VIX 기반 계산</i>")
 
     insight = ("극단공포 - 분할매수 최적 타이밍" if score <= 20
                else "공포 - 분할매수 적극 검토" if score <= 35
@@ -362,12 +371,13 @@ def _send_sentiment_report(data: dict):
                else "극단탐욕 - 비중 축소 고려")
 
     send_message("\n".join([
-        cur.get("emoji", "") + " <b>ARIA 시장 감정지수</b>",
+        cur.get("emoji", "") + " <b>ARIA 종합 감정지수</b>",
         "<code>" + cur.get("date", "") + "</code>",
         "",
-        "오늘: <b>" + str(score) + "/100</b> (" + level + ")",
+        "ARIA 종합: <b>" + str(score) + "/100</b> (" + level + ")",
+        "  └ 레짐·추세·자금흐름·반론·한국시장 7개 지표 종합",
         "추세: " + arrow + " | 7일평균: " + str(trend.get("avg_7d", "-")),
-        fg_note, "",
+        fg_line, "",
         "━━ 구성요소 ━━",
         "<pre>" + "\n".join(comp_lines) + "</pre>", "",
         "━━ 10일 추이 ━━",
