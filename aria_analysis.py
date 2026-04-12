@@ -51,7 +51,7 @@ def _save(path: Path, data):
 _DEFAULT_WEIGHTS = {
     "version": 1, "last_updated": "", "total_learning_cycles": 0,
     "sentiment": {
-        "시장레짐": 1.0, "추세방향": 1.0, "변동성지수": 1.5,
+        "시장레짐": 1.0, "추세방향": 1.0, "변동성지수": 1.2,
         "자금흐름": 1.0, "반론강도": 0.8, "한국시장": 0.8, "숨은시그널": 0.7,
     },
     "prediction_confidence": {
@@ -205,7 +205,7 @@ def calculate_sentiment(report: dict, market_data: dict = None) -> dict:
         elif "공포" in lvl:     raw, reason = -10, lvl
         elif "극단탐욕" in lvl: raw, reason =  20, lvl
         elif "탐욕" in lvl:     raw, reason =  10, lvl
-    comps["변동성지수"] = {"score": round(raw * sw.get("변동성지수", 1.5)), "reason": reason[:30] or "데이터없음"}
+    comps["변동성지수"] = {"score": round(raw * sw.get("변동성지수", 1.2)), "reason": reason[:30] or "데이터없음"}
 
     # 4. 자금흐름
     raw = ((sum(1 for i in inflows if i.get("momentum") == "강함") * 5)
