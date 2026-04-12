@@ -143,7 +143,7 @@
 <div class="header">
   <div class="header-left">
     <h1>ARIA</h1>
-    <p>2026.04.12 12:31 KST</p>
+    <p>2026.04.12 13:16 KST</p>
   </div>
   <div class="regime-badge" style="background:#BA7517;">
     혼조
@@ -159,8 +159,8 @@
   <div class="metrics">
     <div class="metric">
       <div class="metric-label">감정지수</div>
-      <div class="metric-value" style="color:#BA7517;">40</div>
-      <div class="metric-sub">😰 공포</div>
+      <div class="metric-value" style="color:#888780;">47</div>
+      <div class="metric-sub">😐 중립</div>
     </div>
     <div class="metric">
       <div class="metric-label">예측 정확도</div>
@@ -177,7 +177,7 @@
       <span class="legend-item"><span class="legend-dot" style="background:#888780; border-radius:0;height:2px;"></span>중립(50)</span>
     </div>
     <div class="chart-wrap" style="height:160px;">
-      <canvas id="sentChart" role="img" aria-label="30일 감정지수 추이">감정지수 40 / 공포</canvas>
+      <canvas id="sentChart" role="img" aria-label="30일 감정지수 추이">감정지수 47 / 중립</canvas>
     </div>
   </div>
 
@@ -198,11 +198,11 @@
     <div class="card-title">이번 달 API 비용</div>
     <div class="cost-row">
       <span>추정 비용</span>
-      <span class="cost-val">$1.20 (약 1,776원)</span>
+      <span class="cost-val">$2.40 (약 3,552원)</span>
     </div>
     <div class="cost-row">
       <span>실행 횟수</span>
-      <span class="cost-val">1회</span>
+      <span class="cost-val">2회</span>
     </div>
   </div>
 
@@ -233,7 +233,7 @@ if(sentEl) new Chart(sentEl, {
   data:{
     labels:["04-12"],
     datasets:[
-      {data:[40],borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',
+      {data:[47],borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',
         fill:true,tension:0.4,pointRadius:2,borderWidth:2},
       {data:Array(1).fill(50),borderColor:'#888780',
         borderDash:[4,3],borderWidth:1.5,pointRadius:0}
