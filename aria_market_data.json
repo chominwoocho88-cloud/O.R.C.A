@@ -1,5 +1,7 @@
 {
-  "fetched_at": "2026-04-12 15:25 KST",
+  "fetched_at": "2026-04-12 21:53 KST",
+  "market_status": "closed",
+  "data_label": "직전 종가 기준 (2거래일 전, 일요일)",
   "data_quality": "ok",
   "sp500": "6816.89",
   "sp500_change": "-0.11%",
@@ -26,7 +28,7 @@
   "schd": "30.56",
   "schd_change": "-1.23%",
   "fear_greed_value": "49",
-  "fear_greed_rating": "Neutral (VIX기반)",
+  "fear_greed_rating": "Neutral",
   "fear_greed_prev": "N/A",
   "korea_special_news": [],
   "source": "Yahoo Finance + CNN Fear&Greed",

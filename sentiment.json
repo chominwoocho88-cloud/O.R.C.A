@@ -2,7 +2,7 @@
   "history": [
     {
       "date": "2026-04-12",
-      "score": 47,
+      "score": 42,
       "level": "중립",
       "emoji": "😐",
       "components": {
@@ -19,8 +19,8 @@
           "reason": "Fear&Greed 49.0 (중립)"
         },
         "자금흐름": {
-          "score": -5,
-          "reason": "유입4 / 유출4"
+          "score": -10,
+          "reason": "유입3 / 유출3"
         },
         "반론강도": {
           "score": 0,
@@ -45,7 +45,7 @@
   ],
   "current": {
     "date": "2026-04-12",
-    "score": 47,
+    "score": 42,
     "level": "중립",
     "emoji": "😐",
     "components": {
@@ -62,8 +62,8 @@
         "reason": "Fear&Greed 49.0 (중립)"
       },
       "자금흐름": {
-        "score": -5,
-        "reason": "유입4 / 유출4"
+        "score": -10,
+        "reason": "유입3 / 유출3"
       },
       "반론강도": {
         "score": 0,
