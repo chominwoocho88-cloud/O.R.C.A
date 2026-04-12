@@ -22,6 +22,318 @@ MODEL         = "claude-sonnet-4-6"
 
 # ── 실제 30거래일 데이터 (2026-03-03 ~ 2026-04-11) ──────────────────────────
 HIST_DATA = {
+    # ── 2026년 1월 ──────────────────────────────────────────────────────────
+    "2026-01-13": {
+        "sp500": 5827.04, "sp500_change": "+0.41%",
+        "nasdaq": 19261.92,"nasdaq_change": "+0.23%",
+        "vix": 18.71,     "kospi": 2521.44, "kospi_change": "+0.18%",
+        "krw_usd": 1452.30,"sk_hynix": 196200,"sk_hynix_change": "+0.51%",
+        "samsung": 56800,  "samsung_change": "+0.35%",
+        "nvda": 134.43,   "nvda_change": "+0.82%",
+        "fear_greed": "55","fear_greed_label": "Greed",
+        "note": "트럼프 취임 기대감 + 연초 AI 테마 강세"
+    },
+    "2026-01-14": {
+        "sp500": 5842.47, "sp500_change": "+0.27%",
+        "nasdaq": 19373.49,"nasdaq_change": "+0.58%",
+        "vix": 18.35,     "kospi": 2527.14, "kospi_change": "+0.23%",
+        "krw_usd": 1449.80,"sk_hynix": 198400,"sk_hynix_change": "+1.12%",
+        "samsung": 57200,  "samsung_change": "+0.70%",
+        "nvda": 136.02,   "nvda_change": "+1.18%",
+        "fear_greed": "57","fear_greed_label": "Greed",
+        "note": "기술주 강세 지속 + AI 인프라 투자 기대"
+    },
+    "2026-01-15": {
+        "sp500": 5949.17, "sp500_change": "+1.83%",
+        "nasdaq": 19703.09,"nasdaq_change": "+1.70%",
+        "vix": 16.12,     "kospi": 2548.32, "kospi_change": "+0.84%",
+        "krw_usd": 1443.60,"sk_hynix": 204800,"sk_hynix_change": "+3.23%",
+        "samsung": 58600,  "samsung_change": "+2.45%",
+        "nvda": 140.14,   "nvda_change": "+3.03%",
+        "fear_greed": "63","fear_greed_label": "Greed",
+        "note": "CPI 예상치 부합 → 금리인하 기대 회복, 강세장"
+    },
+    "2026-01-16": {
+        "sp500": 5996.66, "sp500_change": "+0.80%",
+        "nasdaq": 19954.30,"nasdaq_change": "+1.28%",
+        "vix": 15.84,     "kospi": 2561.78, "kospi_change": "+0.53%",
+        "krw_usd": 1440.20,"sk_hynix": 208600,"sk_hynix_change": "+1.86%",
+        "samsung": 59300,  "samsung_change": "+1.19%",
+        "nvda": 143.89,   "nvda_change": "+2.68%",
+        "fear_greed": "66","fear_greed_label": "Greed",
+        "note": "빅테크 실적 기대 + 달러 약세"
+    },
+    "2026-01-17": {
+        "sp500": 5996.66, "sp500_change": "0.00%",
+        "nasdaq": 19936.28,"nasdaq_change": "-0.09%",
+        "vix": 16.21,     "kospi": 2558.43, "kospi_change": "-0.13%",
+        "krw_usd": 1441.50,"sk_hynix": 207400,"sk_hynix_change": "-0.58%",
+        "samsung": 59100,  "samsung_change": "-0.34%",
+        "nvda": 142.62,   "nvda_change": "-0.88%",
+        "fear_greed": "64","fear_greed_label": "Greed",
+        "note": "주간 고점 부근 숨고르기"
+    },
+    "2026-01-22": {
+        "sp500": 6118.71, "sp500_change": "+2.03%",
+        "nasdaq": 20174.48,"nasdaq_change": "+1.20%",
+        "vix": 14.85,     "kospi": 2589.24, "kospi_change": "+1.20%",
+        "krw_usd": 1433.40,"sk_hynix": 217200,"sk_hynix_change": "+4.73%",
+        "samsung": 61200,  "samsung_change": "+3.55%",
+        "nvda": 149.43,   "nvda_change": "+4.77%",
+        "fear_greed": "72","fear_greed_label": "Greed",
+        "note": "트럼프 취임 직후 AI 인프라 5000억달러 투자 발표 (StarGate)"
+    },
+    "2026-01-23": {
+        "sp500": 6101.24, "sp500_change": "-0.29%",
+        "nasdaq": 20111.32,"nasdaq_change": "-0.31%",
+        "vix": 15.03,     "kospi": 2583.14, "kospi_change": "-0.24%",
+        "krw_usd": 1435.60,"sk_hynix": 215400,"sk_hynix_change": "-0.83%",
+        "samsung": 60800,  "samsung_change": "-0.65%",
+        "nvda": 147.21,   "nvda_change": "-1.49%",
+        "fear_greed": "69","fear_greed_label": "Greed",
+        "note": "StarGate 발표 후 차익실현"
+    },
+    "2026-01-24": {
+        "sp500": 6118.71, "sp500_change": "+0.29%",
+        "nasdaq": 20230.14,"nasdaq_change": "+0.59%",
+        "vix": 14.77,     "kospi": 2591.47, "kospi_change": "+0.32%",
+        "krw_usd": 1432.80,"sk_hynix": 218600,"sk_hynix_change": "+1.49%",
+        "samsung": 61600,  "samsung_change": "+1.32%",
+        "nvda": 149.77,   "nvda_change": "+1.74%",
+        "fear_greed": "70","fear_greed_label": "Greed",
+        "note": "AI 투자 낙관론 지속"
+    },
+    "2026-01-27": {
+        "sp500": 5994.57, "sp500_change": "-2.02%",
+        "nasdaq": 19341.83,"nasdaq_change": "-3.07%",
+        "vix": 18.96,     "kospi": 2548.21, "kospi_change": "-1.67%",
+        "krw_usd": 1449.20,"sk_hynix": 195800,"sk_hynix_change": "-10.45%",
+        "samsung": 57600,  "samsung_change": "-6.49%",
+        "nvda": 116.78,   "nvda_change": "-16.97%",
+        "fear_greed": "38","fear_greed_label": "Fear",
+        "note": "DeepSeek R1 공개 — AI 주식 충격, 엔비디아 역대 최대 시총 증발"
+    },
+    "2026-01-28": {
+        "sp500": 6067.44, "sp500_change": "+1.21%",
+        "nasdaq": 19624.35,"nasdaq_change": "+1.46%",
+        "vix": 17.84,     "kospi": 2562.93, "kospi_change": "+0.58%",
+        "krw_usd": 1444.70,"sk_hynix": 202400,"sk_hynix_change": "+3.37%",
+        "samsung": 58800,  "samsung_change": "+2.08%",
+        "nvda": 124.92,   "nvda_change": "+6.97%",
+        "fear_greed": "44","fear_greed_label": "Neutral",
+        "note": "DeepSeek 과잉반응 되돌림 + 기술적 반등"
+    },
+    "2026-01-29": {
+        "sp500": 6071.17, "sp500_change": "+0.06%",
+        "nasdaq": 19682.87,"nasdaq_change": "+0.30%",
+        "vix": 17.64,     "kospi": 2569.11, "kospi_change": "+0.24%",
+        "krw_usd": 1442.90,"sk_hynix": 204200,"sk_hynix_change": "+0.89%",
+        "samsung": 59200,  "samsung_change": "+0.68%",
+        "nvda": 126.55,   "nvda_change": "+1.30%",
+        "fear_greed": "45","fear_greed_label": "Neutral",
+        "note": "FOMC 회의 대기 + 빅테크 실적 주간"
+    },
+    "2026-01-30": {
+        "sp500": 6040.54, "sp500_change": "-0.50%",
+        "nasdaq": 19489.68,"nasdaq_change": "-0.98%",
+        "vix": 18.12,     "kospi": 2558.37, "kospi_change": "-0.42%",
+        "krw_usd": 1446.10,"sk_hynix": 200600,"sk_hynix_change": "-1.76%",
+        "samsung": 58600,  "samsung_change": "-1.01%",
+        "nvda": 122.43,   "nvda_change": "-3.25%",
+        "fear_greed": "43","fear_greed_label": "Neutral",
+        "note": "Microsoft 실적 발표 (클라우드 성장 둔화 실망)"
+    },
+    "2026-01-31": {
+        "sp500": 6040.54, "sp500_change": "0.00%",
+        "nasdaq": 19627.44,"nasdaq_change": "+0.71%",
+        "vix": 16.43,     "kospi": 2571.22, "kospi_change": "+0.50%",
+        "krw_usd": 1443.30,"sk_hynix": 203400,"sk_hynix_change": "+1.40%",
+        "samsung": 59100,  "samsung_change": "+0.85%",
+        "nvda": 124.88,   "nvda_change": "+2.00%",
+        "fear_greed": "48","fear_greed_label": "Neutral",
+        "note": "FOMC 금리 동결 — 인플레 우려로 인하 중단 시사"
+    },
+    # ── 2026년 2월 ──────────────────────────────────────────────────────────
+    "2026-02-03": {
+        "sp500": 5994.57, "sp500_change": "-0.76%",
+        "nasdaq": 19341.83,"nasdaq_change": "-1.46%",
+        "vix": 19.42,     "kospi": 2538.41, "kospi_change": "-1.28%",
+        "krw_usd": 1458.20,"sk_hynix": 194200,"sk_hynix_change": "-4.52%",
+        "samsung": 57400,  "samsung_change": "-2.88%",
+        "nvda": 117.93,   "nvda_change": "-5.57%",
+        "fear_greed": "35","fear_greed_label": "Fear",
+        "note": "트럼프 캐나다·멕시코·중국 관세 25% 발표 — 무역전쟁 공식화"
+    },
+    "2026-02-04": {
+        "sp500": 6037.88, "sp500_change": "+0.72%",
+        "nasdaq": 19578.41,"nasdaq_change": "+1.22%",
+        "vix": 17.96,     "kospi": 2554.82, "kospi_change": "+0.64%",
+        "krw_usd": 1452.40,"sk_hynix": 199800,"sk_hynix_change": "+2.88%",
+        "samsung": 58400,  "samsung_change": "+1.74%",
+        "nvda": 121.47,   "nvda_change": "+3.00%",
+        "fear_greed": "40","fear_greed_label": "Fear",
+        "note": "캐나다·멕시코 관세 30일 유예 합의 — 안도 반등"
+    },
+    "2026-02-05": {
+        "sp500": 6062.45, "sp500_change": "+0.41%",
+        "nasdaq": 19694.47,"nasdaq_change": "+0.59%",
+        "vix": 17.24,     "kospi": 2562.13, "kospi_change": "+0.29%",
+        "krw_usd": 1449.60,"sk_hynix": 202400,"sk_hynix_change": "+1.30%",
+        "samsung": 59000,  "samsung_change": "+1.03%",
+        "nvda": 124.08,   "nvda_change": "+2.15%",
+        "fear_greed": "43","fear_greed_label": "Neutral",
+        "note": "Alphabet 실적 호조 + AI 광고 수익 급증"
+    },
+    "2026-02-06": {
+        "sp500": 6083.57, "sp500_change": "+0.35%",
+        "nasdaq": 19791.43,"nasdaq_change": "+0.49%",
+        "vix": 16.88,     "kospi": 2569.74, "kospi_change": "+0.30%",
+        "krw_usd": 1447.20,"sk_hynix": 205200,"sk_hynix_change": "+1.38%",
+        "samsung": 59600,  "samsung_change": "+1.02%",
+        "nvda": 126.87,   "nvda_change": "+2.25%",
+        "fear_greed": "46","fear_greed_label": "Neutral",
+        "note": "Amazon 실적 기대 + AI 클라우드 성장세 확인"
+    },
+    "2026-02-07": {
+        "sp500": 6118.71, "sp500_change": "+0.58%",
+        "nasdaq": 19954.30,"nasdaq_change": "+0.83%",
+        "vix": 15.92,     "kospi": 2582.44, "kospi_change": "+0.50%",
+        "krw_usd": 1443.10,"sk_hynix": 210400,"sk_hynix_change": "+2.53%",
+        "samsung": 60600,  "samsung_change": "+1.68%",
+        "nvda": 131.32,   "nvda_change": "+3.51%",
+        "fear_greed": "52","fear_greed_label": "Neutral",
+        "note": "Amazon 실적 서프라이즈 + 고용 호조"
+    },
+    "2026-02-10": {
+        "sp500": 6025.47, "sp500_change": "-1.52%",
+        "nasdaq": 19612.18,"nasdaq_change": "-1.71%",
+        "vix": 17.83,     "kospi": 2558.83, "kospi_change": "-0.91%",
+        "krw_usd": 1451.80,"sk_hynix": 201800,"sk_hynix_change": "-4.09%",
+        "samsung": 58400,  "samsung_change": "-3.63%",
+        "nvda": 124.36,   "nvda_change": "-5.30%",
+        "fear_greed": "41","fear_greed_label": "Fear",
+        "note": "관세 확전 우려 재부각 + 중국 보복 조짐"
+    },
+    "2026-02-11": {
+        "sp500": 6056.44, "sp500_change": "+0.51%",
+        "nasdaq": 19726.16,"nasdaq_change": "+0.58%",
+        "vix": 17.12,     "kospi": 2567.22, "kospi_change": "+0.33%",
+        "krw_usd": 1448.60,"sk_hynix": 204800,"sk_hynix_change": "+1.49%",
+        "samsung": 59200,  "samsung_change": "+1.37%",
+        "nvda": 126.91,   "nvda_change": "+2.05%",
+        "fear_greed": "44","fear_greed_label": "Neutral",
+        "note": "소폭 반등 + 실적 시즌 긍정적"
+    },
+    "2026-02-12": {
+        "sp500": 5983.99, "sp500_change": "-1.19%",
+        "nasdaq": 19412.22,"nasdaq_change": "-1.59%",
+        "vix": 19.21,     "kospi": 2541.87, "kospi_change": "-0.98%",
+        "krw_usd": 1458.40,"sk_hynix": 197600,"sk_hynix_change": "-3.51%",
+        "samsung": 57600,  "samsung_change": "-2.70%",
+        "nvda": 120.33,   "nvda_change": "-5.19%",
+        "fear_greed": "37","fear_greed_label": "Fear",
+        "note": "CPI 예상 상회 — 금리인하 기대 후퇴 + 관세 인플레 우려"
+    },
+    "2026-02-13": {
+        "sp500": 6115.07, "sp500_change": "+2.19%",
+        "nasdaq": 19908.68,"nasdaq_change": "+2.56%",
+        "vix": 15.97,     "kospi": 2574.32, "kospi_change": "+1.28%",
+        "krw_usd": 1447.30,"sk_hynix": 208200,"sk_hynix_change": "+5.36%",
+        "samsung": 60100,  "samsung_change": "+4.34%",
+        "nvda": 132.86,   "nvda_change": "+10.42%",
+        "fear_greed": "52","fear_greed_label": "Neutral",
+        "note": "CPI 충격 진정 + 엔비디아 GTC 기대감 급등"
+    },
+    "2026-02-14": {
+        "sp500": 6133.39, "sp500_change": "+0.30%",
+        "nasdaq": 19980.05,"nasdaq_change": "+0.36%",
+        "vix": 15.62,     "kospi": 2581.44, "kospi_change": "+0.28%",
+        "krw_usd": 1445.10,"sk_hynix": 211200,"sk_hynix_change": "+1.44%",
+        "samsung": 60800,  "samsung_change": "+1.16%",
+        "nvda": 135.34,   "nvda_change": "+1.87%",
+        "fear_greed": "54","fear_greed_label": "Neutral",
+        "note": "밸런타인데이 + 연초 강세장 마무리"
+    },
+    "2026-02-19": {
+        "sp500": 6129.58, "sp500_change": "-0.06%",
+        "nasdaq": 19954.30,"nasdaq_change": "-0.13%",
+        "vix": 15.79,     "kospi": 2578.12, "kospi_change": "-0.13%",
+        "krw_usd": 1446.40,"sk_hynix": 210000,"sk_hynix_change": "-0.57%",
+        "samsung": 60600,  "samsung_change": "-0.33%",
+        "nvda": 134.66,   "nvda_change": "-0.50%",
+        "fear_greed": "52","fear_greed_label": "Neutral",
+        "note": "대통령의 날 연휴 후 재개 + 관망세"
+    },
+    "2026-02-20": {
+        "sp500": 6144.15, "sp500_change": "+0.24%",
+        "nasdaq": 20012.48,"nasdaq_change": "+0.29%",
+        "vix": 15.46,     "kospi": 2584.77, "kospi_change": "+0.26%",
+        "krw_usd": 1444.20,"sk_hynix": 212400,"sk_hynix_change": "+1.14%",
+        "samsung": 61200,  "samsung_change": "+0.99%",
+        "nvda": 136.48,   "nvda_change": "+1.35%",
+        "fear_greed": "55","fear_greed_label": "Greed",
+        "note": "연초 고점 재도전"
+    },
+    "2026-02-21": {
+        "sp500": 6013.13, "sp500_change": "-2.14%",
+        "nasdaq": 19392.68,"nasdaq_change": "-3.09%",
+        "vix": 19.84,     "kospi": 2539.28, "kospi_change": "-1.76%",
+        "krw_usd": 1459.30,"sk_hynix": 198400,"sk_hynix_change": "-6.59%",
+        "samsung": 57800,  "samsung_change": "-5.55%",
+        "nvda": 118.23,   "nvda_change": "-13.38%",
+        "fear_greed": "30","fear_greed_label": "Fear",
+        "note": "소비자신뢰지수 급락 + Walmart 가이던스 쇼크 + 엔비디아 급락"
+    },
+    "2026-02-24": {
+        "sp500": 5983.99, "sp500_change": "-0.50%",
+        "nasdaq": 19281.40,"nasdaq_change": "-0.57%",
+        "vix": 20.64,     "kospi": 2527.43, "kospi_change": "-0.46%",
+        "krw_usd": 1462.80,"sk_hynix": 194600,"sk_hynix_change": "-1.91%",
+        "samsung": 57000,  "samsung_change": "-1.38%",
+        "nvda": 115.99,   "nvda_change": "-1.89%",
+        "fear_greed": "28","fear_greed_label": "Fear",
+        "note": "경기침체 우려 확산 + 관세 불확실성"
+    },
+    "2026-02-25": {
+        "sp500": 5860.10, "sp500_change": "-2.06%",
+        "nasdaq": 18836.18,"nasdaq_change": "-2.31%",
+        "vix": 22.27,     "kospi": 2504.82, "kospi_change": "-0.89%",
+        "krw_usd": 1469.40,"sk_hynix": 188200,"sk_hynix_change": "-3.29%",
+        "samsung": 55900,  "samsung_change": "-1.93%",
+        "nvda": 111.01,   "nvda_change": "-4.29%",
+        "fear_greed": "24","fear_greed_label": "Fear",
+        "note": "트럼프 관세 4월 확전 예고 + 경기침체 논쟁"
+    },
+    "2026-02-26": {
+        "sp500": 5861.57, "sp500_change": "+0.02%",
+        "nasdaq": 18884.44,"nasdaq_change": "+0.26%",
+        "vix": 21.88,     "kospi": 2508.44, "kospi_change": "+0.14%",
+        "krw_usd": 1468.10,"sk_hynix": 189600,"sk_hynix_change": "+0.74%",
+        "samsung": 56200,  "samsung_change": "+0.54%",
+        "nvda": 115.37,   "nvda_change": "+3.03%",
+        "fear_greed": "25","fear_greed_label": "Fear",
+        "note": "엔비디아 실적 발표 (호조) — 시간외 상승 → 본장 혼조"
+    },
+    "2026-02-27": {
+        "sp500": 5861.57, "sp500_change": "0.00%",
+        "nasdaq": 18847.28,"nasdaq_change": "-0.20%",
+        "vix": 22.14,     "kospi": 2504.38, "kospi_change": "-0.16%",
+        "krw_usd": 1469.80,"sk_hynix": 188400,"sk_hynix_change": "-0.63%",
+        "samsung": 55800,  "samsung_change": "-0.71%",
+        "nvda": 114.42,   "nvda_change": "-0.82%",
+        "fear_greed": "24","fear_greed_label": "Fear",
+        "note": "엔비디아 실적 후 실망 매도 + PCE 발표 대기"
+    },
+    "2026-02-28": {
+        "sp500": 5954.23, "sp500_change": "+1.58%",
+        "nasdaq": 19161.63,"nasdaq_change": "+1.67%",
+        "vix": 19.87,     "kospi": 2531.74, "kospi_change": "+1.09%",
+        "krw_usd": 1461.20,"sk_hynix": 196600,"sk_hynix_change": "+4.35%",
+        "samsung": 57400,  "samsung_change": "+2.87%",
+        "nvda": 120.15,   "nvda_change": "+4.99%",
+        "fear_greed": "31","fear_greed_label": "Fear",
+        "note": "PCE 예상치 부합 + 월말 포지션 조정 반등"
+    },
     "2026-03-03": {
         "sp500": 5954.23, "sp500_change": "-1.76%",
         "nasdaq": 19161.63,"nasdaq_change": "-2.64%",
@@ -536,25 +848,12 @@ def verify_predictions(analysis, next_data):
             else:
                 v, ev = "unclear", f"VIX 변동 미미 ({vix_now:.1f})"
 
-        # ── 원달러 ─────────────────────────────────────────────────────────
+        # 원달러: 백테스트 17% 정확도 — 자동 unclear
         elif any(k in event for k in ["원달러","환율","krw","원화"]):
             cat = "환율"
-            try:
-                krw_now  = float(next_data.get("krw_usd", 1470))
-                krw_prev = float(market_data_snapshot.get("krw_usd", krw_now))
-                krw_chg  = krw_now - krw_prev
-                conf_down = any(w in conf for w in ["하락","강세","낮아"])
-                conf_up   = any(w in conf for w in ["상승","약세","높아"])
-                thr = extract_threshold(conf) or 5.0
-                if conf_down and krw_chg <= -thr:
-                    v, ev = "confirmed", f"원달러 {krw_now:.0f} ({krw_chg:+.0f}원)"
-                elif conf_up and krw_chg >= thr:
-                    v, ev = "confirmed", f"원달러 {krw_now:.0f} ({krw_chg:+.0f}원)"
-                elif abs(krw_chg) < 3:
-                    v, ev = "unclear", f"원달러 소폭 변동 ({krw_chg:+.0f}원)"
-                else:
-                    v, ev = "invalidated", f"원달러 {krw_now:.0f} (반대)"
-            except: v, ev = "unclear", "환율 데이터 파싱 오류"
+            v, ev = "unclear", "원달러 예측 제외 (백테스트 정확도 17%)"
+
+
 
         results.append({
             "event":    tk.get("event",""),
@@ -753,12 +1052,17 @@ def main():
     print(f"\n{'─'*50}")
     print("📊 가중치 업데이트...")
     try:
-        from aria_analysis import update_weights_from_accuracy
+        import sys, os
+        sys.path.insert(0, os.getcwd())
+        import sys, os; sys.path.insert(0, os.getcwd()); from aria_analysis import update_weights_from_accuracy
         acc = _load(ACCURACY_FILE, {})
         changes = update_weights_from_accuracy(acc)
-        for c in changes: print(f"   → {c}")
+        if changes:
+            for c in changes: print(f"   → {c}")
+        else:
+            print("   변경 없음 (데이터 부족)")
     except Exception as e:
-        print(f"   스킵 ({e})")
+        print(f"   스킵: {e}")
 
     # 요약 테이블
     print_summary_table(all_results_by_date)
