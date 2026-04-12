@@ -153,7 +153,8 @@ jobs:
           git reset --hard origin/main
           git add memory.json reports/ sentiment.json accuracy.json \
                   rotation.json aria_weights.json aria_lessons.json \
-                  aria_cost.json aria_market_data.json morning_baseline.json || true
+                  aria_cost.json aria_market_data.json morning_baseline.json \
+                  dashboard.html portfolio.json || true
           git diff --staged --quiet || git commit -m "ARIA: $(date +'%Y-%m-%d %H:%M') [${ARIA_MODE:-AUTO}] 저장"
           git push || (echo "Push 실패 — rebase 후 재시도" && git pull --rebase origin main && git push)
         env:
