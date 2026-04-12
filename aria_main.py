@@ -224,6 +224,13 @@ def main():
         devil   = agent_devil(analyst, memory, MODE)
         report  = agent_reporter(hunter, analyst, devil, memory, accuracy, MODE)
 
+        # 날짜/시간 강제 오버라이드 (모델이 날짜를 잘못 추측하는 버그 방지)
+        report["analysis_date"] = today
+        report["analysis_time"] = _now().strftime("%H:%M KST")
+
+        # 데이터 품질 정보 리포트에 기록
+        report["_data_quality"] = market_data.get("_data_quality", "ok")
+
         # 7. 레짐 드리프트 감지
         drift = get_regime_drift(report.get("market_regime", ""))
         if drift and drift != "STABLE":
