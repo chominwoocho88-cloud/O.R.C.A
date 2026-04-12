@@ -382,18 +382,31 @@ def _send_sentiment_report(data: dict):
 # ══════════════════════════════════════════════════════════════════════════════
 # PORTFOLIO
 # ══════════════════════════════════════════════════════════════════════════════
-_HOLDINGS = [
-    {"name": "엔비디아",      "ticker": "nvda",     "weight": 35.0, "sector": "반도체/ai"},
-    {"name": "SK하이닉스",    "ticker": "sk_hynix", "weight": 15.0, "sector": "반도체"},
-    {"name": "삼성전자",      "ticker": "samsung",  "weight": 10.0, "sector": "반도체/전자"},
-    {"name": "브로드컴",      "ticker": "avgo",     "weight": 10.0, "sector": "반도체/ai"},
-    {"name": "카카오",        "ticker": "kakao",    "weight":  5.0, "sector": "플랫폼/it"},
-    {"name": "한국고배당ETF", "ticker": "kodex",    "weight": 10.0, "sector": "배당"},
-    {"name": "SCHD",         "ticker": "schd",     "weight": 10.0, "sector": "배당"},
-    {"name": "현금",          "ticker": "cash",     "weight":  5.0, "sector": "현금"},
-]
-_RISK_THR = -2.0
-_OPPO_THR = +1.5
+def _load_portfolio() -> tuple:
+    """portfolio.json에서 보유 종목 로드 — 파일 없으면 기본값 사용"""
+    pf_file = Path("portfolio.json")
+    if pf_file.exists():
+        try:
+            data = json.loads(pf_file.read_text(encoding="utf-8"))
+            holdings   = data.get("holdings", [])
+            risk_thr   = data.get("risk_threshold", -2.0)
+            oppo_thr   = data.get("opportunity_threshold", 1.5)
+            return holdings, risk_thr, oppo_thr
+        except Exception as e:
+            print("⚠️ portfolio.json 로드 실패: " + str(e) + " — 기본값 사용")
+
+    # 기본값 (portfolio.json 없을 때)
+    holdings = [
+        {"name": "엔비디아",      "ticker": "nvda",     "weight": 35.0, "sector": "반도체/ai"},
+        {"name": "SK하이닉스",    "ticker": "sk_hynix", "weight": 15.0, "sector": "반도체"},
+        {"name": "삼성전자",      "ticker": "samsung",  "weight": 10.0, "sector": "반도체/전자"},
+        {"name": "브로드컴",      "ticker": "avgo",     "weight": 10.0, "sector": "반도체/ai"},
+        {"name": "카카오",        "ticker": "kakao",    "weight":  5.0, "sector": "플랫폼/it"},
+        {"name": "한국고배당ETF", "ticker": "kodex",    "weight": 10.0, "sector": "배당"},
+        {"name": "SCHD",         "ticker": "schd",     "weight": 10.0, "sector": "배당"},
+        {"name": "현금",          "ticker": "cash",     "weight":  5.0, "sector": "현금"},
+    ]
+    return holdings, -2.0, 1.5
 
 
 def _pct(s) -> float:
@@ -420,6 +433,7 @@ def run_portfolio(report: dict, market_data: dict = None) -> dict:
     out_txt   = " ".join(o.get("zone", "") for o in outflows).lower()
     in_txt    = " ".join(i.get("zone", "") for i in inflows).lower()
 
+    _HOLDINGS, _RISK_THR, _OPPO_THR = _load_portfolio()
     results, total_risk, total_oppo, pnl = [], 0.0, 0.0, 0.0
 
     for h in _HOLDINGS:
