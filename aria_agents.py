@@ -339,9 +339,25 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
             acc_ctx += " Weak: " + ", ".join(accuracy["weak_areas"])
 
     real_data_ctx = ""
+    data_quality_score = 100
+    data_missing = []
     try:
         from aria_data import load_market_data
         md = load_market_data()
+
+        # 데이터 결측 점수 계산
+        if md.get("vix", "N/A") == "N/A":          data_missing.append("VIX"); data_quality_score -= 10
+        if md.get("kospi", "N/A") == "N/A":         data_missing.append("KOSPI"); data_quality_score -= 15
+        if md.get("fear_greed_value","N/A") == "N/A": data_missing.append("Fear&Greed"); data_quality_score -= 10
+        if "(alt)" in str(md.get("fear_greed_rating","")): data_missing.append("F&G폴백(암호화폐기반)"); data_quality_score -= 5
+        if md.get("krw_usd","N/A") == "N/A":        data_missing.append("환율"); data_quality_score -= 10
+        if md.get("nvda","N/A") == "N/A":           data_missing.append("NVDA"); data_quality_score -= 5
+        # KIS 항상 미연결
+        data_missing.append("KIS미연결(수급데이터없음)"); data_quality_score -= 10
+        data_quality_score = max(0, data_quality_score)
+
+        quality_label = "높음" if data_quality_score >= 80 else "보통" if data_quality_score >= 60 else "낮음"
+
         real_data_ctx = (
             "\n\n## CRITICAL: Use these EXACT numbers in volatility_index field"
             "\nDo NOT estimate or say 데이터 미제공:"
@@ -350,9 +366,14 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
             + " (" + str(md.get("fear_greed_rating", "")) + ")"
             + "\n- kospi: "    + str(md.get("kospi", "N/A"))
             + "\n- krw_usd: "  + str(md.get("krw_usd", "N/A"))
+            + "\n\n## 데이터 품질: " + str(data_quality_score) + "/100 (" + quality_label + ")"
+            + "\n결측: " + (", ".join(data_missing) if data_missing else "없음")
+            + "\n→ confidence_overall 결정 시 반드시 반영. 데이터 낮음이면 '낮음'으로."
         )
     except Exception:
-        pass
+        data_quality_score = 50
+        data_missing = ["데이터로드실패"]
+        quality_label = "낮음"
 
     payload = {
         "mode":    mode,
@@ -375,9 +396,16 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
     reporter_model = MODEL_REPORTER_FULL if mode == "MORNING" else MODEL_REPORTER_LITE
     max_tok        = 4000 if mode == "MORNING" else 2500
 
+    # 실제 오늘 날짜 주입 (모델이 날짜를 임의로 추측하지 않도록)
+    from datetime import datetime as _dt
+    today_str = _dt.now(KST).strftime("%Y-%m-%d")
+    now_str   = _dt.now(KST).strftime("%H:%M KST")
+
     raw = call_api(
         REPORTER_SYSTEM,
-        "Mode: " + mode + "\nData:\n" + json.dumps(payload, ensure_ascii=False)
+        "Mode: " + mode + "\nToday: " + today_str + " " + now_str
+        + "\n반드시 analysis_date=" + today_str + " analysis_time=" + now_str + " 로 설정"
+        + "\nData:\n" + json.dumps(payload, ensure_ascii=False)
         + past_ctx + acc_ctx + real_data_ctx + devil_override + "\n\nReturn JSON.",
         model=reporter_model, max_tokens=max_tok,
     )
