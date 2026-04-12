@@ -29,23 +29,6 @@ jobs:
       - name: Install dependencies
         run: pip install anthropic rich httpx
 
-      - name: Fix encoding
-        run: |
-          python3 << 'EOF'
-          import os
-          files = [
-              'aria_main.py', 'aria_agents.py', 'aria_analysis.py',
-              'aria_notify.py', 'aria_data.py',
-          ]
-          for f in files:
-              if os.path.exists(f):
-                  text = open(f, encoding='utf-8').read()
-                  text = text.replace('\u201c', '"').replace('\u201d', '"')
-                  text = text.replace('\u2018', "'").replace('\u2019', "'")
-                  open(f, 'w', encoding='utf-8').write(text)
-                  print('Fixed: ' + f)
-          EOF
-
       # ── 주간 리포트 (일요일) ────────────────────────────────────────────────
       - name: Run Weekly + Lessons
         if: github.event.schedule == '0 22 * * 0'
