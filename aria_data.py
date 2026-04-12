@@ -50,7 +50,8 @@ def fetch_fear_greed(yahoo_data: dict = None) -> dict:
         score = fg.get("score", ""); rate = fg.get("rating", ""); prev = fg.get("previous_close", "")
         if score:
             result.update({"value": str(round(float(score), 1)), "rating": rate,
-                           "prev_close": str(round(float(prev), 1)) if prev else "N/A"})
+                           "prev_close": str(round(float(prev), 1)) if prev else "N/A",
+                           "source": "cnn", "confidence": "높음"})
             print("  Fear&Greed (CNN): " + result["value"] + " (" + rate + ")")
             return result
     except Exception as e:
@@ -88,8 +89,10 @@ def fetch_fear_greed(yahoo_data: dict = None) -> dict:
         elif score <= 80:  rate = "Greed"
         else:              rate = "Extreme Greed"
 
-        result.update({"value": str(score), "rating": rate + " (VIX기반)", "prev_close": "N/A"})
-        print("  Fear&Greed (VIX 계산): " + str(score) + " (" + rate + ") | VIX=" + str(vix))
+        result.update({"value": str(score), "rating": rate, "prev_close": "N/A",
+                          "source": "vix_proxy", "confidence": "보통",
+                          "note": "VIX+모멘텀 자체계산 (CNN 미연결)"})
+        print("  Fear&Greed (VIX+모멘텀 대체치, CNN 미연결): " + str(score) + " (" + rate + ") | VIX=" + str(vix))
         return result
 
     except Exception as e:
@@ -140,14 +143,25 @@ def get_monthly_cost_summary():
     usd=m.get("estimated_usd",0.0)
     return "이번달 "+str(m.get("runs",0))+"회 실행 | 추정 $"+str(usd)+" (약 "+f"{round(usd*1480):,}"+"원)"
 
+def _get_market_status(now):
+    """주말/휴장 여부 반환 — 데이터 freshness 표시용"""
+    wd = now.weekday()
+    if wd == 6: return "closed", "직전 종가 기준 (2거래일 전, 일요일)"
+    if wd == 5: return "closed", "직전 종가 기준 (1거래일 전, 토요일)"
+    h = now.hour
+    if h < 9 or h >= 16: return "after_hours", "전일 종가 기준"
+    return "open", "실시간"
+
+
 def fetch_all_market_data():
     now=datetime.now(KST)
-    print("[Yahoo Finance]"); yahoo=fetch_yahoo_data()
+    market_status, data_label = _get_market_status(now)
+    print("[Yahoo Finance] (" + data_label + ")"); yahoo=fetch_yahoo_data()
     print("[Fear & Greed]"); fg=fetch_fear_greed(yahoo)  # yahoo 데이터 전달 → VIX 기반 계산
     print("[한국 특수 뉴스]"); kr_n=fetch_korea_news()
     print("[KIS API] 미연결")
     keys=["sp500","sp500_change","nasdaq","nasdaq_change","vix","vix_change","us_10y","kospi","kospi_change","krw_usd","sk_hynix","sk_hynix_change","samsung","samsung_change","kakao","kakao_change","kodex","kodex_change","nvda","nvda_change","avgo","avgo_change","schd","schd_change"]
-    data={"fetched_at":now.strftime("%Y-%m-%d %H:%M KST"),"data_quality":yahoo.get("_data_quality","ok"),
+    data={"fetched_at":now.strftime("%Y-%m-%d %H:%M KST"),"market_status":market_status,"data_label":data_label,"data_quality":yahoo.get("_data_quality","ok"),
           **{k:yahoo.get(k,"N/A") for k in keys},
           "fear_greed_value":fg.get("value","N/A"),"fear_greed_rating":fg.get("rating","N/A"),"fear_greed_prev":fg.get("prev_close","N/A"),
           "korea_special_news":kr_n,"source":"Yahoo Finance + CNN Fear&Greed"}
@@ -169,6 +183,24 @@ def format_for_hunter(data):
     alerts=data.get("volatility_alert",{}).get("alerts",[])
     alert_str=("\n⚠️ 경보: "+" | ".join(alerts)) if alerts else ""
     qual_str="\n⚠️ 데이터 품질 불량" if data.get("data_quality")=="poor" else ""
+
+    # 데이터 신뢰도 경고
+    market_status = data.get("market_status", "open")
+    data_label    = data.get("data_label", "실시간")
+    fg_source     = data.get("fear_greed_rating", "")
+    fg_note       = data.get("fear_greed_note", "")
+
+    status_str = ""
+    if market_status == "closed":
+        status_str = "\n⚠️ 주의: 현재 시장 휴장 중 — " + data_label + " (최신 데이터 아님)"
+    elif market_status == "after_hours":
+        status_str = "\n📌 " + data_label
+
+    kis_str = "\n⚠️ KIS 미연결: 한국 외국인 수급·VKOSPI 실데이터 없음. 한국 수급 관련 단정 표현 금지."
+
+    fg_str2 = ""
+    if "vix_proxy" in str(data.get("fear_greed_source","")) or "VIX" in str(fg_source):
+        fg_str2 = "\n📌 Fear&Greed: CNN 미연결 — VIX+모멘텀 자체계산값 (공식 지수 아님, 참고용)"
     krw=data.get("krw_usd","N/A")
     try: krw=str(round(float(krw)))+" KRW/USD"
     except: pass
@@ -179,7 +211,7 @@ def format_for_hunter(data):
     def v(k): return data.get(k,"N/A")
     def vc(k): return data.get(k+"_change","")
     return (
-        "\n\n## 실시간 시장 데이터 (이 수치 그대로 사용. 추정 금지)\n수집: "+v("fetched_at")+qual_str+"\n\n"
+        "\n\n## 시장 데이터 ("+data_label+")\n수집: "+v("fetched_at")+qual_str+status_str+kis_str+fg_str2+"\n\n"
         "### 미국\n- S&P500: "+v("sp500")+" ("+vc("sp500")+")\n- 나스닥: "+v("nasdaq")+" ("+vc("nasdaq")+")\n"
         "- VIX: "+v("vix")+" ("+vc("vix")+")\n- 미국10Y: "+v("us_10y")+"%\n- Fear&Greed: "+fg_str+"\n\n"
         "### 한국\n- 코스피: "+v("kospi")+" ("+vc("kospi")+")\n- 원/달러: "+krw+"\n"
