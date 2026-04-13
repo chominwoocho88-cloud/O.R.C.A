@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-04-13 17:37 KST",
+  "fetched_at": "2026-04-13 17:41 KST",
   "market_status": "after_hours",
   "data_label": "전일 종가 기준",
   "data_quality": "ok",
@@ -7,12 +7,12 @@
   "sp500_change": "-0.11%",
   "nasdaq": "22902.9",
   "nasdaq_change": "+0.35%",
-  "vix": "21.17",
-  "vix_change": "+10.09%",
+  "vix": "21.11",
+  "vix_change": "+9.78%",
   "us_10y": "4.32",
   "kospi": "5808.62",
   "kospi_change": "-0.86%",
-  "krw_usd": "1484.77",
+  "krw_usd": "1486.48",
   "sk_hynix": "1040000.0",
   "sk_hynix_change": "+1.27%",
   "samsung": "201000.0",
@@ -45,7 +45,7 @@
     "level": "normal",
     "alerts": [],
     "should_run_now": false,
-    "vix": 21.17,
+    "vix": 21.11,
     "kospi_change": -0.86,
     "sp500_change": -0.11
   }
