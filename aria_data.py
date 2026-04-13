@@ -154,7 +154,9 @@ def fetch_krx_flow() -> dict:
 
     print("  KRX 수급 데이터 없음 (엔드포인트 확인 필요)")
     return result
-    result={}
+
+
+def fetch_yahoo_data():
     tickers={
         "^GSPC":"sp500","^IXIC":"nasdaq","^VIX":"vix","^KS11":"kospi",
         "KRW=X":"krw_usd","^TNX":"us_10y",
