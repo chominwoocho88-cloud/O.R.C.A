@@ -1,53 +1,53 @@
 {
   "date": "2026-04-13",
-  "saved_at": "22:44 KST",
-  "market_regime": "혼조",
-  "trend_phase": "횡보추세",
-  "confidence": "낮음",
-  "one_line_summary": "골드만삭스 FICC 실적 쇼크로 금융주 약세 예상되나 TSMC·SK하이닉스 반도체 강세와 코스피 외국인 대규모 순매수(4.997조)가 맞서며 혼조 국면 지속, VIX 20.61 중립권",
+  "saved_at": "23:19 KST",
+  "market_regime": "AI집중 위험선호 (광의 혼조 병존)",
+  "trend_phase": "상승추세",
+  "confidence": "보통",
+  "one_line_summary": "나스닥 22906·S&P500 6811 고점권 유지 속 TSMC +35% YoY AI반도체 모멘텀 확인, 단 에너지 EPS 31% 하향·VIX 20 중립권으로 섹터 집중 리스크 경계 필요",
   "thesis_killers": [],
   "key_outflows": [
     {
-      "zone": "미국 금융주 (Goldman Sachs 등 대형은행)",
+      "zone": "에너지 섹터",
       "severity": "높음"
     },
     {
-      "zone": "항공·여행 섹터",
-      "severity": "높음"
+      "zone": "헬스케어 섹터",
+      "severity": "보통"
     },
     {
-      "zone": "미국 장기채 (10년물 포지션)",
+      "zone": "소비자 전자제품 (DRAM·SSD 마진)",
       "severity": "보통"
     }
   ],
   "key_inflows": [
     {
-      "zone": "반도체·AI 섹터 (TSMC, SK하이닉스 등)",
+      "zone": "AI 반도체 (TSMC·엔비디아 생태계)",
       "momentum": "강함"
     },
     {
-      "zone": "에너지 섹터 (정유·가스 관련)",
+      "zone": "HBM·고대역폭 메모리 (SK하이닉스 직결)",
+      "momentum": "강함"
+    },
+    {
+      "zone": "코스피 대형주 (외국인 순매수 복귀)",
       "momentum": "보통"
-    },
-    {
-      "zone": "코스피 (외국인 자금 복귀)",
-      "momentum": "강함"
     }
   ],
   "korea_focus": {},
   "volatility": {
-    "vix": "20.61",
-    "vkospi": "미제공",
-    "fear_greed": "57 (Neutral)",
+    "vix": "20.17",
+    "vkospi": "데이터 미수신",
+    "fear_greed": "58 (Neutral)",
     "level": "중립"
   },
   "market_snapshot": {
-    "sp500": "6796.32",
-    "nasdaq": "22831.75",
-    "vix": "20.61",
+    "sp500": "6811.4",
+    "nasdaq": "22906.34",
+    "vix": "20.17",
     "kospi": "5808.62",
-    "krw_usd": "1485.68",
-    "nvda": "186.93"
+    "krw_usd": "1484.78",
+    "nvda": "187.74"
   },
   "actionable_watch": []
 }
