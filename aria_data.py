@@ -114,7 +114,51 @@ def fetch_yahoo_data():
     if core_na>=2: print("⚠️ 핵심 티커 "+str(core_na)+"개 N/A")
     return result
 
-def fetch_fear_greed(yahoo_data: dict = None) -> dict:
+def fetch_put_call_ratio() -> dict:
+    """SPY·QQQ 풋/콜 비율 (PCR) — CNN F&G 구성요소 직접 계산
+    PCR > 1.0 → 공포(헤지 수요 급증), < 0.7 → 탐욕(콜 과열)
+    yfinance 이미 설치됨 → 추가 패키지 불필요
+    """
+    result = {"pcr_spy": None, "pcr_qqq": None, "pcr_avg": None, "pcr_signal": "N/A"}
+    try:
+        import yfinance as yf
+        pcrs = []
+        for ticker in ["SPY", "QQQ"]:
+            try:
+                tk = yf.Ticker(ticker)
+                exps = tk.options[:2]   # 가까운 만기 2개만 (속도 최적화)
+                total_put = total_call = 0
+                for exp in exps:
+                    chain = tk.option_chain(exp)
+                    total_put  += chain.puts["volume"].fillna(0).sum()
+                    total_call += chain.calls["volume"].fillna(0).sum()
+                if total_call > 0:
+                    pcr = round(total_put / total_call, 3)
+                    pcrs.append(pcr)
+                    result["pcr_" + ticker.lower()] = pcr
+                    time.sleep(0.5)
+            except Exception:
+                pass
+
+        if pcrs:
+            avg = round(sum(pcrs) / len(pcrs), 3)
+            result["pcr_avg"] = avg
+            if avg >= 1.2:    result["pcr_signal"] = "극단공포"
+            elif avg >= 0.9:  result["pcr_signal"] = "공포"
+            elif avg >= 0.7:  result["pcr_signal"] = "중립"
+            elif avg >= 0.5:  result["pcr_signal"] = "탐욕"
+            else:             result["pcr_signal"] = "극단탐욕"
+            print("  PCR: SPY=" + str(result.get("pcr_spy","N/A"))
+                  + " QQQ=" + str(result.get("pcr_qqq","N/A"))
+                  + " 평균=" + str(avg) + " → " + result["pcr_signal"])
+    except ImportError:
+        print("  PCR: yfinance 미설치")
+    except Exception as e:
+        print("  PCR 실패: " + str(e)[:60])
+    return result
+
+
+
     """Fear&Greed 지수 수집 — 소스 우선순위:
     1. FearGreedChart.com (무료·무인증·주식시장 기반)
     2. CNN 직접 API (GitHub Actions에서 대부분 차단)
@@ -277,6 +321,8 @@ def fetch_fred_indicators() -> dict:
         "hy_spread":     None,   # 하이일드 스프레드 (높을수록 공포)
         "yield_curve":   None,   # 장단기 금리차 (음수=침체 신호)
         "consumer_sent": None,   # 미시간 소비자심리 (높을수록 낙관)
+        "rrp":           None,   # 역레포 잔고 (낮아지면 유동성 공급 → 상승 선행)
+        "dxy":           None,   # 달러인덱스 (높을수록 신흥국 부담)
         "fred_source":   False,
     }
     api_key = os.environ.get("FRED_API_KEY", "")
@@ -289,29 +335,37 @@ def fetch_fred_indicators() -> dict:
         "BAMLH0A0HYM2":    "hy_spread",
         "T10Y2Y":          "yield_curve",
         "UMCSENT":         "consumer_sent",
+        "RRPONTSYD":       "rrp",       # 역레포 잔고 (조달러)
+        "DTWEXBGS":        "dxy",       # 달러인덱스
     }
     base = "https://api.stlouisfed.org/fred/series/observations"
     success = 0
     for series_id, key in SERIES.items():
-        try:
-            r = httpx.get(base, params={
-                "series_id":  series_id,
-                "api_key":    api_key,
-                "sort_order": "desc",
-                "limit":      5,       # 최근 5개 중 유효값 사용
-                "file_type":  "json",
-            }, timeout=8)
-            if r.status_code != 200:
-                print("  FRED " + series_id + " → " + str(r.status_code))
-                continue
-            obs = [o for o in r.json().get("observations", []) if o.get("value","") != "."]
-            if obs:
-                val = round(float(obs[0]["value"]), 2)
-                result[key] = val
-                print("  FRED " + series_id + ": " + str(val))
-                success += 1
-        except Exception as e:
-            print("  FRED " + series_id + " 실패: " + str(e)[:50])
+        for attempt in range(2):   # 500 오류 시 1회 재시도
+            try:
+                r = httpx.get(base, params={
+                    "series_id":  series_id,
+                    "api_key":    api_key,
+                    "sort_order": "desc",
+                    "limit":      5,
+                    "file_type":  "json",
+                }, timeout=8)
+                if r.status_code == 500 and attempt == 0:
+                    time.sleep(1.5)   # 500이면 잠깐 대기 후 재시도
+                    continue
+                if r.status_code != 200:
+                    print("  FRED " + series_id + " → " + str(r.status_code))
+                    break
+                obs = [o for o in r.json().get("observations", []) if o.get("value","") not in (".", "")]
+                if obs:
+                    val = round(float(obs[0]["value"]), 2)
+                    result[key] = val
+                    print("  FRED " + series_id + ": " + str(val))
+                    success += 1
+                break
+            except Exception as e:
+                print("  FRED " + series_id + " 실패: " + str(e)[:50])
+                break
 
     result["fred_source"] = success >= 2
     return result
@@ -419,6 +473,7 @@ def fetch_all_market_data():
     market_status, data_label = _get_market_status(now)
     print("[Yahoo Finance] (" + data_label + ")"); yahoo=fetch_yahoo_data()
     print("[Fear & Greed]"); fg=fetch_fear_greed(yahoo)
+    print("[풋/콜 비율]"); pcr=fetch_put_call_ratio()
     print("[KRX 투자자 수급]"); krx_flow=fetch_krx_flow()
     print("[FRED 매크로지표]"); fred=fetch_fred_indicators()
     print("[FSC 금융위 API]"); fsc=fetch_fsc_data()
@@ -439,7 +494,13 @@ def fetch_all_market_data():
           "fred_hy_spread":   fred.get("hy_spread"),
           "fred_yield_curve": fred.get("yield_curve"),
           "fred_consumer":    fred.get("consumer_sent"),
+          "fred_rrp":         fred.get("rrp"),
+          "fred_dxy":         fred.get("dxy"),
           "fred_source":      fred.get("fred_source", False),
+          "pcr_spy":          pcr.get("pcr_spy"),
+          "pcr_qqq":          pcr.get("pcr_qqq"),
+          "pcr_avg":          pcr.get("pcr_avg"),
+          "pcr_signal":       pcr.get("pcr_signal","N/A"),
           "fsc_samsung":      fsc.get("samsung_fsc"),
           "fsc_sk_hynix":     fsc.get("sk_hynix_fsc"),
           "fsc_gold":         fsc.get("gold_price"),
@@ -500,6 +561,20 @@ def format_for_hunter(data):
     if fg_source_val == "vix_proxy":
         fg_str2 = "\n📌 Fear&Greed: VIX+모멘텀 자체계산 (신뢰도:" + fg_conf_val + ")"
 
+    # PCR + 역레포 + 달러인덱스
+    macro_extras = []
+    pcr_avg = data.get("pcr_avg")
+    pcr_sig = data.get("pcr_signal", "")
+    if pcr_avg is not None:
+        macro_extras.append("PCR=" + str(pcr_avg) + "(" + pcr_sig + ")")
+    rrp = data.get("fred_rrp")
+    if rrp is not None:
+        macro_extras.append("역레포=" + str(rrp) + "조달러")
+    dxy = data.get("fred_dxy")
+    if dxy is not None:
+        macro_extras.append("DXY=" + str(dxy))
+    macro_str = ("\n📊 " + " | ".join(macro_extras)) if macro_extras else ""
+
     try: krw = str(round(float(str(data.get("krw_usd","0")).replace(",","")))) + " KRW/USD"
     except: krw = str(data.get("krw_usd","N/A"))
 
@@ -533,7 +608,7 @@ def format_for_hunter(data):
 
     return (
         "\n\n## 시장 데이터 (" + data_label + ")\n수집: " + v("fetched_at")
-        + qual_str + status_str + flow_str + fg_str2 + "\n\n"
+        + qual_str + status_str + flow_str + fg_str2 + macro_str + "\n\n"
         "### 미국\n- S&P500: " + v("sp500") + " (" + vc("sp500") + ")\n"
         "- 나스닥: " + v("nasdaq") + " (" + vc("nasdaq") + ")\n"
         "- VIX: " + v("vix") + " (" + vc("vix") + ")\n"
