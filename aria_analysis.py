@@ -958,6 +958,22 @@ def run_verification() -> dict:
     accuracy["total"]   += len(judged)
     accuracy["correct"] += len(correct)
 
+    # ── strength_score 병행 집계 (기존 correct/total 호환 유지) ──────────
+    # confirmed: 1.0점 / 방향 일치 임계 미달(weak): 0.5점 / invalidated: 0점
+    def _strength(r):
+        if r["verdict"] != "confirmed": return 0.0
+        ev = r.get("evidence", "")
+        return 0.5 if "임계 미달" in ev or "방향 일치" in ev else 1.0
+
+    score_earned = sum(_strength(r) for r in judged)
+    accuracy.setdefault("score_total",  0.0)
+    accuracy.setdefault("score_earned", 0.0)
+    accuracy["score_total"]  += len(judged)
+    accuracy["score_earned"] += score_earned
+    accuracy["score_accuracy"] = round(
+        accuracy["score_earned"] / accuracy["score_total"] * 100, 1
+    ) if accuracy["score_total"] > 0 else 0.0
+
     # 오늘 카테고리별 결과 (날짜 인덱스용)
     today_cat: dict = {}
     for r in judged:
