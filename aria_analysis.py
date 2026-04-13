@@ -1122,23 +1122,77 @@ def get_active_lessons(max_lessons: int = 8) -> list:
     return sorted_l[:max_lessons]
 
 
-def build_lessons_prompt() -> str:
-    """오답 교훈(최대 4개) + 강점(최대 2개) 각 50자 이내 — 프롬프트 토큰 최소화
-    호출될 때마다 사용된 교훈의 applied 카운트를 증가시킴
+def _is_pattern_covered(lesson: dict, pattern_db: dict) -> bool:
+    """교훈이 pattern_db 통계로 이미 설명되면 True → lessons에서 제외
+
+    유지 기준 (False 반환 = lessons에 남김):
+    - severity=high: 항상 유지
+    - reinforced≥2: 반복 검증된 중요 교훈
+    - 특정 이벤트 이름: 블랙스완·실적·정책 등 재현 불가 사건
+    - strength 타입: 강점은 항상 유지
+
+    제거 기준 (True 반환 = pattern_db로 커버 가능):
+    - 레짐판단/추세판단/VIX 카테고리
+    + medium 이하 severity
+    + pattern_db에 해당 패턴 5회 이상 관측
     """
-    all_lessons = get_active_lessons(max_lessons=10)
+    sev  = lesson.get("severity", "medium")
+    cat  = lesson.get("category", "")
+    text = lesson.get("lesson", "").lower()
+
+    # 항상 유지 조건
+    if sev == "high":                       return False
+    if lesson.get("reinforced", 0) >= 2:   return False
+    if lesson.get("type") == "strength":   return False
+
+    # 구체적 이벤트 언급 → 통계로 재현 불가, 유지
+    _SPECIFIC = [
+        "deepseek", "fomc", "cpi", "pce", "관세", "이란", "휴전", "bok", "금통위",
+        "sk하이닉스", "삼성", "엔비디아", "nvda", "실적", "어닝", "파산",
+        "긴급", "블랙", "stargate", "역대", "충격", "서프라이즈",
+    ]
+    if any(kw in text for kw in _SPECIFIC): return False
+
+    # 통계적 패턴 카테고리만 제거 대상
+    if cat not in {"레짐판단", "추세판단", "VIX"}: return False
+
+    # pattern_db에 해당 카테고리 패턴이 충분히 쌓였으면 제거
+    patterns = pattern_db.get("patterns", {})
+    for key, val in patterns.items():
+        if val.get("n", 0) < 5: continue
+        if cat == "레짐판단" and any(k in key for k in ["선호", "회피", "혼조"]):
+            return True
+        if cat == "추세판단" and any(k in key for k in ["상승", "하락", "횡보"]):
+            return True
+        if cat == "VIX":
+            return True
+
+    return False
+
+
+def build_lessons_prompt() -> str:
+    """에이전트 교훈 주입 — pattern_db 중복 제거 후 예외 케이스만 전달
+
+    변경 전: 활성 교훈 최대 4개 (통계적 패턴 포함)
+    변경 후: pattern_db로 설명되는 반복 패턴 제외 → 이례적 사건만 최대 4개
+             에이전트가 받는 신호가 더 희소하고 명확해짐
+    """
+    pattern_db  = _load(PATTERN_DB_FILE, {})
+    all_lessons = get_active_lessons(max_lessons=14)  # 넓게 가져온 후 필터
     if not all_lessons: return ""
 
-    mistakes   = [l for l in all_lessons if l.get("type") != "strength"][:4]
-    strengths  = [l for l in all_lessons if l.get("type") == "strength"][:2]
-    used        = mistakes + strengths
+    # pattern_db로 커버되는 반복 패턴 교훈 제거
+    filtered  = [l for l in all_lessons if not _is_pattern_covered(l, pattern_db)]
+    mistakes  = [l for l in filtered if l.get("type") != "strength"][:4]
+    strengths = [l for l in filtered if l.get("type") == "strength"][:2]
+    used      = mistakes + strengths
 
     lines = []
 
     if mistakes:
         lines.append("\n\n## ARIA 과거 실수 교훈 (필수 반영)")
         for i, l in enumerate(mistakes, 1):
-            mark   = "!!!" if l["severity"]=="high" else "!!" if l["severity"]=="medium" else "!"
+            mark   = "!!!" if l["severity"] == "high" else "!!" if l["severity"] == "medium" else "!"
             lesson = l["lesson"][:50] + ("…" if len(l["lesson"]) > 50 else "")
             lines.append(str(i) + ". [" + mark + "] [" + l["category"] + "] " + lesson)
 
@@ -1148,23 +1202,24 @@ def build_lessons_prompt() -> str:
             lesson = l["lesson"][:50] + ("…" if len(l["lesson"]) > 50 else "")
             lines.append("✓ [" + l["category"] + "] " + lesson)
 
-    # applied 카운트 업데이트 — 실제로 프롬프트에 사용된 교훈 추적
+    # applied 카운트 업데이트
     if used:
         try:
             lf = LESSONS_FILE
             if lf.exists():
-                data = json.loads(lf.read_text(encoding="utf-8"))
-                used_lessons = set(l.get("lesson","") for l in used)
-                updated = False
-                for lesson_item in data.get("lessons", []):
-                    if lesson_item.get("lesson","") in used_lessons:
-                        lesson_item["applied"] = lesson_item.get("applied", 0) + 1
+                data     = json.loads(lf.read_text(encoding="utf-8"))
+                used_set = set(l.get("lesson", "") for l in used)
+                updated  = False
+                for item in data.get("lessons", []):
+                    if item.get("lesson", "") in used_set:
+                        item["applied"] = item.get("applied", 0) + 1
                         updated = True
                 if updated:
                     lf.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
         except Exception:
             pass
 
+    if not lines: return ""
     return "\n".join(lines)
 
 
@@ -1478,8 +1533,11 @@ def update_pattern_db(memory: list) -> dict:
 
 
 def get_pattern_context(memory: list, current_regime: str = "", current_trend: str = "") -> str:
-    """현재 레짐+추세 조합의 역사적 패턴을 한 줄 힌트로 반환
-    메모리가 3개 미만이거나 패턴 매칭 없으면 빈 문자열 반환
+    """현재 레짐+추세의 역사적 패턴을 에이전트용 컨텍스트로 반환
+    - 기본 전환 확률
+    - 최근 전환 발생일 (언제 비슷한 상황에서 반전됐나)
+    - 현재 연속 일수 (streak 위치)
+    - 감정지수 속도 (개선/악화 중인지)
     """
     if len(memory) < 3:
         return ""
@@ -1491,6 +1549,7 @@ def get_pattern_context(memory: list, current_regime: str = "", current_trend: s
     key = r + "+" + t
 
     count = cont = 0
+    last_reversal_date = ""
     for i, entry in enumerate(memory[:-1]):
         er = ("선호" if "선호" in entry.get("market_regime", "") else
               "회피" if "회피" in entry.get("market_regime", "") else "혼조")
@@ -1502,20 +1561,46 @@ def get_pattern_context(memory: list, current_regime: str = "", current_trend: s
                   "회피" if "회피" in memory[i + 1].get("market_regime", "") else "혼조")
             if nr == r:
                 cont += 1
+            else:
+                last_reversal_date = memory[i + 1].get("analysis_date", "")
 
     if count < 2:
         return ""
 
-    # 현재 연속 위험선호 일수 계산
+    cont_pct = round(cont / count * 100)
+
+    # ── 현재 연속 일수 (현재 레짐이 며칠째 이어지고 있는지)
     consec = 0
     for entry in reversed(memory):
-        if "선호" in entry.get("market_regime", ""):
+        er = ("선호" if "선호" in entry.get("market_regime", "") else
+              "회피" if "회피" in entry.get("market_regime", "") else "혼조")
+        if er == r:
             consec += 1
         else:
             break
 
-    cont_pct = round(cont / count * 100)
-    hint = "[패턴힌트] " + key + " " + str(count) + "회: 다음날유지" + str(cont_pct) + "%/전환" + str(100 - cont_pct) + "%"
+    # ── 감정지수 속도 (최근 3일 방향)
+    velocity = ""
+    try:
+        sf     = _load(SENTIMENT_FILE, {"history": []})
+        scores = [h["score"] for h in sf.get("history", [])[-4:]]
+        if len(scores) >= 3:
+            delta = scores[-1] - scores[-3]
+            if delta >= 8:    velocity = " 감정↑가속"
+            elif delta <= -8: velocity = " 감정↓가속"
+            elif delta >= 3:  velocity = " 감정↑"
+            elif delta <= -3: velocity = " 감정↓"
+    except Exception:
+        pass
+
+    # ── 힌트 조립
+    hint = "[패턴힌트] " + key + " " + str(count) + "회: 유지" + str(cont_pct) + "%/전환" + str(100 - cont_pct) + "%"
+    hint += " | 현재" + str(consec) + "일째" + velocity
+
+    if last_reversal_date:
+        hint += " | 최근전환:" + last_reversal_date[5:]   # MM-DD
+
     if consec >= 3:
-        hint += " ⚠️위험선호연속" + str(consec) + "일(블랙스완경계)"
+        hint += " ⚠️연속" + str(consec) + "일(블랙스완경계)"
+
     return hint
