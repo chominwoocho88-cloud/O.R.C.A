@@ -1,53 +1,49 @@
 {
-  "date": "2026-04-13",
-  "saved_at": "23:44 KST",
-  "market_regime": "혼조",
+  "date": "2026-04-14",
+  "saved_at": "00:06 KST",
+  "market_regime": "혼조 (위험선호 vs 스태그플레이션 전환 대기 대립)",
   "trend_phase": "상승추세",
-  "confidence": "보통",
-  "one_line_summary": "S&P500 6820·나스닥 22946 사상급 고점권 유지 속 호르무즈 봉쇄 발효로 유가 $102 돌파, VIX 19.91 경계선에서 AI반도체 강세와 에너지 충격 공존하는 혼조 국면",
+  "confidence": "낮음",
+  "one_line_summary": "나스닥·S&P500 사상최고권 3일+ 연속 상승이지만, EPS 가이던스 51개사 하향·유가 $102·Fed 금리인상 재검토 3중 악재로 스태그플레이션 전환 대기 — 위험선호 판정에 강력 반론 존재",
   "thesis_killers": [],
   "key_outflows": [
     {
-      "zone": "글로벌 에너지 수입국 (한국·일본·유럽)",
+      "zone": "에너지·헬스케어 섹터 (미국)",
       "severity": "높음"
     },
     {
-      "zone": "글로벌 항공·해운·물류 (비용 압박)",
-      "severity": "높음"
+      "zone": "미국 채권 (중단기)",
+      "severity": "보통"
     },
     {
-      "zone": "에너지 다소비 소비재·화학·항공 섹터",
+      "zone": "한국 경상수지 (원유 수입 비용 압박)",
       "severity": "보통"
     }
   ],
   "key_inflows": [
     {
-      "zone": "AI반도체 섹터 (엔비디아·SK하이닉스·삼성전자)",
+      "zone": "한국 반도체·수출주",
       "momentum": "강함"
     },
     {
-      "zone": "글로벌 금융주 (골드만삭스 중심)",
-      "momentum": "보통"
-    },
-    {
-      "zone": "에너지·해운 섹터 (단기)",
+      "zone": "미국 빅테크·AI 섹터",
       "momentum": "보통"
     }
   ],
   "korea_focus": {},
   "volatility": {
-    "vix": "19.91",
-    "vkospi": "데이터 미제공",
+    "vix": "19.98",
+    "vkospi": "N/A",
     "fear_greed": "59 (Neutral)",
     "level": "중립"
   },
   "market_snapshot": {
-    "sp500": "6820.51",
-    "nasdaq": "22946.59",
-    "vix": "19.91",
+    "sp500": "6822.42",
+    "nasdaq": "22971.06",
+    "vix": "19.98",
     "kospi": "5808.62",
-    "krw_usd": "1484.48",
-    "nvda": "188.46"
+    "krw_usd": "1485.04",
+    "nvda": "189.07"
   },
   "actionable_watch": []
 }
