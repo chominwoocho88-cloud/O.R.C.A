@@ -9,12 +9,11 @@ from pathlib import Path
 
 KST = timezone(timedelta(hours=9))
 
-SENTIMENT_FILE = Path("sentiment.json")
-ACCURACY_FILE  = Path("accuracy.json")
-ROTATION_FILE  = Path("rotation.json")
-MEMORY_FILE    = Path("memory.json")
-COST_FILE      = Path("aria_cost.json")
-OUTPUT_FILE    = Path("dashboard.html")
+from aria_paths import (
+    SENTIMENT_FILE, ACCURACY_FILE, ROTATION_FILE,
+    MEMORY_FILE, COST_FILE, DASHBOARD_FILE as OUTPUT_FILE,
+    PATTERN_DB_FILE,
+)
 
 
 def _load(path, default=None):
@@ -38,7 +37,7 @@ def build_dashboard():
     rotation = _load(ROTATION_FILE,  {"ranking": [], "today_flows": {}})
     memory   = _load(MEMORY_FILE,    [])
     cost     = _load(COST_FILE,      {})
-    pattern  = _load(Path("pattern_db.json"), {})
+    pattern  = _load(PATTERN_DB_FILE, {})
 
     current  = sent.get("current", {})
     hist_30  = sent.get("history", [])[-30:]
@@ -71,8 +70,9 @@ def build_dashboard():
     rot_values = [r[1] for r in ranking][:8]
 
     # ── 포트폴리오
-    market = _load(Path("aria_market_data.json"), {})
-    pf_file = Path("portfolio.json")
+    from aria_paths import DATA_FILE, PORTFOLIO_FILE
+    market = _load(DATA_FILE, {})
+    pf_file = PORTFOLIO_FILE
     if pf_file.exists():
         holdings = json.loads(pf_file.read_text(encoding="utf-8")).get("holdings", [])
     else:
