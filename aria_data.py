@@ -62,6 +62,7 @@ def fetch_krx_flow() -> dict:
             headers=headers,
             params={"basDd": date_str},
             timeout=12,
+            follow_redirects=True,  # http→https 302 리다이렉트 처리
         )
         if r.status_code == 200:
             rows = r.json().get("OutBlock_1", [])
@@ -126,7 +127,7 @@ def fetch_fear_greed(yahoo_data: dict = None) -> dict:
         r = httpx.get(
             "https://feargreedchart.com/api/?action=all",
             headers={"User-Agent": "Mozilla/5.0"},
-            timeout=10
+            timeout=3,  # 3초 초과 시 즉시 VIX fallback
         )
         d = r.json()
         score = d.get("score", {}).get("score")
