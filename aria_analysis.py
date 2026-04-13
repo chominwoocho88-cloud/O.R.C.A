@@ -17,13 +17,11 @@ import anthropic
 
 KST = timezone(timedelta(hours=9))
 
-SENTIMENT_FILE = Path("sentiment.json")
-ROTATION_FILE  = Path("rotation.json")
-BASELINE_FILE  = Path("morning_baseline.json")
-ACCURACY_FILE  = Path("accuracy.json")
-MEMORY_FILE    = Path("memory.json")
-WEIGHTS_FILE   = Path("aria_weights.json")
-LESSONS_FILE   = Path("aria_lessons.json")
+from aria_paths import (
+    SENTIMENT_FILE, ROTATION_FILE, BASELINE_FILE,
+    ACCURACY_FILE, MEMORY_FILE, WEIGHTS_FILE,
+    LESSONS_FILE, PATTERN_DB_FILE,
+)
 
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 MODEL   = "claude-sonnet-4-6"
@@ -408,7 +406,7 @@ def _send_sentiment_report(data: dict):
 # ══════════════════════════════════════════════════════════════════════════════
 def _load_portfolio() -> tuple:
     """portfolio.json에서 보유 종목 로드 — 파일 없으면 기본값 사용"""
-    pf_file = Path("portfolio.json")
+    from aria_paths import PORTFOLIO_FILE as pf_file
     if pf_file.exists():
         try:
             data = json.loads(pf_file.read_text(encoding="utf-8"))
@@ -955,8 +953,27 @@ def run_verification() -> dict:
     judged  = [r for r in results if r["verdict"] != "unclear"]
     correct = [r for r in judged if r["verdict"] == "confirmed"]
 
+    # ── 방향 정확도 분리 추적 ─────────────────────────────────────────
+    # dir_correct: 방향만 맞음 (임계 미달 포함) vs 완전 correct (크기까지)
+    def _is_direction_correct(r):
+        """confirmed면 방향 일치. invalidated면 방향 틀림."""
+        return r["verdict"] == "confirmed"
+
+    def _is_full_correct(r):
+        """confirmed이면서 임계 미달 표현 없음 = 방향+크기 모두"""
+        if r["verdict"] != "confirmed": return False
+        ev = r.get("evidence", "")
+        return "임계 미달" not in ev and "방향 일치" not in ev
+
+    dir_correct  = sum(1 for r in judged if _is_direction_correct(r))
+    full_correct = sum(1 for r in judged if _is_full_correct(r))
+
     accuracy["total"]   += len(judged)
     accuracy["correct"] += len(correct)
+    accuracy.setdefault("dir_total",   0)
+    accuracy.setdefault("dir_correct", 0)
+    accuracy["dir_total"]   += len(judged)
+    accuracy["dir_correct"] += dir_correct
 
     # ── strength_score 병행 집계 (기존 correct/total 호환 유지) ──────────
     # confirmed: 1.0점 / 방향 일치 임계 미달(weak): 0.5점 / invalidated: 0점
@@ -991,9 +1008,17 @@ def run_verification() -> dict:
             today_cat[cat]["correct"] += 1
 
     today_acc = round(len(correct) / len(judged) * 100, 1) if judged else 0
-    accuracy["history"].append({"date": today, "total": len(judged),
-                                 "correct": len(correct), "accuracy": today_acc})
-    accuracy["history"] = accuracy["history"][-90:]
+    dir_acc   = round(dir_correct / len(judged) * 100, 1) if judged else 0
+
+    # ── history 중복 날짜 방어 (날짜 dedup 후 append) ─────────────────
+    accuracy["history"] = [h for h in accuracy["history"] if h.get("date") != today]
+    accuracy["history"].append({
+        "date": today, "total": len(judged),
+        "correct": len(correct), "accuracy": today_acc,
+        "dir_correct": dir_correct, "dir_accuracy": dir_acc,
+        "full_correct": full_correct,
+    })
+    accuracy["history"] = sorted(accuracy["history"], key=lambda x: x.get("date",""))[-90:]
 
     # 날짜별 카테고리 스냅샷 저장 (최근 30일 시간 감쇠에 사용)
     if "history_by_category" not in accuracy:
@@ -1013,13 +1038,18 @@ def run_verification() -> dict:
     accuracy["strong_areas"] = strong
     accuracy["weak_areas"]   = weak
 
+    # 방향 정확도 요약
+    d_total   = accuracy.get("dir_total", 0)
+    d_correct = accuracy.get("dir_correct", 0)
+    accuracy["dir_accuracy_pct"] = round(d_correct / d_total * 100, 1) if d_total > 0 else 0
+
     _save(ACCURACY_FILE, accuracy)
-    _send_verification_report(results, accuracy, today_acc)
+    _send_verification_report(results, accuracy, today_acc, dir_acc)
     print("Done. Today accuracy: " + str(today_acc) + "%")
     return accuracy
 
 
-def _send_verification_report(results, accuracy, today_acc):
+def _send_verification_report(results, accuracy, today_acc, dir_acc=0):
     try:
         from aria_notify import send_message
     except ImportError:
@@ -1027,14 +1057,18 @@ def _send_verification_report(results, accuracy, today_acc):
 
     judged    = [r for r in results if r["verdict"] != "unclear"]
     total_acc = round(accuracy["correct"] / accuracy["total"] * 100, 1) if accuracy["total"] > 0 else 0
-    lines     = ["<b>📋 어제 예측 채점</b>", "<code>" + _today() + "</code>", ""]
+    d_total   = accuracy.get("dir_total", 0)
+    d_pct     = accuracy.get("dir_accuracy_pct", 0)
+
+    lines = ["<b>📋 어제 예측 채점</b>", "<code>" + _today() + "</code>", ""]
     for r in results:
         em = "✅" if r["verdict"] == "confirmed" else "❌" if r["verdict"] == "invalidated" else "❓"
         lines.append(em + " <b>" + r.get("event", "")[:40] + "</b>")
         if r.get("evidence"): lines.append("  <i>" + r["evidence"] + "</i>")
     lines += ["",
               "오늘: <b>" + str(today_acc) + "%</b> (" + str(len([r for r in results if r["verdict"]=="confirmed"])) + "/" + str(len(judged)) + ")",
-              "누적: <b>" + str(total_acc) + "%</b> (" + str(accuracy["correct"]) + "/" + str(accuracy["total"]) + ")"]
+              "  방향정확도: <b>" + str(dir_acc) + "%</b>",
+              "누적 방향: <b>" + str(d_pct) + "%</b> | 종합: <b>" + str(total_acc) + "%</b> (" + str(accuracy["correct"]) + "/" + str(accuracy["total"]) + ")"]
     if accuracy.get("strong_areas"): lines.append("💪 강점: " + ", ".join(accuracy["strong_areas"][:3]))
     if accuracy.get("weak_areas"):   lines.append("⚠️ 약점: " + ", ".join(accuracy["weak_areas"][:3]))
     send_message("\n".join(lines))
@@ -1117,7 +1151,7 @@ def build_lessons_prompt() -> str:
     # applied 카운트 업데이트 — 실제로 프롬프트에 사용된 교훈 추적
     if used:
         try:
-            lf = Path("aria_lessons.json")
+            lf = LESSONS_FILE
             if lf.exists():
                 data = json.loads(lf.read_text(encoding="utf-8"))
                 used_lessons = set(l.get("lesson","") for l in used)
@@ -1333,3 +1367,155 @@ def extract_monthly_lessons(memory_data: list, accuracy_data: dict):
     if t >= 10 and c / t < 0.5:
         add_lesson("monthly","전반","지난달 정확도 " + str(round(c/t*100)) + "% — Devil 반론 더 강하게 반영.","high")
     print("Monthly lessons extracted")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# COMPACT MEMORY & PATTERN DB
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+def compress_memory_entry(entry: dict) -> str:
+    """Full report JSON → 1줄 압축 문자열 (~120자)
+    형식: [MM-DD M] 선호↑ C:M S:74 | 핵심이벤트 | ⚠주요리스크
+    """
+    d    = entry.get("analysis_date", "?")[5:]
+    m    = entry.get("mode", "MORNING")[0]
+    reg  = entry.get("market_regime", "?")
+    r    = "선호" if "선호" in reg else "회피" if "회피" in reg else "혼조"
+    t    = entry.get("trend_phase", "?")
+    tr   = "↑" if "상승" in t else "↓" if "하락" in t else "→"
+    conf = entry.get("confidence_overall", "?")
+    c    = "H" if conf == "높음" else "L" if conf == "낮음" else "M"
+
+    # 감정지수 (sentiment.json 조회)
+    s_score = ""
+    try:
+        sf = _load(SENTIMENT_FILE, {"history": []})
+        h  = next((h for h in sf.get("history", []) if h["date"] == entry.get("analysis_date", "")), None)
+        if h:
+            s_score = "S:" + str(h["score"])
+    except Exception:
+        pass
+
+    # 핵심 이벤트 (첫 헤드라인 32자)
+    hl = entry.get("top_headlines", [])
+    ev = hl[0].get("headline", "")[:32] if hl else ""
+
+    # 주요 리스크 (첫 반론 24자)
+    ct = entry.get("counterarguments", []) or []
+    rk = ct[0].get("against", "")[:24] if ct else ""
+
+    parts = ["[" + d + m + "]", r + tr, "C:" + c, s_score, ev, "⚠" + rk]
+    return " | ".join(p for p in parts if p)
+
+
+def build_compact_history(memory: list, n: int = 7) -> str:
+    """최근 n일 메모리를 에이전트 컨텍스트용 압축 문자열로 변환
+    기존 full JSON 대비 ~90% 토큰 절감 (2개 전달 → 7개 전달 가능)
+    """
+    if not memory:
+        return ""
+    recent = memory[-n:]
+    lines  = ["## 최근 분석 이력 (압축)"]
+    for e in recent:
+        lines.append(compress_memory_entry(e))
+    return "\n".join(lines)
+
+
+def update_pattern_db(memory: list) -> dict:
+    """레짐×추세 조합의 역사적 전환 패턴을 pattern_db.json에 갱신
+    에이전트에게 '이 레짐 다음날 어떻게 됐었나' 힌트 제공
+    """
+    patterns: dict = {}
+
+    for i, entry in enumerate(memory[:-1]):
+        r = ("선호" if "선호" in entry.get("market_regime", "") else
+             "회피" if "회피" in entry.get("market_regime", "") else "혼조")
+        t = ("상승" if "상승" in entry.get("trend_phase", "") else
+             "하락" if "하락" in entry.get("trend_phase", "") else "횡보")
+        key = r + "+" + t
+
+        nxt_r = ("선호" if "선호" in memory[i+1].get("market_regime", "") else
+                 "회피" if "회피" in memory[i+1].get("market_regime", "") else "혼조")
+
+        p = patterns.setdefault(key, {"n": 0, "cont": 0, "rev": 0})
+        p["n"] += 1
+        if nxt_r == r:
+            p["cont"] += 1
+        else:
+            p["rev"] += 1
+
+    # 연속 위험선호 후 급반전 (블랙스완 통계)
+    consec, reversal_streaks = 0, []
+    for entry in memory:
+        if "선호" in entry.get("market_regime", ""):
+            consec += 1
+        else:
+            if consec >= 3:
+                reversal_streaks.append(consec)
+            consec = 0
+
+    # 에이전트 주입용 요약 (패턴당 1줄)
+    summary = []
+    for k, v in patterns.items():
+        if v["n"] >= 3:
+            pct = round(v["cont"] / v["n"] * 100)
+            summary.append(k + ": " + str(v["n"]) + "회→유지" + str(pct) + "%/전환" + str(100 - pct) + "%")
+
+    result = {
+        "last_updated": _today(),
+        "patterns": patterns,
+        "summary": summary,
+        "blackswan": {
+            "reversal_count": len(reversal_streaks),
+            "avg_streak_before_reversal": round(
+                sum(reversal_streaks) / len(reversal_streaks), 1
+            ) if reversal_streaks else 0,
+        },
+    }
+    _save(PATTERN_DB_FILE, result)
+    return result
+
+
+def get_pattern_context(memory: list, current_regime: str = "", current_trend: str = "") -> str:
+    """현재 레짐+추세 조합의 역사적 패턴을 한 줄 힌트로 반환
+    메모리가 3개 미만이거나 패턴 매칭 없으면 빈 문자열 반환
+    """
+    if len(memory) < 3:
+        return ""
+
+    r = ("선호" if "선호" in current_regime else
+         "회피" if "회피" in current_regime else "혼조")
+    t = ("상승" if "상승" in current_trend else
+         "하락" if "하락" in current_trend else "횡보")
+    key = r + "+" + t
+
+    count = cont = 0
+    for i, entry in enumerate(memory[:-1]):
+        er = ("선호" if "선호" in entry.get("market_regime", "") else
+              "회피" if "회피" in entry.get("market_regime", "") else "혼조")
+        et = ("상승" if "상승" in entry.get("trend_phase", "") else
+              "하락" if "하락" in entry.get("trend_phase", "") else "횡보")
+        if er + "+" + et == key:
+            count += 1
+            nr = ("선호" if "선호" in memory[i + 1].get("market_regime", "") else
+                  "회피" if "회피" in memory[i + 1].get("market_regime", "") else "혼조")
+            if nr == r:
+                cont += 1
+
+    if count < 2:
+        return ""
+
+    # 현재 연속 위험선호 일수 계산
+    consec = 0
+    for entry in reversed(memory):
+        if "선호" in entry.get("market_regime", ""):
+            consec += 1
+        else:
+            break
+
+    cont_pct = round(cont / count * 100)
+    hint = "[패턴힌트] " + key + " " + str(count) + "회: 다음날유지" + str(cont_pct) + "%/전환" + str(100 - cont_pct) + "%"
+    if consec >= 3:
+        hint += " ⚠️위험선호연속" + str(consec) + "일(블랙스완경계)"
+    return hint
