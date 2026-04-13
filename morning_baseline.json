@@ -1,52 +1,58 @@
 {
-  "date": "2026-04-12",
-  "saved_at": "21:55 KST",
-  "market_regime": "혼조 – AI·반도체 모멘텀 vs 지정학·유가·달러 강세·외국인 이탈 교차 압력",
-  "trend_phase": "횡보추세",
+  "date": "2026-04-13",
+  "saved_at": "09:06 KST",
+  "market_regime": "위험선호(경계)",
+  "trend_phase": "상승추세",
   "confidence": "보통",
   "one_line_summary": "",
   "thesis_killers": [],
   "key_outflows": [
     {
-      "zone": "KOSPI 외국인 포지션",
+      "zone": "한국 시장 — 외국인 자금",
       "severity": "높음"
     },
     {
-      "zone": "에너지 수입 의존 산업(항공·화학·운송)",
+      "zone": "에너지 소비 섹터 (항공·운송·화학)",
       "severity": "높음"
     },
     {
-      "zone": "중동 노출 신흥시장 자산 전반",
+      "zone": "채권 (미 10년물 롱 포지션)",
       "severity": "보통"
     }
   ],
   "key_inflows": [
     {
-      "zone": "AI 인프라·데이터센터 반도체(SK하이닉스, Broadcom, Nvidia)",
-      "momentum": "강함(단기 모멘텀), 구조적 확정 미확인"
+      "zone": "AI·반도체 섹터 (엔비디아·브로드컴·SK하이닉스)",
+      "momentum": "강함"
     },
     {
-      "zone": "미국 에너지 섹터(원유 관련주)",
-      "momentum": "강함(공급 충격 기반, 지속성 불확실)"
-    },
-    {
-      "zone": "한국 수출주(반도체·IT)",
+      "zone": "코스피 (경상수지 + 모멘텀)",
       "momentum": "형성중"
+    },
+    {
+      "zone": "미국 대형 성장주 (기술·나스닥)",
+      "momentum": "강함"
     }
   ],
-  "korea_focus": {},
+  "korea_focus": {
+    "krw_usd": "1497.88",
+    "kospi_flow": "코스피 5858.87 — 주간 17년 최대 상승, 그러나 외국인 3개월 연속 순매도 지속. 수급 구조상 국내 투자자 주도 랠리",
+    "sk_hynix": "SK하이닉스 +2.91% — CoreWeave-Meta AI 딜 수혜, HBM 수요 내러티브 강화. 단 나스닥 대비 베타 1.36x로 조정 시 과반응 리스크",
+    "samsung": "반도체 수출 호조에 따른 간접 수혜 추정. 별도 개별 데이터 미제공",
+    "assessment": "코스피 17년 최대 주간 상승은 인상적이나, KRW/USD 1497.88(약세 지속) + 외국인 역대 최고 순매도의 조합은 구조적 취약성을 시사. 반도체 수출 펀더멘털은 양호하나, 외국인 복귀 없이는 랠리 지속성 의문. 경상수지 역대 흑자는 중기적 긍정 요인이나 단기 수급 구조와 괴리"
+  },
   "volatility": {
     "vix": "19.23",
-    "vkospi": "KIS 미연결(데이터 없음)",
-    "fear_greed": "49 (Neutral)",
-    "level": "중립-공포 경계"
+    "vkospi": "데이터 미제공",
+    "fear_greed": "49",
+    "level": "중립"
   },
   "market_snapshot": {
     "sp500": "6816.89",
     "nasdaq": "22902.9",
     "vix": "19.23",
     "kospi": "5858.87",
-    "krw_usd": "1482.7",
+    "krw_usd": "1497.88",
     "nvda": "188.63"
   },
   "actionable_watch": []
