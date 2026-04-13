@@ -23,137 +23,71 @@ def _fetch_one(ticker,retries=2):
     return "N/A",""
 
 def fetch_krx_flow() -> dict:
-    """KRX OpenAPI — 투자자별 매매동향 (외국인·기관·개인 순매수)
-    엔드포인트: data-dbg.krx.co.kr/svc/apis/sto/invstrtrdtrend_stk
-    AUTH_KEY 헤더 방식, basDd=YYYYMMDD 파라미터
-    당일 최종 데이터는 오후 6시 이후 제공 (장중에는 직전 거래일 데이터)
+    """KRX OpenAPI — 실제 제공 데이터로 한국 시장 보조 지표 수집
+    ※ 투자자별 매매동향은 KRX OpenAPI 미제공 (유료 별도 상품)
+    대신: KOSPI 지수 시세 (Yahoo Finance 교차검증용)
+
+    엔드포인트: data-dbg.krx.co.kr/svc/apis/idx/kospi_dd_trd
+    AUTH_KEY 헤더, basDd=YYYYMMDD 파라미터, GET 방식
     """
     result = {
         "foreign_net": "N/A", "institution_net": "N/A", "individual_net": "N/A",
         "foreign_buy": "N/A", "foreign_sell": "N/A",
         "source": "none", "date": "N/A",
+        "krx_kospi_close": "N/A", "krx_kospi_change": "N/A",
     }
     api_key = os.environ.get("KRX_API_KEY", "")
     if not api_key:
         print("  KRX API 키 없음 (KRX_API_KEY 미설정)")
         return result
 
-    now  = datetime.now(KST)
-    # 장중에는 직전 거래일, 오후 6시 이후에는 당일
-    if now.hour < 18:
-        # 직전 거래일
-        d = now
-        for _ in range(5):
-            d = d - timedelta(days=1)
-            if d.weekday() < 5:  # 월~금
-                break
-        date_str = d.strftime("%Y%m%d")
-    else:
-        date_str = now.strftime("%Y%m%d")
+    now = datetime.now(KST)
+    # 직전 거래일 계산
+    d = now if now.hour >= 18 else now - timedelta(days=1)
+    for _ in range(7):
+        if d.weekday() < 5:
+            break
+        d = d - timedelta(days=1)
+    date_str = d.strftime("%Y%m%d")
 
     headers = {
         "AUTH_KEY": api_key.strip(),
-        "Content-Type": "application/json",
         "Accept": "application/json",
     }
 
-    # 투자자별 거래 실적 — 코스피 전체 시장 기준
-    _CANDIDATE_ENDPOINTS = [
-        "https://data-dbg.krx.co.kr/svc/apis/sto/invstrtrdtrend_stk",  # 1순위
-        "https://data-dbg.krx.co.kr/svc/apis/sto/stk_invsr_trd_krx",   # 2순위
-        "https://data-dbg.krx.co.kr/svc/apis/sto/stk_invstrtrd",        # 3순위
-    ]
-
-    for url in _CANDIDATE_ENDPOINTS:
-        try:
-            r = httpx.post(
-                url,
-                headers=headers,
-                json={"basDd": date_str, "mktId": "STK"},  # STK = 코스피
-                timeout=12,
-            )
-            if r.status_code == 404:
-                continue  # 다음 후보 시도
-            if r.status_code != 200:
-                print("  KRX " + url.split("/")[-1] + " → " + str(r.status_code))
-                continue
-
+    # KOSPI 일별 시세 (실제 제공 엔드포인트)
+    try:
+        r = httpx.get(
+            "http://data-dbg.krx.co.kr/svc/apis/idx/kospi_dd_trd",
+            headers=headers,
+            params={"basDd": date_str},
+            timeout=12,
+        )
+        if r.status_code == 200:
             rows = r.json().get("OutBlock_1", [])
-            if not rows:
-                # GET 방식도 시도
-                r2 = httpx.get(url, headers=headers,
-                               params={"basDd": date_str}, timeout=12)
-                rows = r2.json().get("OutBlock_1", []) if r2.status_code == 200 else []
+            if rows:
+                # 종합(KOSPI) 행 찾기
+                for row in rows:
+                    nm = str(row.get("IDX_NM", "") or row.get("idxNm",""))
+                    if "종합" in nm or "KOSPI" in nm.upper():
+                        close = str(row.get("CLSPRC","") or row.get("clsPrc",""))
+                        fluc  = str(row.get("FLUC_RT","") or row.get("flucRt",""))
+                        if close:
+                            result["krx_kospi_close"]  = close
+                            result["krx_kospi_change"] = fluc
+                            result["source"]           = "krx_api"
+                            result["date"]             = date_str
+                            print("  KRX KOSPI(" + date_str + "): " + close + " (" + fluc + "%)")
+                            break
+        else:
+            print("  KRX API → " + str(r.status_code))
+    except Exception as e:
+        print("  KRX API 실패: " + str(e)[:60])
 
-            if not rows:
-                continue
+    # 투자자별 수급은 미제공 — Hunter 웹서치로 보완
+    if result["source"] == "none":
+        print("  KRX 투자자 수급: OpenAPI 미제공 (유료 별도 상품)")
 
-            # 투자자 구분 코드로 외국인·기관·개인 추출
-            # 컬럼명은 API에 따라 다를 수 있으므로 유연하게 파싱
-            def _net(row):
-                """순매수 금액 (매수-매도, 억원 단위)"""
-                for key in ["NETBUY_AMT", "NET_BUY_AMT", "SELN_BUYNG_QTY", "순매수"]:
-                    if key in row:
-                        try: return int(str(row[key]).replace(",",""))
-                        except: pass
-                # 매수 - 매도 직접 계산
-                buy = sell = 0
-                for bk in ["BUY_AMT","BUYNG_AMT","매수"]:
-                    if bk in row:
-                        try: buy = int(str(row[bk]).replace(",","")); break
-                        except: pass
-                for sk in ["SELL_AMT","SELN_AMT","매도"]:
-                    if sk in row:
-                        try: sell = int(str(row[sk]).replace(",","")); break
-                        except: pass
-                return buy - sell
-
-            def _invstr_type(row):
-                for key in ["INVSTR_TP_CD","INVSTR_CD","투자자구분코드","투자자"]:
-                    if key in row: return str(row[key])
-                return ""
-
-            for row in rows:
-                tp = _invstr_type(row)
-                net = _net(row)
-                net_str = ("+" if net >= 0 else "") + str(round(net / 1e8, 1)) + "억"
-
-                # 외국인: 코드 "5000" 또는 이름에 "외국" 포함
-                if tp in ("5000","9000") or "외국" in str(row.get("INVSTR_NM","")):
-                    result["foreign_net"] = net_str
-                    # 매도 별도 저장
-                    for sk in ["SELL_AMT","SELN_AMT"]:
-                        if sk in row:
-                            try:
-                                result["foreign_sell"] = str(round(int(str(row[sk]).replace(",","")) / 1e8, 1)) + "억"
-                            except: pass
-                    for bk in ["BUY_AMT","BUYNG_AMT"]:
-                        if bk in row:
-                            try:
-                                result["foreign_buy"] = str(round(int(str(row[bk]).replace(",","")) / 1e8, 1)) + "억"
-                            except: pass
-
-                # 기관: 코드 "4000" 또는 이름에 "기관" 포함
-                elif tp in ("4000","3000") or "기관" in str(row.get("INVSTR_NM","")):
-                    result["institution_net"] = net_str
-
-                # 개인: 코드 "1000" 또는 이름에 "개인" 포함
-                elif tp == "1000" or "개인" in str(row.get("INVSTR_NM","")):
-                    result["individual_net"] = net_str
-
-            if result["foreign_net"] != "N/A":
-                result["source"] = "krx_api"
-                result["date"]   = date_str
-                print("  KRX 투자자 수급: 외국인 " + result["foreign_net"]
-                      + " | 기관 " + result["institution_net"]
-                      + " | 개인 " + result["individual_net"])
-                return result
-
-        except Exception as e:
-            print("  KRX " + url.split("/")[-1][:30] + " 실패: " + str(e)[:50])
-            continue
-
-    print("  KRX 수급 데이터 없음 (엔드포인트 확인 필요)")
     return result
 
 
