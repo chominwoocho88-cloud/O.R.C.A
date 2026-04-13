@@ -95,6 +95,7 @@ jobs:
           GH_TOKEN:          ${{ secrets.GH_TOKEN }}
           GH_REPO:           ${{ secrets.GH_REPO }}
           KRX_API_KEY:       ${{ secrets.KRX_API_KEY }}
+          FRED_API_KEY:      ${{ secrets.FRED_API_KEY }}
         run: |
           python aria_main.py
           echo "ARIA_MODE=MORNING" >> $GITHUB_ENV
@@ -115,6 +116,7 @@ jobs:
           GH_TOKEN:          ${{ secrets.GH_TOKEN }}
           GH_REPO:           ${{ secrets.GH_REPO }}
           KRX_API_KEY:       ${{ secrets.KRX_API_KEY }}
+          FRED_API_KEY:      ${{ secrets.FRED_API_KEY }}
         run: |
           python3 << 'EOF'
           from datetime import datetime
