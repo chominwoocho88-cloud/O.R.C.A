@@ -290,7 +290,16 @@ def calculate_sentiment(report: dict, market_data: dict = None) -> dict:
             components_fred.append(cs_s)
             fred_indicators["consumer_sent"] = str(cs) + " → " + str(cs_s)
 
-        if components_fred:
+        # PCR (풋/콜 비율) — 1.2 이상=극단공포, 0.5 이하=극단탐욕
+        pcr = market_data.get("pcr_avg")
+        if pcr is not None:
+            if pcr >= 1.2:    pcr_s = 10
+            elif pcr >= 1.0:  pcr_s = 25
+            elif pcr >= 0.8:  pcr_s = 45
+            elif pcr >= 0.6:  pcr_s = 65
+            else:             pcr_s = 85
+            components_fred.append(pcr_s)
+            fred_indicators["pcr"] = str(pcr) + " → " + str(pcr_s)
             fred_score = round(sum(components_fred) / len(components_fred))
             print("  FRED 보조감정지수: " + str(fred_score)
                   + " | " + " | ".join(k + "=" + v for k, v in fred_indicators.items()))
