@@ -402,9 +402,12 @@ Return ONLY valid JSON in Korean. No markdown.
   "agent_consensus": {"agreed":[],"disputed":[]},
   "meta_improvement": {"missed_last_time":"","accuracy_review":"","reweighting":"","aria_version":""},
   "tomorrow_setup": "",
-  "one_line_summary": "",
+  "one_line_summary": "⚠️필수: 오늘 시장을 한 문장으로. 예) '나스닥 +1.2% 반등에도 코스피 외국인 매도 지속, 혼조세 유지'",
   "actionable_watch": []
-}"""
+}
+
+CRITICAL: one_line_summary는 반드시 30자 이상 한국어 문장으로 채워야 합니다.
+비워두거나 빈 문자열("")을 쓰는 것은 오류입니다."""
 
 
 def agent_reporter(hunter: dict, analyst: dict, devil: dict,
@@ -508,6 +511,17 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
     )
     result = parse_json(raw)
     result["mode"] = mode
+
+    # ── one_line_summary 비어있으면 자동 생성 ─────────────────────────────
+    if not result.get("one_line_summary", "").strip():
+        regime  = result.get("market_regime", "")
+        trend   = result.get("trend_phase", "")
+        conf    = result.get("confidence_overall", "")
+        result["one_line_summary"] = (
+            today_str + " " + regime + " / " + trend
+            + (" | 신뢰도:" + conf if conf else "")
+        )
+        console.print("  [yellow]⚠️ one_line_summary 자동 생성됨[/yellow]")
 
     # ── thesis_killers 품질 후처리 — 숫자 없는 항목 자동 플래그 ──────────
     _VAGUE_KW = {"모멘텀 유지","심리 개선","협상 분위기","외국인 복귀",
