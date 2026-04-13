@@ -202,7 +202,7 @@ def main():
             pass
 
         # 데이터 품질 불량 시 분석 중단 (핵심 티커 2개 이상 N/A)
-        if market_data.get("_data_quality") == "poor":
+        if market_data.get("data_quality") == "poor":
             msg = "⚠️ 핵심 시장 데이터 수집 실패 — 분석 신뢰도 불충분으로 오늘 실행 중단"
             console.print("[bold red]" + msg + "[/bold red]")
             send_message("⚠️ <b>ARIA 데이터 오류</b>\n\n" + msg + "\n\nYahoo Finance 응답 불안정. 내일 자동 재시도.")
@@ -234,6 +234,15 @@ def main():
             print("\n=== Verifying yesterday predictions ===")
             accuracy = run_verification()
 
+            # 검증 완료 후 즉시 가중치 업데이트 (오늘 결과 반영)
+            try:
+                from aria_analysis import update_weights_from_accuracy
+                changes = update_weights_from_accuracy(accuracy)
+                if changes:
+                    print("  📊 가중치 업데이트:", " | ".join(changes[:3]))
+            except Exception as e:
+                print(f"  가중치 업데이트 스킵: {e}")
+
         # 6. 4-Agent 파이프라인
         send_start_notification()
         hunter  = agent_hunter(today, MODE, market_data)
@@ -246,7 +255,7 @@ def main():
         report["analysis_time"] = _now().strftime("%H:%M KST")
 
         # 데이터 품질 정보 리포트에 기록
-        report["_data_quality"] = market_data.get("_data_quality", "ok")
+        report["data_quality"] = market_data.get("data_quality", "ok")
 
         # 7. 레짐 드리프트 감지
         drift = get_regime_drift(report.get("market_regime", ""))
