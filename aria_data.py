@@ -158,7 +158,7 @@ def fetch_put_call_ratio() -> dict:
     return result
 
 
-
+def fetch_fear_greed(yahoo_data: dict = None) -> dict:
     """Fear&Greed 지수 수집 — 소스 우선순위:
     1. FearGreedChart.com (무료·무인증·주식시장 기반)
     2. CNN 직접 API (GitHub Actions에서 대부분 차단)
