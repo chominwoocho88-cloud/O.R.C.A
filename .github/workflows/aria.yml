@@ -93,8 +93,7 @@ jobs:
           TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
           GH_TOKEN:          ${{ secrets.GH_TOKEN }}
           GH_REPO:           ${{ secrets.GH_REPO }}
-        run: |
-          python aria_main.py
+          KRX_API_KEY:       ${{ secrets.KRX_API_KEY }}
           echo "ARIA_MODE=MORNING" >> $GITHUB_ENV
 
       # ── EVENING (미장 30분 전 — 서머타임 자동 대응) ─────────────────────────
@@ -112,6 +111,7 @@ jobs:
           TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
           GH_TOKEN:          ${{ secrets.GH_TOKEN }}
           GH_REPO:           ${{ secrets.GH_REPO }}
+          KRX_API_KEY:       ${{ secrets.KRX_API_KEY }}
         run: |
           python3 << 'EOF'
           from datetime import datetime
