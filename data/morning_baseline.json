@@ -1,53 +1,53 @@
 {
   "date": "2026-04-13",
-  "saved_at": "23:29 KST",
+  "saved_at": "23:44 KST",
   "market_regime": "혼조",
   "trend_phase": "상승추세",
   "confidence": "보통",
-  "one_line_summary": "S&P500 6817·나스닥 22941 고점권 유지 중이나 호르무즈 봉쇄·유가 $102·LNG +80% 에너지 충격이 Fed PCE 2.7% 상향과 맞물려 인플레 재점화 우려 부상, VIX 20.16 경계권에서 AI반도체 강세와 에너지 스태그플레이션 리스크 사이 섹터 로테이션 가속 국면",
+  "one_line_summary": "S&P500 6820·나스닥 22946 사상급 고점권 유지 속 호르무즈 봉쇄 발효로 유가 $102 돌파, VIX 19.91 경계선에서 AI반도체 강세와 에너지 충격 공존하는 혼조 국면",
   "thesis_killers": [],
   "key_outflows": [
     {
-      "zone": "금융주 — Goldman Sachs 등 대형 IB",
-      "severity": "보통"
-    },
-    {
-      "zone": "에너지 수입 의존 소비재·항공·화학 섹터",
+      "zone": "글로벌 에너지 수입국 (한국·일본·유럽)",
       "severity": "높음"
     },
     {
-      "zone": "장기채·금리 민감 성장주(고밸류 비AI 기술주)",
+      "zone": "글로벌 항공·해운·물류 (비용 압박)",
+      "severity": "높음"
+    },
+    {
+      "zone": "에너지 다소비 소비재·화학·항공 섹터",
       "severity": "보통"
     }
   ],
   "key_inflows": [
     {
-      "zone": "AI반도체 — TSMC·삼성전자·SK하이닉스",
+      "zone": "AI반도체 섹터 (엔비디아·SK하이닉스·삼성전자)",
       "momentum": "강함"
     },
     {
-      "zone": "에너지 생산주 — OXY·CVX·국내 E&P",
-      "momentum": "강함"
+      "zone": "글로벌 금융주 (골드만삭스 중심)",
+      "momentum": "보통"
     },
     {
-      "zone": "방산·헤지 자산(금·방산주)",
+      "zone": "에너지·해운 섹터 (단기)",
       "momentum": "보통"
     }
   ],
   "korea_focus": {},
   "volatility": {
-    "vix": "20.16",
+    "vix": "19.91",
     "vkospi": "데이터 미제공",
-    "fear_greed": "58 (Neutral)",
+    "fear_greed": "59 (Neutral)",
     "level": "중립"
   },
   "market_snapshot": {
-    "sp500": "6817.77",
-    "nasdaq": "22941.95",
-    "vix": "20.16",
+    "sp500": "6820.51",
+    "nasdaq": "22946.59",
+    "vix": "19.91",
     "kospi": "5808.62",
-    "krw_usd": "1484.98",
-    "nvda": "188.42"
+    "krw_usd": "1484.48",
+    "nvda": "188.46"
   },
   "actionable_watch": []
 }
