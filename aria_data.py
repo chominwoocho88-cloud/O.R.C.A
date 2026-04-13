@@ -4,7 +4,7 @@ from pathlib import Path
 os.environ["PYTHONIOENCODING"] = "utf-8"
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
-KST=timezone(timedelta(hours=9)); from aria_paths import COST_FILE, DATA_FILE
+KST=timezone(timedelta(hours=9)); COST_FILE=Path("aria_cost.json"); DATA_FILE=Path("aria_market_data.json")
 _CORE={"sp500","nasdaq","vix","kospi"}
 
 def _fetch_one(ticker,retries=2):
@@ -203,8 +203,8 @@ def format_for_hunter(data):
     fg_str2 = ""
     if fg_source_val == "vix_proxy":
         fg_str2 = f"\n📌 Fear&Greed: VIX+모멘텀 자체계산 (CNN 차단, 공식 지수 아님 · 신뢰도:{fg_conf_val})"
-    try: krw=str(round(float(krw)))+" KRW/USD"
-    except: pass
+    try: krw = str(round(float(str(data.get("krw_usd","0")).replace(",","")))) + " KRW/USD"
+    except: krw = str(data.get("krw_usd","N/A"))
     fg=data.get("fear_greed_value","N/A")
     fg_str=(fg+" / "+data.get("fear_greed_rating","")+" (전일: "+data.get("fear_greed_prev","N/A")+")") if fg!="N/A" else "N/A"
     kr_n=data.get("korea_special_news",[])
