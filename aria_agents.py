@@ -132,50 +132,66 @@ def get_mode_context(mode: str, lessons_prompt: str = "") -> str:
 
 
 # ── Agent 1: Hunter ───────────────────────────────────────────────────────────
-HUNTER_SYSTEM = """You are a financial news collection agent. Only collect facts.
-Real-time market data is already provided above — use those exact numbers.
-Search for additional news context only.
+HUNTER_SYSTEM = """You are a financial news collection agent. Your job is to gather as many
+DIVERSE, FACTUAL signals as possible — earnings, policy, flows, macro, geopolitics, supply chain.
+Do NOT pre-filter by market direction. Collect ALL facts regardless of bullish or bearish implications.
+Real-time market data is already provided above — use those exact numbers, do not re-state them as signals.
+Search for NEWS and EVENTS that are NOT already in the market data provided.
+
 Return ONLY valid JSON. No markdown.
 {
   "collected_at": "YYYY-MM-DD HH:MM KST",
   "mode": "",
-  "raw_signals": [{"category":"","headline":"","data_point":""}],
-  "market_snapshot": {
-    "sp500":"","nasdaq":"","kospi":"",
-    "krw_usd":"","us_10y":"","vix":""
-  },
+  "raw_signals": [
+    {
+      "category": "earnings|policy|flows|macro|geopolitics|supply_chain|sector|central_bank|korea",
+      "headline": "구체적 사실 (숫자 포함 우선)",
+      "data_point": "수치·날짜·출처 등 구체 데이터",
+      "source_hint": "Reuters|Bloomberg|WSJ|Yonhap 등"
+    }
+  ],
+  "market_snapshot": {"sp500":"","nasdaq":"","kospi":"","krw_usd":"","us_10y":"","vix":""},
   "total_signals": 0
 }"""
 
+# ── 모드별 검색 쿼리 — 방향성 없이 사실 수집에 집중
 _HUNTER_QUERIES = {
-    "MORNING":   [
-        "global financial markets major news today",
-        "Korea market KOSPI news today",
-        "semiconductor AI Nvidia SK Hynix news today",
-        "geopolitical risk market impact today",
+    "MORNING": [
+        "US stock market earnings news today",                       # 실적
+        "Korea KOSPI foreign investor buying selling today",         # 한국 수급 (핵심)
+        "Federal Reserve interest rate inflation data today",        # 연준·매크로
+        "semiconductor chip AI supply demand news today",            # 반도체 공급망
+        "oil energy geopolitical Middle East news today",            # 에너지·지정학
+        "Korea economy trade export data today",                     # 한국 경제 지표
     ],
-    "DAWN":      [
-        "US market close results AND Asia market open today",
-        "Korea market KOSPI news today",
-        "semiconductor AI Nvidia SK Hynix news today",
-        "geopolitical risk market impact today",
+    "EVENING": [
+        "US stock market close results today",
+        "Korea KOSPI foreign investor net buy sell today",
+        "Federal Reserve Fed officials speech today",
+        "semiconductor earnings guidance outlook today",
+        "crude oil OPEC supply news today",
+        "US economic data jobs inflation today",
+    ],
+    "DAWN": [
+        "US market close Asia market open overnight",
+        "Korea KOSPI premarket futures foreign flow",
+        "Fed officials statements overnight",
+        "semiconductor AI hardware announcements overnight",
+        "global macro risk event overnight news",
+        "currency FX dollar yen yuan movement today",
     ],
     "AFTERNOON": [
-        "market intraday reversal midday news today",
-        "Korea market KOSPI news today",
-        "semiconductor AI Nvidia SK Hynix news today",
-        "geopolitical risk market impact today",
-    ],
-    "EVENING":   [
-        "market close summary today what happened",
-        "Korea market KOSPI news today",
-        "semiconductor AI Nvidia SK Hynix news today",
-        "geopolitical risk market impact today",
+        "US market midday intraday news today",
+        "Korea KOSPI afternoon session news",
+        "economic data release today results",
+        "sector rotation midday capital flow today",
+        "geopolitical risk update today",
+        "earnings announcement guidance today",
     ],
 }
 
 
-def agent_hunter(date_str: str, mode: str, market_data: dict = None) -> dict:
+def agent_hunter(date_str: str, mode: str, market_data: dict = None, memory: list = None) -> dict:
     console.print("\n[bold cyan]Agent 1 - HUNTER [" + mode + "][/bold cyan]")
 
     market_ctx = ""
@@ -186,15 +202,22 @@ def agent_hunter(date_str: str, mode: str, market_data: dict = None) -> dict:
         except ImportError:
             pass
 
-    queries    = _HUNTER_QUERIES.get(mode, _HUNTER_QUERIES["MORNING"])
-    search_str = " AND ".join(queries[:2])  # 4회 → 2회로 축소 (비용 절감)
+    # 모든 쿼리를 개별 검색으로 전달 (2개 제한 제거 — 정보 최대 수집)
+    queries = _HUNTER_QUERIES.get(mode, _HUNTER_QUERIES["MORNING"])
+    search_instruction = (
+        "\n\nSearch these topics SEPARATELY to collect diverse facts:\n"
+        + "\n".join(str(i+1) + ". " + q for i, q in enumerate(queries))
+        + "\n\nFor each search, extract concrete facts with numbers/dates. "
+        "Aim for 15+ diverse signals across different categories."
+    )
 
     raw = call_api(
         HUNTER_SYSTEM,
         "Today: " + date_str + " Mode: " + mode + "."
         + market_ctx
-        + "\nSearch for additional context: " + search_str + ". Return JSON.",
-        use_search=True, model=MODEL_HUNTER, max_tokens=_TOK["HUNTER"],
+        + search_instruction
+        + "\nReturn JSON.",
+        use_search=True, model=MODEL_HUNTER, max_tokens=2500,  # 1500→2500 신호 확대
     )
     result = parse_json(raw)
     result["mode"] = mode
@@ -206,7 +229,8 @@ def agent_hunter(date_str: str, mode: str, market_data: dict = None) -> dict:
                 snap[key] = market_data[key]
         result["market_snapshot"] = snap
 
-    console.print("  [green]Done: " + str(result.get("total_signals", 0)) + " signals[/green]")
+    sig_count = result.get("total_signals", len(result.get("raw_signals", [])))
+    console.print("  [green]Done: " + str(sig_count) + " signals[/green]")
     return result
 
 
@@ -271,7 +295,7 @@ def agent_analyst(hunter_data: dict, mode: str, lessons_prompt: str = "", memory
     mode_ctx = get_mode_context(mode, lessons_prompt + ("\n" + pattern_hint if pattern_hint else ""))
     slim = {
         "market_snapshot": hunter_data.get("market_snapshot", {}),
-        "raw_signals":     hunter_data.get("raw_signals", [])[:8],  # 15 → 8 (-47%)
+        "raw_signals":     hunter_data.get("raw_signals", [])[:15],  # 8 → 15 (Hunter 확장에 맞춤)
         "mode":            mode,
     }
     raw = call_api(
@@ -295,24 +319,32 @@ Return ONLY valid JSON in Korean. No markdown.
 - 급락(-3%+) 다음날 반등 83%: 하락 예측에 반드시 "기술적 반등 리스크" 반론
 - FG<20 정확도 61%: 방향 확신 가능. FG>=20 정확도 17%: "방향 불명확, 관망" 권고
 - SK하이닉스 베타 1.36x: 나스닥 예측치 × 1.4 = 반도체 예상 낙폭
-- [핵심] 전날 예측 100% 적중 + 위험선호 → 다음날 급반전 7/60일 발생 (FOMC·DeepSeek·CPI):
-  Analyst가 상승 지속 예측하면 반드시 "전날 강세 이후 반전 리스크" 반론 필수
-  이런 날은 confidence_overall="낮음" 권고, thesis_killers에 하락 시나리오 반드시 포함
+- [핵심] 전날 예측 100% 적중 + 위험선호 → 다음날 급반전 7/60일: 상승 지속 예측 시 반드시 "반전 리스크" 반론
 
+thesis_killers 작성 필수 규칙:
+- event: 나스닥/코스피/SK하이닉스/삼성전자/엔비디아 중 하나만
+- confirms_if / invalidates_if: 반드시 구체적 숫자 포함
 
-thesis_killers 작성 필수 규칙 (60일 백테스트 기반):
-- event: 나스닥/코스피/SK하이닉스/삼성전자/엔비디아 중 하나만 (주가·지수)
-- confirms_if / invalidates_if: 반드시 숫자 포함 (예: "나스닥 +1% 이상", "코스피 -1% 이하")
-- VIX, 원달러/환율 절대 금지 (VIX 32%, 환율 0% — 노이즈만 추가)
-- "외국인 심리", "협상 분위기", "모멘텀 유지" 등 검증 불가 표현 절대 금지
-- 급락 후(전일 -3% 이상): 반등 시나리오 thesis_killer 반드시 포함 (83% 적중)
-- 블랙스완 경보 (연속 상승 3일+): "갑작스런 충격" 가능성 thesis_killer 추가
+❌ 절대 금지 (검증 불가 — 이런 표현이 있으면 무조건 거부):
+  "모멘텀 유지", "심리 개선", "협상 분위기", "외국인 복귀 기대",
+  "추세 지속", "안정화 확인", "투자심리 안정"
+
+✅ 반드시 이 형식으로 (숫자 필수):
+  confirms_if: "나스닥 +1% 이상 종가"
+  confirms_if: "코스피 5,800pt 이상 유지"
+  confirms_if: "SK하이닉스 +2% 이상"
+  invalidates_if: "나스닥 -1% 이하"
+  invalidates_if: "코스피 5,500pt 이하 이탈"
+
+- VIX·원달러·환율 event 절대 금지
+- 급락 후(전일 -3%): 반등 시나리오 thesis_killer 필수
+- 연속 상승 3일+: "갑작스런 충격" thesis_killer 필수
 
 {
   "verdict": "동의/부분동의/반대",
   "counterarguments": [{"against":"","because":"","risk_level":"낮음/보통/높음"}],
   "alternative_scenario": {"regime":"","narrative":"","probability":"낮음/보통/높음"},
-  "thesis_killers": [{"event":"","timeframe":"","confirms_if":"","invalidates_if":""}],
+  "thesis_killers": [{"event":"","timeframe":"","confirms_if":"(숫자포함)","invalidates_if":"(숫자포함)"}],
   "tail_risks": []
 }"""
 
@@ -406,14 +438,19 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
         md = load_market_data()
 
         # 데이터 결측 점수 계산
-        if md.get("vix", "N/A") == "N/A":          data_missing.append("VIX"); data_quality_score -= 10
-        if md.get("kospi", "N/A") == "N/A":         data_missing.append("KOSPI"); data_quality_score -= 15
+        if md.get("vix", "N/A") == "N/A":            data_missing.append("VIX"); data_quality_score -= 10
+        if md.get("kospi", "N/A") == "N/A":           data_missing.append("KOSPI"); data_quality_score -= 15
         if md.get("fear_greed_value","N/A") == "N/A": data_missing.append("Fear&Greed"); data_quality_score -= 10
-        if "(alt)" in str(md.get("fear_greed_rating","")): data_missing.append("F&G폴백(암호화폐기반)"); data_quality_score -= 5
-        if md.get("krw_usd","N/A") == "N/A":        data_missing.append("환율"); data_quality_score -= 10
-        if md.get("nvda","N/A") == "N/A":           data_missing.append("NVDA"); data_quality_score -= 5
-        # KIS 항상 미연결
-        data_missing.append("KIS미연결(수급데이터없음)"); data_quality_score -= 10
+        if "(alt)" in str(md.get("fear_greed_rating","")): data_missing.append("F&G폴백"); data_quality_score -= 5
+        if md.get("krw_usd","N/A") == "N/A":          data_missing.append("환율"); data_quality_score -= 10
+        if md.get("nvda","N/A") == "N/A":             data_missing.append("NVDA"); data_quality_score -= 5
+        # 외국인 수급: KRX 실데이터 > EWY 프록시 > 없음
+        if md.get("krx_flow_source") == "krx_api":
+            pass  # KRX 실데이터 연결됨 — 감점 없음
+        elif md.get("ewy","N/A") != "N/A":
+            data_missing.append("KRX수급(EWY프록시대체)"); data_quality_score -= 3
+        else:
+            data_missing.append("외국인수급없음"); data_quality_score -= 10
         data_quality_score = max(0, data_quality_score)
 
         quality_label = "높음" if data_quality_score >= 80 else "보통" if data_quality_score >= 60 else "낮음"
@@ -471,6 +508,26 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
     )
     result = parse_json(raw)
     result["mode"] = mode
+
+    # ── thesis_killers 품질 후처리 — 숫자 없는 항목 자동 플래그 ──────────
+    _VAGUE_KW = {"모멘텀 유지","심리 개선","협상 분위기","외국인 복귀",
+                 "추세 지속","안정화 확인","투자심리","분위기 호전"}
+    _has_num  = re.compile(r'\d')
+    for tk in result.get("thesis_killers", []):
+        cf  = tk.get("confirms_if", "")
+        inv = tk.get("invalidates_if", "")
+        vague = (not _has_num.search(cf) or not _has_num.search(inv) or
+                 any(kw in cf for kw in _VAGUE_KW) or any(kw in inv for kw in _VAGUE_KW))
+        tk["quality"] = "vague" if vague else "ok"
+
     console.print("  [green]Done: " + str(result.get("market_regime", ""))
                   + " / consensus: " + str(result.get("consensus_level", "")) + "[/green]")
+
+    # thesis_killers quality 요약 출력
+    tks    = result.get("thesis_killers", [])
+    ok_n   = sum(1 for t in tks if t.get("quality") == "ok")
+    vague_n = sum(1 for t in tks if t.get("quality") == "vague")
+    if tks:
+        console.print("  [dim]thesis_killers: ok=" + str(ok_n) + " vague=" + str(vague_n) + "[/dim]")
+
     return result
