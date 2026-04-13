@@ -1,6 +1,6 @@
 {
   "date": "2026-04-13",
-  "saved_at": "11:56 KST",
+  "saved_at": "12:02 KST",
   "market_regime": "혼조",
   "trend_phase": "횡보추세",
   "confidence": "보통",
@@ -8,29 +8,25 @@
   "thesis_killers": [],
   "key_outflows": [
     {
-      "zone": "코스피 / 한국 주식시장 전반",
+      "zone": "코스피 대형주 (삼성전자·SK하이닉스)",
+      "severity": "보통"
+    },
+    {
+      "zone": "중동 노출 섹터 (항공·해운·정유 수입 의존)",
       "severity": "높음"
     },
     {
-      "zone": "항공·여행·소비재 섹터",
-      "severity": "보통"
-    },
-    {
-      "zone": "에너지 다소비 제조업 / 인플레 민감 섹터",
-      "severity": "보통"
+      "zone": "성장주·고밸류에이션 섹터",
+      "severity": "낮음"
     }
   ],
   "key_inflows": [
     {
-      "zone": "AI/반도체 — 엔비디아·브로드컴·SK하이닉스",
-      "momentum": "강함"
+      "zone": "미국 에너지 섹터 (XLE, 정유주)",
+      "momentum": "강함 (단기), 불확실 (중기)"
     },
     {
-      "zone": "에너지·정유·원자재 섹터",
-      "momentum": "보통"
-    },
-    {
-      "zone": "방산주 (한국·글로벌)",
+      "zone": "AI 인프라·데이터센터 관련주",
       "momentum": "보통"
     }
   ],
@@ -38,15 +34,15 @@
   "volatility": {
     "vix": "19.23",
     "vkospi": "N/A",
-    "fear_greed": "48",
+    "fear_greed": "60 (Neutral)",
     "level": "중립"
   },
   "market_snapshot": {
     "sp500": "6816.89",
     "nasdaq": "22902.9",
     "vix": "19.23",
-    "kospi": "5788.47",
-    "krw_usd": "1489.48",
+    "kospi": "5785.97",
+    "krw_usd": "1487.58",
     "nvda": "188.63"
   },
   "actionable_watch": []

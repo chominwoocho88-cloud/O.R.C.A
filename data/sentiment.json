@@ -44,7 +44,7 @@
     },
     {
       "date": "2026-04-13",
-      "score": 49,
+      "score": 54,
       "level": "중립",
       "emoji": "😐",
       "components": {
@@ -57,12 +57,12 @@
           "reason": "횡보추세"
         },
         "변동성지수": {
-          "score": 0,
-          "reason": "Fear&Greed 48.0 (중립)"
+          "score": 14,
+          "reason": "Fear&Greed 60.0 (탐욕)"
         },
         "자금흐름": {
-          "score": 0,
-          "reason": "유입4 / 유출4"
+          "score": -7,
+          "reason": "유입2 / 유출3"
         },
         "반론강도": {
           "score": 0,
@@ -73,8 +73,8 @@
           "reason": "중립"
         },
         "숨은시그널": {
-          "score": -1,
-          "reason": "고신뢰0 / 저신뢰1"
+          "score": -3,
+          "reason": "고신뢰0 / 저신뢰2"
         }
       },
       "regime": "혼조",
@@ -82,12 +82,12 @@
       "vix_level": "중립",
       "vix_val": 19.23,
       "vkospi_val": null,
-      "fear_greed": 48.0
+      "fear_greed": 60.0
     }
   ],
   "current": {
     "date": "2026-04-13",
-    "score": 49,
+    "score": 54,
     "level": "중립",
     "emoji": "😐",
     "components": {
@@ -100,12 +100,12 @@
         "reason": "횡보추세"
       },
       "변동성지수": {
-        "score": 0,
-        "reason": "Fear&Greed 48.0 (중립)"
+        "score": 14,
+        "reason": "Fear&Greed 60.0 (탐욕)"
       },
       "자금흐름": {
-        "score": 0,
-        "reason": "유입4 / 유출4"
+        "score": -7,
+        "reason": "유입2 / 유출3"
       },
       "반론강도": {
         "score": 0,
@@ -116,8 +116,8 @@
         "reason": "중립"
       },
       "숨은시그널": {
-        "score": -1,
-        "reason": "고신뢰0 / 저신뢰1"
+        "score": -3,
+        "reason": "고신뢰0 / 저신뢰2"
       }
     },
     "regime": "혼조",
@@ -125,14 +125,14 @@
     "vix_level": "중립",
     "vix_val": 19.23,
     "vkospi_val": null,
-    "fear_greed": 48.0
+    "fear_greed": 60.0
   },
   "trend": {
     "direction": "improving",
-    "change": 7.0,
-    "avg_7d": 45.5,
+    "change": 12.0,
+    "avg_7d": 48.0,
     "min_30d": 42,
-    "max_30d": 49,
-    "avg_30d": 45.5
+    "max_30d": 54,
+    "avg_30d": 48.0
   }
 }

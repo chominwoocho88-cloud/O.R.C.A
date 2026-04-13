@@ -2,7 +2,7 @@
   "version": 1,
   "last_updated": "2026-04-13",
   "note": "백테스트 29거래일 실증 기반 초기화",
-  "total_learning_cycles": 3,
+  "total_learning_cycles": 4,
   "sentiment": {
     "시장레짐": 1.0,
     "추세방향": 0.8,
@@ -20,7 +20,7 @@
     "원자재": 0.9,
     "기업": 1.0,
     "기타": 0.6,
-    "VIX": 0.5
+    "VIX": 0.4
   },
   "learning_log": [
     {
@@ -52,6 +52,13 @@
       "date": "2026-04-13",
       "changes": [
         "VIX 신뢰도 감소: 0.6 -> 0.5"
+      ],
+      "trigger": "accuracy_update"
+    },
+    {
+      "date": "2026-04-13",
+      "changes": [
+        "VIX 신뢰도 감소: 0.5 -> 0.4"
       ],
       "trigger": "accuracy_update"
     }
