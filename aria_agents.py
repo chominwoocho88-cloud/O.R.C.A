@@ -21,8 +21,17 @@ API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 MODEL_HUNTER        = "claude-haiku-4-5-20251001"
 MODEL_ANALYST       = "claude-sonnet-4-6"
 MODEL_DEVIL         = "claude-sonnet-4-6"
-MODEL_REPORTER_FULL = "claude-sonnet-4-6"    # MORNING 리포트 (Opus→Sonnet, 비용 35% 절감)
-MODEL_REPORTER_LITE = "claude-sonnet-4-6"  # AFTERNOON/EVENING/DAWN — 비용 40% 절감
+MODEL_REPORTER_FULL = "claude-sonnet-4-6"
+MODEL_REPORTER_LITE = "claude-sonnet-4-6"
+
+# ── 토큰 예산 (비용 최적화: 실측 기반 상한 설정)
+_TOK = {
+    "HUNTER":         1500,   # 2000 → 1500  (-25%)
+    "ANALYST":        1400,   # 1800 → 1400  (-22%)
+    "DEVIL":          1500,   # 2000 → 1500  (-25%)
+    "REPORTER_FULL":  3000,   # 4000 → 3000  (-25%) MORNING
+    "REPORTER_LITE":  2000,   # 2500 → 2000  (-20%) EVENING/DAWN
+}
 
 console = Console()
 client  = anthropic.Anthropic(api_key=API_KEY)
@@ -185,7 +194,7 @@ def agent_hunter(date_str: str, mode: str, market_data: dict = None) -> dict:
         "Today: " + date_str + " Mode: " + mode + "."
         + market_ctx
         + "\nSearch for additional context: " + search_str + ". Return JSON.",
-        use_search=True, model=MODEL_HUNTER, max_tokens=2000,
+        use_search=True, model=MODEL_HUNTER, max_tokens=_TOK["HUNTER"],
     )
     result = parse_json(raw)
     result["mode"] = mode
@@ -241,18 +250,34 @@ Return ONLY valid JSON in Korean. No markdown.
 }"""
 
 
-def agent_analyst(hunter_data: dict, mode: str, lessons_prompt: str = "") -> dict:
+def agent_analyst(hunter_data: dict, mode: str, lessons_prompt: str = "", memory: list = None) -> dict:
     console.print("\n[bold yellow]Agent 2 - ANALYST [" + mode + "][/bold yellow]")
-    mode_ctx = get_mode_context(mode, lessons_prompt)
+
+    # 패턴 힌트 (메모리에서 로컬 계산, 비용 0)
+    pattern_hint = ""
+    if memory and len(memory) >= 3:
+        try:
+            from aria_analysis import get_pattern_context
+            snap = hunter_data.get("market_snapshot", {})
+            # Hunter가 수집한 레짐 추정값이 없으므로 최근 메모리 레짐 기반
+            last_regime = memory[-1].get("market_regime", "")
+            last_trend  = memory[-1].get("trend_phase", "")
+            pattern_hint = get_pattern_context(memory, last_regime, last_trend)
+            if pattern_hint:
+                console.print("  [dim]" + pattern_hint + "[/dim]")
+        except Exception:
+            pass
+
+    mode_ctx = get_mode_context(mode, lessons_prompt + ("\n" + pattern_hint if pattern_hint else ""))
     slim = {
         "market_snapshot": hunter_data.get("market_snapshot", {}),
-        "raw_signals":     hunter_data.get("raw_signals", [])[:15],
+        "raw_signals":     hunter_data.get("raw_signals", [])[:8],  # 15 → 8 (-47%)
         "mode":            mode,
     }
     raw = call_api(
         mode_ctx + "\n\n" + ANALYST_SYSTEM_BASE,
         "Hunter data:\n" + json.dumps(slim, ensure_ascii=False) + "\n\nReturn JSON.",
-        model=MODEL_ANALYST, max_tokens=1800,  # 2500 → 1800 절감
+        model=MODEL_ANALYST, max_tokens=_TOK["ANALYST"],
     )
     result = parse_json(raw)
     console.print("  [green]Done: " + str(result.get("market_regime", ""))
@@ -310,7 +335,7 @@ def agent_devil(analyst_data: dict, memory: list, mode: str) -> dict:
     raw = call_api(
         DEVIL_SYSTEM,
         "Analyst:\n" + json.dumps(slim, ensure_ascii=False) + past + "\n\nReturn JSON.",
-        model=MODEL_DEVIL, max_tokens=2000,
+        model=MODEL_DEVIL, max_tokens=_TOK["DEVIL"],
     )
     result = parse_json(raw)
     console.print("  [green]Done: " + str(result.get("verdict", ""))
@@ -355,9 +380,16 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
     console.print("\n[bold green]Agent 4 - REPORTER [" + mode + "][/bold green]")
     accuracy = accuracy or {}
 
+    # ── 컴팩트 메모리 컨텍스트 (full JSON 대비 ~90% 토큰 절감)
     past_ctx = ""
     if memory:
-        past_ctx = "\n\nPast:\n" + json.dumps(memory[-2:], ensure_ascii=False)
+        try:
+            from aria_analysis import build_compact_history
+            past_ctx = "\n\n" + build_compact_history(memory, n=7)
+        except ImportError:
+            # 폴백: 마지막 1개만 요약
+            last = memory[-1]
+            past_ctx = "\n\nPrev: " + last.get("analysis_date","") + " " + last.get("market_regime","") + " " + last.get("one_line_summary","")[:40]
 
     acc_ctx = ""
     if accuracy.get("total", 0) > 0:
@@ -420,9 +452,9 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
             "\n- Analyst 결론을 그대로 따르지 말고 Devil 반론을 우선 반영하세요."
         )
 
-    # MORNING만 Opus, 나머지는 Sonnet (비용 최적화)
+    # MORNING만 full 토큰, 나머지는 lite
     reporter_model = MODEL_REPORTER_FULL if mode == "MORNING" else MODEL_REPORTER_LITE
-    max_tok        = 4000 if mode == "MORNING" else 2500
+    max_tok        = _TOK["REPORTER_FULL"] if mode == "MORNING" else _TOK["REPORTER_LITE"]
 
     # 실제 오늘 날짜 주입 (모델이 날짜를 임의로 추측하지 않도록)
     from datetime import datetime as _dt
