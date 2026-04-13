@@ -137,8 +137,10 @@ def fetch_put_call_ratio() -> dict:
                     pcrs.append(pcr)
                     result["pcr_" + ticker.lower()] = pcr
                     time.sleep(0.5)
-            except Exception:
-                pass
+                else:
+                    print("  PCR " + ticker + ": 옵션 거래량 0 (장 마감 후 or 데이터 없음)")
+            except Exception as e:
+                print("  PCR " + ticker + " 실패: " + str(e)[:70])
 
         if pcrs:
             avg = round(sum(pcrs) / len(pcrs), 3)
