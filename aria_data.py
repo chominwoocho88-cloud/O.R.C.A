@@ -58,11 +58,11 @@ def fetch_krx_flow() -> dict:
     # KOSPI 일별 시세 (실제 제공 엔드포인트)
     try:
         r = httpx.get(
-            "http://data-dbg.krx.co.kr/svc/apis/idx/kospi_dd_trd",
+            "https://data-dbg.krx.co.kr/svc/apis/idx/kospi_dd_trd",
             headers=headers,
             params={"basDd": date_str},
             timeout=12,
-            follow_redirects=True,  # http→https 302 리다이렉트 처리
+            follow_redirects=True,
         )
         if r.status_code == 200:
             rows = r.json().get("OutBlock_1", [])
