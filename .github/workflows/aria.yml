@@ -150,46 +150,35 @@ jobs:
           git config user.name "ARIA Bot"
           git config user.email "aria@github-actions"
 
-          # 공통 함수: 생성 파일을 /tmp에 백업
           backup_files() {
-            mkdir -p /tmp/aria_data/reports
-            for f in memory.json sentiment.json accuracy.json rotation.json                      aria_weights.json aria_lessons.json aria_cost.json                      aria_market_data.json morning_baseline.json                      dashboard.html portfolio.json; do
-              [ -f "$f" ] && cp "$f" /tmp/aria_data/ || true
-            done
+            mkdir -p /tmp/aria_data/data /tmp/aria_data/reports
+            [ -d "data" ]    && cp -r data/.    /tmp/aria_data/data/    || true
             [ -d "reports" ] && cp -r reports/. /tmp/aria_data/reports/ || true
+            [ -f "dashboard.html" ] && cp dashboard.html /tmp/aria_data/ || true
           }
 
-          # 공통 함수: /tmp 백업에서 복원
           restore_files() {
-            cp /tmp/aria_data/*.json . 2>/dev/null || true
+            mkdir -p data reports
+            ls /tmp/aria_data/data/ 2>/dev/null    && cp /tmp/aria_data/data/*    data/    || true
+            ls /tmp/aria_data/reports/ 2>/dev/null && cp /tmp/aria_data/reports/* reports/ || true
             cp /tmp/aria_data/dashboard.html . 2>/dev/null || true
-            mkdir -p reports
-            ls /tmp/aria_data/reports/ 2>/dev/null && cp /tmp/aria_data/reports/* reports/ 2>/dev/null || true
           }
 
-          # 공통 함수: 스테이징
           stage_files() {
-            for f in memory.json sentiment.json accuracy.json rotation.json                      aria_weights.json aria_lessons.json aria_cost.json                      aria_market_data.json morning_baseline.json                      dashboard.html portfolio.json; do
-              git add "$f" 2>/dev/null || true
-            done
-            git add reports/ 2>/dev/null || true
+            git add data/     2>/dev/null || true
+            git add reports/  2>/dev/null || true
+            git add dashboard.html 2>/dev/null || true
           }
 
-          # 1. 백업
           backup_files
-
-          # 2. remote 최신으로 리셋 (rebase/충돌 원천 차단)
           git fetch origin main
           git reset --hard origin/main
-
-          # 3. 복원 → 스테이징 → 커밋
           restore_files
           stage_files
           git diff --staged --quiet || git commit -m "ARIA: $(date +'%Y-%m-%d %H:%M') [${ARIA_MODE:-AUTO}] 저장"
 
-          # 4. 푸시 — 실패 시 최신으로 다시 리셋 후 재시도 (동시 실행 경합 대응)
           git push || (
-            echo "Push 실패 — 최신 동기화 후 재시도"
+            echo "Push 실패 — 재시도"
             git fetch origin main
             git reset --hard origin/main
             restore_files
