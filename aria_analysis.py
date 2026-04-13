@@ -244,17 +244,37 @@ def calculate_sentiment(report: dict, market_data: dict = None) -> dict:
     comps["숨은시그널"] = {"score": round(raw * sw.get("숨은시그널", 0.7)),
                           "reason": "고신뢰" + str(h_conf) + " / 저신뢰" + str(l_conf)}
 
-    score = 50 + sum(c["score"] for c in comps.values())
+    internal_raw = 50 + sum(c["score"] for c in comps.values())
+    internal_raw = max(0, min(100, internal_raw))
+
     if fg_raw is not None:
-        if fg_raw <= 20:   score = min(score, 30)   # 극단공포 상한
-        elif fg_raw <= 35: score = min(score, 40)   # 공포 상한
-        elif fg_raw <= 45: score = min(score, 48)   # 공포우위 상한
-        elif fg_raw >= 80: score = max(score, 70)   # 극단탐욕 하한
-    if vix_val and vix_val >= 50:           score = min(score, 20)   # 패닉 구간
-    elif vix_val and vix_val >= 40:         score = min(score, 30)   # 극단공포
-    elif vix_val and vix_val >= 25:         score = min(score, 60)
-    if vkospi_val and vkospi_val >= 40:     score = min(score, 55)
+        # ── Proportional scaling: 외부 F&G를 앵커로, 내부 신호를 ±20 이내로 반영
+        # 내부 신호가 아무리 강해도 외부 지수에서 ±20 이상 벗어날 수 없음
+        # FG=57, internal=100 → 57 + min(20, (100-50)*0.4) = 57 + 20 = 77 (탐욕)
+        # FG=57, internal=50  → 57 + 0 = 57 (중립)
+        # FG=20, internal=10  → 20 + (10-50)*0.4 = 20 - 16 = 4 → max(5) = 5 (극단공포)
+        adjustment = (internal_raw - 50) * 0.4
+        adjustment = max(-20, min(20, adjustment))   # ±20 이내 제한
+        score      = round(fg_raw + adjustment)
+
+        # VIX 극단 구간 오버라이드 (시장 패닉은 외부 지수보다 더 빠르게 반영)
+        if vix_val and vix_val >= 50: score = min(score, 20)
+        elif vix_val and vix_val >= 40: score = min(score, 30)
+        elif vix_val and vix_val >= 25: score = min(score, 60)
+
+    else:
+        # F&G 없으면 내부 계산 + VIX 캡만 적용
+        score = internal_raw
+        if vix_val and vix_val >= 50:  score = min(score, 20)
+        elif vix_val and vix_val >= 40: score = min(score, 30)
+        elif vix_val and vix_val >= 25: score = min(score, 60)
+
+    if vkospi_val and vkospi_val >= 40: score = min(score, 55)
     score = max(0, min(100, score))
+
+    # ── Divergence 감지 (외부 F&G와 내부 신호 간 괴리 경고)
+    divergence = abs(internal_raw - (fg_raw or 50))
+    divergence_flag = divergence >= 25  # 25pt 이상 벌어지면 경고
 
     if score <= 20:   level, emoji = "극단공포", "😱"
     elif score <= 40: level, emoji = "공포",     "😰"
@@ -267,6 +287,7 @@ def calculate_sentiment(report: dict, market_data: dict = None) -> dict:
         "components": comps, "regime": regime, "trend": trend,
         "vix_level": vi.get("level", ""), "vix_val": vix_val,
         "vkospi_val": vkospi_val, "fear_greed": fg_raw,
+        "internal_raw": internal_raw, "divergence": divergence_flag,
     }
 
 
@@ -363,7 +384,7 @@ def _send_sentiment_report(data: dict):
         bar = "█" * (s // 10) + "░" * (10 - s // 10)
         chart_lines.append(h["date"][5:] + " " + bar + " " + str(s) + h.get("emoji", ""))
 
-    # Fear&Greed와 ARIA 감정지수 구분 표시 (사용자 혼동 방지)
+    # Fear&Greed와 ARIA 감정지수 구분 표시
     fg_val  = cur.get("fear_greed")
     fg_line = ""
     if fg_val is not None:
@@ -372,8 +393,15 @@ def _send_sentiment_report(data: dict):
         elif fg_val <= 60: fg_label = "중립"
         elif fg_val <= 80: fg_label = "탐욕"
         else:              fg_label = "극단탐욕"
-        fg_line = ("\n<i>외부지표 Fear&Greed: " + str(fg_val)
-                   + " (" + fg_label + ") ← VIX 기반 계산</i>")
+        fg_line = "\n<i>외부 F&G: " + str(fg_val) + " (" + fg_label + ")</i>"
+
+    # Divergence 경고
+    divergence_line = ""
+    internal_raw = cur.get("internal_raw")
+    if cur.get("divergence") and internal_raw is not None and fg_val is not None:
+        divergence_line = ("\n⚠️ <b>내부/외부 괴리 감지</b> "
+                           "ARIA내부=" + str(internal_raw) + " vs F&G=" + str(fg_val)
+                           + " (차이 " + str(abs(internal_raw - fg_val)) + "pt)")
 
     insight = ("극단공포 - 분할매수 최적 타이밍" if score <= 20
                else "공포 - 분할매수 적극 검토" if score <= 35
@@ -389,7 +417,7 @@ def _send_sentiment_report(data: dict):
         "ARIA 종합: <b>" + str(score) + "/100</b> (" + level + ")",
         "  └ 레짐·추세·자금흐름·반론·한국시장 7개 지표 종합",
         "추세: " + arrow + " | 7일평균: " + str(trend.get("avg_7d", "-")),
-        fg_line, "",
+        fg_line, divergence_line, "",
         "━━ 구성요소 ━━",
         "<pre>" + "\n".join(comp_lines) + "</pre>", "",
         "━━ 10일 추이 ━━",
