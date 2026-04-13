@@ -143,23 +143,23 @@
 <div class="header">
   <div class="header-left">
     <h1>ARIA</h1>
-    <p>2026.04.13 23:19 KST</p>
+    <p>2026.04.13 23:29 KST</p>
   </div>
-  <div class="regime-badge" style="background:#1D9E75;">
-    위험선호
+  <div class="regime-badge" style="background:#BA7517;">
+    혼조
   </div>
 </div>
 
 <div class="section">
 
   <!-- 요약 -->
-  <div class="summary-card"><p class="summary-text">💡 나스닥 22906·S&P500 6811 고점권 유지 속 TSMC +35% YoY AI반도체 모멘텀 확인, 단</p></div>
+  <div class="summary-card"><p class="summary-text">💡 S&P500 6817·나스닥 22941 고점권 유지 중이나 호르무즈 봉쇄·유가 $102·LNG +80% 에너</p></div>
 
   <!-- 핵심 지표 -->
   <div class="metrics">
     <div class="metric">
       <div class="metric-label">감정지수</div>
-      <div class="metric-value" style="color:#1D9E75;">70</div>
+      <div class="metric-value" style="color:#1D9E75;">65</div>
       <div class="metric-sub">😏 탐욕</div>
     </div>
     <div class="metric">
@@ -177,7 +177,7 @@
       <span class="legend-item"><span class="legend-dot" style="background:#888780; border-radius:0;height:2px;"></span>중립(50)</span>
     </div>
     <div class="chart-wrap" style="height:160px;">
-      <canvas id="sentChart" role="img" aria-label="30일 감정지수 추이">감정지수 70 / 탐욕</canvas>
+      <canvas id="sentChart" role="img" aria-label="30일 감정지수 추이">감정지수 65 / 탐욕</canvas>
     </div>
   </div>
 
@@ -185,7 +185,7 @@
   <div class="card"><div class="card-title">카테고리별 예측 정확도</div><div class="chart-wrap" style="height:144px;"><canvas id="accChart" role="img" aria-label="카테고리별 예측 정확도">정확도 차트</canvas></div></div>
 
   <!-- 패턴 통계 -->
-  <div class="card"><div class="card-title">레짐 전환 패턴</div><div class="cost-row"><span style="font-size:12px;color:var(--text);">혼조+횡보: 18회→유지17%/전환83%</span></div><div class="cost-row"><span style="font-size:12px;color:var(--text);">선호+상승: 11회→유지55%/전환45%</span></div><div class="cost-row"><span style="font-size:12px;color:var(--text);">선호+횡보: 4회→유지75%/전환25%</span></div><div class="cost-row"><span style="font-size:12px;color:var(--text);">회피+하락: 24회→유지46%/전환54%</span></div><div class="cost-row" style="margin-top:6px;"><span>블랙스완 전례</span><span class="cost-val">1회 (평균 8.0일 연속 후 반전)</span></div></div>
+  <div class="card"><div class="card-title">레짐 전환 패턴</div><div class="cost-row"><span style="font-size:12px;color:var(--text);">혼조+횡보: 18회→유지22%/전환78%</span></div><div class="cost-row"><span style="font-size:12px;color:var(--text);">선호+상승: 11회→유지55%/전환45%</span></div><div class="cost-row"><span style="font-size:12px;color:var(--text);">선호+횡보: 4회→유지75%/전환25%</span></div><div class="cost-row"><span style="font-size:12px;color:var(--text);">회피+하락: 24회→유지46%/전환54%</span></div><div class="cost-row" style="margin-top:6px;"><span>블랙스완 전례</span><span class="cost-val">1회 (평균 8.0일 연속 후 반전)</span></div></div>
 
   <!-- 포트폴리오 손익 -->
   <div class="card">
@@ -201,11 +201,11 @@
     <div class="card-title">이번 달 API 비용</div>
     <div class="cost-row">
       <span>추정 비용</span>
-      <span class="cost-val">$18.00 (약 26,640원)</span>
+      <span class="cost-val">$19.20 (약 28,416원)</span>
     </div>
     <div class="cost-row">
       <span>실행 횟수</span>
-      <span class="cost-val">15회</span>
+      <span class="cost-val">16회</span>
     </div>
   </div>
 
@@ -236,7 +236,7 @@ if(sentEl) new Chart(sentEl, {
   data:{
     labels:["04-12", "04-13"],
     datasets:[
-      {data:[42, 70],borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',
+      {data:[42, 65],borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',
         fill:true,tension:0.4,pointRadius:2,borderWidth:2},
       {data:Array(2).fill(50),borderColor:'#888780',
         borderDash:[4,3],borderWidth:1.5,pointRadius:0}
@@ -271,10 +271,10 @@ const rotEl = document.getElementById('rotChart');
 if(rotEl) new Chart(rotEl, {
   type:'bar',
   data:{
-    labels:["반도체/AI", "빅테크", "방산", "금융", "소비재", "배당/가치주", "원자재", "부동산(리츠)"],
+    labels:["반도체/AI", "방산", "빅테크", "헬스케어", "배당/가치주", "원자재", "부동산(리츠)", "에너지/원유"],
     datasets:[{
-      data:[6, 0, 0, 0, 0, 0, 0, 0],
-      backgroundColor:[6, 0, 0, 0, 0, 0, 0, 0].map(v=>v>=0?'#1D9E75':'#E24B4A'),
+      data:[4, 1, 0, 0, 0, 0, 0, -2],
+      backgroundColor:[4, 1, 0, 0, 0, 0, 0, -2].map(v=>v>=0?'#1D9E75':'#E24B4A'),
       borderRadius:3,barPercentage:0.65
     }]
   },
