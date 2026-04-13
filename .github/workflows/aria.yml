@@ -96,6 +96,7 @@ jobs:
           GH_REPO:           ${{ secrets.GH_REPO }}
           KRX_API_KEY:       ${{ secrets.KRX_API_KEY }}
           FRED_API_KEY:      ${{ secrets.FRED_API_KEY }}
+          FSCAPI_KEY:        ${{ secrets.FSCAPI_KEY }}
         run: |
           python aria_main.py
           echo "ARIA_MODE=MORNING" >> $GITHUB_ENV
@@ -117,6 +118,7 @@ jobs:
           GH_REPO:           ${{ secrets.GH_REPO }}
           KRX_API_KEY:       ${{ secrets.KRX_API_KEY }}
           FRED_API_KEY:      ${{ secrets.FRED_API_KEY }}
+          FSCAPI_KEY:        ${{ secrets.FSCAPI_KEY }}
         run: |
           python3 << 'EOF'
           from datetime import datetime
@@ -148,13 +150,6 @@ jobs:
           with open(_os.environ.get("GITHUB_ENV", "/dev/null"), "a") as f:
               f.write("ARIA_MODE=EVENING\n")
           EOF
-
-      # ── FSC API 테스트 (수동 실행 시에만, 확인 후 삭제) ──────────────────
-      - name: Test FSC API
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
-        run: python test_fsc_api.py
 
       # ── 저장 ────────────────────────────────────────────────────────────────
       - name: Save memory
