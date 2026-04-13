@@ -1,6 +1,6 @@
 {
   "date": "2026-04-13",
-  "saved_at": "17:07 KST",
+  "saved_at": "17:39 KST",
   "market_regime": "혼조",
   "trend_phase": "횡보추세",
   "confidence": "보통",
@@ -8,45 +8,45 @@
   "thesis_killers": [],
   "key_outflows": [
     {
-      "zone": "에너지 수입 의존 소비재·항공·화학 섹터",
-      "severity": "보통"
+      "zone": "KOSPI 기관 전반",
+      "severity": "높음"
     },
     {
-      "zone": "미국 헬스케어 섹터",
-      "severity": "보통"
+      "zone": "항공·화학·유틸리티 (에너지 수입 의존 섹터)",
+      "severity": "높음"
     },
     {
-      "zone": "미국 국채 장기물",
+      "zone": "미국 장기 국채",
       "severity": "보통"
     }
   ],
   "key_inflows": [
     {
-      "zone": "반도체·AI 섹터 (한국·미국)",
+      "zone": "국내 정유·에너지 섹터 (SK이노베이션, S-Oil)",
       "momentum": "강함"
     },
     {
-      "zone": "미국 셰일·LNG 수출주·에너지 생산주",
-      "momentum": "보통"
+      "zone": "방산주 (한화에어로스페이스, LIG넥스원)",
+      "momentum": "강함"
     },
     {
-      "zone": "방산·안보 섹터",
+      "zone": "금 관련 ETF·귀금속",
       "momentum": "보통"
     }
   ],
   "korea_focus": {},
   "volatility": {
-    "vix": "21.22",
-    "vkospi": "데이터 미제공",
+    "vix": "21.17",
+    "vkospi": "N/A",
     "fear_greed": "57 (Neutral)",
-    "level": "공포 구간 하단"
+    "level": "공포 하단~중립 경계"
   },
   "market_snapshot": {
     "sp500": "6816.89",
     "nasdaq": "22902.9",
-    "vix": "21.22",
+    "vix": "21.17",
     "kospi": "5808.62",
-    "krw_usd": "1487.38",
+    "krw_usd": "1484.77",
     "nvda": "188.63"
   },
   "actionable_watch": []

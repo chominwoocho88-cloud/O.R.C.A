@@ -44,7 +44,7 @@
     },
     {
       "date": "2026-04-13",
-      "score": 70,
+      "score": 64,
       "level": "탐욕",
       "emoji": "😏",
       "components": {
@@ -61,8 +61,8 @@
           "reason": "Fear&Greed 57.0 (탐욕)"
         },
         "자금흐름": {
-          "score": 7,
-          "reason": "유입4 / 유출3"
+          "score": 0,
+          "reason": "유입4 / 유출4"
         },
         "반론강도": {
           "score": 0,
@@ -73,21 +73,21 @@
           "reason": "중립"
         },
         "숨은시그널": {
-          "score": -1,
-          "reason": "고신뢰0 / 저신뢰1"
+          "score": 0,
+          "reason": "고신뢰0 / 저신뢰0"
         }
       },
       "regime": "혼조",
       "trend": "횡보추세",
-      "vix_level": "공포 구간 하단",
-      "vix_val": 21.22,
+      "vix_level": "공포 하단~중립 경계",
+      "vix_val": 21.17,
       "vkospi_val": null,
       "fear_greed": 57.0
     }
   ],
   "current": {
     "date": "2026-04-13",
-    "score": 70,
+    "score": 64,
     "level": "탐욕",
     "emoji": "😏",
     "components": {
@@ -104,8 +104,8 @@
         "reason": "Fear&Greed 57.0 (탐욕)"
       },
       "자금흐름": {
-        "score": 7,
-        "reason": "유입4 / 유출3"
+        "score": 0,
+        "reason": "유입4 / 유출4"
       },
       "반론강도": {
         "score": 0,
@@ -116,23 +116,23 @@
         "reason": "중립"
       },
       "숨은시그널": {
-        "score": -1,
-        "reason": "고신뢰0 / 저신뢰1"
+        "score": 0,
+        "reason": "고신뢰0 / 저신뢰0"
       }
     },
     "regime": "혼조",
     "trend": "횡보추세",
-    "vix_level": "공포 구간 하단",
-    "vix_val": 21.22,
+    "vix_level": "공포 하단~중립 경계",
+    "vix_val": 21.17,
     "vkospi_val": null,
     "fear_greed": 57.0
   },
   "trend": {
     "direction": "improving",
-    "change": 28.0,
-    "avg_7d": 56.0,
+    "change": 22.0,
+    "avg_7d": 53.0,
     "min_30d": 42,
-    "max_30d": 70,
-    "avg_30d": 56.0
+    "max_30d": 64,
+    "avg_30d": 53.0
   }
 }
