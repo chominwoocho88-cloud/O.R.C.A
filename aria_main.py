@@ -209,15 +209,21 @@ def main():
     ))
 
     try:
-        # 중복 실행 방어: MORNING/EVENING은 오늘 이미 리포트가 있으면 스킵
+        # 중복 실행 방어: MORNING/EVENING은 오늘 이미 리포트가 있으면 처리
         if MODE in ["MORNING", "EVENING"]:
             existing = list(REPORTS_DIR.glob(today + "_" + MODE.lower() + ".json")) if REPORTS_DIR.exists() else []
             if existing:
-                console.print("[yellow]⚠️ 오늘 " + MODE + " 분석이 이미 존재합니다: " + str(existing[0].name) + "[/yellow]")
                 import os as _os
-                if _os.environ.get("GITHUB_EVENT_NAME") == "schedule":
-                    console.print("[red]스케줄 실행 중복 감지 — 종료[/red]")
-                    return
+                event = _os.environ.get("GITHUB_EVENT_NAME", "")
+                if event == "schedule":
+                    # 스케줄 자동 실행 중복 → 즉시 종료 (비용 낭비 방지)
+                    console.print("[red]⛔ 스케줄 중복 감지 — 종료 (비용 절약)[/red]")
+                    sys.exit(0)
+                else:
+                    # 수동 실행 중복 → 경고 후 계속 (의도적 재실행 허용)
+                    console.print("[yellow]⚠️ 오늘 " + MODE + " 분석이 이미 존재합니다: "
+                                  + str(existing[0].name) + "[/yellow]")
+                    console.print("[yellow]   수동 실행 — 덮어쓰기 계속 진행 (약 $1.2 비용 발생)[/yellow]")
 
         # 1. 실시간 데이터 수집
         print("\n=== 실시간 시장 데이터 수집 ===")
