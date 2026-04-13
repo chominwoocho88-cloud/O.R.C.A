@@ -14,10 +14,9 @@ sys.stderr.reconfigure(encoding="utf-8")
 KST     = timezone(timedelta(hours=9))
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
-MEMORY_FILE   = Path("memory.json")
-ACCURACY_FILE = Path("accuracy.json")
-LESSONS_FILE  = Path("aria_lessons.json")
-WEIGHTS_FILE  = Path("aria_weights.json")
+from aria_paths import (
+    MEMORY_FILE, ACCURACY_FILE, LESSONS_FILE, WEIGHTS_FILE,
+)
 MODEL         = "claude-sonnet-4-6"
 
 # ── 실제 30거래일 데이터 (2026-03-03 ~ 2026-04-11) ──────────────────────────
@@ -891,9 +890,20 @@ def update_accuracy(results, date):
             today_cat[cat]["correct"] += 1
 
     today_acc = round(len(correct)/len(judged)*100,1) if judged else 0
-    acc["history"].append({"date":date,"total":len(judged),
-                           "correct":len(correct),"accuracy":today_acc})
-    acc["history"] = acc["history"][-90:]
+
+    # 방향 정확도 (aria_analysis.py와 동일 기준)
+    dir_correct = len(correct)   # backtest confirmed = 방향 일치로 간주
+    acc.setdefault("dir_total",   0)
+    acc.setdefault("dir_correct", 0)
+    acc["dir_total"]   += len(judged)
+    acc["dir_correct"] += dir_correct
+
+    # 중복 날짜 방어 (aria_analysis.py와 동일 로직)
+    acc["history"] = [h for h in acc["history"] if h.get("date") != date]
+    acc["history"].append({"date": date, "total": len(judged),
+                           "correct": len(correct), "accuracy": today_acc,
+                           "dir_correct": dir_correct, "dir_accuracy": today_acc})
+    acc["history"] = sorted(acc["history"], key=lambda x: x.get("date",""))[-90:]
     acc.setdefault("history_by_category",[])
     acc["history_by_category"] = [h for h in acc["history_by_category"] if h.get("date")!=date]
     acc["history_by_category"].append({"date":date,"by_category":today_cat})
