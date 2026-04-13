@@ -505,6 +505,7 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
         REPORTER_SYSTEM,
         "Mode: " + mode + "\nToday: " + today_str + " " + now_str
         + "\n반드시 analysis_date=" + today_str + " analysis_time=" + now_str + " 로 설정"
+        + "\n⚠️ one_line_summary 필수: 오늘 시장 핵심을 30자 이상 한국어 문장으로. 예) '나스닥 +1.2% 반등에도 코스피 외국인 매도 지속, VIX 21로 관망세 유지'"
         + "\nData:\n" + json.dumps(payload, ensure_ascii=False)
         + past_ctx + acc_ctx + real_data_ctx + devil_override + "\n\nReturn JSON.",
         model=reporter_model, max_tokens=max_tok,
