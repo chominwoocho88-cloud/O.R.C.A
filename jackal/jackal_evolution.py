@@ -91,11 +91,14 @@ class JackalEvolution:
     def evolve(self) -> dict:
         log.info("🧬 Evolution 시작")
 
-        # 1. 4시간 경과 알림 결과 확인 + 학습
+        # 1. 타점 알림 결과 확인 + 학습
         learn_result = self._learn_from_outcomes()
 
-        # 2. Claude Sonnet 주간 패턴 리뷰 (7일치 데이터)
-        context  = self._build_context()
+        # 2. ARIA 추천 종목 결과 확인 + 학습 (24h 경과)
+        rec_result = self._learn_from_recommendations()
+
+        # 3. Claude Sonnet 주간 패턴 리뷰
+        context  = self._build_context(rec_result)
         raw      = self._ask_claude(context)
         analysis = self._parse_response(raw)
 
@@ -107,16 +110,19 @@ class JackalEvolution:
         self.weights["last_updated"] = datetime.now().isoformat()
         self._save_weights()
 
-        log.info(f"🧬 완료 | 학습 {learn_result['learned']}건 | "
+        log.info(f"🧬 완료 | 타점학습 {learn_result['learned']}건 | "
+                 f"추천학습 {rec_result['learned']}건 | "
                  f"Skill {len(analysis.get('new_skills',[]))}개")
 
         return {
-            "learned":       learn_result["learned"],
-            "weight_changes": learn_result["changes"],
-            "new_skills":    analysis.get("new_skills", []),
-            "new_instincts": analysis.get("new_instincts", []),
-            "improvements":  analysis.get("prompt_improvements", ""),
-            "accuracy_summary": learn_result.get("accuracy_summary", {}),
+            "learned":            learn_result["learned"],
+            "rec_learned":        rec_result["learned"],
+            "weight_changes":     learn_result["changes"],
+            "new_skills":         analysis.get("new_skills", []),
+            "new_instincts":      analysis.get("new_instincts", []),
+            "improvements":       analysis.get("prompt_improvements", ""),
+            "accuracy_summary":   learn_result.get("accuracy_summary", {}),
+            "rec_accuracy":       rec_result.get("accuracy", {}),
         }
 
     def save_weights(self):
@@ -265,8 +271,123 @@ class JackalEvolution:
     # Claude Sonnet 주간 패턴 리뷰
     # ══════════════════════════════════════════════════════════════
 
-    def _build_context(self) -> dict:
-        """7일치 스캔 데이터 + 현재 정확도 요약"""
+    def _learn_from_recommendations(self) -> dict:
+        """
+        ARIA 추천 종목의 24시간 후 결과 확인 + 학습.
+        - 어떤 레짐/섹터 패턴의 추천이 맞았는가?
+        - jackal_news.json의 뉴스와 결과 연관성
+        """
+        rec_file = _BASE / "recommendation_log.json"
+        if not rec_file.exists():
+            return {"learned": 0, "accuracy": {}}
+
+        try:
+            logs = json.loads(rec_file.read_text(encoding="utf-8"))
+        except Exception:
+            return {"learned": 0, "accuracy": {}}
+
+        cutoff  = datetime.now() - timedelta(hours=24)
+        pending = [
+            e for e in logs
+            if not e.get("outcome_checked")
+            and datetime.fromisoformat(e["timestamp"] if "timestamp" in e
+                                        else e.get("recommended_at", "2000-01-01"))
+               < cutoff
+        ]
+
+        learned = 0
+        regime_acc   = {}
+        inflow_acc   = {}
+        ticker_acc   = {}
+
+        for entry in pending:
+            try:
+                import yfinance as _yf
+                ticker      = entry["ticker"]
+                price_rec   = entry.get("price_at_rec")
+                if not price_rec:
+                    continue
+
+                hist = _yf.Ticker(ticker).history(period="5d", interval="1d")
+                if len(hist) < 2:
+                    continue
+
+                # 추천 다음 거래일 종가
+                price_next = float(hist["Close"].iloc[-1])
+                pct        = (price_next - price_rec) / price_rec * 100
+                correct    = pct >= 0.5
+
+                entry["outcome_checked"] = True
+                entry["price_next_day"]  = round(price_next, 4)
+                entry["outcome_pct"]     = round(pct, 2)
+                entry["outcome_correct"] = correct
+
+                # 레짐별 정확도 집계
+                regime = entry.get("aria_regime", "")
+                if regime:
+                    if regime not in regime_acc:
+                        regime_acc[regime] = {"correct": 0, "total": 0}
+                    regime_acc[regime]["total"]   += 1
+                    regime_acc[regime]["correct"] += int(correct)
+
+                # 유입섹터별 정확도
+                for inflow in entry.get("aria_inflows", []):
+                    if inflow not in inflow_acc:
+                        inflow_acc[inflow] = {"correct": 0, "total": 0}
+                    inflow_acc[inflow]["total"]   += 1
+                    inflow_acc[inflow]["correct"] += int(correct)
+
+                # 종목별 정확도
+                if ticker not in ticker_acc:
+                    ticker_acc[ticker] = {"correct": 0, "total": 0}
+                ticker_acc[ticker]["total"]   += 1
+                ticker_acc[ticker]["correct"] += int(correct)
+
+                learned += 1
+                log.info(f"  추천확인 {ticker}: {pct:+.1f}% {'✅' if correct else '❌'} "
+                         f"[레짐:{regime}]")
+
+            except Exception as e:
+                log.error(f"  추천 결과 확인 실패: {e}")
+
+        # 업데이트된 로그 저장
+        if pending:
+            rec_file.write_text(
+                json.dumps(logs, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+
+        # 가중치에 추천 정확도 기록
+        self.weights.setdefault("recommendation_accuracy", {
+            "by_regime":  {},
+            "by_inflow":  {},
+            "by_ticker":  {},
+        })
+        ra = self.weights["recommendation_accuracy"]
+        for k, v in regime_acc.items():
+            if k not in ra["by_regime"]:
+                ra["by_regime"][k] = {"correct": 0, "total": 0}
+            ra["by_regime"][k]["correct"] += v["correct"]
+            ra["by_regime"][k]["total"]   += v["total"]
+            ra["by_regime"][k]["accuracy"] = round(
+                ra["by_regime"][k]["correct"] / ra["by_regime"][k]["total"] * 100, 1
+            )
+        for k, v in inflow_acc.items():
+            if k not in ra["by_inflow"]:
+                ra["by_inflow"][k] = {"correct": 0, "total": 0}
+            ra["by_inflow"][k]["correct"] += v["correct"]
+            ra["by_inflow"][k]["total"]   += v["total"]
+            ra["by_inflow"][k]["accuracy"] = round(
+                ra["by_inflow"][k]["correct"] / ra["by_inflow"][k]["total"] * 100, 1
+            )
+
+        accuracy_summary = {
+            "regime":  {k: v["accuracy"] for k, v in ra["by_regime"].items() if v.get("total",0) >= 2},
+            "inflow":  {k: v["accuracy"] for k, v in ra["by_inflow"].items() if v.get("total",0) >= 2},
+        }
+        return {"learned": learned, "accuracy": accuracy_summary}
+
+    def _build_context(self, rec_result: dict = None) -> dict:
+        """7일치 스캔 데이터 + 현재 정확도 + 추천 정확도 요약"""
         recent = self._load_recent_logs(days=7)
         alerted = [e for e in recent if e.get("alerted")]
         correct = [e for e in alerted if e.get("outcome_correct") is True]
@@ -289,8 +410,12 @@ class JackalEvolution:
                 if e.get("outcome_correct"):
                     regime_perf[r]["correct"] += 1
 
+        # 추천 정확도 포함
+        rec_accuracy = (rec_result or {}).get("accuracy", {})
+
         return {
             "period": "7일",
+            "recommendation_accuracy": rec_accuracy,
             "scan_summary": {
                 "total_scans":   len(recent),
                 "total_alerted": len(alerted),
@@ -374,6 +499,9 @@ class JackalEvolution:
 - 데이터 3건 미만이면 빈 배열
 - weight_adjustments는 -0.15 ~ +0.15 범위
 - 정확도가 60% 이상인 신호는 가중치 ↑, 40% 미만은 ↓ 권장
+- recommendation_accuracy를 보고 어떤 레짐/섹터에서 추천이 잘 맞는지 분석
+- 추천이 잘 맞는 패턴은 new_skills에 포함
+- 추천이 잘 안 맞는 패턴은 new_instincts의 warning에 포함
 """.strip()
 
         resp = self.client.messages.create(
