@@ -1,19 +1,10 @@
 {
   "signal_weights": {
-    "rsi_oversold": 1.0,
-    "bb_touch": 1.0,
-    "volume_surge": 1.0,
-    "ma_support": 1.0,
-    "golden_cross": 1.0,
-    "fear_regime": 1.0,
-    "sector_inflow": 1.0,
-    "rsi_extreme": 1.0,
-    "dead_cross": 1.0,
-    "bb_near": 1.0,
-    "bb_upper": 1.0,
-    "volume_rise": 1.0,
-    "ma20_support": 1.0,
-    "cross_imminent": 1.0
+    "ma_support": 1.794,
+    "momentum_dip": 2.18,
+    "bb_touch": 2.048,
+    "sector_rebound": 2.29,
+    "rsi_oversold": 1.868
   },
   "regime_weights": {
     "위험선호": 1.1,
@@ -26,9 +17,91 @@
     "부분동의": 0.9,
     "반대": 0.6
   },
-  "signal_accuracy": {},
-  "regime_accuracy": {},
-  "ticker_accuracy": {},
+  "signal_accuracy": {
+    "ma_support": {
+      "total": 34,
+      "correct": 22,
+      "accuracy": 64.7
+    },
+    "momentum_dip": {
+      "total": 50,
+      "correct": 42,
+      "accuracy": 84.0
+    },
+    "bb_touch": {
+      "total": 31,
+      "correct": 24,
+      "accuracy": 77.4
+    },
+    "sector_rebound": {
+      "total": 19,
+      "correct": 17,
+      "accuracy": 89.5
+    },
+    "rsi_oversold": {
+      "total": 19,
+      "correct": 13,
+      "accuracy": 68.4
+    }
+  },
+  "regime_accuracy": {
+    "위험회피": {
+      "total": 69,
+      "correct": 58,
+      "accuracy": 84.1,
+      "avg_peak": 7.56
+    },
+    "전환중": {
+      "total": 30,
+      "correct": 16,
+      "accuracy": 53.3,
+      "avg_peak": 1.5
+    }
+  },
+  "ticker_accuracy": {
+    "NVDA": {
+      "total": 14,
+      "correct": 11,
+      "accuracy": 78.6,
+      "avg_peak_day": 3.9
+    },
+    "000660.KS": {
+      "total": 11,
+      "correct": 11,
+      "accuracy": 100.0,
+      "avg_peak_day": 8.5
+    },
+    "005930.KS": {
+      "total": 9,
+      "correct": 9,
+      "accuracy": 100.0,
+      "avg_peak_day": 7.8
+    },
+    "AVGO": {
+      "total": 13,
+      "correct": 11,
+      "accuracy": 84.6,
+      "avg_peak_day": 3.7
+    },
+    "035720.KS": {
+      "total": 13,
+      "correct": 7,
+      "accuracy": 53.8,
+      "avg_peak_day": 3.2
+    },
+    "466920.KS": {
+      "total": 18,
+      "correct": 12,
+      "accuracy": 66.7,
+      "avg_peak_day": 4.2
+    },
+    "SCHD": {
+      "total": 21,
+      "correct": 13,
+      "accuracy": 61.9,
+      "avg_peak_day": 5.7
+    }
+  },
   "devil_accuracy": {
     "동의": {
       "correct": 0,
@@ -46,5 +119,37 @@
   "last_updated": "2026-04-14T09:51:31.725525",
   "fear_greed_weight": 0.4,
   "technical_weight": 0.37,
-  "fundamental_weight": 0.23
+  "fundamental_weight": 0.23,
+  "last_backtest": "2026-04-14T10:15:09.658360",
+  "backtest_days": 22,
+  "backtest_signals": 99,
+  "signal_optimal_days": {
+    "ma_support": {
+      "avg_peak_day": 4.4,
+      "avg_peak_gain": 2.22,
+      "sample_count": 34
+    },
+    "momentum_dip": {
+      "avg_peak_day": 5.8,
+      "avg_peak_gain": 8.03,
+      "sample_count": 50
+    },
+    "bb_touch": {
+      "avg_peak_day": 5.2,
+      "avg_peak_gain": 8.21,
+      "sample_count": 31
+    },
+    "sector_rebound": {
+      "avg_peak_day": 5.4,
+      "avg_peak_gain": 10.33,
+      "sample_count": 19
+    },
+    "rsi_oversold": {
+      "avg_peak_day": 5.8,
+      "avg_peak_gain": 5.8,
+      "sample_count": 19
+    }
+  },
+  "alert_threshold": 65,
+  "cooldown_hours": 4
 }
