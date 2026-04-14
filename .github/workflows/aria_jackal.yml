@@ -1,11 +1,10 @@
 name: Jackal Scanner
 
-# ── 매시간 실행 (한국장 + 미국장 시간대) ────────────────────────
-# 한국장  KST 09:00~15:30 = UTC 00:00~06:30
-# 미국장  EST 09:30~16:00 = UTC 14:30~21:00
+# Jackal 전용 워크플로우 — ARIA와 완전 독립
+# 역할: 매시간 타점 스캔 + 텔레그램 알림 + 자체 학습
 on:
   schedule:
-    # 한국장 (UTC 00:30 ~ 06:00, 월~금)
+    # 한국장 (UTC 00:30~06:00, 월~금)
     - cron: "30 0 * * 1-5"    # KST 09:30
     - cron: "30 1 * * 1-5"    # KST 10:30
     - cron: "30 2 * * 1-5"    # KST 11:30
@@ -13,8 +12,7 @@ on:
     - cron: "30 4 * * 1-5"    # KST 13:30
     - cron: "30 5 * * 1-5"    # KST 14:30
     - cron: "0  6 * * 1-5"    # KST 15:00
-
-    # 미국장 (UTC 14:30 ~ 21:00)
+    # 미국장 (UTC 14:30~21:00)
     - cron: "30 14 * * 1-5"   # KST 23:30
     - cron: "30 15 * * 2-6"   # KST 00:30
     - cron: "30 16 * * 2-6"   # KST 01:30
@@ -27,11 +25,9 @@ on:
     inputs:
       force_scan:
         description: "장 마감 무시 강제 스캔"
-        required: false
         default: "false"
       force_evolve:
         description: "Evolution 강제 실행"
-        required: false
         default: "false"
 
 jobs:
@@ -64,12 +60,8 @@ jobs:
           JACKAL_AUTOCOMPACT:  "true"
         run: |
           ARGS=""
-          if [ "${{ github.event.inputs.force_scan }}" = "true" ]; then
-            ARGS="$ARGS --force-scan"
-          fi
-          if [ "${{ github.event.inputs.force_evolve }}" = "true" ]; then
-            ARGS="$ARGS --force-evolve"
-          fi
+          [ "${{ github.event.inputs.force_scan }}"   = "true" ] && ARGS="$ARGS --force-scan"
+          [ "${{ github.event.inputs.force_evolve }}" = "true" ] && ARGS="$ARGS --force-evolve"
           python jackal/jackal_core.py $ARGS
 
       - name: Save Jackal state
@@ -77,27 +69,19 @@ jobs:
           git config user.name  "Jackal Bot"
           git config user.email "jackal@aria-agent"
 
-          git add \
-            jackal/scan_log.json \
-            jackal/scan_cooldown.json \
-            jackal/jackal_weights.json \
-            jackal/skills/ \
-            jackal/lessons/ \
-            jackal/compact_log.json 2>/dev/null || true
-
-          git add jackal/.last_evolve 2>/dev/null || true
+          git add jackal/scan_log.json jackal/scan_cooldown.json \
+                  jackal/jackal_weights.json jackal/skills/ \
+                  jackal/lessons/ || true
+          git add jackal/compact_log.json jackal/.last_evolve 2>/dev/null || true
 
           git stash
           git fetch origin main
           git reset --hard origin/main
           git stash pop || true
 
-          git add \
-            jackal/scan_log.json \
-            jackal/scan_cooldown.json \
-            jackal/jackal_weights.json \
-            jackal/skills/ \
-            jackal/lessons/ || true
+          git add jackal/scan_log.json jackal/scan_cooldown.json \
+                  jackal/jackal_weights.json jackal/skills/ \
+                  jackal/lessons/ || true
           git add jackal/compact_log.json jackal/.last_evolve 2>/dev/null || true
 
           git diff --cached --quiet || \
