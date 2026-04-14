@@ -6,7 +6,7 @@ on:
   schedule:
     - cron: "30 23 * * 0-4"   # MORNING  08:30 KST (한국장 30분 전)
     - cron: "0  14 * * 1-5"   # EVENING  23:00 KST (미국장 30분 전)
-    - cron: "0  22 * * 0"     # WEEKLY   일요일 07:00 KST
+    - cron: "0  22 * * 6"     # WEEKLY   일요일 07:00 KST (UTC 토요일 22:00)
     - cron: "0  21 1 * *"     # MONTHLY  매월 1일 06:00 KST
 
   workflow_dispatch:
@@ -52,6 +52,9 @@ jobs:
           ANTHROPIC_MODEL:     "claude-sonnet-4-20250514"
           MAX_THINKING_TOKENS: "8000"
           SUBAGENT_MODEL:      "claude-haiku-4-5-20251001"
+          FRED_API_KEY:        ${{ secrets.FRED_API_KEY }}
+          KRX_API_KEY:         ${{ secrets.KRX_API_KEY }}
+          FSCAPI_KEY:          ${{ secrets.FSCAPI_KEY }}
         run: python aria_main.py
 
       # ── EVENING 23:00 KST ─────────────────────────────────────
@@ -71,12 +74,15 @@ jobs:
           ANTHROPIC_MODEL:     "claude-sonnet-4-20250514"
           MAX_THINKING_TOKENS: "8000"
           SUBAGENT_MODEL:      "claude-haiku-4-5-20251001"
+          FRED_API_KEY:        ${{ secrets.FRED_API_KEY }}
+          KRX_API_KEY:         ${{ secrets.KRX_API_KEY }}
+          FSCAPI_KEY:          ${{ secrets.FSCAPI_KEY }}
         run: python aria_main.py
 
       # ── WEEKLY 일요일 07:00 KST ───────────────────────────────
       - name: WEEKLY Report
         if: >
-          github.event.schedule == '0 22 * * 0' ||
+          github.event.schedule == '0 22 * * 6' ||
           (github.event_name == 'workflow_dispatch' &&
            github.event.inputs.mode == 'WEEKLY')
         env:
