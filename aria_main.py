@@ -219,12 +219,19 @@ def _collect_jackal_news(hunter_data: dict):
     if len(relevant) < 3:
         try:
             from aria_agents import call_api, MODEL_HUNTER
-            ticker_str = ", ".join([f"{t}({details.get(t,{}).get('name',t)})" for t in tickers])
+            ticker_str = ", ".join([
+                f"{t}({details.get(t, {}).get('name', t)})" for t in tickers
+            ])
+            regime_str = wl.get("regime", "")
+            news_prompt = (
+                f"Search recent news for these stocks: {ticker_str}. "
+                f"Market regime: {regime_str}. "
+                "Return ONLY valid JSON: "
+                '{"news_items": [{"ticker": "X", "headline": "...", "impact": "bullish/bearish/neutral"}]}'
+            )
             raw = call_api(
                 "You are a financial news collector. Return ONLY valid JSON, no markdown.",
-                f"Search recent news for these stocks: {ticker_str}\n"
-                f"Market regime: {wl.get('regime','')}\n"
-                "Return JSON: {"news_items": [{"ticker": "", "headline": "", "impact": "bullish/bearish/neutral"}]}",
+                news_prompt,
                 use_search=True,
                 model=MODEL_HUNTER,
                 max_tokens=800,
