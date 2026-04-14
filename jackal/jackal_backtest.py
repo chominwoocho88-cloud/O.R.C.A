@@ -63,15 +63,28 @@ SUCCESS_PCT   = 0.5  # 이 % 이상이면 성공
 # 데이터 로딩
 # ══════════════════════════════════════════════════════════════════
 
+BACKTEST_DAYS = 30   # 최근 N일만 사용
+
+
 def load_memory() -> list:
     if not MEMORY_FILE.exists():
         print(f"❌ memory.json 없음: {MEMORY_FILE}")
         sys.exit(1)
     mem = json.loads(MEMORY_FILE.read_text(encoding="utf-8"))
+
     # MORNING만, 날짜순 정렬
     morning = [r for r in mem if r.get("mode") == "MORNING"]
     morning.sort(key=lambda r: r.get("analysis_date", ""))
-    print(f"✅ memory.json: {len(morning)}개 MORNING 리포트 로드")
+
+    # 최근 BACKTEST_DAYS일 필터 (Peak 추적 10일 제외 → 실질 사용 가능 구간)
+    cutoff = (datetime.now() - timedelta(days=BACKTEST_DAYS + TRACKING_DAYS)).strftime("%Y-%m-%d")
+    end    = (datetime.now() - timedelta(days=TRACKING_DAYS)).strftime("%Y-%m-%d")
+    morning = [r for r in morning if cutoff <= r.get("analysis_date", "") <= end]
+
+    print(f"✅ memory.json: {len(morning)}개 MORNING 리포트")
+    print(f"   기간: {morning[0]['analysis_date'] if morning else 'N/A'} ~ "
+          f"{morning[-1]['analysis_date'] if morning else 'N/A'}")
+    print(f"   (최근 {BACKTEST_DAYS}일 | Peak 추적 {TRACKING_DAYS}거래일 제외)")
     return morning
 
 
