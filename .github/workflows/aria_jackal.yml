@@ -1,0 +1,105 @@
+name: Jackal Scanner
+
+# ── 매시간 실행 (한국장 + 미국장 시간대) ────────────────────────
+# 한국장  KST 09:00~15:30 = UTC 00:00~06:30
+# 미국장  EST 09:30~16:00 = UTC 14:30~21:00
+on:
+  schedule:
+    # 한국장 (UTC 00:30 ~ 06:00, 월~금)
+    - cron: "30 0 * * 1-5"    # KST 09:30
+    - cron: "30 1 * * 1-5"    # KST 10:30
+    - cron: "30 2 * * 1-5"    # KST 11:30
+    - cron: "30 3 * * 1-5"    # KST 12:30
+    - cron: "30 4 * * 1-5"    # KST 13:30
+    - cron: "30 5 * * 1-5"    # KST 14:30
+    - cron: "0  6 * * 1-5"    # KST 15:00
+
+    # 미국장 (UTC 14:30 ~ 21:00)
+    - cron: "30 14 * * 1-5"   # KST 23:30
+    - cron: "30 15 * * 2-6"   # KST 00:30
+    - cron: "30 16 * * 2-6"   # KST 01:30
+    - cron: "30 17 * * 2-6"   # KST 02:30
+    - cron: "30 18 * * 2-6"   # KST 03:30
+    - cron: "30 19 * * 2-6"   # KST 04:30
+    - cron: "0  21 * * 2-6"   # KST 06:00
+
+  workflow_dispatch:
+    inputs:
+      force_scan:
+        description: "장 마감 무시 강제 스캔"
+        required: false
+        default: "false"
+      force_evolve:
+        description: "Evolution 강제 실행"
+        required: false
+        default: "false"
+
+jobs:
+  jackal:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install anthropic httpx yfinance
+
+      - name: Run Jackal
+        env:
+          ANTHROPIC_API_KEY:   ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_TOKEN:      ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_MODEL:     "claude-sonnet-4-20250514"
+          SUBAGENT_MODEL:      "claude-haiku-4-5-20251001"
+          JACKAL_DAILY_BUDGET: "500000"
+          JACKAL_AUTOCOMPACT:  "true"
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.force_scan }}" = "true" ]; then
+            ARGS="$ARGS --force-scan"
+          fi
+          if [ "${{ github.event.inputs.force_evolve }}" = "true" ]; then
+            ARGS="$ARGS --force-evolve"
+          fi
+          python jackal/jackal_core.py $ARGS
+
+      - name: Save Jackal state
+        run: |
+          git config user.name  "Jackal Bot"
+          git config user.email "jackal@aria-agent"
+
+          git add \
+            jackal/scan_log.json \
+            jackal/scan_cooldown.json \
+            jackal/jackal_weights.json \
+            jackal/skills/ \
+            jackal/lessons/ \
+            jackal/compact_log.json 2>/dev/null || true
+
+          git add jackal/.last_evolve 2>/dev/null || true
+
+          git stash
+          git fetch origin main
+          git reset --hard origin/main
+          git stash pop || true
+
+          git add \
+            jackal/scan_log.json \
+            jackal/scan_cooldown.json \
+            jackal/jackal_weights.json \
+            jackal/skills/ \
+            jackal/lessons/ || true
+          git add jackal/compact_log.json jackal/.last_evolve 2>/dev/null || true
+
+          git diff --cached --quiet || \
+            git commit -m "🦊 Jackal: $(date +'%Y-%m-%d %H:%M') [skip ci]"
+          git push || (git pull --rebase origin main && git push)
