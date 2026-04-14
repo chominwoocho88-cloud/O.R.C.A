@@ -328,6 +328,7 @@ def run_scan(force: bool = False) -> dict:
 
     scanned = 0
     alerted = 0
+    results: list = []
 
     for ticker, info in WATCHLIST.items():
         market = info["market"]
@@ -358,6 +359,10 @@ def run_scan(force: bool = False) -> dict:
             continue
 
         scanned += 1
+        results.append({"ticker": ticker, "name": info["name"],
+                        "claude_score": result.get("score", 0),
+                        "signal_type": result.get("signal_type", "관망"),
+                        "rsi": tech["rsi"]})
         log.info(
             f"    → {result.get('signal_type','?')} | "
             f"점수 {result.get('score',0)} | {result.get('reason','')}"
@@ -400,4 +405,30 @@ def run_scan(force: bool = False) -> dict:
         })
 
     log.info(f"📡 완료 | 분석 {scanned}종목 | 알림 {alerted}건")
+
+    # 장이 열려있는데 타점 없으면 결과 요약 발송
+    any_market_open = (us_open or kr_open) or force
+    if any_market_open and alerted == 0 and scanned > 0:
+        now_str  = datetime.now(KST).strftime("%m/%d %H:%M")
+        sent     = macro.get("sentiment", {})
+        fred     = macro.get("fred", {})
+        lines    = ["📊 <b>Jackal 스캔 완료 — 타점 없음</b>",
+                    "━━━━━━━━━━━━━━━━━━━━"]
+        for r in results:
+            sig  = r.get("signal_type", "관망")
+            icon = {"강한매수": "🔴", "매수검토": "🟡", "관망": "⚪", "매도주의": "🔵"}.get(sig, "⚪")
+            lines.append(f"{icon} {r['name']} ({r['ticker']}): {r['claude_score']}점 | RSI {r['rsi']} | {sig}")
+        lines.append("━━━━━━━━━━━━━━━━━━━━")
+        fred_parts = []
+        if fred.get("vix"):         fred_parts.append(f"VIX {fred['vix']}")
+        if fred.get("hy_spread"):   fred_parts.append(f"HY {fred['hy_spread']}%")
+        if fred.get("yield_curve") is not None:
+            fred_parts.append(f"금리차 {fred['yield_curve']:+.2f}%")
+        if fred_parts:
+            lines.append("📈 " + " | ".join(fred_parts))
+        lines.append(f"😐 센티먼트: {sent.get('score', 50)}점 ({sent.get('level', '중립')})")
+        lines.append(f"⏰ {now_str} KST | Jackal")
+        _send_telegram("
+".join(lines))
+
     return {"scanned": scanned, "alerted": alerted}
