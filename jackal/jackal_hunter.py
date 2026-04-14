@@ -57,6 +57,33 @@ HUNT_COOLDOWN_H = 6     # 동일 종목 재알림 방지
 MY_PORTFOLIO = {"NVDA", "AVGO", "SCHD", "000660.KS", "005930.KS", "035720.KS", "466920.KS"}
 
 
+def _safe_parse_json(text: str) -> dict:
+    """3단계 폴백 JSON 파싱."""
+    # 1. 직접 파싱
+    m = re.search(r"\{[\s\S]*\}", text)
+    if not m:
+        return {}
+    s = m.group()
+    try:
+        return json.loads(s)
+    except json.JSONDecodeError:
+        pass
+    # 2. trailing comma 제거
+    s2 = re.sub(r",\s*([}\]])", r"", s)
+    try:
+        return json.loads(s2)
+    except json.JSONDecodeError:
+        pass
+    # 3. 괄호 보정
+    s3 = s2
+    s3 += "]" * (s3.count("[") - s3.count("]"))
+    s3 += "}" * (s3.count("{") - s3.count("}"))
+    try:
+        return json.loads(s3)
+    except json.JSONDecodeError:
+        return {}
+
+
 # ══════════════════════════════════════════════════════════════════
 # ARIA 컨텍스트
 # ══════════════════════════════════════════════════════════════════
@@ -214,10 +241,15 @@ MA20: {cur}{tech['ma20']} | MA50: {cur}{tech.get('ma50','N/A')}
 
 [시장] 레짐: {aria['regime']} | TK 주의: {', '.join(tk_events) or '없음'}
 
-판단 기준:
-- RSI≤35 + BB≤20%: 강한 반등 신호
-- 3~5일 -5%이상 급락 + 거래량 1.5x: 투매 소진
-- 섹터 유입 + 개별 악재 과반영: 역발상 매수
+점수 기준 (엄격하게):
+- 85~100: RSI≤30 + BB≤10% + 거래량2x 동시 충족
+- 70~84: RSI≤35 + BB≤20% 충족
+- 55~69: 조건 1개만 충족
+- 40~54: 조건 미충족, 중립
+- 40미만: 과매수 또는 추가하락 우려
+
+현재 데이터를 기준으로 정확히 점수를 매기세요.
+RSI {tech['rsi']}, BB {tech['bb_pos']:.0f}% 기준으로 몇 점인지 명확히.
 
 {{"analyst_score": 0~100, "swing_setup": "강한반등/반등가능/중립/추가하락",
   "signals_fired": ["rsi_oversold","bb_touch","volume_climax","sector_rebound","momentum_dip"],
@@ -230,8 +262,7 @@ MA20: {cur}{tech['ma20']} | MA50: {cur}{tech.get('ma50','N/A')}
             messages=[{"role": "user", "content": prompt}],
         )
         raw = re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip()
-        m   = re.search(r"\{[\s\S]*\}", raw)
-        r   = json.loads(m.group()) if m else {}
+        r = _safe_parse_json(raw)
         r["analyst_score"] = int(r.get("analyst_score", 50))
         r.setdefault("swing_setup",  "중립")
         r.setdefault("signals_fired", [])
@@ -279,8 +310,7 @@ Thesis Killer:{tk_text or ' 없음'} | 레짐:{aria['regime']}
             messages=[{"role": "user", "content": prompt}],
         )
         raw = re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip()
-        m   = re.search(r"\{[\s\S]*\}", raw)
-        r   = json.loads(m.group()) if m else {}
+        r = _safe_parse_json(raw)
         r["devil_score"] = int(r.get("devil_score", 30))
         r.setdefault("verdict",           "부분동의")
         r.setdefault("main_risk",         "")
@@ -411,6 +441,7 @@ def run_hunt(force: bool = False) -> dict:
         return {"hunted": 0, "alerted": 0}
 
     hunted = alerted = 0
+    _last_results: list = []
 
     for cand in candidates:
         ticker      = cand.get("ticker", "")
@@ -445,6 +476,12 @@ def run_hunt(force: bool = False) -> dict:
                 alerted += 1
                 log.info("    ✅ Hunter 알림 발송")
 
+        _last_results.append({
+            "ticker":      ticker, "name": name,
+            "final_score": final["final_score"],
+            "signal_type": analyst.get("swing_setup", "중립"),
+            "rsi":         tech["rsi"],
+        })
         _save_log({
             "timestamp":         now_kst.isoformat(),
             "ticker":            ticker, "name": name, "market": market,
@@ -471,4 +508,26 @@ def run_hunt(force: bool = False) -> dict:
         })
 
     log.info(f"🎯 Hunter 완료 | 분석 {hunted}종목 | 알림 {alerted}건")
+
+    # 타점 없을 때 요약 메시지 발송
+    if hunted > 0 and alerted == 0:
+        now_str = datetime.now(KST).strftime("%m/%d %H:%M")
+        lines = [
+            "📊 <b>Jackal Hunter — 스윙 타점 없음</b>",
+            "━━━━━━━━━━━━━━━━━━━━",
+        ]
+        for entry in _last_results:
+            sig  = entry.get("signal_type", "중립")
+            icon = {"강한반등": "🔴", "반등가능": "🟡", "중립": "⚪", "추가하락": "🔵"}.get(sig, "⚪")
+            lines.append(
+                f"{icon} {entry['name']} ({entry['ticker']}): "
+                f"{entry['final_score']:.0f}점 | RSI {entry['rsi']} | {sig}"
+            )
+        lines += [
+            "━━━━━━━━━━━━━━━━━━━━",
+            f"🌐 레짐: {aria.get('regime', '')[:30]}",
+            f"⏰ {now_str} KST | Jackal Hunter",
+        ]
+        _send_telegram("\n".join(lines))
+
     return {"hunted": hunted, "alerted": alerted}
