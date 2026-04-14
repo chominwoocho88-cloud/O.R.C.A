@@ -51,8 +51,11 @@ MODEL_H          = os.environ.get("SUBAGENT_MODEL", "claude-haiku-4-5-20251001")
 
 
 def _load_portfolio() -> dict:
-    """data/portfolio.json 에서 포트폴리오 로드.
-    없으면 기본값 반환."""
+    """
+    data/portfolio.json 에서 포트폴리오 로드.
+    ticker_yf (yfinance 형식) 키로 딕셔너리 구성.
+    현금 등 ticker_yf 없는 항목은 스캔 제외.
+    """
     default = {
         "NVDA":      {"name": "엔비디아",   "avg_cost": 182.99, "market": "US", "currency": "$", "portfolio": True},
         "AVGO":      {"name": "브로드컴",   "avg_cost": None,   "market": "US", "currency": "$", "portfolio": True},
@@ -64,22 +67,23 @@ def _load_portfolio() -> dict:
     if not PORTFOLIO_FILE.exists():
         return default
     try:
-        data = json.loads(PORTFOLIO_FILE.read_text(encoding="utf-8"))
+        data   = json.loads(PORTFOLIO_FILE.read_text(encoding="utf-8"))
         result = {}
         for h in data.get("holdings", []):
-            ticker = h.get("ticker", "")
-            if not ticker:
+            yf_ticker = h.get("ticker_yf")
+            if not yf_ticker:          # 현금 등 yfinance 없는 항목 제외
                 continue
             market = h.get("market", "US")
-            result[ticker] = {
-                "name":      h.get("name", ticker),
+            result[yf_ticker] = {
+                "name":      h.get("name", yf_ticker),
                 "avg_cost":  h.get("avg_cost"),
                 "market":    market,
-                "currency":  h.get("currency", "$"),
+                "currency":  h.get("currency", "$" if market == "US" else "₩"),
                 "portfolio": True,
             }
         return result if result else default
-    except Exception:
+    except Exception as e:
+        log.warning(f"portfolio.json 로드 실패: {e} — 기본값 사용")
         return default
 
 ALERT_THRESHOLD = 65
