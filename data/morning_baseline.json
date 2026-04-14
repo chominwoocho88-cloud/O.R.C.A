@@ -1,49 +1,53 @@
 {
   "date": "2026-04-14",
-  "saved_at": "00:49 KST",
-  "market_regime": "위험선호 (스태그플레이션 전환 리스크 상존)",
+  "saved_at": "15:06 KST",
+  "market_regime": "위험선호",
   "trend_phase": "상승추세",
-  "confidence": "낮음",
-  "one_line_summary": "나스닥 22973 사상최고권이나 Q1 EPS 추정 12.6%로 하향·Exxon 가이던스 -31% 쇼크·LNG +80% 스태그플레이션 압력 동시 작동, 어닝시즌 첫 주 반전 리스크 고조",
+  "confidence": "보통",
+  "one_line_summary": "TSMC 어닝 서프라이즈·반도체 수출 폭발로 나스닥 23183 고점권 유지, VIX 19.12 공포 완전 해소됐으나 Fed 금리인상 재부상·에너지 인플레·연속 급등 후 되돌림 경보 동시 발동으로 위험선호 속 고점 경계 국면",
   "thesis_killers": [],
   "key_outflows": [
     {
-      "zone": "에너지 섹터 (글로벌 에너지주)",
-      "severity": "높음"
-    },
-    {
-      "zone": "LNG·카타르 공급망 연계 자산",
-      "severity": "높음"
-    },
-    {
-      "zone": "S&P500 Q1 어닝 기대치",
+      "zone": "에너지·항공 섹터",
       "severity": "보통"
+    },
+    {
+      "zone": "헬스케어 섹터",
+      "severity": "보통"
+    },
+    {
+      "zone": "장기채 (미국 10년국채)",
+      "severity": "높음"
     }
   ],
   "key_inflows": [
     {
-      "zone": "반도체·AI 섹터 (글로벌·한국)",
+      "zone": "반도체·AI 인프라 (글로벌)",
       "momentum": "강함"
     },
     {
-      "zone": "미국 금융주 (JPMorgan·골드만삭스)",
+      "zone": "코스피·한국 반도체 (SK하이닉스·삼성전자)",
+      "momentum": "강함"
+    },
+    {
+      "zone": "미국 대형 금융주 (Goldman Sachs 등)",
       "momentum": "보통"
     }
   ],
   "korea_focus": {},
   "volatility": {
-    "vix": "19.99",
-    "vkospi": "N/A",
-    "fear_greed": "59 (Neutral)",
-    "level": "중립"
+    "vix": "19.12",
+    "vkospi": "추정 18~20",
+    "fear_greed": "62 (Greed)",
+    "level": "중립~탐욕"
   },
   "market_snapshot": {
-    "sp500": "6819.69",
-    "nasdaq": "22973.76",
-    "vix": "19.99",
-    "kospi": "5808.62",
-    "krw_usd": "1487.08",
-    "nvda": "188.47"
+    "sp500": "6886.24",
+    "nasdaq": "23183.74",
+    "vix": "19.12",
+    "kospi": "5985.62",
+    "krw_usd": "1481.48",
+    "nvda": "189.31"
   },
   "actionable_watch": []
 }
