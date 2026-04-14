@@ -1,54 +1,96 @@
 {
   "last_updated": "2026-04-14",
-  "note": "이 파일을 직접 수정해서 포트폴리오를 관리하세요. ARIA와 Jackal이 함께 읽습니다.",
+  "note": "ARIA와 Jackal이 함께 읽는 포트폴리오. ticker=ARIA용, ticker_yf=yfinance용(Jackal)",
+  "risk_threshold": -2.0,
+  "opportunity_threshold": 1.5,
   "holdings": [
     {
-      "ticker":   "NVDA",
-      "name":     "엔비디아",
+      "name": "엔비디아",
+      "ticker": "nvda",
+      "weight": 35.0,
+      "sector": "반도체/AI",
+      "market": "US",
+      "currency": "$",
       "avg_cost": 182.99,
-      "market":   "US",
-      "currency": "$",
-      "memo":     "AI 반도체 핵심 포지션"
+      "memo": "AI 반도체 핵심 포지션",
+      "ticker_yf": "NVDA"
     },
     {
-      "ticker":   "AVGO",
-      "name":     "브로드컴",
-      "avg_cost": null,
-      "market":   "US",
-      "currency": "$",
-      "memo":     ""
-    },
-    {
-      "ticker":   "SCHD",
-      "name":     "SCHD ETF",
-      "avg_cost": null,
-      "market":   "US",
-      "currency": "$",
-      "memo":     "배당 ETF"
-    },
-    {
-      "ticker":   "000660.KS",
-      "name":     "SK하이닉스",
-      "avg_cost": null,
-      "market":   "KR",
+      "name": "SK하이닉스",
+      "ticker": "sk_hynix",
+      "weight": 15.0,
+      "sector": "반도체",
+      "market": "KR",
       "currency": "₩",
-      "memo":     "HBM 수혜"
+      "avg_cost": null,
+      "memo": "HBM 수혜",
+      "ticker_yf": "000660.KS"
     },
     {
-      "ticker":   "005930.KS",
-      "name":     "삼성전자",
-      "avg_cost": null,
-      "market":   "KR",
+      "name": "삼성전자",
+      "ticker": "samsung",
+      "weight": 10.0,
+      "sector": "반도체/전자",
+      "market": "KR",
       "currency": "₩",
-      "memo":     ""
+      "avg_cost": null,
+      "memo": "",
+      "ticker_yf": "005930.KS"
     },
     {
-      "ticker":   "035720.KS",
-      "name":     "카카오",
+      "name": "브로드컴",
+      "ticker": "avgo",
+      "weight": 10.0,
+      "sector": "반도체/AI",
+      "market": "US",
+      "currency": "$",
       "avg_cost": null,
-      "market":   "KR",
+      "memo": "",
+      "ticker_yf": "AVGO"
+    },
+    {
+      "name": "카카오",
+      "ticker": "kakao",
+      "weight": 5.0,
+      "sector": "플랫폼/IT",
+      "market": "KR",
       "currency": "₩",
-      "memo":     ""
+      "avg_cost": null,
+      "memo": "",
+      "ticker_yf": "035720.KS"
+    },
+    {
+      "name": "SCHD",
+      "ticker": "schd",
+      "weight": 10.0,
+      "sector": "배당",
+      "market": "US",
+      "currency": "$",
+      "avg_cost": null,
+      "memo": "배당 ETF",
+      "ticker_yf": "SCHD"
+    },
+    {
+      "name": "SOL 코리아고배당",
+      "ticker": "kodex",
+      "weight": 10.0,
+      "sector": "배당",
+      "market": "KR",
+      "currency": "₩",
+      "avg_cost": null,
+      "memo": "한국 고배당 ETF",
+      "ticker_yf": "466920.KS"
+    },
+    {
+      "name": "현금",
+      "ticker": "cash",
+      "weight": 5.0,
+      "sector": "현금",
+      "market": null,
+      "currency": null,
+      "avg_cost": null,
+      "memo": "",
+      "ticker_yf": null
     }
   ]
 }
