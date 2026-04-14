@@ -30,7 +30,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install anthropic rich httpx yfinance
+        run: pip install anthropic rich httpx yfinance requests
 
       # ── DAWN (04:30 KST) ──────────────────────────────────────────
       - name: Run ARIA DAWN
@@ -129,22 +129,17 @@ jobs:
           git config user.name  "ARIA Bot"
           git config user.email "aria@github-actions"
 
-          # 변경사항 먼저 스테이징
           git add memory.json reports/ sentiment.json accuracy.json \
                   rotation.json aria_weights.json aria_lessons.json \
                   aria_cost.json aria_market_data.json morning_baseline.json || true
 
-          # 변경사항 임시 보관
           git stash
 
-          # 원격 최신으로 맞추기
           git fetch origin main
           git reset --hard origin/main
 
-          # 보관한 변경사항 복원
           git stash pop || true
 
-          # 다시 스테이징 후 커밋
           git add memory.json reports/ sentiment.json accuracy.json \
                   rotation.json aria_weights.json aria_lessons.json \
                   aria_cost.json aria_market_data.json morning_baseline.json || true
@@ -170,7 +165,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install anthropic
+        run: pip install anthropic rich httpx yfinance requests
 
       - name: Run Jackal
         env:
@@ -185,10 +180,16 @@ jobs:
         run: |
           git config user.name  "Jackal Bot"
           git config user.email "jackal@aria-agent"
+
           git add jackal/skills/ jackal/lessons/ jackal/jackal_weights.json jackal/compact_log.json 2>/dev/null || true
+
           git stash
-          git pull --rebase origin main
+
+          git fetch origin main
+          git reset --hard origin/main
+
           git stash pop || true
+
           git add jackal/skills/ jackal/lessons/ jackal/jackal_weights.json jackal/compact_log.json 2>/dev/null || true
           git diff --cached --quiet || git commit -m "🦊 Jackal: $(date +'%Y-%m-%d %H:%M') 학습 완료 [skip ci]"
           git push
