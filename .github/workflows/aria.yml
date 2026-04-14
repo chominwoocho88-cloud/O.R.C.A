@@ -30,7 +30,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install anthropic rich httpx yfinance requests
+        run: python -m pip install anthropic rich httpx yfinance requests
 
       # ── DAWN (04:30 KST) ──────────────────────────────────────────
       - name: Run ARIA DAWN
@@ -165,7 +165,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install anthropic rich httpx yfinance requests
+        run: python -m pip install anthropic rich httpx yfinance requests
 
       - name: Run Jackal
         env:
