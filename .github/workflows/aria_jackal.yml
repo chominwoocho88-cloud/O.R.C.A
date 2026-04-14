@@ -58,6 +58,9 @@ jobs:
           SUBAGENT_MODEL:      "claude-haiku-4-5-20251001"
           JACKAL_DAILY_BUDGET: "500000"
           JACKAL_AUTOCOMPACT:  "true"
+          FRED_API_KEY:        ${{ secrets.FRED_API_KEY }}
+          KRX_API_KEY:         ${{ secrets.KRX_API_KEY }}
+          FSCAPI_KEY:          ${{ secrets.FSCAPI_KEY }}
         run: |
           ARGS=""
           [ "${{ github.event.inputs.force_scan }}"   = "true" ] && ARGS="$ARGS --force-scan"
