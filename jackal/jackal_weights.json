@@ -1,19 +1,50 @@
 {
   "signal_weights": {
-    "rsi_extreme": 1.0,
     "rsi_oversold": 1.0,
-    "golden_cross": 1.0,
-    "dead_cross": 1.0,
     "bb_touch": 1.0,
+    "volume_surge": 1.0,
+    "ma_support": 1.0,
+    "golden_cross": 1.0,
+    "fear_regime": 1.0,
+    "sector_inflow": 1.0,
+    "rsi_extreme": 1.0,
+    "dead_cross": 1.0,
     "bb_near": 1.0,
     "bb_upper": 1.0,
-    "volume_surge": 1.0,
     "volume_rise": 1.0,
     "ma20_support": 1.0,
     "cross_imminent": 1.0
   },
+  "regime_weights": {
+    "위험선호": 1.1,
+    "혼조": 1.0,
+    "위험회피": 0.8,
+    "전환중": 0.9
+  },
+  "devil_weights": {
+    "동의": 1.1,
+    "부분동의": 0.9,
+    "반대": 0.6
+  },
+  "signal_accuracy": {},
+  "regime_accuracy": {},
+  "ticker_accuracy": {},
+  "devil_accuracy": {
+    "동의": {
+      "correct": 0,
+      "total": 0
+    },
+    "부분동의": {
+      "correct": 0,
+      "total": 0
+    },
+    "반대": {
+      "correct": 0,
+      "total": 0
+    }
+  },
+  "last_updated": "2026-04-14T09:51:31.725525",
   "fear_greed_weight": 0.4,
   "technical_weight": 0.37,
-  "fundamental_weight": 0.23,
-  "last_updated": "2026-04-14T04:49:08.138771"
+  "fundamental_weight": 0.23
 }
