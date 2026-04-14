@@ -165,6 +165,7 @@ def agent_analyst(ticker: str, info: dict, tech: dict,
     weights = _load_weights()
     stw     = weights.get("signal_weights", {})
 
+    price_str = f"{tech['price']:,.2f}" if info["market"] == "US" else f"{tech['price']:,.0f}"
     pnl_str = ""
     if info.get("avg_cost") and info["market"] == "US":
         pnl     = (tech["price"] - info["avg_cost"]) / info["avg_cost"] * 100
@@ -184,7 +185,7 @@ def agent_analyst(ticker: str, info: dict, tech: dict,
 반드시 JSON만 반환하세요.
 
 [종목]
-현재가: {cur}{tech['price']:,.2f if info['market']=='US' else tech['price']:,.0f}
+현재가: {cur}{price_str}
 전일比: {tech['change_1d']:+.1f}% | 5일比: {tech['change_5d']:+.1f}%{pnl_str}
 
 [기술 지표]
@@ -248,6 +249,8 @@ def agent_devil(ticker: str, info: dict, tech: dict,
     cur  = info["currency"]
     fred = macro.get("fred", {})
 
+    price_str = f"{tech['price']:,.2f}" if info["market"] == "US" else f"{tech['price']:,.0f}"
+
     # Thesis Killer 텍스트 구성
     tk_text = ""
     tks = aria.get("thesis_killers", [])
@@ -271,7 +274,7 @@ Analyst가 {info['name']} ({ticker}) 매수를 주장합니다.
 발동 신호: {', '.join(analyst.get('signals_fired', []))}
 
 [현재 상황]
-현재가: {cur}{tech['price']:,.2f if info['market']=='US' else tech['price']:,.0f}
+현재가: {cur}{price_str}
 RSI: {tech['rsi']} | 볼린저: {tech['bb_pos']}% | 거래량: {tech['vol_ratio']:.1f}x
 VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
 장단기금리차: {fred.get('yield_curve','N/A')}%
