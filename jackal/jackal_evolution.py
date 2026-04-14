@@ -74,7 +74,10 @@ class JackalEvolution:
         accuracy = self._load_json_safe(_BASE / "accuracy.json", default={})
         recent_lessons = self._load_recent_lessons(days=7)
         skill_names = [p.stem for p in self.skills_dir.glob("*.json")]
-        weight_summary = {k: round(v, 3) for k, v in self.weights.items()}
+        weight_summary = {
+            k: round(v, 3) if isinstance(v, (int, float)) else v
+            for k, v in self.weights.items()
+        }
 
         return {
             "accuracy": accuracy,
