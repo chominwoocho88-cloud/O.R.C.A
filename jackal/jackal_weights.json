@@ -1,10 +1,10 @@
 {
   "signal_weights": {
-    "ma_support": 1.794,
-    "momentum_dip": 2.18,
-    "bb_touch": 2.048,
+    "ma_support": 1.382,
+    "momentum_dip": 1.86,
+    "bb_touch": 1.92,
     "sector_rebound": 2.29,
-    "rsi_oversold": 1.868
+    "rsi_oversold": 1.552
   },
   "regime_weights": {
     "위험선호": 1.1,
@@ -20,86 +20,96 @@
   "signal_accuracy": {
     "ma_support": {
       "total": 34,
-      "correct": 22,
-      "accuracy": 64.7
+      "swing_correct": 15,
+      "swing_accuracy": 44.1,
+      "d1_correct": 9,
+      "d1_accuracy": 26.5
     },
     "momentum_dip": {
       "total": 50,
-      "correct": 42,
-      "accuracy": 84.0
+      "swing_correct": 34,
+      "swing_accuracy": 68.0,
+      "d1_correct": 17,
+      "d1_accuracy": 34.0
     },
     "bb_touch": {
       "total": 31,
-      "correct": 24,
-      "accuracy": 77.4
+      "swing_correct": 22,
+      "swing_accuracy": 71.0,
+      "d1_correct": 16,
+      "d1_accuracy": 51.6
     },
     "sector_rebound": {
       "total": 19,
-      "correct": 17,
-      "accuracy": 89.5
+      "swing_correct": 17,
+      "swing_accuracy": 89.5,
+      "d1_correct": 9,
+      "d1_accuracy": 47.4
     },
     "rsi_oversold": {
       "total": 19,
-      "correct": 13,
-      "accuracy": 68.4
+      "swing_correct": 10,
+      "swing_accuracy": 52.6,
+      "d1_correct": 7,
+      "d1_accuracy": 36.8
     }
   },
   "regime_accuracy": {
     "위험회피": {
-      "total": 69,
-      "correct": 58,
-      "accuracy": 84.1,
-      "avg_peak": 7.56
+      "total": 82,
+      "correct": 52,
+      "accuracy": 63.4,
+      "avg_peak": 4.25
     },
-    "전환중": {
-      "total": 30,
-      "correct": 16,
-      "accuracy": 53.3,
-      "avg_peak": 1.5
+    "위험선호": {
+      "total": 17,
+      "correct": 7,
+      "accuracy": 41.2,
+      "avg_peak": 0.26
     }
   },
   "ticker_accuracy": {
     "NVDA": {
       "total": 14,
-      "correct": 11,
-      "accuracy": 78.6,
-      "avg_peak_day": 3.9
+      "correct": 10,
+      "accuracy": 71.4,
+      "avg_peak_day": 3.3
     },
     "000660.KS": {
       "total": 11,
-      "correct": 11,
-      "accuracy": 100.0,
-      "avg_peak_day": 8.5
+      "correct": 7,
+      "accuracy": 63.6,
+      "avg_peak_day": 5.5
     },
     "005930.KS": {
       "total": 9,
-      "correct": 9,
-      "accuracy": 100.0,
-      "avg_peak_day": 7.8
+      "correct": 7,
+      "accuracy": 77.8,
+      "avg_peak_day": 6.0
     },
     "AVGO": {
       "total": 13,
-      "correct": 11,
-      "accuracy": 84.6,
-      "avg_peak_day": 3.7
+      "correct": 10,
+      "accuracy": 76.9,
+      "avg_peak_day": 3.0
     },
     "035720.KS": {
       "total": 13,
       "correct": 7,
       "accuracy": 53.8,
-      "avg_peak_day": 3.2
+      "avg_peak_day": 2.8
     },
     "466920.KS": {
       "total": 18,
-      "correct": 12,
-      "accuracy": 66.7,
-      "avg_peak_day": 4.2
+      "correct": 11,
+      "accuracy": 61.1,
+      "avg_peak_day": 3.2
     },
     "SCHD": {
       "total": 21,
-      "correct": 13,
-      "accuracy": 61.9,
-      "avg_peak_day": 5.7
+      "correct": 7,
+      "accuracy": 33.3,
+      "avg_peak_day": 4.3
     }
   },
   "devil_accuracy": {
@@ -120,33 +130,43 @@
   "fear_greed_weight": 0.4,
   "technical_weight": 0.37,
   "fundamental_weight": 0.23,
-  "last_backtest": "2026-04-14T10:15:09.658360",
+  "last_backtest": "2026-04-14T14:48:25.362713",
   "backtest_days": 22,
   "backtest_signals": 99,
   "signal_optimal_days": {
     "ma_support": {
-      "avg_peak_day": 4.4,
-      "avg_peak_gain": 2.22,
+      "avg_peak_day": 3.4,
+      "avg_peak_gain": 1.89,
+      "swing_accuracy": 44.1,
+      "day1_accuracy": 26.5,
       "sample_count": 34
     },
     "momentum_dip": {
-      "avg_peak_day": 5.8,
-      "avg_peak_gain": 8.03,
+      "avg_peak_day": 4.3,
+      "avg_peak_gain": 4.63,
+      "swing_accuracy": 68.0,
+      "day1_accuracy": 34.0,
       "sample_count": 50
     },
     "bb_touch": {
-      "avg_peak_day": 5.2,
-      "avg_peak_gain": 8.21,
+      "avg_peak_day": 4.2,
+      "avg_peak_gain": 6.55,
+      "swing_accuracy": 71.0,
+      "day1_accuracy": 51.6,
       "sample_count": 31
     },
     "sector_rebound": {
-      "avg_peak_day": 5.4,
-      "avg_peak_gain": 10.33,
+      "avg_peak_day": 4.2,
+      "avg_peak_gain": 7.73,
+      "swing_accuracy": 89.5,
+      "day1_accuracy": 47.4,
       "sample_count": 19
     },
     "rsi_oversold": {
-      "avg_peak_day": 5.8,
-      "avg_peak_gain": 5.8,
+      "avg_peak_day": 4.6,
+      "avg_peak_gain": 4.27,
+      "swing_accuracy": 52.6,
+      "day1_accuracy": 36.8,
       "sample_count": 19
     }
   },
