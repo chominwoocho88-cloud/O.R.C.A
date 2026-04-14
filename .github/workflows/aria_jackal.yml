@@ -24,10 +24,12 @@ on:
   workflow_dispatch:
     inputs:
       force_scan:
-        description: "장 마감 무시 강제 스캔"
+        description: "장 마감 무시 강제 스캔 (true 입력 시 지금 당장 전 종목 스캔)"
+        required: false
         default: "false"
       force_evolve:
-        description: "Evolution 강제 실행"
+        description: "Evolution 강제 실행 (true 입력 시 24h 미경과해도 학습 즉시 실행)"
+        required: false
         default: "false"
 
 jobs:
