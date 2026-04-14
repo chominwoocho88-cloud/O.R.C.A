@@ -1,4 +1,17 @@
 {
+  "signal_weights": {
+    "rsi_extreme": 1.0,
+    "rsi_oversold": 1.0,
+    "golden_cross": 1.0,
+    "dead_cross": 1.0,
+    "bb_touch": 1.0,
+    "bb_near": 1.0,
+    "bb_upper": 1.0,
+    "volume_surge": 1.0,
+    "volume_rise": 1.0,
+    "ma20_support": 1.0,
+    "cross_imminent": 1.0
+  },
   "fear_greed_weight": 0.4,
   "technical_weight": 0.37,
   "fundamental_weight": 0.23,
