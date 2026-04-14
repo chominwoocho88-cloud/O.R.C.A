@@ -1,235 +1,184 @@
 """
 jackal_evolution.py
-Jackal Evolution Engine - ARIA 자동 학습 + Skill 승격 시스템
+Jackal Evolution — 스캔 알림 결과 학습 + 신호 가중치 자동 조정
 
-동작 원리:
-  1. accuracy.json + lessons/ 에서 최근 7일 성과 로드
-  2. Claude(Sonnet)에게 패턴 분석 요청 → JSON 응답
-  3. 성공 패턴 → skills/ 에 .json Skill 파일로 저장
-  4. 실패 패턴 → lessons/ 에 Instinct(경고) 파일로 저장
-  5. jackal_weights.json 자동 업데이트
+학습 흐름:
+  1. scan_log.json 에서 알림 발송 후 4시간 이상 지난 미채점 항목 수집
+  2. yfinance 로 현재가 조회 → 알림 시점 대비 수익률 계산
+  3. 수익 시 → 해당 알림의 fired 신호들 가중치 ↑
+     손실 시 → 해당 알림의 fired 신호들 가중치 ↓
+  4. jackal_weights.json 에 저장
 """
 
 import json
-import os
-import re
 import logging
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
-from anthropic import Anthropic
+
+import yfinance as yf
 
 log = logging.getLogger("jackal_evolution")
 
-# ─── 기본 경로 (JackalCore가 주입하지 않을 때 fallback) ───────────
-_BASE = Path(__file__).parent
-_DEFAULT_SKILLS = _BASE / "skills"
-_DEFAULT_LESSONS = _BASE / "lessons"
-_DEFAULT_WEIGHTS = _BASE / "jackal_weights.json"
+_BASE         = Path(__file__).parent
+WEIGHTS_FILE  = _BASE / "jackal_weights.json"
+SCAN_LOG_FILE = _BASE / "scan_log.json"
 
-# ─── 모델 설정 ────────────────────────────────────────────────────
-_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
-_MAX_TOKENS = int(os.getenv("MAX_THINKING_TOKENS", "8000"))
+OUTCOME_CHECK_HOURS = 4    # 알림 후 몇 시간 뒤 결과 확인
+SUCCESS_PCT         = 0.5  # 이 % 이상 오르면 성공
+WEIGHT_ADJUST_UP    = 0.05
+WEIGHT_ADJUST_DOWN  = 0.03
+WEIGHT_MIN          = 0.3
+WEIGHT_MAX          = 2.5
+
+DEFAULT_SIGNAL_WEIGHTS = {
+    "rsi_extreme":    1.0,
+    "rsi_oversold":   1.0,
+    "golden_cross":   1.0,
+    "dead_cross":     1.0,
+    "bb_touch":       1.0,
+    "bb_near":        1.0,
+    "bb_upper":       1.0,
+    "volume_surge":   1.0,
+    "volume_rise":    1.0,
+    "ma20_support":   1.0,
+    "cross_imminent": 1.0,
+}
 
 
 class JackalEvolution:
-    def __init__(
-        self,
-        skills_dir: Path = _DEFAULT_SKILLS,
-        lessons_dir: Path = _DEFAULT_LESSONS,
-        weights_file: Path = _DEFAULT_WEIGHTS,
-    ):
-        self.client = Anthropic()
-        self.skills_dir = Path(skills_dir)
-        self.lessons_dir = Path(lessons_dir)
-        self.weights_file = Path(weights_file)
-        self.weights = self._load_weights()
 
-    # ── 공개 메서드 ────────────────────────────────────────────────
+    def __init__(self):
+        self.weights  = self._load_weights()
+        self._all_logs: list = []
+
     def evolve(self) -> dict:
-        """Evolution 1회 실행"""
         log.info("🧬 Evolution 시작")
+        pending = self._get_pending_alerts()
 
-        context = self._build_context()
-        raw = self._ask_claude(context)
-        result = self._parse_response(raw)
+        if not pending:
+            log.info("  학습할 알림 없음")
+            return {"learned": 0, "weight_changes": []}
 
-        self._save_skills(result.get("new_skills", []))
-        self._save_instincts(result.get("new_instincts", []))
-        self._update_weights(result)
-        self._mark_last_evolve()
+        changes = []
+        learned = 0
 
-        log.info("🧬 Evolution 완료")
-        return result
+        for entry in pending:
+            outcome = self._check_outcome(entry)
+            if outcome is None:
+                continue
+
+            entry["outcome_checked"] = True
+            entry["outcome_price"]   = outcome["current_price"]
+            entry["outcome_pct"]     = outcome["pct_change"]
+            entry["outcome_correct"] = outcome["correct"]
+
+            fired   = entry.get("fired", [])
+            correct = outcome["correct"]
+            adj     = WEIGHT_ADJUST_UP if correct else -WEIGHT_ADJUST_DOWN
+
+            for key in fired:
+                if key in self.weights["signal_weights"]:
+                    old = self.weights["signal_weights"][key]
+                    new = round(max(WEIGHT_MIN, min(WEIGHT_MAX, old + adj)), 4)
+                    self.weights["signal_weights"][key] = new
+                    if old != new:
+                        changes.append(
+                            f"{key}: {old:.3f}→{new:.3f} "
+                            f"[{entry['ticker']} {outcome['pct_change']:+.1f}%]"
+                        )
+            learned += 1
+            log.info(
+                f"  {entry['ticker']}: {outcome['pct_change']:+.1f}% "
+                f"{'✅' if correct else '❌'} | fired={fired}"
+            )
+
+        # 로그 + 가중치 저장
+        if self._all_logs:
+            SCAN_LOG_FILE.write_text(
+                json.dumps(self._all_logs, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        self.weights["last_updated"] = datetime.now().isoformat()
+        self._save_weights()
+
+        for c in changes:
+            log.info(f"  ⚖️  {c}")
+        log.info(f"🧬 완료 | 학습 {learned}건 | 가중치 변경 {len(changes)}개")
+        return {"learned": learned, "weight_changes": changes}
 
     def save_weights(self):
-        """현재 weights를 파일에 저장"""
-        self.weights_file.write_text(
-            json.dumps(self.weights, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
+        self._save_weights()
 
-    # ── 컨텍스트 구성 ──────────────────────────────────────────────
-    def _build_context(self) -> dict:
-        """최근 7일 데이터를 수집해 컨텍스트 딕셔너리로 반환"""
-        accuracy = self._load_json_safe(_BASE / "accuracy.json", default={})
-        recent_lessons = self._load_recent_lessons(days=7)
-        skill_names = [p.stem for p in self.skills_dir.glob("*.json")]
-        weight_summary = {
-            k: round(v, 3) if isinstance(v, (int, float)) else v
-            for k, v in self.weights.items()
-        }
+    def _get_pending_alerts(self) -> list:
+        if not SCAN_LOG_FILE.exists():
+            return []
+        try:
+            self._all_logs = json.loads(SCAN_LOG_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            return []
 
-        return {
-            "accuracy": accuracy,
-            "recent_lessons": recent_lessons,
-            "existing_skills": skill_names,
-            "weights": weight_summary,
-        }
-
-    def _load_recent_lessons(self, days: int = 7) -> list[dict]:
-        cutoff = datetime.now() - timedelta(days=days)
-        lessons = []
-        for p in sorted(self.lessons_dir.glob("*.json")):
+        cutoff  = datetime.now() - timedelta(hours=OUTCOME_CHECK_HOURS)
+        pending = []
+        for entry in self._all_logs:
+            if not entry.get("alerted"):
+                continue
+            if entry.get("outcome_checked"):
+                continue
             try:
-                data = json.loads(p.read_text(encoding="utf-8"))
-                ts = datetime.fromisoformat(data.get("timestamp", "2000-01-01"))
-                if ts >= cutoff:
-                    lessons.append(data)
+                if datetime.fromisoformat(entry["timestamp"]) < cutoff:
+                    pending.append(entry)
             except Exception:
                 continue
-        return lessons[-30:]  # 최대 30건
+        return pending
 
-    # ── Claude 호출 ────────────────────────────────────────────────
-    def _ask_claude(self, context: dict) -> str:
-        prompt = f"""
-너는 Jackal, ARIA 투자 분석 에이전트의 자동 진화 엔진이다.
-아래 최근 7일 성과 데이터를 분석하고, 다음 4가지를 JSON으로만 반환하라.
-마크다운 코드블록, 설명 없이 순수 JSON만 출력할 것.
-
-### 입력 데이터
-{json.dumps(context, ensure_ascii=False, indent=2)}
-
-### 반환 형식 (JSON)
-{{
-  "new_skills": [
-    {{
-      "name": "skill_이름(snake_case)",
-      "description": "어떤 상황에서 쓰는 Skill인지 1줄 설명",
-      "trigger": "이 Skill이 발동되어야 하는 조건",
-      "action": "구체적인 분석/판단 방법"
-    }}
-  ],
-  "new_instincts": [
-    {{
-      "name": "instinct_이름",
-      "warning": "피해야 할 패턴",
-      "reason": "왜 실패했는가"
-    }}
-  ],
-  "prompt_improvements": "Hunter/Analyst/Devil 프롬프트에 추가하면 좋을 개선 사항 (없으면 빈 문자열)",
-  "cost_saving_tip": "이번 주 비용 절감을 위한 실질적 제안 (없으면 빈 문자열)",
-  "weight_adjustments": {{
-    "fear_greed_weight": 0.0,
-    "technical_weight": 0.0,
-    "fundamental_weight": 0.0
-  }}
-}}
-
-규칙:
-- new_skills, new_instincts는 기존 데이터와 중복되지 않는 것만 포함
-- 데이터가 부족하면 new_skills/new_instincts를 빈 배열로 반환
-- weight_adjustments는 -0.1 ~ +0.1 범위의 조정값 (절대값 아님)
-""".strip()
-
-        resp = self.client.messages.create(
-            model=_MODEL,
-            max_tokens=_MAX_TOKENS,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return resp.content[0].text
-
-    # ── 응답 파싱 ──────────────────────────────────────────────────
-    def _parse_response(self, raw: str) -> dict:
-        # JSON 블록 추출 (마크다운 fence 제거)
-        cleaned = re.sub(r"```(?:json)?|```", "", raw).strip()
+    def _check_outcome(self, entry: dict) -> dict | None:
         try:
-            return json.loads(cleaned)
-        except json.JSONDecodeError as e:
-            log.error(f"Evolution 응답 파싱 실패: {e}\n원문: {raw[:300]}")
+            price_alert = entry.get("price_at_scan")
+            if not price_alert:
+                return None
+            hist = yf.Ticker(entry["ticker"]).history(period="2d", interval="1h")
+            if hist.empty:
+                return None
+            current = float(hist["Close"].iloc[-1])
+            pct     = (current - price_alert) / price_alert * 100
             return {
-                "new_skills": [],
-                "new_instincts": [],
-                "prompt_improvements": "",
-                "cost_saving_tip": "",
-                "weight_adjustments": {},
+                "current_price": round(current, 4),
+                "pct_change":    round(pct, 2),
+                "correct":       pct >= SUCCESS_PCT,
             }
+        except Exception as e:
+            log.error(f"  outcome 조회 실패: {e}")
+            return None
 
-    # ── Skill 저장 ─────────────────────────────────────────────────
-    def _save_skills(self, skills: list[dict]):
-        for skill in skills:
-            name = skill.get("name", "").strip()
-            if not name:
-                continue
-            path = self.skills_dir / f"{name}.json"
-            skill["created_at"] = datetime.now().isoformat()
-            path.write_text(json.dumps(skill, ensure_ascii=False, indent=2), encoding="utf-8")
-            log.info(f"  ✅ Skill 생성: {name}")
-
-    # ── Instinct 저장 ──────────────────────────────────────────────
-    def _save_instincts(self, instincts: list[dict]):
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        for i, inst in enumerate(instincts):
-            name = inst.get("name", f"instinct_{i}").strip()
-            path = self.lessons_dir / f"{ts}_{name}.json"
-            inst["timestamp"] = datetime.now().isoformat()
-            path.write_text(json.dumps(inst, ensure_ascii=False, indent=2), encoding="utf-8")
-            log.info(f"  ⚠️  Instinct 등록: {name}")
-
-    # ── 가중치 업데이트 ────────────────────────────────────────────
-    def _update_weights(self, result: dict):
-        adjustments = result.get("weight_adjustments", {})
-        for key, delta in adjustments.items():
-            if key in self.weights:
-                self.weights[key] = round(
-                    max(0.0, min(1.0, self.weights[key] + float(delta))), 4
-                )
-        self.weights["last_updated"] = datetime.now().isoformat()
-
-    # ── 마지막 실행 시각 기록 ──────────────────────────────────────
-    def _mark_last_evolve(self):
-        marker = self.lessons_dir / ".last_evolve"
-        marker.write_text(datetime.now().isoformat(), encoding="utf-8")
-
-    # ── 유틸 ───────────────────────────────────────────────────────
     def _load_weights(self) -> dict:
         default = {
-            "fear_greed_weight": 0.35,
-            "technical_weight": 0.40,
-            "fundamental_weight": 0.25,
-            "last_updated": "",
+            "signal_weights":      DEFAULT_SIGNAL_WEIGHTS.copy(),
+            "fear_greed_weight":   0.35,
+            "technical_weight":    0.40,
+            "fundamental_weight":  0.25,
+            "last_updated":        "",
         }
-        if self.weights_file.exists():
+        if WEIGHTS_FILE.exists():
             try:
-                loaded = json.loads(self.weights_file.read_text(encoding="utf-8"))
+                loaded = json.loads(WEIGHTS_FILE.read_text(encoding="utf-8"))
+                sw = default["signal_weights"].copy()
+                sw.update(loaded.get("signal_weights", {}))
+                loaded["signal_weights"] = sw
+                # 문자열 필드는 round 제외하고 업데이트
                 default.update(loaded)
             except Exception:
                 pass
         return default
 
-    @staticmethod
-    def _load_json_safe(path: Path, default):
-        if path.exists():
-            try:
-                return json.loads(path.read_text(encoding="utf-8"))
-            except Exception:
-                pass
-        return default
+    def _save_weights(self):
+        WEIGHTS_FILE.write_text(
+            json.dumps(self.weights, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
 
 
-# ─── 단독 실행 ────────────────────────────────────────────────────
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
     ev = JackalEvolution()
-    result = ev.evolve()
-    ev.save_weights()
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(json.dumps(ev.evolve(), ensure_ascii=False, indent=2))
