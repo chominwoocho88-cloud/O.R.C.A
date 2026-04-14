@@ -200,7 +200,9 @@ def track_peak(df: pd.DataFrame, signal_date: str,
                tracking_days: int = TRACKING_DAYS) -> dict:
     """
     signal_date 다음 거래일부터 tracking_days일 추적.
-    최대 수익률(Peak)과 그 날짜 반환.
+    두 가지 정확도 측정:
+      ① 1일 정확도: 다음날 방향 (>0.3%)
+      ② 스윙 정확도: 3~7일 내 Peak +1% 이상
     """
     cutoff    = pd.Timestamp(signal_date)
     future    = df[df.index > cutoff].copy()
@@ -208,19 +210,32 @@ def track_peak(df: pd.DataFrame, signal_date: str,
 
     if future.empty:
         return {"peak_day": None, "peak_pct": None, "final_pct": None,
-                "daily_returns": []}
+                "daily_returns": [], "d1_pct": None, "d1_hit": None,
+                "swing_hit": None}
 
-    entry     = float(df[df.index <= cutoff]["Close"].iloc[-1])
-    returns   = [(float(r) - entry) / entry * 100 for r in future["Close"]]
-    peak_idx  = returns.index(max(returns))
-    peak_pct  = round(max(returns), 2)
+    entry   = float(df[df.index <= cutoff]["Close"].iloc[-1])
+    returns = [(float(r) - entry) / entry * 100 for r in future["Close"]]
+
+    # ① 1일 정확도
+    d1_pct = round(returns[0], 2) if returns else None
+    d1_hit = (d1_pct > 0.3) if d1_pct is not None else None
+
+    # ② 스윙 정확도 (3~7일 Peak)
+    swing_window  = returns[:7]
+    peak_pct      = round(max(swing_window), 2) if swing_window else 0
+    peak_idx      = swing_window.index(max(swing_window)) if swing_window else 0
+    swing_hit     = peak_pct >= 1.0   # +1% 이상 = 스윙 성공
+
     final_pct = round(returns[-1], 2) if returns else None
 
     return {
-        "peak_day":      peak_idx + 1,     # 1-indexed
+        "peak_day":      peak_idx + 1,
         "peak_pct":      peak_pct,
         "final_pct":     final_pct,
         "daily_returns": [round(r, 2) for r in returns],
+        "d1_pct":        d1_pct,
+        "d1_hit":        d1_hit,
+        "swing_hit":     swing_hit,
     }
 
 
@@ -292,7 +307,9 @@ def run_backtest():
             if peak["peak_day"] is None:
                 continue
 
-            correct = (peak["peak_pct"] or 0) >= SUCCESS_PCT
+            swing_hit = peak.get("swing_hit", (peak["peak_pct"] or 0) >= 1.0)
+            d1_hit    = peak.get("d1_hit")
+            correct   = swing_hit
             total_signals += 1
 
             entry = {
@@ -303,6 +320,9 @@ def run_backtest():
                 "peak_day":   peak["peak_day"],
                 "peak_pct":   peak["peak_pct"],
                 "final_pct":  peak["final_pct"],
+                "d1_pct":     peak.get("d1_pct"),
+                "d1_hit":     d1_hit,
+                "swing_hit":  swing_hit,
                 "correct":    correct,
                 "signals":    fired,
                 "rsi":        tech["rsi"],
@@ -322,12 +342,14 @@ def run_backtest():
             # 티커별 기록
             ticker_results[ticker].append(entry)
 
+            d1_str = f"{peak.get('d1_pct', 0):+.1f}%" if peak.get('d1_pct') is not None else "N/A"
             print(
                 f"  {date_str} | {ticker:12} | "
                 f"RSI:{tech['rsi']:5.1f} BB:{tech['bb_pos']:5.1f}% | "
                 f"신호:{','.join(fired)} | "
-                f"Peak D{peak['peak_day']} {peak['peak_pct']:+.1f}% "
-                f"{'✅' if correct else '❌'}"
+                f"1일:{d1_str}({'✅' if d1_hit else '❌'}) "
+                f"스윙 D{peak['peak_day']} {peak['peak_pct']:+.1f}%"
+                f"({'✅' if swing_hit else '❌'})"
             )
 
     print(f"\n총 신호 발동: {total_signals}건 / {total_days}거래일")
@@ -344,9 +366,14 @@ def run_backtest():
     for sig, results in signal_results.items():
         if not results:
             continue
-        total    = len(results)
-        correct  = sum(1 for r in results if r["correct"])
-        accuracy = round(correct / total * 100, 1)
+        total     = len(results)
+        # 스윙 정확도 (3~7일 +1%)
+        swing_ok  = sum(1 for r in results if r.get("swing_hit", r["correct"]))
+        swing_acc = round(swing_ok / total * 100, 1)
+        # 1일 정확도
+        d1_judged = [r for r in results if r.get("d1_hit") is not None]
+        d1_ok     = sum(1 for r in d1_judged if r.get("d1_hit"))
+        d1_acc    = round(d1_ok / len(d1_judged) * 100, 1) if d1_judged else 0
 
         peak_days  = [r["peak_day"] for r in results if r["peak_day"] is not None]
         peak_gains = [r["peak_pct"] for r in results if r["peak_pct"] is not None]
@@ -354,24 +381,29 @@ def run_backtest():
         avg_peak_day  = round(sum(peak_days) / len(peak_days), 1) if peak_days else 5
         avg_peak_gain = round(sum(peak_gains) / len(peak_gains), 2) if peak_gains else 0
 
-        # 가중치 계산: 정확도 60% 이상이면 1.0 초과, 40% 미만이면 감소
-        weight = round(max(0.3, min(2.5, 0.5 + accuracy / 100 * 2)), 3)
+        # 가중치: 스윙 정확도 기반
+        weight = round(max(0.3, min(2.5, 0.5 + swing_acc / 100 * 2)), 3)
 
         signal_stats[sig]    = {
-            "total":    total,
-            "correct":  correct,
-            "accuracy": accuracy,
+            "total":          total,
+            "swing_correct":  swing_ok,
+            "swing_accuracy": swing_acc,
+            "d1_correct":     d1_ok,
+            "d1_accuracy":    d1_acc,
         }
         signal_opt_days[sig] = {
-            "avg_peak_day":  avg_peak_day,
-            "avg_peak_gain": avg_peak_gain,
-            "sample_count":  total,
+            "avg_peak_day":   avg_peak_day,
+            "avg_peak_gain":  avg_peak_gain,
+            "swing_accuracy": swing_acc,
+            "day1_accuracy":  d1_acc,
+            "sample_count":   total,
         }
         signal_weights[sig]  = weight
 
         print(
-            f"  {sig:<20} | {total:3}건 | 정확도 {accuracy:5.1f}% | "
-            f"평균 Peak D{avg_peak_day:4.1f} | 평균수익 {avg_peak_gain:+.2f}% | "
+            f"  {sig:<20} | {total:3}건 | "
+            f"1일 {d1_acc:5.1f}% | 스윙 {swing_acc:5.1f}% | "
+            f"Peak D{avg_peak_day:4.1f} {avg_peak_gain:+.2f}% | "
             f"가중치 {weight:.3f}"
         )
 
