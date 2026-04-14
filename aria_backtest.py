@@ -17,7 +17,7 @@ API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 from aria_paths import (
     MEMORY_FILE, ACCURACY_FILE, LESSONS_FILE, WEIGHTS_FILE,
 )
-MODEL         = "claude-sonnet-4-6"
+MODEL         = "claude-haiku-4-5-20251001"
 
 # ── 실제 30거래일 데이터 (2026-03-03 ~ 2026-04-11) ──────────────────────────
 HIST_DATA = {
@@ -642,23 +642,31 @@ ANALYST_PROMPT = """당신은 ARIA 투자 분석 에이전트입니다.
 아래 시장 데이터를 분석하고 thesis_killers를 생성하세요.
 
 [thesis_killers 필수 규칙 — 반드시 준수]
-1. event는 반드시 내일 주가/지수로 검증 가능한 것만 (나스닥, 코스피, 반도체주, VIX, 원달러)
-2. confirms_if / invalidates_if에 반드시 숫자 포함 (예: "나스닥 +1% 이상", "코스피 -1% 이하")
+1. event는 내일(1일) 또는 3일 이내 주가/지수로 검증 가능한 것만
+2. confirms_if / invalidates_if에 반드시 숫자 포함
 3. "협상 진전", "분위기 개선" 같은 뉴스 이벤트는 절대 금지
-4. 검증 불가능한 event는 생성 금지
+4. 모멘텀 지속(상승장) vs 모멘텀 반전 중 하나를 명확히 선택할 것
+5. 위험회피 레짐에서는 반등 가능성을 thesis_killer로 포함할 것
+
+[사용 가능한 timeframe]
+- "1일": 내일 하루 방향 (단기, 이벤트 직후 반응)
+- "3일": 3거래일 누적 방향 (추세 확인용, 모멘텀 판단에 적합)
 
 [올바른 예시]
 event: "나스닥 기술주 방향성"
-confirms_if: "나스닥 +1% 이상 상승"
-invalidates_if: "나스닥 -1% 이하 하락"
+timeframe: "1일"
+confirms_if: "나스닥 +0.8% 이상 상승"
+invalidates_if: "나스닥 -0.8% 이하 하락"
 
-event: "반도체 섹터 (SK하이닉스) 방향성"
-confirms_if: "SK하이닉스 +2% 이상"
-invalidates_if: "SK하이닉스 -2% 이하"
+event: "반도체 섹터 (SK하이닉스) 3일 추세"
+timeframe: "3일"
+confirms_if: "SK하이닉스 3일 누적 +3% 이상"
+invalidates_if: "SK하이닉스 3일 누적 -3% 이하"
 
 event: "VIX 공포지수 완화"
-confirms_if: "VIX 현재보다 10% 이상 하락"
-invalidates_if: "VIX 현재보다 10% 이상 상승"
+timeframe: "1일"
+confirms_if: "VIX 현재보다 15% 이상 하락"
+invalidates_if: "VIX 현재보다 15% 이상 상승"
 
 Return ONLY valid JSON. No markdown.
 {
@@ -669,7 +677,7 @@ Return ONLY valid JSON. No markdown.
   "one_line_summary": "",
   "thesis_killers": [
     {"event":"나스닥/코스피/반도체/VIX 등 수치 검증 가능한 이벤트",
-     "timeframe":"1일","confirms_if":"숫자 포함 조건","invalidates_if":"숫자 포함 조건"}
+     "timeframe":"1일 또는 3일","confirms_if":"숫자 포함 조건","invalidates_if":"숫자 포함 조건"}
   ],
   "outflows": [{"zone":"","reason":"","severity":"높음/보통/낮음"}],
   "inflows":  [{"zone":"","reason":"","momentum":"강함/형성중/약함"}],
@@ -750,8 +758,12 @@ def _pct(v):
     except: return 0.0
 
 
-def verify_predictions(analysis, next_data):
-    """유연한 thesis_killers 검증 — 수치 기반 + 키워드 확장"""
+def verify_predictions(analysis, next_data, next_3d_data=None):
+    """
+    thesis_killers 검증.
+    timeframe 1일: next_data로 검증
+    timeframe 3일: next_3d_data (3거래일 누적) 로 검증, 없으면 1일 데이터 사용
+    """
     results = []
 
     nq  = _pct(next_data.get("nasdaq_change"))
@@ -760,6 +772,11 @@ def verify_predictions(analysis, next_data):
     sk  = _pct(next_data.get("sk_hynix_change"))
     sam = _pct(next_data.get("samsung_change"))
     nv  = _pct(next_data.get("nvda_change"))
+
+    # 3일 누적 데이터 (있으면 사용)
+    nq3  = _pct(next_3d_data.get("nasdaq_change_3d",  "0")) if next_3d_data else nq*2.5
+    sk3  = _pct(next_3d_data.get("sk_hynix_change_3d","0")) if next_3d_data else sk*2.5
+    nv3  = _pct(next_3d_data.get("nvda_change_3d",    "0")) if next_3d_data else nv*2.5
     try:   vix_now  = float(next_data.get("vix", 25))
     except: vix_now = 25.0
     try:   vix_prev = float(analysis.get("vix_at_time", vix_now))
@@ -771,11 +788,14 @@ def verify_predictions(analysis, next_data):
         return float(nums[0]) if nums else None
 
     def check_direction(chg, conf_text, inv_text):
-        """등락 방향 + 임계값으로 verdict 결정"""
+        """
+        등락 방향 + 임계값으로 verdict 결정.
+        임계값 ±0.3% (이전 ±0.5%)로 낮춰 불명확 감소.
+        방향이 맞으면 수치 미달이어도 partial_confirm 처리.
+        """
         conf_thr = extract_threshold(conf_text) or 1.0
         inv_thr  = extract_threshold(inv_text) or 1.0
 
-        # confirms_if 방향 판단
         conf_up   = any(w in conf_text.lower() for w in ["상승","반등","올라","증가","+"])
         conf_down = any(w in conf_text.lower() for w in ["하락","급락","내려","감소","-"])
         inv_up    = any(w in inv_text.lower() for w in ["상승","반등","올라","증가","+"])
@@ -783,30 +803,46 @@ def verify_predictions(analysis, next_data):
 
         abs_thr = abs(conf_thr) if conf_thr else 1.0
 
+        # 임계값 완전 충족
         if conf_up and chg >= abs_thr:
-            return "confirmed",   f"실제 {chg:+.2f}% (예측: {conf_thr:+.1f}% 이상)"
+            return "confirmed",   f"실제 {chg:+.2f}% (예측: +{abs_thr:.1f}% 이상)"
         if conf_down and chg <= -abs_thr:
             return "confirmed",   f"실제 {chg:+.2f}% (예측: -{abs_thr:.1f}% 이하)"
+
+        # 방향은 맞지만 수치 미달 → partial confirm (±0.3% 이상이면 인정)
+        if conf_up and 0.3 <= chg < abs_thr:
+            return "confirmed",   f"실제 {chg:+.2f}% (예측 방향 일치, 수치 부분달성)"
+        if conf_down and -abs_thr < chg <= -0.3:
+            return "confirmed",   f"실제 {chg:+.2f}% (예측 방향 일치, 수치 부분달성)"
+
+        # 반대 방향 (invalidated)
         if inv_up and chg >= abs(inv_thr):
             return "invalidated", f"실제 {chg:+.2f}% (예측 반대)"
         if inv_down and chg <= -abs(inv_thr):
             return "invalidated", f"실제 {chg:+.2f}% (예측 반대)"
+        # 방향 자체가 반대인 경우 (수치 기준 없이)
+        if conf_up and chg <= -0.3:
+            return "invalidated", f"실제 {chg:+.2f}% (예측 반대)"
+        if conf_down and chg >= 0.3:
+            return "invalidated", f"실제 {chg:+.2f}% (예측 반대)"
 
-        # 임계값 미달 (변동 미미)
-        if abs(chg) < 0.5:
+        # 변동 미미 (±0.3% 미만)
+        if abs(chg) < 0.3:
             return "unclear", f"변동 미미 ({chg:+.2f}%)"
         return "unclear", f"방향 불명확 ({chg:+.2f}%)"
 
     for tk in analysis.get("thesis_killers", []):
-        event = tk.get("event","").lower()
-        conf  = tk.get("confirms_if","").lower()
-        inv   = tk.get("invalidates_if","").lower()
+        event     = tk.get("event","").lower()
+        conf      = tk.get("confirms_if","").lower()
+        inv       = tk.get("invalidates_if","").lower()
+        timeframe = tk.get("timeframe","1일")
+        use_3d    = "3일" in timeframe
         v, ev, cat = "unclear", "", "기타"
 
         # ── 나스닥 / 미국 기술주 ───────────────────────────────────────────
         if any(k in event for k in ["나스닥","nasdaq","기술주","미국 주식","s&p","sp500","빅테크"]):
             cat = "주식"
-            chg = nq if "나스닥" in event or "nasdaq" in event else sp
+            chg = (nq3 if use_3d else nq) if "나스닥" in event or "nasdaq" in event else sp
             v, ev = check_direction(chg, conf, inv)
 
         # ── 코스피 / 한국 주식 ─────────────────────────────────────────────
