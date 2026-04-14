@@ -1,12 +1,16 @@
 """
 jackal_scanner.py
-Jackal Scanner — Claude Haiku 타점 분석 (FRED+KRX+FSC+yfinance 데이터 활용)
+Jackal Scanner — Analyst → Devil → Final 3단계 타점 분석
 
-동작:
-  1. 시장 데이터 수집 (yfinance 기술지표 + FRED 매크로 + KRX + FSC)
-  2. Claude Haiku에게 종합 타점 판단 요청
-  3. is_entry=True + score≥65 → 텔레그램 발송
-  4. 결과를 scan_log.json 에 저장 (Evolution 자체 학습용)
+흐름:
+  1. 데이터 수집 (yfinance + FRED + KRX + FSC + ARIA 파일)
+  2. Analyst (Haiku): 매수 근거 구성
+  3. Devil   (Haiku): Analyst 반박 + ARIA Thesis Killer 체크
+  4. Final   판단:
+       둘 다 매수  → 강한 신호 (가중 합산)
+       엇갈림      → 점수 낮춤
+       둘 다 반대  → 알림 없음
+  5. 결과 저장 (Evolution 학습용 — 신호·레짐·Devil 정확도 포함)
 """
 
 import os
@@ -35,11 +39,15 @@ SCAN_LOG_FILE = _BASE / "scan_log.json"
 COOLDOWN_FILE = _BASE / "scan_cooldown.json"
 WEIGHTS_FILE  = _BASE / "jackal_weights.json"
 
+# ARIA 데이터 파일 (읽기만, 의존성 없음)
+ARIA_BASELINE  = Path("data") / "morning_baseline.json"
+ARIA_SENTIMENT = Path("data") / "sentiment.json"
+ARIA_ROTATION  = Path("data") / "rotation.json"
+
 TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
-MODEL            = os.environ.get("SUBAGENT_MODEL", "claude-haiku-4-5-20251001")
+MODEL_H          = os.environ.get("SUBAGENT_MODEL", "claude-haiku-4-5-20251001")
 
-# 감시 종목
 WATCHLIST = {
     "NVDA":      {"name": "엔비디아",   "avg_cost": 182.99, "market": "US", "currency": "$"},
     "AVGO":      {"name": "브로드컴",   "avg_cost": None,   "market": "US", "currency": "$"},
@@ -50,6 +58,7 @@ WATCHLIST = {
 }
 
 ALERT_THRESHOLD = 65
+STRONG_THRESHOLD = 78
 COOLDOWN_HOURS  = 4
 
 
@@ -69,8 +78,68 @@ def _is_kr_open() -> bool:
 
 
 # ══════════════════════════════════════════════════════════════════
-# 가중치 로드
+# ARIA 컨텍스트 로딩 (파일 읽기만)
 # ══════════════════════════════════════════════════════════════════
+
+def _load_aria_context() -> dict:
+    """
+    ARIA가 생성한 파일들을 읽어 시장 맥락 구성.
+    파일 없으면 빈 값 반환 — ARIA에 의존하지 않음.
+    """
+    ctx = {
+        "regime":        "",
+        "trend":         "",
+        "confidence":    "",
+        "one_line":      "",
+        "thesis_killers": [],
+        "key_inflows":   [],
+        "key_outflows":  [],
+        "sentiment_score": 50,
+        "sentiment_level": "중립",
+        "top_sector":    "",
+        "bottom_sector": "",
+    }
+
+    # morning_baseline.json
+    try:
+        if ARIA_BASELINE.exists():
+            b = json.loads(ARIA_BASELINE.read_text(encoding="utf-8"))
+            ctx["regime"]     = b.get("market_regime", "")
+            ctx["trend"]      = b.get("trend_phase", "")
+            ctx["confidence"] = b.get("confidence", "")
+            ctx["one_line"]   = b.get("one_line_summary", "")
+            ctx["thesis_killers"] = b.get("thesis_killers", [])
+            ctx["key_inflows"]    = [i.get("zone","") for i in b.get("key_inflows", [])[:3]]
+            ctx["key_outflows"]   = [o.get("zone","") for o in b.get("key_outflows", [])[:3]]
+    except Exception:
+        pass
+
+    # sentiment.json
+    try:
+        if ARIA_SENTIMENT.exists():
+            s = json.loads(ARIA_SENTIMENT.read_text(encoding="utf-8"))
+            cur = s.get("current", {})
+            ctx["sentiment_score"] = cur.get("score", 50)
+            ctx["sentiment_level"] = cur.get("level", "중립")
+    except Exception:
+        pass
+
+    # rotation.json
+    try:
+        if ARIA_ROTATION.exists():
+            r = json.loads(ARIA_ROTATION.read_text(encoding="utf-8"))
+            ranking = r.get("ranking", [])
+            if ranking:
+                ctx["top_sector"]    = ranking[0][0] if ranking else ""
+                ctx["bottom_sector"] = ranking[-1][0] if ranking else ""
+            sig = r.get("rotation_signal", {})
+            ctx["rotation_from"] = sig.get("from", "")
+            ctx["rotation_to"]   = sig.get("to", "")
+    except Exception:
+        pass
+
+    return ctx
+
 
 def _load_weights() -> dict:
     try:
@@ -82,123 +151,235 @@ def _load_weights() -> dict:
 
 
 # ══════════════════════════════════════════════════════════════════
-# Claude Haiku 타점 판단
+# Agent 1: Analyst — 매수 근거 구성
 # ══════════════════════════════════════════════════════════════════
 
-def _analyze_with_claude(
-    ticker: str,
-    info:   dict,
-    tech:   dict,
-    macro:  dict,
-) -> dict | None:
+def agent_analyst(ticker: str, info: dict, tech: dict,
+                  macro: dict, aria: dict) -> dict:
     """
-    FRED + KRX + FSC + 기술지표를 모두 Claude에 전달해 타점 판단.
+    Haiku로 매수 근거를 구성.
+    Returns: {score, signals_fired, reasoning, confidence}
     """
-    client  = Anthropic()
-    weights = _load_weights()
     cur     = info["currency"]
-    sent    = macro.get("sentiment", {})
     fred    = macro.get("fred", {})
-    krx     = macro.get("krx", {})
-    fsc     = macro.get("fsc", {})
+    weights = _load_weights()
+    stw     = weights.get("signal_weights", {})
 
-    # 수익률 (평균단가 있을 때)
     pnl_str = ""
     if info.get("avg_cost") and info["market"] == "US":
         pnl     = (tech["price"] - info["avg_cost"]) / info["avg_cost"] * 100
-        pnl_str = f"\n내 평균 매입가: {cur}{info['avg_cost']} (현재 {pnl:+.1f}%)"
+        pnl_str = f"\n내 평균단가: {cur}{info['avg_cost']} (현재 {pnl:+.1f}%)"
 
-    # MA50
-    ma50_str = f"\nMA50: {cur}{tech['ma50']}" if tech.get("ma50") else ""
+    # 학습된 신호별 정확도 힌트
+    acc_hint = ""
+    sig_acc = weights.get("signal_accuracy", {})
+    if sig_acc:
+        top = sorted(sig_acc.items(), key=lambda x: x[1].get("accuracy", 0), reverse=True)[:3]
+        acc_hint = "\n[학습 정확도 높은 신호] " + " | ".join(
+            f"{k}:{v['accuracy']:.0f}%" for k, v in top if v.get("total", 0) >= 3
+        )
 
-    # FRED 매크로 요약
-    fred_str = ""
-    if fred.get("source"):
-        parts = []
-        if fred.get("vix"):           parts.append(f"VIX {fred['vix']}")
-        if fred.get("hy_spread"):     parts.append(f"HY스프레드 {fred['hy_spread']}%")
-        if fred.get("yield_curve") is not None:
-            yc = fred["yield_curve"]
-            parts.append(f"장단기금리차 {yc:+.2f}% ({'침체경고' if yc < 0 else '정상'})")
-        if fred.get("dxy"):           parts.append(f"달러지수 {fred['dxy']}")
-        if fred.get("consumer_sent"): parts.append(f"소비자심리 {fred['consumer_sent']}")
-        if parts:
-            fred_str = "\n[FRED 매크로] " + " | ".join(parts)
+    prompt = f"""당신은 주식 매수 타점 분석가(Analyst)입니다.
+아래 데이터로 {info['name']} ({ticker})의 매수 근거를 분석하세요.
+반드시 JSON만 반환하세요.
 
-    # KRX
-    krx_str = ""
-    if krx.get("source") and krx.get("kospi_close"):
-        krx_str = f"\n[KRX] KOSPI {krx['kospi_close']}pt ({krx.get('kospi_change','?')}%)"
-
-    # FSC (한국 종목일 때)
-    fsc_str = ""
-    if info["market"] == "KR" and fsc.get("source"):
-        if ticker == "005930.KS" and fsc.get("samsung"):
-            fsc_str = f"\n[FSC 공식] 삼성전자 {fsc['samsung']}원"
-        elif ticker == "000660.KS" and fsc.get("sk_hynix"):
-            fsc_str = f"\n[FSC 공식] SK하이닉스 {fsc['sk_hynix']}원"
-        if fsc.get("gold"):
-            fsc_str += f" | 금 {fsc['gold']}원/kg"
-
-    # 가중치 힌트
-    w_str = ""
-    stw = weights.get("signal_type_weights", {})
-    if stw:
-        w_str = f"\n[Jackal 학습 가중치] 강한매수:{stw.get('강한매수',1.0):.2f} 매수검토:{stw.get('매수검토',1.0):.2f}"
-
-    prompt = f"""당신은 주식 매수 타점 분석 전문가입니다.
-아래 데이터를 종합해 지금이 매수 타점인지 판단하세요.
-
-종목: {info['name']} ({ticker})
-현재가: {cur}{tech['price']:,.2f if info['market'] == 'US' else tech['price']:,.0f} 
+[종목]
+현재가: {cur}{tech['price']:,.2f if info['market']=='US' else tech['price']:,.0f}
 전일比: {tech['change_1d']:+.1f}% | 5일比: {tech['change_5d']:+.1f}%{pnl_str}
 
 [기술 지표]
-RSI(14): {tech['rsi']} | MA20: {cur}{tech['ma20']}{ma50_str}
-볼린저 위치: {tech['bb_pos']}% (0%=하단, 100%=상단)
-거래량: 평균 대비 {tech['vol_ratio']:.1f}x
+RSI(14): {tech['rsi']} | MA20: {cur}{tech['ma20']} | MA50: {cur}{tech.get('ma50','N/A')}
+볼린저: {tech['bb_pos']}% (0%=하단, 100%=상단) | 거래량: 평균 대비 {tech['vol_ratio']:.1f}x
 
-[시장 환경]
-센티먼트: {sent.get('score',50)}점 ({sent.get('level','중립')}) | 추세: {sent.get('trend','횡보')}
-레짐: {sent.get('regime','')[:60] if sent.get('regime') else '정보없음'}{fred_str}{krx_str}{fsc_str}{w_str}
+[매크로 (FRED)]
+VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
+장단기금리차: {fred.get('yield_curve','N/A')}% | 달러지수: {fred.get('dxy','N/A')}
+소비자심리: {fred.get('consumer_sent','N/A')}
 
-판단 기준:
-- RSI ≤ 30: 강한 과매도 신호
-- 볼린저 ≤ 10%: 하단 터치, 반등 가능
-- 거래량 ≥ 2x + 가격 하락: 투매 구간 (역발상 매수)
-- HY스프레드 급등: 위험회피 → 매수 자제
-- 장단기금리차 음수: 침체 우려 → 보수적 접근
-- VIX ≥ 30: 극단 공포 → 역발상 매수 고려
+[ARIA 시장 맥락]
+레짐: {aria['regime'] or '정보없음'} | 추세: {aria['trend'] or '정보없음'}
+센티먼트: {aria['sentiment_score']}점 ({aria['sentiment_level']})
+섹터유입: {', '.join(aria['key_inflows']) or '없음'}
+섹터유출: {', '.join(aria['key_outflows']) or '없음'}
+강세섹터: {aria.get('top_sector','N/A')} | 약세섹터: {aria.get('bottom_sector','N/A')}
+{acc_hint}
 
-반드시 JSON만 반환. 설명 없이.
+매수 근거가 있다면 높은 점수, 없다면 낮은 점수를 주세요.
+
 {{
-  "is_entry": true 또는 false,
-  "score": 0~100,
-  "signal_type": "강한매수" 또는 "매수검토" 또는 "관망" 또는 "매도주의",
-  "reason": "한 줄 핵심 이유 (30자 이내)",
+  "analyst_score": 0~100,
+  "confidence": "낮음" 또는 "보통" 또는 "높음",
+  "signals_fired": ["rsi_oversold", "bb_touch", "volume_surge", "ma_support", "golden_cross", "fear_regime", "sector_inflow"],
+  "bull_case": "매수 근거 2~3줄",
   "entry_price": 숫자 또는 null,
-  "stop_loss": 숫자 또는 null,
-  "key_risk": "가장 큰 리스크 한 줄 (20자 이내)"
+  "stop_loss": 숫자 또는 null
 }}"""
 
     try:
         resp = Anthropic().messages.create(
-            model=MODEL,
-            max_tokens=300,
+            model=MODEL_H, max_tokens=400,
             messages=[{"role": "user", "content": prompt}],
         )
-        raw     = resp.content[0].text
-        cleaned = re.sub(r"```(?:json)?|```", "", raw).strip()
-        m       = re.search(r"\{[\s\S]*\}", cleaned)
+        raw  = re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip()
+        m    = re.search(r"\{[\s\S]*\}", raw)
         if not m:
-            return None
+            return {"analyst_score": 50, "confidence": "낮음",
+                    "signals_fired": [], "bull_case": "분석 실패"}
         result = json.loads(m.group())
-        result["is_entry"] = bool(result.get("is_entry", False))
-        result["score"]    = int(result.get("score", 0))
+        result["analyst_score"] = int(result.get("analyst_score", 50))
         return result
     except Exception as e:
-        log.error(f"  Claude 분석 실패: {e}")
-        return None
+        log.error(f"  Analyst 실패: {e}")
+        return {"analyst_score": 50, "confidence": "낮음",
+                "signals_fired": [], "bull_case": "분석 실패"}
+
+
+# ══════════════════════════════════════════════════════════════════
+# Agent 2: Devil — 반박 + Thesis Killer 체크
+# ══════════════════════════════════════════════════════════════════
+
+def agent_devil(ticker: str, info: dict, tech: dict,
+                macro: dict, aria: dict, analyst: dict) -> dict:
+    """
+    Haiku로 Analyst 결론을 반박.
+    ARIA의 Thesis Killer를 직접 체크.
+    Returns: {devil_score, verdict, objections, thesis_killer_hit}
+    """
+    cur  = info["currency"]
+    fred = macro.get("fred", {})
+
+    # Thesis Killer 텍스트 구성
+    tk_text = ""
+    tks = aria.get("thesis_killers", [])
+    if tks:
+        tk_lines = []
+        for tk in tks[:3]:
+            event = tk.get("event", "")
+            inv   = tk.get("invalidates_if", "")
+            if event and inv:
+                tk_lines.append(f"  • {event}: {inv}")
+        if tk_lines:
+            tk_text = "\n[ARIA Thesis Killers — 이 조건이면 매수 무효]\n" + "\n".join(tk_lines)
+
+    prompt = f"""당신은 투자 리스크 분석가(Devil)입니다.
+Analyst가 {info['name']} ({ticker}) 매수를 주장합니다.
+당신은 반드시 반박해야 합니다. JSON만 반환하세요.
+
+[Analyst 결론]
+점수: {analyst['analyst_score']} | 신뢰도: {analyst['confidence']}
+근거: {analyst.get('bull_case','')}
+발동 신호: {', '.join(analyst.get('signals_fired', []))}
+
+[현재 상황]
+현재가: {cur}{tech['price']:,.2f if info['market']=='US' else tech['price']:,.0f}
+RSI: {tech['rsi']} | 볼린저: {tech['bb_pos']}% | 거래량: {tech['vol_ratio']:.1f}x
+VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
+장단기금리차: {fred.get('yield_curve','N/A')}%
+
+[ARIA 시장 맥락]
+레짐: {aria['regime'] or '정보없음'} | 센티먼트: {aria['sentiment_score']}점
+유출섹터: {', '.join(aria['key_outflows']) or '없음'}
+{tk_text}
+
+반박 기준:
+- VIX > 25이면 변동성 과대
+- HY스프레드 > 4%이면 위험회피 강화
+- 레짐이 위험회피이면 매수 부적절
+- Thesis Killer 조건 해당이면 즉시 무효
+- 연속 3일+ 상승이면 과열 경고
+
+{{
+  "devil_score": 0~100 (높을수록 반박 강함, 매수 부적절),
+  "verdict": "동의" 또는 "부분동의" 또는 "반대",
+  "objections": ["반박 이유 1", "반박 이유 2"],
+  "thesis_killer_hit": true 또는 false,
+  "killer_detail": "해당 Thesis Killer 내용 (없으면 빈 문자열)",
+  "bear_case": "매수 반대 근거 1~2줄"
+}}"""
+
+    try:
+        resp = Anthropic().messages.create(
+            model=MODEL_H, max_tokens=400,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        raw  = re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip()
+        m    = re.search(r"\{[\s\S]*\}", raw)
+        if not m:
+            return {"devil_score": 30, "verdict": "부분동의",
+                    "objections": [], "thesis_killer_hit": False}
+        result = json.loads(m.group())
+        result["devil_score"] = int(result.get("devil_score", 30))
+        return result
+    except Exception as e:
+        log.error(f"  Devil 실패: {e}")
+        return {"devil_score": 30, "verdict": "부분동의",
+                "objections": [], "thesis_killer_hit": False}
+
+
+# ══════════════════════════════════════════════════════════════════
+# Final 판단
+# ══════════════════════════════════════════════════════════════════
+
+def _final_judgment(analyst: dict, devil: dict) -> dict:
+    """
+    Analyst와 Devil 결과를 합산해 최종 판단.
+
+    계산:
+      - Thesis Killer 발동 → 즉시 is_entry=False
+      - Devil 반대         → analyst_score * 0.5
+      - Devil 부분동의     → analyst_score * 0.75
+      - Devil 동의         → analyst_score * 1.0
+      - final_score        → 위 조정값 (devil_score는 페널티로 반영)
+    """
+    a_score   = analyst.get("analyst_score", 50)
+    d_score   = devil.get("devil_score", 30)
+    verdict   = devil.get("verdict", "부분동의")
+    tk_hit    = devil.get("thesis_killer_hit", False)
+
+    # Thesis Killer 발동 → 즉시 매수 불가
+    if tk_hit:
+        return {
+            "final_score": 20,
+            "is_entry":    False,
+            "signal_type": "매도주의",
+            "reason":      f"⛔ Thesis Killer: {devil.get('killer_detail','무효화 조건 충족')}",
+        }
+
+    # Devil 판정에 따른 가중치
+    weight_map = {"동의": 1.0, "부분동의": 0.75, "반대": 0.5}
+    weight     = weight_map.get(verdict, 0.75)
+
+    # Devil 반박 강도 페널티 (devil_score가 높을수록 페널티)
+    devil_penalty = (d_score - 30) * 0.2   # devil_score 30 기준, 초과분의 20%
+    final = max(0, min(100, round(a_score * weight - devil_penalty, 1)))
+
+    # 신호 타입 결정
+    if final >= STRONG_THRESHOLD and verdict != "반대":
+        sig_type = "강한매수"
+    elif final >= ALERT_THRESHOLD and verdict != "반대":
+        sig_type = "매수검토"
+    elif verdict == "반대" or final < 40:
+        sig_type = "매도주의" if final < 30 else "관망"
+    else:
+        sig_type = "관망"
+
+    is_entry = final >= ALERT_THRESHOLD and verdict != "반대" and not tk_hit
+
+    # 판단 이유 구성
+    reason_parts = []
+    if analyst.get("bull_case"):
+        reason_parts.append(analyst["bull_case"][:40])
+    if devil.get("objections"):
+        reason_parts.append("⚠️ " + devil["objections"][0][:30])
+
+    return {
+        "final_score": final,
+        "is_entry":    is_entry,
+        "signal_type": sig_type,
+        "reason":      " | ".join(reason_parts)[:80],
+        "entry_price": analyst.get("entry_price"),
+        "stop_loss":   analyst.get("stop_loss"),
+    }
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -248,37 +429,28 @@ def _send_telegram(text: str) -> bool:
         return False
 
 
-def _build_message(ticker: str, info: dict, tech: dict,
-                   result: dict, macro: dict) -> str:
+def _build_alert_message(ticker: str, info: dict, tech: dict,
+                          analyst: dict, devil: dict, final: dict,
+                          aria: dict) -> str:
     now_str  = datetime.now(KST).strftime("%m/%d %H:%M")
     cur      = info["currency"]
-    strong   = result.get("signal_type") == "강한매수"
+    strong   = final["signal_type"] == "강한매수"
     header   = "🔥 <b>강한 매수 타점</b>" if strong else "🔵 <b>매수 검토 타점</b>"
     price_str = f"{tech['price']:,.2f}" if info["market"] == "US" else f"{tech['price']:,.0f}"
-    sent      = macro.get("sentiment", {})
-    fred      = macro.get("fred", {})
 
     pnl_line = ""
     if info.get("avg_cost") and info["market"] == "US":
         pnl      = (tech["price"] - info["avg_cost"]) / info["avg_cost"] * 100
         pnl_line = f"\n{'📈' if pnl >= 0 else '📉'} 내 수익률: {pnl:+.1f}%"
 
-    entry = result.get("entry_price")
-    stop  = result.get("stop_loss")
-    entry_line = f"\n🎯 진입가: {cur}{entry:,.0f}" if entry else ""
-    stop_line  = f"\n🛑 손절가: {cur}{stop:,.0f}" if stop else ""
-    risk_line  = f"\n⚡ 리스크: {result.get('key_risk','')}" if result.get("key_risk") else ""
+    entry = final.get("entry_price")
+    stop  = final.get("stop_loss")
 
-    # FRED 핵심 지표
-    fred_line = ""
-    if fred.get("source"):
-        parts = []
-        if fred.get("vix"):       parts.append(f"VIX {fred['vix']}")
-        if fred.get("hy_spread"): parts.append(f"HY {fred['hy_spread']}%")
-        if fred.get("yield_curve") is not None:
-            parts.append(f"금리차 {fred['yield_curve']:+.2f}%")
-        if parts:
-            fred_line = "\n📈 " + " | ".join(parts)
+    # Devil 판정
+    verdict_icon = {"동의": "✅", "부분동의": "⚠️", "반대": "❌"}.get(devil.get("verdict",""), "")
+    devil_line = f"\n🔴 Devil {verdict_icon}: {devil.get('objections',[None])[0] or ''}"[:60] if devil.get("objections") else ""
+
+    fred = aria  # macro already in aria context for message
 
     return (
         f"{header}\n"
@@ -286,17 +458,52 @@ def _build_message(ticker: str, info: dict, tech: dict,
         f"<b>{info['name']} ({ticker})</b>\n"
         f"💰 {cur}{price_str} ({tech['change_1d']:+.1f}%){pnl_line}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"🤖 Jackal 점수: <b>{result['score']}/100</b>\n"
-        f"📊 RSI {tech['rsi']} | BB {tech['bb_pos']}% | 거래량 {tech['vol_ratio']:.1f}x\n"
-        f"💡 {result.get('reason','')}{entry_line}{stop_line}{risk_line}\n"
+        f"🤖 최종 점수: <b>{final['final_score']:.0f}/100</b>\n"
+        f"📊 Analyst {analyst['analyst_score']} → Devil {devil['devil_score']} → Final {final['final_score']:.0f}\n"
+        f"📉 RSI {tech['rsi']} | BB {tech['bb_pos']}% | 거래량 {tech['vol_ratio']:.1f}x\n"
+        f"💡 {final.get('reason','')}{devil_line}\n"
+        f"{'🎯 진입가: ' + cur + str(entry) if entry else ''}"
+        f"{'  🛑 손절: ' + cur + str(stop) if stop else ''}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"😐 센티먼트: {sent.get('score',50)}점 ({sent.get('level','중립')}){fred_line}\n"
+        f"😐 센티먼트: {aria['sentiment_score']}점 | 레짐: {aria['regime'][:20] if aria['regime'] else 'N/A'}\n"
         f"⏰ {now_str} KST | Jackal"
     )
 
 
+def _build_summary_message(results: list, macro: dict, aria: dict) -> str:
+    """타점 없을 때 스캔 결과 요약"""
+    now_str = datetime.now(KST).strftime("%m/%d %H:%M")
+    fred    = macro.get("fred", {})
+    lines   = ["📊 <b>Jackal 스캔 완료 — 타점 없음</b>",
+               "━━━━━━━━━━━━━━━━━━━━"]
+
+    for r in results:
+        sig  = r.get("signal_type", "관망")
+        icon = {"강한매수": "🔴", "매수검토": "🟡", "관망": "⚪", "매도주의": "🔵"}.get(sig, "⚪")
+        v    = r.get("devil_verdict", "")
+        dv   = f" | Devil:{v}" if v else ""
+        lines.append(
+            f"{icon} {r['name']}: {r['final_score']:.0f}점 | RSI {r['rsi']} | {sig}{dv}"
+        )
+
+    lines.append("━━━━━━━━━━━━━━━━━━━━")
+    fred_parts = []
+    if fred.get("vix"):         fred_parts.append(f"VIX {fred['vix']}")
+    if fred.get("hy_spread"):   fred_parts.append(f"HY {fred['hy_spread']}%")
+    if fred.get("yield_curve") is not None:
+        fred_parts.append(f"금리차 {fred['yield_curve']:+.2f}%")
+    if fred_parts:
+        lines.append("📈 " + " | ".join(fred_parts))
+
+    lines.append(f"😐 센티먼트: {aria['sentiment_score']}점 ({aria['sentiment_level']})")
+    if aria.get("regime"):
+        lines.append(f"🌐 레짐: {aria['regime'][:30]}")
+    lines.append(f"⏰ {now_str} KST | Jackal")
+    return "\n".join(lines)
+
+
 # ══════════════════════════════════════════════════════════════════
-# 스캔 로그
+# 스캔 로그 (Evolution 학습용 — 풍부한 메타데이터 포함)
 # ══════════════════════════════════════════════════════════════════
 
 def _save_log(entry: dict):
@@ -323,8 +530,12 @@ def run_scan(force: bool = False) -> dict:
     log.info(f"📡 Jackal Scanner | {now_kst.strftime('%Y-%m-%d %H:%M KST')}")
     log.info(f"   미국장 {'✅' if us_open else '❌'} | 한국장 {'✅' if kr_open else '❌'}")
 
-    # 공통 매크로 데이터 (1회 수집 → 모든 종목에 공유)
+    # 공통 데이터 수집 (1회)
     macro = fetch_all()
+    aria  = _load_aria_context()
+
+    log.info(f"   ARIA 레짐: {aria['regime'][:20] if aria['regime'] else '정보없음'} | "
+             f"센티먼트: {aria['sentiment_score']}점")
 
     scanned = 0
     alerted = 0
@@ -343,92 +554,92 @@ def run_scan(force: bool = False) -> dict:
             log.info(f"  {ticker}: 쿨다운 — 스킵")
             continue
 
-        # 기술 지표
         tech = fetch_technicals(ticker)
         if not tech:
             continue
 
-        log.info(
-            f"  {ticker} ({info['name']}): "
-            f"RSI={tech['rsi']} BB={tech['bb_pos']}% vol={tech['vol_ratio']:.1f}x"
-        )
+        log.info(f"  {ticker} ({info['name']}): RSI={tech['rsi']} BB={tech['bb_pos']}% vol={tech['vol_ratio']:.1f}x")
 
-        # Claude 타점 판단 (FRED+KRX+FSC+기술지표 전달)
-        result = _analyze_with_claude(ticker, info, tech, macro)
-        if not result:
-            continue
+        # ── Agent 1: Analyst ─────────────────────────────────────
+        analyst = agent_analyst(ticker, info, tech, macro, aria)
+        log.info(f"    Analyst: {analyst['analyst_score']}점 | {analyst['confidence']} | {analyst.get('signals_fired', [])}")
 
+        # ── Agent 2: Devil ───────────────────────────────────────
+        devil = agent_devil(ticker, info, tech, macro, aria, analyst)
+        log.info(f"    Devil: {devil['verdict']} | {devil['devil_score']}점 | TK:{devil['thesis_killer_hit']}")
+
+        # ── Final 판단 ───────────────────────────────────────────
+        final = _final_judgment(analyst, devil)
         scanned += 1
-        results.append({"ticker": ticker, "name": info["name"],
-                        "claude_score": result.get("score", 0),
-                        "signal_type": result.get("signal_type", "관망"),
-                        "rsi": tech["rsi"]})
-        log.info(
-            f"    → {result.get('signal_type','?')} | "
-            f"점수 {result.get('score',0)} | {result.get('reason','')}"
-        )
 
-        # 알림 발송
-        do_alert = result.get("is_entry", False) and result.get("score", 0) >= ALERT_THRESHOLD
-        if do_alert:
-            msg = _build_message(ticker, info, tech, result, macro)
+        log.info(f"    Final: {final['final_score']:.0f}점 | {final['signal_type']} | is_entry={final['is_entry']}")
+
+        results.append({
+            "ticker":       ticker,
+            "name":         info["name"],
+            "final_score":  final["final_score"],
+            "signal_type":  final["signal_type"],
+            "devil_verdict": devil.get("verdict", ""),
+            "rsi":          tech["rsi"],
+        })
+
+        # ── 알림 발송 ─────────────────────────────────────────────
+        if final["is_entry"] and final["final_score"] >= ALERT_THRESHOLD:
+            msg = _build_alert_message(ticker, info, tech, analyst, devil, final, aria)
             ok  = _send_telegram(msg)
             if ok:
                 _set_cooldown(ticker)
                 alerted += 1
                 log.info(f"    ✅ 텔레그램 발송 완료")
 
-        # 로그 저장 (Evolution 학습용)
+        # ── 로그 저장 (Evolution 학습용) ──────────────────────────
         _save_log({
-            "timestamp":       now_kst.isoformat(),
-            "ticker":          ticker,
-            "name":            info["name"],
-            "market":          market,
-            "price_at_scan":   tech["price"],
-            "rsi":             tech["rsi"],
-            "bb_pos":          tech["bb_pos"],
-            "vol_ratio":       tech["vol_ratio"],
-            "vix":             macro["fred"].get("vix"),
-            "hy_spread":       macro["fred"].get("hy_spread"),
-            "yield_curve":     macro["fred"].get("yield_curve"),
-            "sent_score":      macro["sentiment"].get("score"),
-            "claude_score":    result.get("score", 0),
-            "signal_type":     result.get("signal_type", ""),
-            "is_entry":        result.get("is_entry", False),
-            "reason":          result.get("reason", ""),
-            "key_risk":        result.get("key_risk", ""),
-            "alerted":         do_alert,
-            "outcome_checked": False,
-            "outcome_price":   None,
-            "outcome_pct":     None,
-            "outcome_correct": None,
+            "timestamp":        now_kst.isoformat(),
+            "ticker":           ticker,
+            "name":             info["name"],
+            "market":           market,
+            # 기술 지표
+            "price_at_scan":    tech["price"],
+            "rsi":              tech["rsi"],
+            "bb_pos":           tech["bb_pos"],
+            "vol_ratio":        tech["vol_ratio"],
+            # 매크로
+            "vix":              macro["fred"].get("vix"),
+            "hy_spread":        macro["fred"].get("hy_spread"),
+            "yield_curve":      macro["fred"].get("yield_curve"),
+            # ARIA 컨텍스트
+            "aria_regime":      aria["regime"],
+            "aria_sentiment":   aria["sentiment_score"],
+            "aria_trend":       aria["trend"],
+            # Analyst
+            "analyst_score":    analyst["analyst_score"],
+            "analyst_confidence": analyst.get("confidence",""),
+            "signals_fired":    analyst.get("signals_fired", []),
+            "bull_case":        analyst.get("bull_case",""),
+            # Devil
+            "devil_score":      devil["devil_score"],
+            "devil_verdict":    devil.get("verdict",""),
+            "devil_objections": devil.get("objections", []),
+            "thesis_killer_hit": devil.get("thesis_killer_hit", False),
+            "killer_detail":    devil.get("killer_detail",""),
+            # Final
+            "final_score":      final["final_score"],
+            "signal_type":      final["signal_type"],
+            "is_entry":         final["is_entry"],
+            "reason":           final.get("reason",""),
+            # 결과 (Evolution이 4시간 후 채움)
+            "alerted":          final["is_entry"] and final["final_score"] >= ALERT_THRESHOLD,
+            "outcome_checked":  False,
+            "outcome_price":    None,
+            "outcome_pct":      None,
+            "outcome_correct":  None,
         })
 
     log.info(f"📡 완료 | 분석 {scanned}종목 | 알림 {alerted}건")
 
-    # 장이 열려있는데 타점 없으면 결과 요약 발송
-    any_market_open = (us_open or kr_open) or force
-    if any_market_open and alerted == 0 and scanned > 0:
-        now_str  = datetime.now(KST).strftime("%m/%d %H:%M")
-        sent     = macro.get("sentiment", {})
-        fred     = macro.get("fred", {})
-        lines    = ["📊 <b>Jackal 스캔 완료 — 타점 없음</b>",
-                    "━━━━━━━━━━━━━━━━━━━━"]
-        for r in results:
-            sig  = r.get("signal_type", "관망")
-            icon = {"강한매수": "🔴", "매수검토": "🟡", "관망": "⚪", "매도주의": "🔵"}.get(sig, "⚪")
-            lines.append(f"{icon} {r['name']} ({r['ticker']}): {r['claude_score']}점 | RSI {r['rsi']} | {sig}")
-        lines.append("━━━━━━━━━━━━━━━━━━━━")
-        fred_parts = []
-        if fred.get("vix"):         fred_parts.append(f"VIX {fred['vix']}")
-        if fred.get("hy_spread"):   fred_parts.append(f"HY {fred['hy_spread']}%")
-        if fred.get("yield_curve") is not None:
-            fred_parts.append(f"금리차 {fred['yield_curve']:+.2f}%")
-        if fred_parts:
-            lines.append("📈 " + " | ".join(fred_parts))
-        lines.append(f"😐 센티먼트: {sent.get('score', 50)}점 ({sent.get('level', '중립')})")
-        lines.append(f"⏰ {now_str} KST | Jackal")
-        _send_telegram("
-".join(lines))
+    # 장이 열려있는데 타점 없으면 요약 발송
+    any_open = (us_open or kr_open) or force
+    if any_open and alerted == 0 and scanned > 0:
+        _send_telegram(_build_summary_message(results, macro, aria))
 
     return {"scanned": scanned, "alerted": alerted}
