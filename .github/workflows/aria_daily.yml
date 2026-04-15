@@ -121,14 +121,19 @@ jobs:
           extract_monthly_lessons(memory, accuracy)
           "
 
+      # ── 경로 동기화 ────────────────────────────────────────────
+      # data/ 기준 저장 파일을 루트로 복사 (일부 코드가 루트 경로 참조 시 대비)
+      - name: Sync paths
+        run: python sync_legacy_paths.py --direction data_to_root
+
       # ── 저장 ──────────────────────────────────────────────────
       - name: Save ARIA state
         run: |
           git config user.name  "ARIA Bot"
           git config user.email "aria@github-actions"
 
-          git add data/         2>/dev/null || true
-          git add reports/      2>/dev/null || true
+          git add data/          2>/dev/null || true
+          git add reports/       2>/dev/null || true
           git add dashboard.html 2>/dev/null || true
 
           git stash
@@ -136,8 +141,8 @@ jobs:
           git reset --hard origin/main
           git stash pop || true
 
-          git add data/         2>/dev/null || true
-          git add reports/      2>/dev/null || true
+          git add data/          2>/dev/null || true
+          git add reports/       2>/dev/null || true
           git add dashboard.html 2>/dev/null || true
 
           git diff --staged --quiet || \
