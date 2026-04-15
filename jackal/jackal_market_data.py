@@ -246,11 +246,22 @@ def load_sentiment() -> dict:
 
 def fetch_technicals(ticker: str) -> dict | None:
     """
-    65일 일봉으로 기술 지표 계산.
-    Returns: {price, change_1d, change_5d, rsi, ma20, ma50, bb_pos, vol_ratio}
+    65일(+52주 고저점용 1년) 일봉으로 기술 지표 계산.
+
+    기존: price, change_1d, change_5d, rsi, ma20, ma50, bb_pos, vol_ratio
+    추가:
+      change_3d       - 3일 수익률 (sector_rebound 신호에 필요)
+      rsi_divergence  - 강세 다이버전스 (가격↓ + RSI↑) → 반등 선행 신호
+      52w_pos         - 52주 고/저 대비 현재 위치 (0~100%)
+      bb_width        - 볼린저 밴드 폭 (수축→확장 예고)
+      bb_expanding    - 밴드 폭 최근 3일 확장 여부
+      vol_trend_5d    - 5일 거래량 추세 (양수=증가, 음수=감소)
+      vol_accumulation- 가격 하락 중 거래량 증가 (매집 신호)
+      ma_alignment    - MA 배열 (bullish/bearish/neutral)
     """
     try:
-        hist = yf.Ticker(ticker).history(period="65d", interval="1d")
+        # 52주 위치를 위해 1년 데이터 사용
+        hist = yf.Ticker(ticker).history(period="1y", interval="1d")
         if len(hist) < 22:
             return None
 
@@ -259,38 +270,105 @@ def fetch_technicals(ticker: str) -> dict | None:
         price  = float(close.iloc[-1])
         prev   = float(close.iloc[-2])
 
-        # RSI 14
-        delta = close.diff()
-        gain  = delta.clip(lower=0).rolling(14).mean()
-        loss  = (-delta.clip(upper=0)).rolling(14).mean()
-        rsi   = float((100 - 100 / (1 + gain / loss)).iloc[-1])
+        # ── 기본 수익률 ────────────────────────────────────────────
+        def chg(n: int) -> float:
+            return round((price - float(close.iloc[-n-1])) / float(close.iloc[-n-1]) * 100, 2)                    if len(close) > n else 0.0
 
-        # MA
+        chg_1d = chg(1)
+        chg_3d = chg(3)
+        chg_5d = chg(5)
+
+        # ── RSI 14 ─────────────────────────────────────────────────
+        delta  = close.diff()
+        gain   = delta.clip(lower=0).rolling(14).mean()
+        loss   = (-delta.clip(upper=0)).rolling(14).mean()
+        rsi_s  = 100 - 100 / (1 + gain / loss)
+        rsi    = float(rsi_s.iloc[-1])
+
+        # ── RSI 강세 다이버전스 감지 ──────────────────────────────
+        # 조건: 최근 5일 가격 하락 + RSI는 상승 → 매도 소진 신호
+        rsi_divergence = False
+        if len(rsi_s) >= 6 and chg_5d < -1.5:
+            rsi_now  = float(rsi_s.iloc[-1])
+            rsi_5d   = float(rsi_s.iloc[-6])
+            price_now = price
+            price_5d  = float(close.iloc[-6])
+            if price_now < price_5d and rsi_now > rsi_5d + 2:
+                rsi_divergence = True   # 가격 낮아졌는데 RSI 올라감
+
+        # ── MA ─────────────────────────────────────────────────────
         ma20 = float(close.rolling(20).mean().iloc[-1])
         ma50 = float(close.rolling(50).mean().iloc[-1]) if len(close) >= 50 else None
 
-        # 볼린저
-        std20  = float(close.rolling(20).std().iloc[-1])
-        bb_pos = (price - (ma20 - 2*std20)) / (4*std20) if std20 > 0 else 0.5
-        bb_pos = round(bb_pos * 100, 1)  # % 형태
+        # MA 배열: 현재가/MA20/MA50 상대 위치
+        if ma50:
+            if price > ma20 > ma50:
+                ma_alignment = "bullish"
+            elif price < ma20 < ma50:
+                ma_alignment = "bearish"
+            else:
+                ma_alignment = "neutral"
+        else:
+            ma_alignment = "neutral"
 
-        # 거래량
+        # ── 볼린저 밴드 ────────────────────────────────────────────
+        std20   = float(close.rolling(20).std().iloc[-1])
+        bb_upper = ma20 + 2 * std20
+        bb_lower = ma20 - 2 * std20
+        bb_pos  = (price - bb_lower) / (bb_upper - bb_lower) * 100 if std20 > 0 else 50.0
+        bb_pos  = round(bb_pos, 1)
+
+        # BB 폭 및 확장 여부
+        bb_width = round((bb_upper - bb_lower) / ma20 * 100, 2) if ma20 > 0 else 0
+        bb_width_3d_ago = None
+        if len(close) >= 23:
+            std_3d = float(close.rolling(20).std().iloc[-4])
+            ma_3d  = float(close.rolling(20).mean().iloc[-4])
+            bb_width_3d_ago = (ma_3d + 2*std_3d - (ma_3d - 2*std_3d)) / ma_3d * 100 if ma_3d > 0 else 0
+        bb_expanding = (bb_width_3d_ago is not None and bb_width > bb_width_3d_ago * 1.05)
+
+        # ── 거래량 ─────────────────────────────────────────────────
         avg_vol   = float(volume.iloc[-6:-1].mean()) if len(volume) >= 6 else float(volume.mean())
         vol_ratio = round(float(volume.iloc[-1]) / avg_vol, 2) if avg_vol > 0 else 1.0
 
-        # 수익률
-        chg_1d = round((price - prev) / prev * 100, 2)
-        chg_5d = round((price - float(close.iloc[-6])) / float(close.iloc[-6]) * 100, 2) if len(close) >= 6 else 0
+        # 5일 거래량 추세 (선형 회귀 기울기 대신 단순 비교)
+        if len(volume) >= 10:
+            vol_recent = float(volume.iloc[-5:].mean())
+            vol_prior  = float(volume.iloc[-10:-5].mean())
+            vol_trend_5d = round((vol_recent - vol_prior) / vol_prior * 100, 1) if vol_prior > 0 else 0
+        else:
+            vol_trend_5d = 0
+
+        # 매집 신호: 가격 하락 중 거래량 증가
+        vol_accumulation = chg_5d < -2.0 and vol_trend_5d > 15
+
+        # ── 52주 위치 ──────────────────────────────────────────────
+        high_52w = float(close.rolling(252).max().iloc[-1]) if len(close) >= 50 else float(close.max())
+        low_52w  = float(close.rolling(252).min().iloc[-1]) if len(close) >= 50 else float(close.min())
+        if high_52w > low_52w:
+            pos_52w = round((price - low_52w) / (high_52w - low_52w) * 100, 1)
+        else:
+            pos_52w = 50.0
 
         return {
-            "price":     round(price, 2),
-            "change_1d": chg_1d,
-            "change_5d": chg_5d,
-            "rsi":       round(rsi, 1),
-            "ma20":      round(ma20, 2),
-            "ma50":      round(ma50, 2) if ma50 else None,
-            "bb_pos":    bb_pos,
-            "vol_ratio": vol_ratio,
+            # 기존
+            "price":          round(price, 2),
+            "change_1d":      chg_1d,
+            "change_3d":      chg_3d,
+            "change_5d":      chg_5d,
+            "rsi":            round(rsi, 1),
+            "ma20":           round(ma20, 2),
+            "ma50":           round(ma50, 2) if ma50 else None,
+            "bb_pos":         bb_pos,
+            "vol_ratio":      vol_ratio,
+            # 신규
+            "rsi_divergence": rsi_divergence,
+            "52w_pos":        pos_52w,
+            "bb_width":       bb_width,
+            "bb_expanding":   bb_expanding,
+            "vol_trend_5d":   vol_trend_5d,
+            "vol_accumulation": vol_accumulation,
+            "ma_alignment":   ma_alignment,
         }
     except Exception as e:
         log.error(f"  {ticker} 기술 지표 실패: {e}")
