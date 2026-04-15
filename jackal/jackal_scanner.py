@@ -225,8 +225,9 @@ _RULE_REGISTRY = {
 # Doc1 반박: 분류 기준이 코드에 없으면 새 신호 추가 시 일관성 깨짐
 # 규칙: rebound 계열 신호가 1개라도 있으면 crash_rebound family
 _CRASH_REBOUND_SIGNALS = frozenset({"sector_rebound", "volume_climax",
-                                        "rsi_divergence", "52w_low_zone",
+                                        "52w_low_zone",
                                         "vol_accumulation"})
+# rsi_divergence: 백테스트 조합 50.0% → crash_rebound 아님, general로 강등
 _MA_SUPPORT_SOLO       = frozenset({"ma_support"})
 _MA_SUPPORT_WEAK       = frozenset({"ma_support", "momentum_dip"})
 
@@ -331,19 +332,31 @@ def _calc_signal_quality(signals: list, tech: dict, aria: dict,
         score += 5;  reasons.append("급락+복수신호+5")
 
     # 신규 신호 (미검증 — 초기 보너스 보수적)
+    # rsi_divergence: 백테스트 스윙 52.2% (단독 57%, 조합 50%)
+    # 1일 정확도 30.4% = 반대로 움직이는 경향
+    # → 단독 발동 시 페널티, 조합 시만 소폭 인정
     if "rsi_divergence" in sig:
-        score += 14   # 강세 다이버전스 — 반등 선행 신호로 높은 점수 부여
-        reasons.append("RSI강세다이버전스+14")
+        if len(sig) == 1:
+            score -= 10   # 단독 = 노이즈, 페널티
+            reasons.append("RSI다이버전스단독(역방향-10)")
+        elif len(sig) >= 3 and "vol_accumulation" in sig:
+            score += 5    # 다이버전스+매집+다른신호 = 유일하게 의미
+            reasons.append("RSI다이버전스+매집조합+5")
+        else:
+            score += 0    # 중립 (기대치 없음)
     if "52w_low_zone" in sig:
         score += 12   # 52주 저점 15% 이내 — 심리적 지지
         reasons.append("52주저점구간+12")
     if "vol_accumulation" in sig:
-        score += 10   # 매집 신호
-        reasons.append("하락중거래량증가(매집)+10")
+        # 백테스트 스윙 79.2% 검증됨 → bb_touch(78.7%)와 동급
+        score += 12
+        reasons.append("하락중거래량증가(매집,검증79%)+12")
 
     # 신호 조합 시너지 (새 신호 + 기존 신호 조합)
-    if "rsi_divergence" in sig and ("bb_touch" in sig or "sector_rebound" in sig):
-        score += 8;  reasons.append("다이버전스+반등조합시너지+8")
+    # rsi_divergence 시너지: 백테스트 결과 조합도 50% → 시너지 제거
+    # 대신 vol_accumulation+sector_rebound 조합이 더 강함
+    if "vol_accumulation" in sig and "sector_rebound" in sig:
+        score += 8;  reasons.append("매집+반등조합시너지+8")
     if "52w_low_zone" in sig and "rsi_oversold" in sig:
         score += 6;  reasons.append("52주저점+RSI과매도조합+6")
     if "vol_accumulation" in sig and "momentum_dip" in sig:
@@ -369,22 +382,46 @@ def _calc_signal_quality(signals: list, tech: dict, aria: dict,
             score -= 8    # 과도한 낙관(PCR<0.8)에서 volume_climax는 고점 경고
             reasons.append(f"PCR낙관({pcr_avg:.2f})+volume=고점경고-8")
 
-    # ── B. VIX — gating role (점수 가산 X, 활성화 조건만)
+    # ── B. VIX + HY Spread 교차 검증 gating ────────────────────────
+    # Doc1 반박 수용: VIX 단일값 → VIX + HY Spread 교차 확인
+    # 이미 FRED에서 수집 중인 BAMLH0A0HYM2 활용
     vix = (
         float(tech.get("vix_level") or 0)
         or float(aria.get("fred_vix") or 0)
         or _get_vix_from_cache()
     )
+    # HY Spread: aria_market_data.json의 FRED 데이터에서 로드
+    hy_spread = 0.0
+    try:
+        from pathlib import Path as _Path
+        import json as _json
+        _md = _json.loads(_Path("data/aria_market_data.json").read_text(encoding="utf-8"))             if _Path("data/aria_market_data.json").exists() else {}
+        hy_spread = float(_md.get("fred", {}).get("bamlh0a0hym2", 0) or
+                          _md.get("fred", {}).get("hy_spread", 0) or 0)
+    except Exception:
+        pass
+
+    # 극단 공포: VIX>30 AND HY>4.0 (두 조건 동시 = 진짜 패닉)
+    # VIX만: 변동성 급등이지만 크레딧 시장은 안정일 수 있음
     vix_extreme = vix > 35
     vix_high    = vix > 25
+    real_panic  = vix > 30 and hy_spread > 4.0   # 진짜 공황: VIX+HY 교차 확인
+    credit_stress = hy_spread > 3.5              # 크레딧 스트레스만
 
     # ── C. 반등 계열 보너스 (총합 상한 +12 cap — 스태킹 방지) ────
     rebound_raw = 0
     chg5d = float(tech.get("change_5d") or 0)
 
-    if "sector_rebound" in sig and vix_extreme:
-        rebound_raw += 8
-        reasons.append(f"VIX극단({vix:.0f})게이팅+반등+8")
+    if "sector_rebound" in sig:
+        if real_panic:                          # VIX>30 + HY>4.0 교차 = 진짜 패닉 반등
+            rebound_raw += 10
+            reasons.append(f"진짜패닉(VIX{vix:.0f}+HY{hy_spread:.1f})+반등+10")
+        elif vix_extreme:                       # VIX만 극단
+            rebound_raw += 6
+            reasons.append(f"VIX극단({vix:.0f})게이팅+반등+6")
+        elif credit_stress and vix_high:        # HY 스트레스 + VIX 고조
+            rebound_raw += 4
+            reasons.append(f"크레딧스트레스(HY{hy_spread:.1f})+반등+4")
 
     if chg5d < -8 and "sector_rebound" in sig:
         rebound_raw += 10
