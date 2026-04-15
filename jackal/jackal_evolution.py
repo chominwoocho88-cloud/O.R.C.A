@@ -166,6 +166,10 @@ class JackalEvolution:
         self._save_skills(analysis.get("new_skills", []))
         self._save_instincts(analysis.get("new_instincts", []))
         self._apply_claude_adjustments(analysis)
+
+        # ── Rule Auto-Disable (개선안 4) ─────────────────────────
+        disabled_rules = self._check_rule_auto_disable()
+
         self._mark_last_evolve()
 
         self.weights["last_updated"] = datetime.now().isoformat()
@@ -184,6 +188,7 @@ class JackalEvolution:
             "improvements":       analysis.get("prompt_improvements", ""),
             "accuracy_summary":   learn_result.get("accuracy_summary", {}),
             "rec_accuracy":       rec_result.get("accuracy", {}),
+            "disabled_rules":     disabled_rules,
         }
 
     def save_weights(self):
@@ -447,6 +452,8 @@ class JackalEvolution:
                     f"  shadow outcome: {shadow_stats['total']}건 체크 "
                     f"→ 실제론 {shadow_acc}% 맞았을 신호 (스킵됐지만)"
                 )
+                # ── ARIA accuracy.json 연동 (개선안 1) ──────────
+                self._sync_shadow_to_aria_accuracy(shadow_stats)
 
         # 정확도 요약
         acc_summary = {}
@@ -770,6 +777,122 @@ class JackalEvolution:
             inst["timestamp"] = datetime.now().isoformat()
             path.write_text(json.dumps(inst, ensure_ascii=False, indent=2), encoding="utf-8")
             log.info(f"  ⚠️  Instinct 등록: {name}")
+
+
+    # ══════════════════════════════════════════════════════════════
+    # 개선안 4: Rule Auto-Disable 자동화
+    # ══════════════════════════════════════════════════════════════
+
+    def _check_rule_auto_disable(self) -> list:
+        """
+        rule_registry_status 기반 Rule 자동 비활성화.
+        조건: sample_n >= review_after_n AND recent_accuracy < min_accuracy
+        → active=False 처리 + 이유 기록.
+        """
+        # hunt_log 기반으로 각 Rule의 최근 정확도 업데이트
+        rule_signal_map = {
+            "sector_rebound_base":   ["sector_rebound"],
+            "volume_climax_base":    ["volume_climax"],
+            "crash_rebound_pattern": ["sector_rebound", "volume_climax", "vol_accumulation"],
+        }
+        if self._logs:
+            registry = self.weights.setdefault("rule_registry_status", {})
+            for rule_name, signals in rule_signal_map.items():
+                entries = [
+                    e for e in self._logs
+                    if any(s in e.get("signals_fired", []) for s in signals)
+                    and e.get("outcome_checked")
+                ]
+                if entries and rule_name in registry:
+                    n       = len(entries)
+                    correct = sum(
+                        1 for e in entries
+                        if e.get("outcome_swing_hit") or e.get("outcome_correct")
+                    )
+                    registry[rule_name]["sample_n"]        = n
+                    registry[rule_name]["recent_accuracy"] = round(correct / n, 3) if n > 0 else 0.0
+
+        disabled = []
+        registry = self.weights.get("rule_registry_status", {})
+
+        for rule_name, status in registry.items():
+            if not status.get("active", True):
+                continue
+            min_acc   = status.get("min_accuracy")
+            if min_acc is None:
+                continue
+            sample_n   = status.get("sample_n", 0)
+            review_n   = status.get("review_after_n", 50)
+            recent_acc = status.get("recent_accuracy", 0.0)
+
+            if sample_n >= review_n and recent_acc < min_acc:
+                status["active"]         = False
+                status["disabled_at"]    = datetime.now().isoformat()
+                status["disable_reason"] = (
+                    f"정확도 {recent_acc:.1%} < 기준 {min_acc:.1%} "
+                    f"(샘플 {sample_n}건 / 임계 {review_n}건)"
+                )
+                disabled.append(rule_name)
+                log.warning(
+                    f"  🚫 Rule 자동 비활성화: {rule_name} "
+                    f"({recent_acc:.1%} < {min_acc:.1%}, n={sample_n})"
+                )
+
+        if not disabled:
+            log.info("  ✅ Rule Auto-Disable: 모든 Rule 정상 범위")
+        else:
+            self.weights.setdefault("auto_disabled_log", []).append({
+                "timestamp": datetime.now().isoformat(),
+                "rules":     disabled,
+            })
+
+        return disabled
+
+    # ══════════════════════════════════════════════════════════════
+    # 개선안 1: Shadow Log → ARIA Accuracy 연동
+    # ══════════════════════════════════════════════════════════════
+
+    def _sync_shadow_to_aria_accuracy(self, shadow_stats: dict):
+        """
+        shadow_log 결과(버린 신호의 실제 성과)를 ARIA accuracy.json에 기록.
+        ARIA가 "Jackal이 스킵한 신호 품질"을 학습하는 피드백 루프.
+        """
+        if shadow_stats.get("total", 0) == 0:
+            return
+
+        acc_file = _BASE.parent / "data" / "accuracy.json"
+        if not acc_file.exists():
+            log.debug("  aria accuracy.json 없음 — shadow 연동 스킵")
+            return
+
+        try:
+            accuracy = json.loads(acc_file.read_text(encoding="utf-8"))
+        except Exception:
+            accuracy = {}
+
+        total  = shadow_stats["total"]
+        worked = shadow_stats["would_have_worked"]
+        rate   = round(worked / total * 100, 1) if total > 0 else 0
+
+        entry  = accuracy.setdefault("jackal_shadow", {
+            "correct":     0,
+            "total":       0,
+            "accuracy":    0,
+            "description": "Jackal 발송 스킵된 신호의 실제 스윙 성공률",
+        })
+        entry["correct"]      += worked
+        entry["total"]        += total
+        entry["accuracy"]      = round(entry["correct"] / entry["total"] * 100, 1) if entry["total"] > 0 else 0
+        entry["last_updated"]  = datetime.now().isoformat()
+        entry["last_batch"]    = {"total": total, "worked": worked, "rate": rate}
+
+        acc_file.write_text(
+            json.dumps(accuracy, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        log.info(
+            f"  📡 ARIA accuracy 연동: shadow {total}건 → "
+            f"스윙 성공 {worked}건 ({rate}%) [누적 {entry['total']}건 {entry['accuracy']}%]"
+        )
 
     def _apply_claude_adjustments(self, result: dict):
         """Claude가 제안한 가중치 조정 적용"""
