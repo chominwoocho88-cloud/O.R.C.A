@@ -41,6 +41,7 @@ WEIGHTS_FILE       = _BASE / "jackal_weights.json"
 RECOMMEND_LOG_FILE = _BASE / "recommendation_log.json"
 JACKAL_WATCHLIST   = Path("data") / "jackal_watchlist.json"   # ARIA가 읽음
 JACKAL_NEWS_FILE   = Path("data") / "jackal_news.json"        # ARIA가 씀, Jackal이 읽음
+JACKAL_SHADOW_LOG  = _BASE / "jackal_shadow_log.json"         # 스킵된 신호 별도 추적 (ARIA accuracy와 분리)
 
 # ARIA 데이터 파일 (읽기만, 의존성 없음)
 ARIA_BASELINE  = Path("data") / "morning_baseline.json"
@@ -59,13 +60,14 @@ def _load_portfolio() -> dict:
     ticker_yf (yfinance 형식) 키로 딕셔너리 구성.
     현금 등 ticker_yf 없는 항목은 스캔 제외.
     """
+    # 기본값 — portfolio.json 없을 때 사용, asset_type 포함
     default = {
-        "NVDA":      {"name": "엔비디아",   "avg_cost": 182.99, "market": "US", "currency": "$", "portfolio": True},
-        "AVGO":      {"name": "브로드컴",   "avg_cost": None,   "market": "US", "currency": "$", "portfolio": True},
-        "SCHD":      {"name": "SCHD",       "avg_cost": None,   "market": "US", "currency": "$", "portfolio": True},
-        "000660.KS": {"name": "SK하이닉스", "avg_cost": None,   "market": "KR", "currency": "₩", "portfolio": True},
-        "005930.KS": {"name": "삼성전자",   "avg_cost": None,   "market": "KR", "currency": "₩", "portfolio": True},
-        "035720.KS": {"name": "카카오",     "avg_cost": None,   "market": "KR", "currency": "₩", "portfolio": True},
+        "NVDA":      {"name": "엔비디아",   "avg_cost": 182.99, "market": "US", "currency": "$", "portfolio": True, "asset_type": "stock"},
+        "AVGO":      {"name": "브로드컴",   "avg_cost": None,   "market": "US", "currency": "$", "portfolio": True, "asset_type": "stock"},
+        # SCHD는 etf_broad_dividend → 기본값도 스캔 제외 반영
+        "000660.KS": {"name": "SK하이닉스", "avg_cost": None,   "market": "KR", "currency": "₩", "portfolio": True, "asset_type": "stock"},
+        "005930.KS": {"name": "삼성전자",   "avg_cost": None,   "market": "KR", "currency": "₩", "portfolio": True, "asset_type": "stock"},
+        "035720.KS": {"name": "카카오",     "avg_cost": None,   "market": "KR", "currency": "₩", "portfolio": True, "asset_type": "stock"},
     }
     if not PORTFOLIO_FILE.exists():
         return default
@@ -76,13 +78,32 @@ def _load_portfolio() -> dict:
             yf_ticker = h.get("ticker_yf")
             if not yf_ticker:          # 현금 등 yfinance 없는 항목 제외
                 continue
-            market = h.get("market", "US")
+            # jackal_scan: false → 스캔 제외 (배당형 ETF 등)
+            if h.get("jackal_scan", True) is False:
+                log.info(f"   {yf_ticker} 스캔 제외 (jackal_scan=false)")
+                continue
+            market     = h.get("market", "US")
+            asset_type = h.get("asset_type", "stock")
+
+            # asset_type 기반 jackal_scan 기본값 결정
+            # etf_broad_dividend → 구조적으로 기술지표 미적합 → 기본 false
+            # 명시된 jackal_scan 필드가 있으면 그것이 우선
+            if "jackal_scan" not in h:
+                default_scan = asset_type not in ("etf_broad_dividend", "cash")
+            else:
+                default_scan = h["jackal_scan"]
+
+            if not default_scan:
+                log.info(f"   {yf_ticker} 스캔 제외 (asset_type={asset_type})")
+                continue
+
             result[yf_ticker] = {
-                "name":      h.get("name", yf_ticker),
-                "avg_cost":  h.get("avg_cost"),
-                "market":    market,
-                "currency":  h.get("currency", "$" if market == "US" else "₩"),
-                "portfolio": True,
+                "name":       h.get("name", yf_ticker),
+                "avg_cost":   h.get("avg_cost"),
+                "market":     market,
+                "currency":   h.get("currency", "$" if market == "US" else "₩"),
+                "portfolio":  True,
+                "asset_type": asset_type,
             }
         return result if result else default
     except Exception as e:
@@ -186,6 +207,308 @@ def _load_weights() -> dict:
 # Agent 1: Analyst — 매수 근거 구성
 # ══════════════════════════════════════════════════════════════════
 
+# ══════════════════════════════════════════════════════════════════
+# 신호 품질 사전 평가 (백테스트 기반, Claude 호출 전 실행)
+# ══════════════════════════════════════════════════════════════════
+
+# 규칙 레지스트리 — 도입 근거/검토 기준 명시 (Doc3: 규칙 폐기 조건)
+_RULE_REGISTRY = {
+    "sector_rebound_base":   {"introduced": "2026-04", "basis": "backtest 93.1%", "review_after_n": 50},
+    "volume_climax_base":    {"introduced": "2026-04", "basis": "backtest 80.0%", "review_after_n": 20},
+    "ma_support_solo_pen":   {"introduced": "2026-04", "basis": "backtest 55.6%", "review_after_n": 30},
+    "rebound_cap":           {"introduced": "2026-04", "basis": "anti-stacking",  "review_after_n": 50},
+    "crash_rebound_pattern": {"introduced": "2026-04", "basis": "3/31~4/8 검증",  "review_after_n": 30},
+    "vix_gating":            {"introduced": "2026-04", "basis": "ARIA중복방지",   "review_after_n": 20},
+}
+
+# ── signal_family 분류 테이블 ────────────────────────────────────
+# Doc1 반박: 분류 기준이 코드에 없으면 새 신호 추가 시 일관성 깨짐
+# 규칙: rebound 계열 신호가 1개라도 있으면 crash_rebound family
+_CRASH_REBOUND_SIGNALS = frozenset({"sector_rebound", "volume_climax",
+                                        "rsi_divergence", "52w_low_zone",
+                                        "vol_accumulation"})
+_MA_SUPPORT_SOLO       = frozenset({"ma_support"})
+_MA_SUPPORT_WEAK       = frozenset({"ma_support", "momentum_dip"})
+
+def _get_signal_family(signals: list) -> str:
+    """
+    신호 목록에서 signal_family를 결정.
+    우선순위: crash_rebound > ma_support_solo/weak > general
+    Doc1: 복합 신호는 상위 family 적용 (예: bb_touch+sector_rebound → crash_rebound)
+    """
+    sig = set(signals)
+    if sig & _CRASH_REBOUND_SIGNALS:        # rebound 계열 1개라도 → crash_rebound
+        return "crash_rebound"
+    if sig == _MA_SUPPORT_SOLO:             # ma_support 단독
+        return "ma_support_solo"
+    if sig == _MA_SUPPORT_WEAK:             # ma_support + momentum_dip만
+        return "ma_support_weak"
+    return "general"
+
+
+def _load_pcr_from_aria() -> float:
+    """ARIA가 수집한 PCR(Put/Call Ratio) 로드 — Jackal 품질 평가에 활용."""
+    try:
+        from pathlib import Path
+        import json
+        cache = Path("data/aria_market_data.json")
+        if not cache.exists():
+            return 0.0
+        md = json.loads(cache.read_text(encoding="utf-8"))
+        # ARIA 수집 구조: prices.pcr_avg 또는 put_call.avg
+        pcr = (
+            md.get("prices", {}).get("pcr_avg")
+            or md.get("put_call", {}).get("avg")
+            or md.get("pcr_avg")
+        )
+        return float(pcr) if pcr else 0.0
+    except Exception:
+        return 0.0
+
+
+def _get_vix_from_cache() -> float:
+    """ARIA가 수집한 시장 데이터에서 VIX 추출."""
+    try:
+        from pathlib import Path
+        import json
+        cache = Path("data/aria_market_data.json")
+        if cache.exists():
+            md = json.loads(cache.read_text(encoding="utf-8"))
+            return float(
+                md.get("fred", {}).get("vixcls", 0)
+                or md.get("prices", {}).get("^VIX", {}).get("price", 0)
+                or 0
+            )
+    except Exception:
+        pass
+    return 0.0
+
+
+def _calc_signal_quality(signals: list, tech: dict, aria: dict,
+                          ticker: str = "", weights: dict = None) -> dict:
+    """
+    발동된 기술 신호 조합의 품질을 0~100점으로 평가.
+
+    개선 사항 (반박 문서 반영):
+      - signal_family별 스킵 임계값 (ma_support:50 / 일반:45 / crash_rebound:40)
+      - ticker_accuracy 연속 함수 + 표본수 가중치 (절벽 효과 제거)
+      - rebound 계열 보너스 총합 상한 (+12 cap, 스태킹 방지)
+      - VIX → 점수 가산 아닌 gating role로 전환 (ARIA 중복 방지)
+      - 규칙 레지스트리로 도입 근거 추적
+
+    Returns dict:
+      quality_score  : 0~100
+      quality_label  : 최강/강/보통/약
+      reasons        : 근거 리스트
+      skip           : True면 Claude 호출 스킵
+      skip_threshold : 적용된 임계값
+      analyst_adj    : Analyst 점수 보정 (+0 or +5)
+      final_adj      : final_score 보정
+      vix_used       : 실제 사용된 VIX값
+      rebound_bonus  : 반등 계열 누적 보너스 (상한 적용 전)
+    """
+    if weights is None:
+        weights = {}
+
+    sig    = set(signals)
+    score  = 50
+    reasons: list = []
+
+    # ── A. 신호 조합 품질 (백테스트 정확도 기반) ─────────────────
+
+    # 기존 검증된 신호
+    if "sector_rebound" in sig:
+        score += 20; reasons.append("sector_rebound(93%)+20")
+    if "volume_climax" in sig:
+        score += 15; reasons.append("volume_climax(80%)+15")
+    if "bb_touch" in sig and "rsi_oversold" in sig:
+        score += 12; reasons.append("BB+RSI조합+12")
+    elif "bb_touch" in sig:
+        score += 8;  reasons.append("BB하단(79%)+8")
+    if "rsi_oversold" in sig and "sector_rebound" not in sig:
+        score += 5;  reasons.append("RSI과매도+5")
+    if "momentum_dip" in sig and len(sig) > 1:
+        score += 5;  reasons.append("급락+복수신호+5")
+
+    # 신규 신호 (미검증 — 초기 보너스 보수적)
+    if "rsi_divergence" in sig:
+        score += 14   # 강세 다이버전스 — 반등 선행 신호로 높은 점수 부여
+        reasons.append("RSI강세다이버전스+14")
+    if "52w_low_zone" in sig:
+        score += 12   # 52주 저점 15% 이내 — 심리적 지지
+        reasons.append("52주저점구간+12")
+    if "vol_accumulation" in sig:
+        score += 10   # 매집 신호
+        reasons.append("하락중거래량증가(매집)+10")
+
+    # 신호 조합 시너지 (새 신호 + 기존 신호 조합)
+    if "rsi_divergence" in sig and ("bb_touch" in sig or "sector_rebound" in sig):
+        score += 8;  reasons.append("다이버전스+반등조합시너지+8")
+    if "52w_low_zone" in sig and "rsi_oversold" in sig:
+        score += 6;  reasons.append("52주저점+RSI과매도조합+6")
+    if "vol_accumulation" in sig and "momentum_dip" in sig:
+        score += 5;  reasons.append("매집+급락조합+5")
+
+    # ma_support 패밀리 페널티
+    if sig == _MA_SUPPORT_SOLO:
+        score -= 25; reasons.append("ma_support단독-25")
+    elif sig == _MA_SUPPORT_WEAK:
+        score -= 8;  reasons.append("ma+momentum약조합-8")
+
+    # ── A-2. PCR(Put/Call Ratio) 연동 ─────────────────────────────
+    # ARIA가 수집한 PCR 데이터 — Jackal이 활용 안 하던 데이터
+    pcr_avg = _load_pcr_from_aria()
+    if pcr_avg > 0:
+        if pcr_avg > 1.3 and _CRASH_REBOUND_SIGNALS & sig:
+            score += 10   # 극단공포(PCR>1.3) + 반등 신호 = 최강 조합
+            reasons.append(f"PCR극단({pcr_avg:.2f})+반등=최강+10")
+        elif pcr_avg > 1.1 and ("bb_touch" in sig or "rsi_oversold" in sig):
+            score += 5
+            reasons.append(f"PCR고조({pcr_avg:.2f})+과매도+5")
+        elif pcr_avg < 0.8 and "volume_climax" in sig:
+            score -= 8    # 과도한 낙관(PCR<0.8)에서 volume_climax는 고점 경고
+            reasons.append(f"PCR낙관({pcr_avg:.2f})+volume=고점경고-8")
+
+    # ── B. VIX — gating role (점수 가산 X, 활성화 조건만)
+    vix = (
+        float(tech.get("vix_level") or 0)
+        or float(aria.get("fred_vix") or 0)
+        or _get_vix_from_cache()
+    )
+    vix_extreme = vix > 35
+    vix_high    = vix > 25
+
+    # ── C. 반등 계열 보너스 (총합 상한 +12 cap — 스태킹 방지) ────
+    rebound_raw = 0
+    chg5d = float(tech.get("change_5d") or 0)
+
+    if "sector_rebound" in sig and vix_extreme:
+        rebound_raw += 8
+        reasons.append(f"VIX극단({vix:.0f})게이팅+반등+8")
+
+    if chg5d < -8 and "sector_rebound" in sig:
+        rebound_raw += 10
+        reasons.append(f"5일{chg5d:.0f}%급락+반등+10")
+    elif chg5d < -5 and len(sig) >= 2:
+        rebound_raw += 5
+        reasons.append(f"5일{chg5d:.0f}%+복수신호+5")
+
+    REBOUND_CAP = 12
+    rebound_capped = min(rebound_raw, REBOUND_CAP)
+    score += rebound_capped
+    if rebound_raw > REBOUND_CAP:
+        reasons.append(f"반등상한cap({REBOUND_CAP}←{rebound_raw})")
+
+    # ── D. Negative Veto — 고위험 상황에서 rebound cap 동적 축소
+    # Doc3: 양수 스태킹 방지만으로는 부족, 음수 신호와의 충돌 처리
+    thesis_killers = aria.get("thesis_killers", [])
+    regime = aria.get("regime", "")
+
+    has_negative_veto = False
+    negative_reasons: list = []
+
+    if thesis_killers:
+        has_negative_veto = True
+        negative_reasons.append(f"Thesis Killer({len(thesis_killers)}개)")
+
+    # ARIA 레짐 부정 신호
+    if "전환중" in regime or regime.startswith("혼조"):
+        score -= 15
+        reasons.append("전환중/혼조레짐-15")
+        has_negative_veto = True
+        negative_reasons.append("레짐불확실")
+    elif "위험회피" in regime:
+        if "sector_rebound" in sig:
+            score += 5
+            reasons.append("위험회피+반등+5")
+
+    # 5일 급등 직후 신호 (급락 반대)
+    if chg5d > 15 and "bb_touch" not in sig:
+        score -= 8
+        reasons.append(f"5일{chg5d:.0f}% 과열-8")
+        has_negative_veto = True
+        negative_reasons.append("단기과열")
+
+    # Negative veto 발동 시 rebound cap 절반으로 축소
+    if has_negative_veto and rebound_capped > 0:
+        rebound_cap_after_veto = rebound_capped // 2
+        veto_penalty = rebound_capped - rebound_cap_after_veto
+        score -= veto_penalty
+        reasons.append(f"NegVeto({','.join(negative_reasons)}): rebound -{veto_penalty}")
+
+    # ── E. ticker_accuracy — 연속 함수, 하방 페널티만 ────────────
+    # Doc3 최종 합의: 상방 보너스 완전 제거 (순환 편향 + ARIA 중복 방지)
+    # 하방 페널티만: 성과 나쁜 종목 신호 품질 낮춤
+    if ticker and weights:
+        tk_data = weights.get("ticker_accuracy", {}).get(ticker, {})
+        acc_pct = tk_data.get("accuracy", 50)
+        total   = tk_data.get("total", 0)
+
+        if total >= 8:
+            acc_adj = (acc_pct - 50) * 0.20
+            acc_adj = max(-10, min(0, acc_adj))   # 상방 완전 0 (Doc3 수용)
+            score  += acc_adj
+            if abs(acc_adj) >= 1:
+                reasons.append(f"종목정확도({acc_pct:.0f}%,n={total}){acc_adj:+.1f}")
+        elif total >= 3:
+            acc_adj = (acc_pct - 50) * 0.10
+            acc_adj = max(-5, min(0, acc_adj))    # 약한 하방만
+            score  += acc_adj
+            if abs(acc_adj) >= 0.5:
+                reasons.append(f"종목정확도약(n={total}){acc_adj:+.1f}")
+        # total < 3: 무시 (초기 낙인 방지)
+
+    score = max(0, min(100, score))
+
+    # ── F. signal_family 결정 (분류 테이블 기반) ─────────────────
+    family = _get_signal_family(signals)
+
+    # ── G. signal_family별 스킵 임계값 + VIX 동적 조정 ──────────
+    # Doc2/3 합의: VIX 완화는 crash_rebound 전용 (ma_support, general 제외)
+    THRESHOLDS = {
+        "crash_rebound":   40,   # 극단 반등: 완화
+        "general":         45,   # 기본
+        "ma_support_weak": 48,
+        "ma_support_solo": 50,   # 가장 엄격
+    }
+    skip_threshold = THRESHOLDS.get(family, 45)
+
+    # VIX 동적 조정: crash_rebound 전용 (Doc3 반박 수용)
+    if family == "crash_rebound":
+        if vix >= 30:
+            skip_threshold = max(33, skip_threshold - 5)   # 완화
+        elif vix < 18:
+            skip_threshold = min(46, skip_threshold + 3)   # 약간 엄격
+    elif family == "general":
+        if vix < 18:
+            skip_threshold = min(50, skip_threshold + 5)   # 저변동성: 엄격
+        # 고변동성에서 일반 신호는 완화 없음 (ARIA 중복 방지)
+    # ma_support: VIX 상태 무관하게 고정 (노이즈라 어떤 환경도 동일)
+
+    skip  = score < skip_threshold
+    label = "최강" if score >= 80 else "강" if score >= 65 else "보통" if score >= 50 else "약"
+
+    analyst_adj = +5 if score >= 75 else 0
+    final_adj   = +5 if score >= 75 else 0
+
+    return {
+        "quality_score":    score,
+        "quality_label":    label,
+        "reasons":          reasons,
+        "skip":             skip,
+        "skip_threshold":   skip_threshold,
+        "signal_family":    family,
+        "analyst_adj":      analyst_adj,
+        "final_adj":        final_adj,
+        "vix_used":         vix,
+        "vix_extreme":      vix_extreme,
+        "rebound_bonus":    rebound_capped,
+        "rebound_raw":      rebound_raw,
+        "negative_veto":    has_negative_veto,
+        "negative_reasons": negative_reasons,
+    }
+
+
 def agent_analyst(ticker: str, info: dict, tech: dict,
                   macro: dict, aria: dict) -> dict:
     """
@@ -212,6 +535,18 @@ def agent_analyst(ticker: str, info: dict, tech: dict,
             f"{k}:{v['accuracy']:.0f}%" for k, v in top if v.get("total", 0) >= 3
         )
 
+    # 신호 품질 컨텍스트 (백테스트 기반 사전 평가)
+    quality = info.get("_quality", {})
+    quality_hint = ""
+    if quality:
+        q_score = quality.get("quality_score", 50)
+        q_label = quality.get("quality_label", "")
+        q_reasons = ", ".join(quality.get("reasons", []))
+        quality_hint = (
+            f"\n[신호 품질 사전평가] {q_score}점 ({q_label})"
+            f"\n  근거: {q_reasons}"
+        )
+
     prompt = f"""당신은 주식 매수 타점 분석가(Analyst)입니다.
 아래 데이터로 {info['name']} ({ticker})의 매수 근거를 분석하세요.
 반드시 JSON만 반환하세요.
@@ -222,7 +557,10 @@ def agent_analyst(ticker: str, info: dict, tech: dict,
 
 [기술 지표]
 RSI(14): {tech['rsi']} | MA20: {cur}{tech['ma20']} | MA50: {cur}{tech.get('ma50','N/A')}
-볼린저: {tech['bb_pos']}% (0%=하단, 100%=상단) | 거래량: 평균 대비 {tech['vol_ratio']:.1f}x
+볼린저: {tech['bb_pos']}% (0%=하단, 100%=상단) | BB폭: {tech.get('bb_width','N/A')}%
+거래량: 평균 대비 {tech['vol_ratio']:.1f}x | 5일거래량추세: {tech.get('vol_trend_5d','N/A')}%
+MA배열: {tech.get('ma_alignment','N/A')} | 52주위치: {tech.get('52w_pos','N/A')}%
+RSI다이버전스: {'✅ 강세' if tech.get('rsi_divergence') else '없음'} | 매집신호: {'✅' if tech.get('vol_accumulation') else '없음'}
 
 [매크로 (FRED)]
 VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
@@ -235,9 +573,10 @@ VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
 섹터유입: {', '.join(aria['key_inflows']) or '없음'}
 섹터유출: {', '.join(aria['key_outflows']) or '없음'}
 강세섹터: {aria.get('top_sector','N/A')} | 약세섹터: {aria.get('bottom_sector','N/A')}
-{acc_hint}
+{acc_hint}{quality_hint}
 
 매수 근거가 있다면 높은 점수, 없다면 낮은 점수를 주세요.
+신호 품질이 "최강/강"이면 낙관적으로, "약"이면 보수적으로 평가하세요.
 
 {{
   "analyst_score": 0~100,
@@ -259,7 +598,12 @@ VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
             return {"analyst_score": 50, "confidence": "낮음",
                     "signals_fired": [], "bull_case": "분석 실패"}
         result = json.loads(m.group())
-        result["analyst_score"] = int(result.get("analyst_score", 50))
+        base = int(result.get("analyst_score", 50))
+        # 신호 품질 보정 적용
+        adj = info.get("_quality", {}).get("analyst_adj", 0) if info else 0
+        result["analyst_score"] = max(0, min(100, base + adj))
+        if adj != 0:
+            result["_quality_adj_applied"] = adj
         return result
     except Exception as e:
         log.error(f"  Analyst 실패: {e}")
@@ -397,6 +741,10 @@ def _final_judgment(analyst: dict, devil: dict) -> dict:
         sig_type = "매도주의" if final < 30 else "관망"
     else:
         sig_type = "관망"
+
+    # 신호 품질 최종 보정
+    # (analyst에 이미 adj 반영됐으나 final에도 미세 보정)
+    # quality 정보는 analyst dict에 포함돼있지 않으므로 별도 처리 불가 → 생략
 
     is_entry = final >= ALERT_THRESHOLD and verdict != "반대" and not tk_hit
 
@@ -720,6 +1068,21 @@ def _save_log(entry: dict):
     logs = logs[-500:]
     SCAN_LOG_FILE.write_text(json.dumps(logs, ensure_ascii=False, indent=2), encoding="utf-8")
 
+def _save_shadow_log(entry: dict):
+    """
+    Claude 호출 스킵된 신호 별도 저장 (Doc3: ARIA accuracy와 분리).
+    scan_log.json과 혼용 금지 — Evolution이 live/shadow를 별도 집계해야 함.
+    """
+    logs: list = []
+    if JACKAL_SHADOW_LOG.exists():
+        try:
+            logs = json.loads(JACKAL_SHADOW_LOG.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    logs.append(entry)
+    logs = logs[-300:]   # shadow는 별도 한도
+    JACKAL_SHADOW_LOG.write_text(json.dumps(logs, ensure_ascii=False, indent=2), encoding="utf-8")
+
 
 # ══════════════════════════════════════════════════════════════════
 # 메인 스캔
@@ -847,6 +1210,116 @@ def run_scan(force: bool = False) -> dict:
 
         log.info(f"  {ticker} ({info['name']}): RSI={tech['rsi']} BB={tech['bb_pos']}% vol={tech['vol_ratio']:.1f}x")
 
+        # ── 신호 품질 사전 평가 (Claude 호출 전) ─────────────────
+        # 기술 신호 사전 감지 (백테스트와 동일한 기준)
+        _RULES_PRE = {
+            # ── 기존 신호 ──────────────────────────────────────────
+            "rsi_oversold":   lambda t: t["rsi"] < 32,
+            "bb_touch":       lambda t: t["bb_pos"] < 15,
+            "volume_climax":  lambda t: t["vol_ratio"] > 1.8 and t["change_1d"] < -1.0,
+            "momentum_dip":   lambda t: t["change_5d"] < -4.0,
+            "ma_support":     lambda t: (t["ma50"] is not None and
+                                         abs(t["price"] - t["ma50"]) / t["ma50"] < 0.025),
+            "sector_rebound": lambda t: t["rsi"] < 40 and t.get("change_3d", t.get("change_5d", 0)) < -2.0,
+            # ── 신규 신호 (피처 확장) ──────────────────────────────
+            # RSI 강세 다이버전스: 가격↓ + RSI↑ → 매도 소진, 반등 선행 신호
+            "rsi_divergence": lambda t: t.get("rsi_divergence", False),
+            # 52주 저점 근처: 심리적/기술적 지지 (0~15% = 저점 15% 이내)
+            "52w_low_zone":   lambda t: t.get("52w_pos", 50) < 15,
+            # 매집 신호: 가격 하락 중 거래량 증가 (세력 매수)
+            "vol_accumulation": lambda t: t.get("vol_accumulation", False),
+        }
+        signals_fired_pre = [sig for sig, rule in _RULES_PRE.items() if rule(tech)]
+
+        quality = _calc_signal_quality(
+            signals  = signals_fired_pre,
+            tech     = tech,
+            aria     = aria,
+            ticker   = ticker,
+            weights  = _load_weights(),
+        )
+        info["_quality"] = quality  # agent_analyst에서 접근
+
+        log.info(
+            f"    신호품질: {quality['quality_score']}점({quality['quality_label']})"
+            f" | family:{quality['signal_family']}"
+            f" | 임계:{quality['skip_threshold']}"
+            f" | vix:{quality['vix_used']:.0f}"
+            f" | 신호:{signals_fired_pre}"
+        )
+        log.info(f"    근거: {', '.join(quality['reasons'][:3])}")
+        if quality.get("negative_veto"):
+            log.info(f"    ⚠️ NegVeto: {quality.get('negative_reasons', [])}")
+
+        # 품질 45 미만 → Claude 호출 스킵 (Doc2/3 반박 수용)
+        # shadow_record는 반드시 저장 → 나중에 "버린 신호의 실제 성과" 추적 가능
+        if quality["skip"]:
+            log.info(
+                f"    ⛔ 신호품질미달 {quality['quality_score']}점"
+                f" (임계:{quality['skip_threshold']}, family:{quality['signal_family']})"
+                f" → 스킵+shadow저장"
+            )
+            scanned += 1
+            results.append({
+                "ticker":        ticker,
+                "name":          info["name"],
+                "final_score":   quality["quality_score"],
+                "signal_type":   "관망",
+                "devil_verdict":  "",
+                "rsi":           tech["rsi"],
+                "change_5d":     tech.get("change_5d", "N/A"),
+                "is_portfolio":  info.get("portfolio", True),
+                "aria_reason":   "신호품질미달",
+                "quality_score": quality["quality_score"],
+                "quality_label": quality["quality_label"],
+            })
+            # shadow_record: 별도 파일 저장 (Doc3: ARIA accuracy/scan_log와 완전 분리)
+            _save_shadow_log({
+                "timestamp":        now_kst.isoformat(),
+                "ticker":           ticker,
+                "name":             info["name"],
+                "market":           info["market"],
+                "price_at_scan":    tech["price"],
+                "rsi":              tech["rsi"],
+                "bb_pos":           tech["bb_pos"],
+                "vol_ratio":        tech["vol_ratio"],
+                "vix":              macro["fred"].get("vix"),
+                "hy_spread":        macro["fred"].get("hy_spread"),
+                "yield_curve":      macro["fred"].get("yield_curve"),
+                "aria_regime":      aria["regime"],
+                "aria_sentiment":   aria["sentiment_score"],
+                "aria_trend":       aria["trend"],
+                # shadow: Claude 미호출, 품질 미달
+                "analyst_score":    None,
+                "analyst_confidence": None,
+                "signals_fired":    signals_fired_pre,
+                "bull_case":        None,
+                "devil_score":      None,
+                "devil_verdict":    None,
+                "devil_objections": [],
+                "thesis_killer_hit": False,
+                "killer_detail":    "",
+                "final_score":      quality["quality_score"],
+                "signal_type":      "관망",
+                "is_entry":         False,
+                "reason":           f"신호품질미달({quality['quality_score']}점)",
+                "quality_score":    quality["quality_score"],
+                "quality_label":    quality["quality_label"],
+                "quality_reasons":  quality["reasons"],
+                "signal_family":    quality["signal_family"],
+                "skip_threshold":   quality["skip_threshold"],
+                "rebound_bonus":    quality.get("rebound_bonus", 0),
+                "vix_used":         quality.get("vix_used", 0),
+                "shadow_record":    True,     # Evolution이 이 필드로 구분 (scan_log와 분리)
+                "shadow_log_path":  str(JACKAL_SHADOW_LOG),
+                "alerted":          False,
+                "outcome_checked":  False,
+                "outcome_price":    None,
+                "outcome_pct":      None,
+                "outcome_correct":  None,
+            })
+            continue
+
         # ── Agent 1: Analyst ─────────────────────────────────────
         analyst = agent_analyst(ticker, info, tech, macro, aria)
         log.info(f"    Analyst: {analyst['analyst_score']}점 | {analyst['confidence']} | {analyst.get('signals_fired', [])}")
@@ -859,7 +1332,10 @@ def run_scan(force: bool = False) -> dict:
         final = _final_judgment(analyst, devil)
         scanned += 1
 
-        log.info(f"    Final: {final['final_score']:.0f}점 | {final['signal_type']} | is_entry={final['is_entry']}")
+        log.info(
+            f"    Final: {final['final_score']:.0f}점 | {final['signal_type']} | is_entry={final['is_entry']}"
+            f" | 품질:{quality['quality_score']}({quality['quality_label']})"
+        )
 
         results.append({
             "ticker":       ticker,
