@@ -322,12 +322,14 @@ def _calc_signal_quality(signals: list, tech: dict, aria: dict,
         score += 20; reasons.append("sector_rebound(93%)+20")
     if "volume_climax" in sig:
         score += 15; reasons.append("volume_climax(80%)+15")
+    # 백테스트 재검증: bb_touch 97.2%, bb+rsi 조합 최강
     if "bb_touch" in sig and "rsi_oversold" in sig:
-        score += 12; reasons.append("BB+RSI조합+12")
+        score += 16; reasons.append("BB+RSI조합(97%+88%)+16")
     elif "bb_touch" in sig:
-        score += 8;  reasons.append("BB하단(79%)+8")
+        score += 12; reasons.append("BB하단(97%)+12")
+    # rsi_oversold 88.2% 재검증 (이전 65.4%에서 대폭 상승)
     if "rsi_oversold" in sig and "sector_rebound" not in sig:
-        score += 5;  reasons.append("RSI과매도+5")
+        score += 9;  reasons.append("RSI과매도(88%)+9")
     if "momentum_dip" in sig and len(sig) > 1:
         score += 5;  reasons.append("급락+복수신호+5")
 
@@ -336,21 +338,24 @@ def _calc_signal_quality(signals: list, tech: dict, aria: dict,
     # 1일 정확도 30.4% = 반대로 움직이는 경향
     # → 단독 발동 시 페널티, 조합 시만 소폭 인정
     if "rsi_divergence" in sig:
-        if len(sig) == 1:
-            score -= 10   # 단독 = 노이즈, 페널티
-            reasons.append("RSI다이버전스단독(역방향-10)")
-        elif len(sig) >= 3 and "vol_accumulation" in sig:
-            score += 5    # 다이버전스+매집+다른신호 = 유일하게 의미
-            reasons.append("RSI다이버전스+매집조합+5")
+        if sig == {"rsi_divergence"}:
+            score -= 8    # 단독: 57.1% (약한 노이즈)
+            reasons.append("RSI다이버전스단독(57%)-8")
+        elif "momentum_dip" in sig and "vol_accumulation" not in sig:
+            score -= 12   # momentum_dip+rsi_div = 40% 최악 조합
+            reasons.append("다이버전스+momentum_dip(40%)-12")
+        elif "vol_accumulation" in sig:
+            score += 3    # vol_acc와 함께면 60% → 소폭 플러스
+            reasons.append("RSI다이버전스+매집+3")
         else:
-            score += 0    # 중립 (기대치 없음)
+            score += 0
     if "52w_low_zone" in sig:
         score += 12   # 52주 저점 15% 이내 — 심리적 지지
         reasons.append("52주저점구간+12")
     if "vol_accumulation" in sig:
-        # 백테스트 스윙 79.2% 검증됨 → bb_touch(78.7%)와 동급
+        # 백테스트 최신: 스윙 84.0% (이전 79.2% → 상승, SCHD 제거 효과)
         score += 12
-        reasons.append("하락중거래량증가(매집,검증79%)+12")
+        reasons.append("하락중거래량증가(매집,84%)+12")
 
     # 신호 조합 시너지 (새 신호 + 기존 신호 조합)
     # rsi_divergence 시너지: 백테스트 결과 조합도 50% → 시너지 제거
@@ -364,9 +369,9 @@ def _calc_signal_quality(signals: list, tech: dict, aria: dict,
 
     # ma_support 패밀리 페널티
     if sig == _MA_SUPPORT_SOLO:
-        score -= 25; reasons.append("ma_support단독-25")
+        score -= 12; reasons.append("ma_support단독(61.8%)-12")
     elif sig == _MA_SUPPORT_WEAK:
-        score -= 8;  reasons.append("ma+momentum약조합-8")
+        score -= 5;  reasons.append("ma+momentum약조합-5")
 
     # ── A-2. PCR(Put/Call Ratio) 연동 ─────────────────────────────
     # ARIA가 수집한 PCR 데이터 — Jackal이 활용 안 하던 데이터
@@ -505,8 +510,8 @@ def _calc_signal_quality(signals: list, tech: dict, aria: dict,
     THRESHOLDS = {
         "crash_rebound":   40,   # 극단 반등: 완화
         "general":         45,   # 기본
-        "ma_support_weak": 48,
-        "ma_support_solo": 50,   # 가장 엄격
+        "ma_support_weak": 47,   # ma+momentum 50% → 완화
+        "ma_support_solo": 46,   # 61.8% 검증 → 50에서 완화
     }
     skip_threshold = THRESHOLDS.get(family, 45)
 
@@ -806,26 +811,59 @@ def _final_judgment(analyst: dict, devil: dict) -> dict:
 # 쿨다운
 # ══════════════════════════════════════════════════════════════════
 
-def _is_on_cooldown(ticker: str) -> bool:
+def _get_signal_family_key(signals: list) -> str:
+    """신호 목록에서 family 키 생성 (쿨다운 구분용)."""
+    sig = set(signals)
+    if sig & {"sector_rebound","volume_climax","vol_accumulation","52w_low_zone"}:
+        return "crash_rebound"
+    if "bb_touch" in sig or "rsi_oversold" in sig:
+        return "oversold"
+    if "momentum_dip" in sig:
+        return "momentum"
+    return "general"
+
+
+def _is_on_cooldown(ticker: str, signals: list = None) -> bool:
+    """
+    ticker + signal_family 기반 쿨다운 확인.
+    Doc3: 같은 ticker+family 2거래일(48h) 내 재발동 방지.
+    signals=None이면 ticker 전체 쿨다운 확인.
+    """
     if not COOLDOWN_FILE.exists():
         return False
     try:
-        cd   = json.loads(COOLDOWN_FILE.read_text(encoding="utf-8"))
+        cd  = json.loads(COOLDOWN_FILE.read_text(encoding="utf-8"))
+        fam = _get_signal_family_key(signals) if signals else "any"
+        # ticker+family 쿨다운 확인 (48시간)
+        key_fam = f"{ticker}:{fam}"
+        if key_fam in cd:
+            hrs = (datetime.now() - datetime.fromisoformat(cd[key_fam])).total_seconds() / 3600
+            if hrs < 48:   # 2거래일 기준
+                return True
+        # 레거시: ticker 전체 쿨다운 (4시간, 하위 호환)
         last = cd.get(ticker)
-        if not last:
-            return False
-        return (datetime.now() - datetime.fromisoformat(last)).total_seconds() / 3600 < COOLDOWN_HOURS
+        if last:
+            hrs = (datetime.now() - datetime.fromisoformat(last)).total_seconds() / 3600
+            if hrs < COOLDOWN_HOURS:
+                return True
+        return False
     except Exception:
         return False
 
-def _set_cooldown(ticker: str):
+
+def _set_cooldown(ticker: str, signals: list = None):
+    """ticker + signal_family 기반 쿨다운 설정."""
     cd: dict = {}
     if COOLDOWN_FILE.exists():
         try:
             cd = json.loads(COOLDOWN_FILE.read_text(encoding="utf-8"))
         except Exception:
             pass
-    cd[ticker] = datetime.now().isoformat()
+    now_iso = datetime.now().isoformat()
+    cd[ticker] = now_iso   # 레거시 호환
+    if signals:
+        fam = _get_signal_family_key(signals)
+        cd[f"{ticker}:{fam}"] = now_iso
     COOLDOWN_FILE.write_text(json.dumps(cd, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
@@ -881,6 +919,27 @@ def _build_alert_message(ticker: str, info: dict, tech: dict,
     entry = final.get("entry_price")
     stop  = final.get("stop_loss")
 
+    # 백테스트 기반 신호별 스윙 정보 (Doc3: 스윙 중심 재정의)
+    SIGNAL_SWING_INFO = {
+        "sector_rebound":  ("D4~5", "93%"),
+        "bb_touch":        ("D4~5", "97%"),
+        "rsi_oversold":    ("D4~5", "88%"),
+        "vol_accumulation":("D5",   "84%"),
+        "volume_climax":   ("D4~5", "80%"),
+        "momentum_dip":    ("D4~5", "78%"),
+        "ma_support":      ("D3~4", "67%"),
+        "rsi_divergence":  ("D4",   "52%"),
+    }
+    # 발동 신호 중 가장 강한 것 기준 스윙 정보 표시
+    fired_sigs = final.get("signals_fired", [])
+    best_swing_info = ("D4~5", "74%")  # 기본값
+    for s in ["sector_rebound","bb_touch","rsi_oversold","vol_accumulation"]:
+        if s in fired_sigs:
+            best_swing_info = SIGNAL_SWING_INFO[s]
+            break
+
+    swing_peak_str = f"📈 스윙 타겟: Peak {best_swing_info[0]} ({best_swing_info[1]} 확률)"
+
     lines = [
         f"{icon} <b>Jackal Hunter — {label}</b>",
         "━━━━━━━━━━━━━━━━━━━━",
@@ -888,6 +947,7 @@ def _build_alert_message(ticker: str, info: dict, tech: dict,
         f"💰 {cur}{price_str}  1일:{tech['change_1d']:+.1f}%  5일:{tech['change_5d']:+.1f}%{pnl_str}",
         "━━━━━━━━━━━━━━━━━━━━",
         f"{score_icon} <b>{score:.0f}/100</b>  {final['signal_type']}  [{analyst.get('confidence','')}]",
+        swing_peak_str,  # ← 스윙 타겟 강조 (1일보다 스윙 정확도가 훨씬 높음)
         f"⚡ Analyst {analyst['analyst_score']}  →  Devil {devil['devil_score']}  →  Final {score:.0f}",
         f"📊 RSI {tech['rsi']} | BB {tech['bb_pos']}% | 거래량 {tech['vol_ratio']:.1f}x",
     ]
@@ -1237,7 +1297,7 @@ def run_scan(force: bool = False) -> dict:
             if market == "KR" and not kr_open:
                 continue
 
-        if _is_on_cooldown(ticker):
+        if _is_on_cooldown(ticker, signals_fired_pre):
             log.info(f"  {ticker}: 쿨다운 — 스킵")
             continue
 
@@ -1250,23 +1310,35 @@ def run_scan(force: bool = False) -> dict:
         # ── 신호 품질 사전 평가 (Claude 호출 전) ─────────────────
         # 기술 신호 사전 감지 (백테스트와 동일한 기준)
         _RULES_PRE = {
-            # ── 기존 신호 ──────────────────────────────────────────
-            "rsi_oversold":   lambda t: t["rsi"] < 32,
-            "bb_touch":       lambda t: t["bb_pos"] < 15,
-            "volume_climax":  lambda t: t["vol_ratio"] > 1.8 and t["change_1d"] < -1.0,
-            "momentum_dip":   lambda t: t["change_5d"] < -4.0,
-            "ma_support":     lambda t: (t["ma50"] is not None and
-                                         abs(t["price"] - t["ma50"]) / t["ma50"] < 0.025),
-            "sector_rebound": lambda t: t["rsi"] < 40 and t.get("change_3d", t.get("change_5d", 0)) < -2.0,
-            # ── 신규 신호 (피처 확장) ──────────────────────────────
-            # RSI 강세 다이버전스: 가격↓ + RSI↑ → 매도 소진, 반등 선행 신호
-            "rsi_divergence": lambda t: t.get("rsi_divergence", False),
-            # 52주 저점 근처: 심리적/기술적 지지 (0~15% = 저점 15% 이내)
-            "52w_low_zone":   lambda t: t.get("52w_pos", 50) < 15,
-            # 매집 신호: 가격 하락 중 거래량 증가 (세력 매수)
-            "vol_accumulation": lambda t: t.get("vol_accumulation", False),
+            # ── 독립 트리거 신호 (단독으로 의미 있는 신호) ──────────
+            "rsi_oversold":    lambda t: t["rsi"] < 32,
+            "bb_touch":        lambda t: t["bb_pos"] < 15,
+            "volume_climax":   lambda t: t["vol_ratio"] > 1.8 and t["change_1d"] < -1.0,
+            "momentum_dip":    lambda t: t["change_5d"] < -4.0,
+            "sector_rebound":  lambda t: t["rsi"] < 40 and t.get("change_3d", t.get("change_5d", 0)) < -2.0,
+            "rsi_divergence":  lambda t: t.get("rsi_divergence", False),
+            "52w_low_zone":    lambda t: t.get("52w_pos", 50) < 15,
+            "vol_accumulation":lambda t: t.get("vol_accumulation", False),
+            # ── ma_support: 보조 신호 (다른 독립 신호와 함께일 때만 의미)
+            # Doc3: 단독 발동 시 1일 54%, 스윙 61.8% → 독립 트리거로는 약함
+            # 아래 필터에서 ma_support 단독이면 신호 목록에서 제거
+            "ma_support":      lambda t: (t["ma50"] is not None and
+                                          abs(t["price"] - t["ma50"]) / t["ma50"] < 0.025),
         }
+
+        # ma_support 단독 제거 필터
+        # 다른 강한 신호 없이 ma_support만 있으면 신호 불발
+        _STRONG_SIGNALS = {"rsi_oversold","bb_touch","volume_climax",
+                           "sector_rebound","vol_accumulation","52w_low_zone"}
         signals_fired_pre = [sig for sig, rule in _RULES_PRE.items() if rule(tech)]
+
+        # ma_support 단독 발동 필터: 강한 신호 없으면 제거 (독립 트리거 금지)
+        if signals_fired_pre == ["ma_support"]:
+            log.debug(f"  {ticker} ma_support 단독 → 독립 트리거 제외 (보조 신호 전용)")
+            signals_fired_pre = []
+        elif "ma_support" in signals_fired_pre and not (_STRONG_SIGNALS & set(signals_fired_pre)):
+            # ma_support + momentum_dip만 있고 강한 신호 없으면 제외
+            signals_fired_pre = [s for s in signals_fired_pre if s != "ma_support"]
 
         quality = _calc_signal_quality(
             signals  = signals_fired_pre,
@@ -1391,7 +1463,7 @@ def run_scan(force: bool = False) -> dict:
             msg = _build_alert_message(ticker, info, tech, analyst, devil, final, aria)
             ok  = _send_telegram(msg)
             if ok:
-                _set_cooldown(ticker)
+                _set_cooldown(ticker, final.get("signals_fired", signals_fired_pre))
                 alerted += 1
                 log.info(f"    ✅ 텔레그램 발송 완료")
 
