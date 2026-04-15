@@ -36,10 +36,11 @@ OUTPUT_FILE    = _ROOT / "jackal" / "jackal_weights.json"
 DEFAULT_TICKERS = {
     "NVDA":      {"name": "엔비디아",   "market": "US"},
     "AVGO":      {"name": "브로드컴",   "market": "US"},
-    "SCHD":      {"name": "SCHD",       "market": "US"},
+    # SCHD 제외: 백테스트 28.6%, etf_broad_dividend 구조적 미적합
     "000660.KS": {"name": "SK하이닉스", "market": "KR"},
     "005930.KS": {"name": "삼성전자",   "market": "KR"},
     "035720.KS": {"name": "카카오",     "market": "KR"},
+    "466920.KS": {"name": "SOL고배당",  "market": "KR"},  # 백테스트 75.0% 유지
 }
 
 # 기본 신호 임계값
@@ -106,8 +107,18 @@ def load_tickers() -> dict:
             result = {}
             for h in data.get("holdings", []):
                 yf_t = h.get("ticker_yf")
-                if yf_t:
-                    result[yf_t] = {"name": h.get("name", yf_t), "market": h.get("market", "US")}
+                if not yf_t:
+                    continue
+                # asset_type 기반 제외 (etf_broad_dividend, cash)
+                asset_type = h.get("asset_type", "stock")
+                if asset_type in ("etf_broad_dividend", "cash"):
+                    print(f"  {yf_t} 제외 (asset_type={asset_type})")
+                    continue
+                # 명시적 jackal_scan: false 제외
+                if h.get("jackal_scan", True) is False:
+                    print(f"  {yf_t} 제외 (jackal_scan=false)")
+                    continue
+                result[yf_t] = {"name": h.get("name", yf_t), "market": h.get("market", "US")}
             if result:
                 print(f"✅ portfolio.json: {len(result)}종목")
                 return result
