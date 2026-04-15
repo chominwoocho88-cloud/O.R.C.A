@@ -82,6 +82,25 @@ DEFAULT_WEIGHTS = {
         "반대":     {"correct": 0, "total": 0},
     },
     "last_updated": "",
+    # ── rule_registry_status: _RULE_REGISTRY 성과 추적 (auto_disable 연동)
+    # min_accuracy 미달 + review_after_n 이상 시 _check_rule_auto_disable 경고
+    "rule_registry_status": {
+        "sector_rebound_base":   {"active": True, "min_accuracy": 0.75, "recent_accuracy": 0.0, "sample_n": 0, "review_after_n": 50},
+        "volume_climax_base":    {"active": True, "min_accuracy": 0.65, "recent_accuracy": 0.0, "sample_n": 0, "review_after_n": 20},
+        "ma_support_solo_pen":   {"active": True, "min_accuracy": None, "recent_accuracy": 0.0, "sample_n": 0, "review_after_n": 30},
+        "crash_rebound_pattern": {"active": True, "min_accuracy": 0.70, "recent_accuracy": 0.0, "sample_n": 0, "review_after_n": 30},
+        "heuristic_gate":        {"active": True, "min_accuracy": None, "recent_accuracy": 0.0, "sample_n": 0, "review_after_n": 30},
+    },
+    # ── ticker_reliability: 로그 해석용 (점수 미사용, Doc8 수용)
+    # Evolution이 백테스트 결과 기반으로 자동 업데이트
+    "ticker_reliability": {
+        # low/medium/high — 로그 해석 및 리포트용만, 신호 점수에 미반영
+        "NVDA":       {"level": "high",   "sample": 0, "accuracy": 0.0},
+        "AVGO":       {"level": "medium", "sample": 0, "accuracy": 0.0},
+        "000660.KS":  {"level": "medium", "sample": 0, "accuracy": 0.0},
+        "005930.KS":  {"level": "medium", "sample": 0, "accuracy": 0.0},
+        "035720.KS":  {"level": "low",    "sample": 0, "accuracy": 0.0},
+    },
     # ── signal_details: MAE/스윙 정보 동적 저장 (알림 코드에서 읽음) ──
     # 백테스트마다 자동 업데이트 → 알림 코드 수정 없이 동적 반영
     # signal_details: MAE/스윙/샘플 정보 (Doc3: median + std + sample_count 필수)
