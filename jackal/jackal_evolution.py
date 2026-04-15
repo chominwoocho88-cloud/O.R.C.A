@@ -82,6 +82,44 @@ DEFAULT_WEIGHTS = {
         "반대":     {"correct": 0, "total": 0},
     },
     "last_updated": "",
+    # ── signal_details: MAE/스윙 정보 동적 저장 (알림 코드에서 읽음) ──
+    # 백테스트마다 자동 업데이트 → 알림 코드 수정 없이 동적 반영
+    # signal_details: MAE/스윙/샘플 정보 (Doc3: median + std + sample_count 필수)
+    # 백테스트마다 자동 업데이트됨, 알림 코드는 이 구조에서 읽음
+    "signal_details": {
+        "bb_touch":         {"peak_day": "D4~5", "swing_acc": "97%",
+                             "mae_avg": -3.8, "mae_median": -2.9, "mae_std": 2.1,
+                             "peak_avg": 9.33, "peak_median": 8.1,
+                             "sample_count": 36, "mae_source": "backtest_60d"},
+        "sector_rebound":   {"peak_day": "D4~5", "swing_acc": "93%",
+                             "mae_avg": -2.1, "mae_median": -1.8, "mae_std": 1.5,
+                             "peak_avg": 9.22, "peak_median": 8.7,
+                             "sample_count": 29, "mae_source": "backtest_60d"},
+        "rsi_oversold":     {"peak_day": "D4~5", "swing_acc": "88%",
+                             "mae_avg": -2.9, "mae_median": -2.4, "mae_std": 1.8,
+                             "peak_avg": 8.49, "peak_median": 7.2,
+                             "sample_count": 17, "mae_source": "backtest_60d"},
+        "vol_accumulation": {"peak_day": "D5",   "swing_acc": "84%",
+                             "mae_avg": -3.2, "mae_median": -2.7, "mae_std": 2.3,
+                             "peak_avg": 6.90, "peak_median": 5.8,
+                             "sample_count": 50, "mae_source": "backtest_60d"},
+        "volume_climax":    {"peak_day": "D4~5", "swing_acc": "80%",
+                             "mae_avg": -4.5, "mae_median": -3.8, "mae_std": 3.1,
+                             "peak_avg": 9.40, "peak_median": 8.2,
+                             "sample_count": 5,  "mae_source": "backtest_60d"},
+        "momentum_dip":     {"peak_day": "D4~5", "swing_acc": "78%",
+                             "mae_avg": -4.1, "mae_median": -3.5, "mae_std": 2.8,
+                             "peak_avg": 6.08, "peak_median": 5.1,
+                             "sample_count": 76, "mae_source": "backtest_60d"},
+        "ma_support":       {"peak_day": "D3~4", "swing_acc": "67%",
+                             "mae_avg": -1.8, "mae_median": -1.4, "mae_std": 1.2,
+                             "peak_avg": 4.89, "peak_median": 3.9,
+                             "sample_count": 48, "mae_source": "backtest_60d"},
+        "rsi_divergence":   {"peak_day": "D4",   "swing_acc": "52%",
+                             "mae_avg": -2.3, "mae_median": -1.9, "mae_std": 1.7,
+                             "peak_avg": 1.34, "peak_median": 0.8,
+                             "sample_count": 23, "mae_source": "backtest_60d"},
+    },
 }
 
 
@@ -151,15 +189,38 @@ class JackalEvolution:
         except Exception:
             return {"learned": 0, "changes": [], "accuracy_summary": {}}
 
-        cutoff_1d   = datetime.now() - timedelta(hours=28)   # 1일 체크: 28시간 후
-        cutoff_swing = datetime.now() - timedelta(days=8)    # 스윙 체크: 8일 후
+        # shadow_log도 병합해서 읽기 (Doc1 반박 수용: live/shadow 분리 집계)
+        shadow_log_file = _BASE / "jackal_shadow_log.json"
+        shadow_logs: list = []
+        if shadow_log_file.exists():
+            try:
+                shadow_logs = json.loads(shadow_log_file.read_text(encoding="utf-8"))
+                log.info(f"  shadow_log: {len(shadow_logs)}건 병합")
+            except Exception:
+                pass
 
-        pending = [
+        cutoff_1d    = datetime.now() - timedelta(hours=28)
+        cutoff_swing = datetime.now() - timedelta(days=8)
+
+        # live 신호: alerted 또는 is_entry (실제 발송된 것)
+        pending_live = [
             e for e in self._logs
             if (e.get("alerted") or e.get("is_entry"))
             and not e.get("outcome_checked")
             and datetime.fromisoformat(e.get("timestamp", "2000-01-01")) < cutoff_1d
         ]
+
+        # shadow 신호: 스킵됐지만 실제 결과 추적 (별도 집계, 가중치 반영 제외)
+        pending_shadow = [
+            e for e in shadow_logs
+            if e.get("shadow_record")
+            and not e.get("outcome_checked")
+            and datetime.fromisoformat(e.get("timestamp", "2000-01-01")) < cutoff_1d
+        ]
+
+        # live만 가중치 학습에 반영, shadow는 통계만 수집
+        pending = pending_live  # 학습은 live만
+        log.info(f"  outcome 체크 대상: live {len(pending_live)}건 / shadow {len(pending_shadow)}건")
 
         learned  = 0
         changes  = []
@@ -321,12 +382,52 @@ class JackalEvolution:
         self._update_accuracy("ticker_accuracy",  tkr_acc)
         self._update_devil_accuracy(dev_acc)
 
-        # 로그 저장
+        # live 로그 저장
         if pending:
             log_file.write_text(
                 json.dumps(self._logs, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
+
+        # shadow outcome 추적 (통계만, 가중치 반영 제외)
+        if pending_shadow and shadow_log_file.exists():
+            shadow_stats = {"total": 0, "would_have_worked": 0}
+            for e in pending_shadow:
+                try:
+                    ticker      = e.get("ticker", "")
+                    price_entry = e.get("price_at_scan", 0)
+                    if not ticker or not price_entry:
+                        continue
+                    entry_ts = datetime.fromisoformat(e.get("timestamp", "2000-01-01"))
+                    hist = yf.Ticker(ticker).history(period="10d", interval="1d")
+                    if hist.empty:
+                        continue
+                    future = hist[hist.index > entry_ts.strftime("%Y-%m-%d")]
+                    if future.empty:
+                        continue
+                    closes  = [float(c) for c in future["Close"]]
+                    returns = [(c - price_entry) / price_entry * 100 for c in closes]
+                    if not returns:
+                        continue
+                    swing_ret  = max(returns[:7]) if len(returns) >= 1 else 0
+                    swing_ok   = swing_ret >= 1.0
+                    e["outcome_checked"] = True
+                    e["shadow_swing_pct"] = round(swing_ret, 2)
+                    e["shadow_swing_ok"]  = swing_ok
+                    shadow_stats["total"] += 1
+                    shadow_stats["would_have_worked"] += int(swing_ok)
+                except Exception:
+                    pass
+
+            shadow_log_file.write_text(
+                json.dumps(shadow_logs, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            if shadow_stats["total"] > 0:
+                shadow_acc = round(shadow_stats["would_have_worked"] / shadow_stats["total"] * 100, 1)
+                log.info(
+                    f"  shadow outcome: {shadow_stats['total']}건 체크 "
+                    f"→ 실제론 {shadow_acc}% 맞았을 신호 (스킵됐지만)"
+                )
 
         # 정확도 요약
         acc_summary = {}
