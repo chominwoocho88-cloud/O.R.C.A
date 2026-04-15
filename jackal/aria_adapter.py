@@ -1,18 +1,18 @@
 """
-aria_adapter.py — ARIA ↔ Jackal 인터페이스 레이어 (개선안 3)
+aria_adapter.py — ARIA ↔ Jackal 인터페이스 레이어
 
-배경:
-  기존 jackal_hunter.py가 ARIA 파일 경로를 직접 하드코딩.
-  ARIA 구조 변경 시 hunter.py를 직접 수정해야 하는 결합도 문제.
+[Bug Fix 4] _ROOT 경로 분기 로직 불안정 수정
+  기존: _ROOT = _BASE.parent if (_BASE / "jackal_hunter.py").exists() else _BASE
+  → jackal/에서 실행 시 정상이지만, jackal_hunter.py가 다른 위치로 이동하면 깨짐
+  → 조건이 False일 때 _BASE(=jackal/)를 _ROOT로 써버려 DATA_DIR = jackal/data 가 됨
+
+  수정: __file__이 jackal/ 안에 있으면 무조건 .parent.parent = repo root
+        파일 존재 조건 없이 경로만으로 결정 → 견고함
 
 역할:
   - ARIA 데이터 로딩의 단일 진입점
   - 경로/구조 변경은 이 파일만 수정
   - Jackal 모듈은 이 adapter만 의존
-
-사용법 (jackal_hunter.py):
-  from aria_adapter import load_aria_context, aria_baseline_exists, get_aria_regime
-  # 기존 _load_aria_context() 호출을 load_aria_context()로 교체
 """
 
 import json
@@ -21,15 +21,15 @@ from pathlib import Path
 
 log = logging.getLogger("aria_adapter")
 
-# ── 경로 정의 (aria_paths.py와 동기화) ───────────────────────────
-# jackal/ 폴더에서 실행 시: _BASE = jackal/, _ROOT = repo root
-_BASE         = Path(__file__).parent
-_ROOT         = _BASE.parent if (_BASE / "jackal_hunter.py").exists() else _BASE
-DATA_DIR      = _ROOT / "data"
+# ── 경로 정의 (Bug Fix: 조건 없이 항상 repo root 계산) ──────────
+_JACKAL_DIR = Path(__file__).parent          # jackal/
+_REPO_ROOT  = _JACKAL_DIR.parent             # repo root — 항상 고정
 
-ARIA_BASELINE = DATA_DIR / "morning_baseline.json"   # 당일 ARIA 분석 요약
-ARIA_MEMORY   = DATA_DIR / "memory.json"             # 누적 ARIA 리포트
-JACKAL_NEWS   = DATA_DIR / "jackal_news.json"        # Jackal용 티커별 뉴스
+DATA_DIR = _REPO_ROOT / "data"               # data/ — 항상 정확
+
+ARIA_BASELINE = DATA_DIR / "morning_baseline.json"
+ARIA_MEMORY   = DATA_DIR / "memory.json"
+JACKAL_NEWS   = DATA_DIR / "jackal_news.json"
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -44,18 +44,18 @@ def load_aria_context() -> dict:
         dict with keys:
           one_line, regime, top_headlines, key_inflows, key_outflows,
           thesis_killers, actionable,
-          inflows_detail, outflows_detail,  ← 상세 (reason + data_point)
-          all_headlines,                    ← signal_tag + impact 포함
-          jackal_news                       ← {ticker: [news_item, ...]}
+          inflows_detail, outflows_detail,
+          all_headlines,
+          jackal_news  ← {ticker: [news_item, ...]}
     """
     ctx: dict = {
-        "one_line":       "",
-        "regime":         "",
-        "top_headlines":  [],
-        "key_inflows":    [],
-        "key_outflows":   [],
-        "thesis_killers": [],
-        "actionable":     [],
+        "one_line":        "",
+        "regime":          "",
+        "top_headlines":   [],
+        "key_inflows":     [],
+        "key_outflows":    [],
+        "thesis_killers":  [],
+        "actionable":      [],
         "inflows_detail":  [],
         "outflows_detail": [],
         "all_headlines":   [],
@@ -85,7 +85,6 @@ def load_aria_context() -> dict:
                 ctx["all_headlines"]   = last.get("top_headlines", [])[:8]
                 ctx["inflows_detail"]  = last.get("inflows", [])[:4]
                 ctx["outflows_detail"] = last.get("outflows", [])[:3]
-                # baseline 없으면 memory로 보완
                 if not ctx["regime"]:
                     ctx["regime"] = last.get("market_regime", "")
                 if not ctx["top_headlines"]:
@@ -95,7 +94,7 @@ def load_aria_context() -> dict:
     except Exception as e:
         log.warning(f"ARIA memory 로드 실패: {e}")
 
-    # ── 3. jackal_news.json (티커별 뉴스) ─────────────────────────
+    # ── 3. jackal_news.json ────────────────────────────────────────
     try:
         if JACKAL_NEWS.exists():
             jn = json.loads(JACKAL_NEWS.read_text(encoding="utf-8"))
@@ -110,12 +109,10 @@ def load_aria_context() -> dict:
 
 
 def aria_baseline_exists() -> bool:
-    """morning_baseline.json 존재 여부 (run_hunt 진입 조건)."""
     return ARIA_BASELINE.exists()
 
 
 def get_aria_regime() -> str:
-    """ARIA 레짐만 빠르게 조회 (Shield / 조건 체크용)."""
     try:
         if ARIA_BASELINE.exists():
             b = json.loads(ARIA_BASELINE.read_text(encoding="utf-8"))
@@ -125,8 +122,7 @@ def get_aria_regime() -> str:
     return ""
 
 
-def get_aria_inflows() -> list[str]:
-    """ARIA 유입 섹터 목록만 반환."""
+def get_aria_inflows() -> list:
     try:
         if ARIA_BASELINE.exists():
             b = json.loads(ARIA_BASELINE.read_text(encoding="utf-8"))
