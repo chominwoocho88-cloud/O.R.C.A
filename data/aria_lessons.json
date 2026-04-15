@@ -107,6 +107,56 @@
       "reinforced": 0
     },
     {
+      "date": "2026-04-10",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "S&P500 1일 모멘텀 반전 테스트 예측 적중 — 실제 +1.81% (예측 방향 일치, 수치 부",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-10",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "나스닥 기술주 공포 심화 vs 회복 예측 적중 — 실제 +2.06% (예측 방향 일치, 수치 부",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-10",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "반도체 섹터 (SK하이닉스) 3일 추세 전환 예측 적중 — 실제 +2.95% (예측 방향 일치, 수치 부",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-10",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "코스피 원화 약세 뒷받침 지속 여부 예측 적중 — 실제 +1.52% (예측 방향 일치, 수치 부",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-10",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "엔비디아 기술주 바닥 테스트 예측 적중 — 실제 +1.81% (예측 방향 일치, 수치 부",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
       "date": "2026-04-09",
       "source": "backtest",
       "category": "주식",
@@ -239,6 +289,60 @@
       "lesson": "나스닥 모멘텀 지속성 (관세 유예 후 1일) 예측 적중 — 실제 -4.31% (예측 방향 일치, 수치 부",
       "severity": "low",
       "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-09",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "나스닥 모멘텀 지속성 오판 — 실제 -4.31% (예측 반대)",
+      "severity": "high",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-09",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "기술주(엔비디아) 상승 지속 오판 — 실제 -3.46% (예측 반대)",
+      "severity": "high",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-09",
+      "source": "backtest",
+      "category": "VIX",
+      "lesson": "VIX 공포지수 완화 오판 — VIX 40.7 +21% 상승",
+      "severity": "medium",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-09",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "SK하이닉스 반도체 섹터 3일 추세 오판 — 실제 -4.03% (예측 반대)",
+      "severity": "high",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-09",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "코스피 상승장 지속 오판 — 실제 -1.49% (예측 반대)",
+      "severity": "high",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-09",
+      "source": "backtest",
+      "category": "레짐판단",
+      "lesson": "FG 17.0(극단공포)인데 위험선호 판단 — 공포 구간 낙관 과잉",
+      "severity": "high",
       "applied": 0,
       "reinforced": 0
     },
@@ -392,6 +496,56 @@
       "reinforced": 0
     },
     {
+      "date": "2026-04-08",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "나스닥 기술주 반등 지속 예측 적중 — 실제 +7.47% (예측 방향 일치, 수치 부",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-08",
+      "source": "backtest",
+      "category": "VIX",
+      "lesson": "VIX 공포지수 완화 예측 적중 — VIX 33.6 (전일 47.0, -28%)",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-08",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "S&P500 광범위 참여 확인 예측 적중 — 실제 +5.87% (예측 방향 일치, 수치 부",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-08",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "코스피 반등 모멘텀 지속 예측 적중 — 실제 +2.01% (예측 방향 일치, 수치 부",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-08",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "반도체 섹터(SK하이닉스) 3일 추세 확인 예측 적중 — 실제 +3.85% (예측: +3.0% 이상)",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
       "date": "2026-04-07",
       "source": "backtest",
       "category": "레짐판단",
@@ -527,6 +681,55 @@
       "reinforced": 0
     },
     {
+      "date": "2026-04-07",
+      "source": "backtest",
+      "category": "레짐판단",
+      "lesson": "FG 4.0 + S&P -6.0% — 극단공포 폭락기, 반등 타이밍 연구 필요",
+      "severity": "high",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-07",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "S&P500 단기 바닥 형성 여부 예측 적중 — 실제 +1.57% (예측 방향 일치, 수치 부",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-07",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "나스닥 기술주 저항선 돌파 예측 적중 — 실제 +2.26% (예측 방향 일치, 수치 부",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-07",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "반도체 섹터 3일 추세 반전 예측 적중 — 실제 +7.16% (예측: +3.0% 이상)",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
+      "date": "2026-04-07",
+      "source": "backtest",
+      "category": "주식",
+      "lesson": "코스피 극단적 공포 반등 예측 적중 — 실제 +3.95% (예측 방향 일치, 수치 부",
+      "severity": "low",
+      "type": "strength",
+      "applied": 0,
+      "reinforced": 0
+    },
+    {
       "date": "2026-04-03",
       "source": "backtest",
       "category": "주식",
@@ -562,200 +765,8 @@
       "severity": "high",
       "applied": 0,
       "reinforced": 0
-    },
-    {
-      "date": "2026-04-03",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "SK하이닉스 반도체 모멘텀 지속 여부 오판 — 실제 -8.11% (예측 반대)",
-      "severity": "high",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-03",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "삼성전자 낙폭 확대 vs 안정화 오판 — 실제 -4.84% (예측 반대)",
-      "severity": "high",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-03",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "나스닥 월요일(4.7) 반등 강도 검증 오판 — 실제 -5.82% (예측 반대)",
-      "severity": "high",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-03",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "코스피 3일 누적 추세 반전 오판 — 실제 -5.57% (예측 반대)",
-      "severity": "high",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-03",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "SK하이닉스 쏠림 현상 지속성 오판 — 실제 -8.11% (예측 반대)",
-      "severity": "high",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-02",
-      "source": "backtest",
-      "category": "VIX",
-      "lesson": "VIX 공포지수 완화 여부 오판 — VIX 52.3 상승",
-      "severity": "medium",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-02",
-      "source": "backtest",
-      "category": "레짐판단",
-      "lesson": "FG 5.0 + S&P -4.1% — 극단공포 폭락기, 반등 타이밍 연구 필요",
-      "severity": "high",
-      "applied": 23,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-02",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "SK하이닉스 반도체 섹터 낙폭 회복 예측 적중 — 실제 +4.29% (예측: +3.0% 이상)",
-      "severity": "low",
-      "type": "strength",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-02",
-      "source": "backtest",
-      "category": "레짐판단",
-      "lesson": "FG 5.0 + S&P -4.1% — 극단공포 폭락기, 반등 타이밍 연구 필요",
-      "severity": "high",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-02",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "반도체 섹터 방향성 (SK하이닉스) 예측 적중 — 실제 +4.29% (예측: +3.0% 이상)",
-      "severity": "low",
-      "type": "strength",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-02",
-      "source": "backtest",
-      "category": "레짐판단",
-      "lesson": "FG 5.0 + S&P -4.1% — 극단공포 폭락기, 반등 타이밍 연구 필요",
-      "severity": "high",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-02",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "코스피 3일 누적 추세 확인 예측 적중 — 실제 -0.35% (예측 방향 일치, 수치 부",
-      "severity": "low",
-      "type": "strength",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-01",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "나스닥 기술주 추가 하락 여부 오판 — 실제 -4.88% (예측 반대)",
-      "severity": "high",
-      "applied": 23,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-01",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "코스피 낙폭 확대 여부 오판 — 실제 -2.25% (예측 반대)",
-      "severity": "high",
-      "applied": 20,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-01",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "반도체 섹터 (SK하이닉스) 패닉 지속 여부 오판 — 실제 -3.18% (예측 반대)",
-      "severity": "high",
-      "applied": 20,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-01",
-      "source": "backtest",
-      "category": "VIX",
-      "lesson": "VIX 공포지수 진정 여부 오판 — VIX 45.3 상승",
-      "severity": "medium",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-01",
-      "source": "backtest",
-      "category": "레짐판단",
-      "lesson": "FG 8.0 + S&P -5.5% — 극단공포 폭락기, 반등 타이밍 연구 필요",
-      "severity": "high",
-      "applied": 20,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-01",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "나스닥 기술주 추가 하락 vs 기술적 반등 오판 — 실제 -4.88% (예측 반대)",
-      "severity": "high",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-01",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "반도체 섹터 방향성 (SK하이닉스 기준) 오판 — 실제 -3.18% (예측 반대)",
-      "severity": "high",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-01",
-      "source": "backtest",
-      "category": "VIX",
-      "lesson": "VIX 공포지수 완화 여부 오판 — VIX 45.3 +28% 상승",
-      "severity": "medium",
-      "applied": 0,
-      "reinforced": 0
-    },
-    {
-      "date": "2026-04-01",
-      "source": "backtest",
-      "category": "주식",
-      "lesson": "코스피 패닉셀 지속 vs 낙폭과대 매수세 유입 오판 — 실제 -2.25% (예측 반대)",
-      "severity": "high",
-      "applied": 0,
-      "reinforced": 0
     }
   ],
-  "total_lessons": 246,
+  "total_lessons": 363,
   "last_updated": "2026-04-10"
 }
