@@ -403,7 +403,8 @@ class JackalEvolution:
             acc = self.weights.get(key, {})
             acc_summary[key] = {
                 k: {"accuracy": round(v["correct"]/v["total"]*100, 1), "total": v["total"]}
-                for k, v in acc.items() if v.get("total", 0) >= 3
+                for k, v in acc.items()
+                if isinstance(v, dict) and v.get("total", 0) >= 3 and "correct" in v
             }
 
         return {"learned": learned, "changes": changes, "accuracy_summary": acc_summary}
