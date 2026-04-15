@@ -1568,7 +1568,7 @@ def run_scan(force: bool = False) -> dict:
             "volume_climax":   lambda t: t["vol_ratio"] > 1.8 and t["change_1d"] < -1.0,
             "momentum_dip":    lambda t: t["change_5d"] < -4.0,
             "sector_rebound":  lambda t: t["rsi"] < 40 and t.get("change_3d", t.get("change_5d", 0)) < -2.0,
-            "rsi_divergence":  lambda t: t.get("rsi_divergence", False),
+            "rsi_divergence":  lambda t: t.get("rsi_divergence", False) and t["rsi"] < 35,
             "52w_low_zone":    lambda t: t.get("52w_pos", 50) < 15,
             "vol_accumulation":lambda t: t.get("vol_accumulation", False),
             # ── ma_support: 보조 신호 (다른 독립 신호와 함께일 때만 의미)
