@@ -75,20 +75,25 @@ class JackalCompact:
             return {"compacted": False, "saved_tokens": 0, "summary": "no data"}
 
         # 2. Claude Haiku에게 핵심만 요약 요청 (저비용)
-        summary = self._summarize(raw_data)
+        summary, token_usage = self._summarize(raw_data)
 
         # 3. 요약본을 캐시에 저장
         self._save_cache(summary)
 
-        # 4. 로그 기록
+        # 4. 로그 기록 (토큰 상세 포함)
         estimated_saved = int(current_tokens * (1 - _TARGET_RATIO))
         self._append_log(
             {
-                "timestamp": datetime.now().isoformat(),
-                "forced": forced,
-                "tokens_before": current_tokens,
-                "estimated_saved": estimated_saved,
-                "summary_chars": len(summary),
+                "timestamp":        datetime.now().isoformat(),
+                "forced":           forced,
+                "tokens_before":    current_tokens,
+                "estimated_saved":  estimated_saved,
+                "summary_chars":    len(summary),
+                # ── 토큰 상세 (개선안 5) ──────────────────────
+                "prompt_tokens":    token_usage["prompt_tokens"],
+                "response_tokens":  token_usage["response_tokens"],
+                "total_api_tokens": token_usage["total_api_tokens"],
+                "cost_usd":         token_usage["estimated_cost_usd"],
             }
         )
 
@@ -142,7 +147,11 @@ class JackalCompact:
         return data
 
     # ── Claude 요약 ────────────────────────────────────────────────
-    def _summarize(self, raw_data: dict) -> str:
+    def _summarize(self, raw_data: dict) -> tuple[str, dict]:
+        """
+        Claude Haiku로 핵심 요약 생성.
+        Returns: (summary_text, token_usage_dict)
+        """
         prompt = f"""
 너는 ARIA 투자 분석 에이전트의 컨텍스트 압축기다.
 아래 데이터를 분석하여 **핵심 정보만** 500 토큰 이내로 압축하라.
@@ -169,7 +178,17 @@ class JackalCompact:
             max_tokens=600,
             messages=[{"role": "user", "content": prompt}],
         )
-        return resp.content[0].text.strip()
+        token_usage = {
+            "prompt_tokens":    resp.usage.input_tokens,
+            "response_tokens":  resp.usage.output_tokens,
+            "total_api_tokens": resp.usage.input_tokens + resp.usage.output_tokens,
+            "estimated_cost_usd": round(
+                resp.usage.input_tokens  * 0.00000080   # Haiku input  $0.80/M
+                + resp.usage.output_tokens * 0.00000400,  # Haiku output $4.00/M
+                6,
+            ),
+        }
+        return resp.content[0].text.strip(), token_usage
 
     # ── 캐시 저장 ──────────────────────────────────────────────────
     def _save_cache(self, summary: str):
