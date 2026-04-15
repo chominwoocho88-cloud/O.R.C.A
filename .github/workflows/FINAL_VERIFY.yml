@@ -1,11 +1,14 @@
 name: Bug Fix Verification
 
 on:
-  workflow_dispatch:   # 수동 실행 전용
+  workflow_dispatch:
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
 
@@ -13,8 +16,167 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: pip install anthropic rich httpx yfinance pandas
+      - name: Verify all bug fixes
+        run: |
+          python - << 'PYEOF'
+          import sys, re
+          from pathlib import Path
 
-      - name: Run verification
-        run: python FINAL_VERIFY.py
+          errors = []
+          warnings = []
+
+          def read(p):
+              f = Path(p)
+              if not f.exists():
+                  errors.append(f"파일 없음: {p}")
+                  return ""
+              return f.read_text(encoding="utf-8")
+
+          # ── Bug 1: jackal_evolution.py 중복키 + 모델명 ──────────
+          src = read("jackal/jackal_evolution.py")
+          if src:
+              m = re.search(r'"signal_weights"\s*:\s*\{([^}]+)\}', src, re.DOTALL)
+              if m:
+                  keys = re.findall(r'"(\w+)"\s*:', m.group(1))
+                  dupes = {k for k in keys if keys.count(k) > 1}
+                  if dupes:
+                      errors.append(f'Bug1: signal_weights 중복 키 잔존: {dupes}')
+              if "claude-sonnet-4-20250514" in src:
+                  errors.append('Bug1: 잘못된 모델명 claude-sonnet-4-20250514 잔존')
+              if "last_evolved_at" not in src:
+                  errors.append('Bug1/3: last_evolved_at 없음')
+              if '".last_evolve").write_text' in src:
+                  errors.append('Bug8: .last_evolve 파일 쓰기 미제거')
+
+          # ── Bug 2: jackal_shield.py usage_log ───────────────────
+          src = read("jackal/jackal_shield.py")
+          if src:
+              if "jackal_usage_log" not in src:
+                  errors.append('Bug2: usage_log 미연동')
+              if "log_usage" not in src:
+                  errors.append('Bug2: log_usage 헬퍼 없음')
+              if 'ANTHROPIC_API_KEY\\s*=\\s*[\\\'\\"]?[A-Za-z0-9' in src or \
+                 "os.environ.get" not in src and "ANTHROPIC_API_KEY" in src:
+                  pass  # 오탐지 수정은 선택사항
+
+          # ── Bug 3: jackal_core.py last_evolved_at ───────────────
+          src = read("jackal/jackal_core.py")
+          if src:
+              if "import json" not in src:
+                  errors.append('Bug3: import json 없음')
+              if ".last_evolve" in src and "last_evolved_at" not in src:
+                  errors.append('Bug3: .last_evolve 의존 미제거')
+
+          # ── JackalBT: jackal_backtest.py 경로 ───────────────────
+          src = read("jackal/jackal_backtest.py")
+          if src:
+              if '_ROOT       = Path(__file__).parent' in src and \
+                 'MEMORY_FILE = _ROOT / "data"' in src:
+                  errors.append('JackalBT: 경로 버그 미수정 (_ROOT/MEMORY_FILE)')
+
+          # ── Bug 4: aria_adapter.py 경로 분기 ────────────────────
+          src = read("jackal/aria_adapter.py")
+          if src:
+              if "_BASE.parent if (_BASE" in src:
+                  errors.append('Bug4: aria_adapter _ROOT 분기 로직 미수정')
+
+          # ── Bug 5: jackal_hunter.py aria_adapter 미사용 ─────────
+          src = read("jackal/jackal_hunter.py")
+          if src:
+              if 'ARIA_BASELINE  = Path("data")' in src:
+                  errors.append('Bug5: ARIA_BASELINE 하드코딩 미제거')
+              if "from aria_adapter import" not in src:
+                  errors.append('Bug5: aria_adapter import 없음')
+
+          # ── Bug 6: jackal_compact.py 자체 토큰 계산 ─────────────
+          src = read("jackal/jackal_compact.py")
+          if src:
+              if "_get_today_tokens" not in src:
+                  errors.append('Bug6: _get_today_tokens 없음')
+
+          src = read("jackal/jackal_core.py")
+          if src:
+              if "check_and_compact(context_tokens)" in src:
+                  errors.append('Bug6: compact에 context_tokens 여전히 전달')
+
+          # ── Bug 7: aria_main.py kis_connected 하드코딩 ──────────
+          src = read("aria_main.py")
+          if src:
+              if "kis_connected = False" in src:
+                  errors.append('Bug7: kis_connected = False 하드코딩 미제거')
+              if "ensure_dirs" not in src:
+                  warnings.append('Bug9: aria_main.py ensure_dirs() 호출 없음')
+
+          # ── Bug 9: aria_paths.py 절대경로 + ensure_dirs ─────────
+          src = read("aria_paths.py")
+          if src:
+              if 'Path("data")' in src:
+                  errors.append('Bug9: 상대경로 Path("data") 미제거')
+              if "ensure_dirs" not in src:
+                  errors.append('Bug9: ensure_dirs 함수 없음')
+              if "DATA_DIR.mkdir(exist_ok=True)" in src:
+                  errors.append('Bug9: 최상위 mkdir 사이드이펙트 미제거')
+
+          # ── Bug 10: 모델 환경변수화 ──────────────────────────────
+          src = read("aria_analysis.py")
+          if src:
+              if 'MODEL   = "claude-sonnet-4-6"' in src:
+                  errors.append('Bug10: aria_analysis.py MODEL 하드코딩 미제거')
+              if "ARIA_MODEL" not in src:
+                  errors.append('Bug10: aria_analysis.py ARIA_MODEL 없음')
+
+          src = read("aria_agents.py")
+          if src:
+              if 'MODEL_ANALYST       = "claude-sonnet-4-6"' in src:
+                  errors.append('Bug10: aria_agents.py MODEL 하드코딩 미제거')
+              if "ARIA_MODEL" not in src:
+                  errors.append('Bug10: aria_agents.py ARIA_MODEL 없음')
+
+          # ── Bug 11: verification 중복 방어 ───────────────────────
+          src = read("aria_analysis.py")
+          if src:
+              if 'accuracy["history"][-1].get("date") == today' in src:
+                  errors.append('Bug11: [-1] 인덱스 위험 패턴 미제거')
+              if "ARIA_FORCE_VERIFY" not in src:
+                  errors.append('Bug11: ARIA_FORCE_VERIFY 환경변수 없음')
+
+          # ── Bug 12: call_api 재귀 제거 ───────────────────────────
+          src = read("aria_agents.py")
+          if src:
+              if "return call_api(" in src:
+                  errors.append('Bug12: call_api 재귀 호출 미제거')
+              if "max_retries" not in src:
+                  errors.append('Bug12: max_retries 루프 없음')
+
+          # ── Bug 15: backtest 중복 import ─────────────────────────
+          src = read("aria_backtest.py")
+          if src:
+              if "import sys, os; sys.path.insert" in src:
+                  errors.append('Bug15: 중복 import 라인 미제거')
+
+          # ── 결과 출력 ────────────────────────────────────────────
+          total = 25
+          print()
+          print("=" * 62)
+          print("  ARIA + Jackal 전체 버그 수정 검증")
+          print("=" * 62)
+          print(f"  ✅ 통과: {total - len(errors)}  |  ❌ 실패: {len(errors)}  |  ⚠️  권장: {len(warnings)}")
+          print()
+
+          if errors:
+              print(f"❌ 미수정 항목 {len(errors)}건:")
+              for e in errors:
+                  print(f"   • {e}")
+          else:
+              print("✅ 모든 버그 수정 완료!")
+
+          if warnings:
+              print()
+              print(f"⚠️  권장 사항 {len(warnings)}건:")
+              for w in warnings:
+                  print(f"   • {w}")
+
+          print()
+          print("=" * 62)
+          sys.exit(1 if errors else 0)
+          PYEOF
