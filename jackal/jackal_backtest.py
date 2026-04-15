@@ -263,6 +263,10 @@ def _run_signals(memory, tickers, hist, signal_rules, label=""):
     total_signals  = 0
     skipped        = 0
 
+    # 중복 날짜 제거 필터 (Doc1: 주말/휴장 직후 동일 RSI/BB 중복 발동 방지)
+    # 동일 (ticker, RSI, BB) 조합이 연속 이틀 발동하면 첫날만 사용
+    seen_tech_keys: set = set()
+
     for report in memory:
         date_str = report.get("analysis_date", "")
         aria     = parse_aria_context(report)
@@ -274,7 +278,24 @@ def _run_signals(memory, tickers, hist, signal_rules, label=""):
             tech = calc_indicators(df, date_str)
             if not tech:
                 continue
+
+            # 중복 감지: 동일 기술 지표 = 같은 날 데이터가 반복된 것
+            tech_key = (ticker, round(tech["rsi"], 1), round(tech["bb_pos"], 1))
+            if tech_key in seen_tech_keys:
+                continue   # 이미 처리한 동일 상태 → 스킵
+            seen_tech_keys.add(tech_key)
+
             fired = [sig for sig, rule in signal_rules.items() if rule(tech)]
+
+            # ma_support 단독 독립 트리거 제거 (scanner.py와 동기화)
+            # 다른 강한 신호 없이 ma_support만이면 신호 불발
+            _STRONG = {"rsi_oversold","bb_touch","volume_climax",
+                       "sector_rebound","vol_accumulation","52w_low_zone"}
+            if set(fired) == {"ma_support"}:
+                continue  # ma_support 단독 = 독립 트리거 제외
+            if "ma_support" in fired and not (_STRONG & set(fired)):
+                fired = [s for s in fired if s != "ma_support"]
+
             if not fired:
                 continue
             peak = track_peak(df, date_str)
