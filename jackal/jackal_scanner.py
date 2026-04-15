@@ -213,13 +213,60 @@ def _load_weights() -> dict:
 
 # 규칙 레지스트리 — 도입 근거/검토 기준 명시 (Doc3: 규칙 폐기 조건)
 _RULE_REGISTRY = {
-    "sector_rebound_base":   {"introduced": "2026-04", "basis": "backtest 93.1%", "review_after_n": 50},
-    "volume_climax_base":    {"introduced": "2026-04", "basis": "backtest 80.0%", "review_after_n": 20},
-    "ma_support_solo_pen":   {"introduced": "2026-04", "basis": "backtest 55.6%", "review_after_n": 30},
-    "rebound_cap":           {"introduced": "2026-04", "basis": "anti-stacking",  "review_after_n": 50},
-    "crash_rebound_pattern": {"introduced": "2026-04", "basis": "3/31~4/8 검증",  "review_after_n": 30},
-    "vix_gating":            {"introduced": "2026-04", "basis": "ARIA중복방지",   "review_after_n": 20},
+    # 각 규칙에 min_accuracy 추가 — 해당 건수 이상에서 정확도 미달 시 자동 비활성화
+    # Evolution Engine이 이 메타데이터를 읽어 규칙 상태를 평가
+    "sector_rebound_base":   {
+        "introduced": "2026-04", "basis": "backtest 93.1%",
+        "review_after_n": 50,  "min_accuracy": 0.75, "active": True,
+    },
+    "volume_climax_base":    {
+        "introduced": "2026-04", "basis": "backtest 80.0%",
+        "review_after_n": 20,  "min_accuracy": 0.65, "active": True,
+    },
+    "ma_support_solo_pen":   {
+        "introduced": "2026-04", "basis": "backtest 55.6% → 단독 차단",
+        "review_after_n": 30,  "min_accuracy": None, "active": True,  # 페널티라 정확도 기준 없음
+    },
+    "rebound_cap":           {
+        "introduced": "2026-04", "basis": "anti-stacking",
+        "review_after_n": 50,  "min_accuracy": None, "active": True,
+    },
+    "crash_rebound_pattern": {
+        "introduced": "2026-04", "basis": "3/31~4/8 검증",
+        "review_after_n": 30,  "min_accuracy": 0.70, "active": True,
+    },
+    "vix_gating":            {
+        "introduced": "2026-04", "basis": "ARIA중복방지",
+        "review_after_n": 20,  "min_accuracy": None, "active": True,
+    },
+    "heuristic_gate":        {
+        "introduced": "2026-04", "basis": "이벤트-데이 품질 하락",
+        "review_after_n": 30,  "min_accuracy": None, "active": True,
+    },
 }
+
+
+def _check_rule_auto_disable(rule_name: str, recent_accuracy: float, sample_n: int) -> bool:
+    """
+    규칙 자동 폐기 검사.
+    min_accuracy 미달 + review_after_n 이상 샘플 → active=False 권고 반환.
+    실제 비활성화는 Evolution Engine이 담당.
+    """
+    rule = _RULE_REGISTRY.get(rule_name, {})
+    if not rule.get("active", True):
+        return False   # 이미 비활성
+    min_acc = rule.get("min_accuracy")
+    review_n = rule.get("review_after_n", 50)
+    if min_acc is None or sample_n < review_n:
+        return False   # 기준 없음 or 샘플 부족
+    if recent_accuracy < min_acc:
+        log.warning(
+            f"  ⚠️ RULE AUTO-DISABLE 권고: {rule_name} "
+            f"정확도 {recent_accuracy:.1%} < 기준 {min_acc:.1%} "
+            f"(n={sample_n}/{review_n})"
+        )
+        return True    # Evolution이 처리하도록 True 반환
+    return False
 
 # ── signal_family 분류 테이블 ────────────────────────────────────
 # Doc1 반박: 분류 기준이 코드에 없으면 새 신호 추가 시 일관성 깨짐
@@ -245,6 +292,26 @@ def _get_signal_family(signals: list) -> str:
     if sig == _MA_SUPPORT_WEAK:             # ma_support + momentum_dip만
         return "ma_support_weak"
     return "general"
+
+
+def _load_schd_regime_signal() -> float:
+    """
+    SCHD는 Jackal 스캔 제외(jackal_scan:false) 유지.
+    방어 자산 레짐 지표로만 활용 — 5일 -3% 이하 시 전체 confidence -5.
+    Doc7/9 부분 수용: 기각 유지 + 새 용도 추가, 충돌 없음.
+    """
+    try:
+        import yfinance as _yf
+        df = _yf.Ticker("SCHD").history(period="10d", interval="1d")
+        if df.empty or len(df) < 5:
+            return 0.0
+        change_5d = (float(df["Close"].iloc[-1]) - float(df["Close"].iloc[-5]))                     / float(df["Close"].iloc[-5]) * 100
+        if change_5d < -3.0:
+            log.info(f"  ⚠️ SCHD 5일 {change_5d:.1f}% 하락 → 레짐 지표 -5")
+            return -5.0
+        return 0.0
+    except Exception:
+        return 0.0
 
 
 def _load_pcr_from_aria() -> float:
@@ -548,6 +615,13 @@ def _calc_signal_quality(signals: list, tech: dict, aria: dict,
         reasons.append(
             f"불확실게이트[{gate_reason}](VIX{vix:.0f}/{fg_str})-{penalty}"
         )
+
+        # hard gate + 극단 VIX(≥40) → abstain 플래그 (신호 완전 차단)
+        # Doc3: "Jackal이 스스로 쉬는 날"로 처리 → 사용자 신뢰 상승
+        if gate_strength == "hard" and vix >= 40:
+            score = 0   # skip_threshold 하회 강제
+            reasons.append(f"🚫 ABSTAIN(VIX극단{vix:.0f}≥40+hard gate)")
+
     elif micro_gate_active and family != "crash_rebound":
         score  -= 5
         reasons.append(f"레짐microgate({regime[:6]}/VIX{vix:.0f})-5")
@@ -1069,6 +1143,22 @@ def _build_alert_message(ticker: str, info: dict, tech: dict,
         }
 
     fired_sigs = final.get("signals_fired", [])
+
+    # Doc7 부분 수용: 같은 family 안 모든 신호명 표시 (집계는 family 기준 유지)
+    # 단일 신호명만 보이던 것 → "bb_touch + rsi_oversold (crash_rebound)" 형태로
+    def _format_signals_display(sigs: list) -> str:
+        if not sigs:
+            return "없음"
+        if len(sigs) == 1:
+            return sigs[0]
+        # 강신호 앞으로 정렬
+        priority = ["sector_rebound","volume_climax","bb_touch","rsi_oversold",
+                    "vol_accumulation","momentum_dip","ma_support","rsi_divergence"]
+        sorted_sigs = sorted(sigs, key=lambda s: priority.index(s) if s in priority else 99)
+        return " + ".join(sorted_sigs)
+
+    signals_display = _format_signals_display(fired_sigs)
+
     best_info = _get_swing_info("bb_touch")  # 기본값
     for s in ["sector_rebound","bb_touch","rsi_oversold","vol_accumulation"]:
         if s in fired_sigs:
@@ -1103,7 +1193,8 @@ def _build_alert_message(ticker: str, info: dict, tech: dict,
         f"{score_icon} <b>{score:.0f}/100</b>  {final['signal_type']}  [{analyst.get('confidence','')}]",
         swing_peak_str,  # ← 스윙 타겟 강조 (1일보다 스윙 정확도가 훨씬 높음)
         f"⚡ Analyst {analyst['analyst_score']}  →  Devil {devil['devil_score']}  →  Final {score:.0f}",
-        f"📊 RSI {tech['rsi']} | BB {tech['bb_pos']}% | 거래량 {tech['vol_ratio']:.1f}x",
+        f"📊 신호: {signals_display}",
+        f"   RSI {tech['rsi']} | BB {tech['bb_pos']}% | 거래량 {tech['vol_ratio']:.1f}x",
     ]
 
     # Analyst 근거
