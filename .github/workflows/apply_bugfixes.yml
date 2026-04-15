@@ -16,6 +16,9 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Debug patterns
+        run: python debug_patterns.py
+
       - name: Apply fixes
         run: python apply_bugfixes.py
 
