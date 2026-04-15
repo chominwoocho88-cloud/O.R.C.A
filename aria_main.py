@@ -40,7 +40,7 @@ console = Console()
 def sanitize_korea_claims(report: dict, market_data: dict) -> dict:
     """KIS 미연결 시 한국 수급 단정 표현 완화"""
     import re
-    kis_connected = False
+    kis_connected = os.environ.get("KIS_CONNECTED", "").lower() == "true"
     if kis_connected:
         return report
 
