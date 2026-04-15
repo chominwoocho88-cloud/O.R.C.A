@@ -38,6 +38,7 @@ _BASE = Path(__file__).parent
 
 HUNT_LOG_FILE  = _BASE / "hunt_log.json"
 HUNT_COOL_FILE = _BASE / "hunt_cooldown.json"
+
 from aria_adapter import (
     load_aria_context     as _load_aria_context,
     aria_baseline_exists  as _aria_baseline_exists,
@@ -187,74 +188,6 @@ def _extract_relevant_news(ticker: str, name: str, aria: dict) -> str:
 
     result = "\n".join(lines + sector_context)
     return result or "관련 뉴스 없음"
-
-
-# ══════════════════════════════════════════════════════════════════
-# ARIA 컨텍스트
-# ══════════════════════════════════════════════════════════════════
-
-def _load_aria_context() -> dict:
-    ctx = {
-        "one_line": "", "regime": "",
-        "top_headlines": [], "key_inflows": [],
-        "key_outflows": [], "thesis_killers": [],
-        "actionable": [],
-        # 뉴스 품질 향상용 상세 데이터
-        "inflows_detail":  [],   # zone + reason + data_point
-        "outflows_detail": [],
-        "all_headlines":   [],   # signal_tag + impact 포함
-        "jackal_news":     {},   # 티커별 수집 뉴스
-    }
-    try:
-        if ARIA_BASELINE.exists():
-            b = json.loads(ARIA_BASELINE.read_text(encoding="utf-8"))
-            ctx["one_line"]       = b.get("one_line_summary", "")
-            ctx["regime"]         = b.get("market_regime", "")
-            ctx["top_headlines"]  = [h.get("headline","") for h in b.get("top_headlines",[])[:5]]
-            ctx["key_inflows"]    = [i.get("zone","") for i in b.get("inflows",[])[:3]]
-            ctx["key_outflows"]   = [o.get("zone","") for o in b.get("outflows",[])[:3]]
-            ctx["thesis_killers"] = b.get("thesis_killers", [])
-            ctx["actionable"]     = b.get("actionable_watch", [])[:5]
-    except Exception as e:
-        log.warning(f"ARIA baseline 로드 실패: {e}")
-
-    # memory.json에서 최신 리포트 상세 데이터 로드
-    try:
-        if ARIA_MEMORY.exists():
-            mem = json.loads(ARIA_MEMORY.read_text(encoding="utf-8"))
-            if mem:
-                last = sorted(mem, key=lambda x: x.get("analysis_date",""))[-1]
-                # 헤드라인 전체 (signal_tag + impact 포함)
-                ctx["all_headlines"] = last.get("top_headlines", [])[:8]
-                # 섹터 유입 상세 (reason + data_point)
-                ctx["inflows_detail"] = last.get("inflows", [])[:4]
-                # 섹터 유출 상세
-                ctx["outflows_detail"] = last.get("outflows", [])[:3]
-                # baseline에 없으면 memory에서 보완
-                if not ctx["regime"]:
-                    ctx["regime"] = last.get("market_regime", "")
-                if not ctx["top_headlines"]:
-                    ctx["top_headlines"] = [h.get("headline","")
-                                            for h in ctx["all_headlines"]]
-                if not ctx["key_inflows"]:
-                    ctx["key_inflows"] = [i.get("zone","")
-                                          for i in ctx["inflows_detail"][:3]]
-    except Exception as e:
-        log.warning(f"ARIA memory 로드 실패: {e}")
-
-    # jackal_news.json (ARIA가 수집한 티커별 뉴스)
-    try:
-        jn_file = Path("data") / "jackal_news.json"
-        if jn_file.exists():
-            jn = json.loads(jn_file.read_text(encoding="utf-8"))
-            for item in jn.get("news_items", []):
-                t = item.get("ticker","")
-                if t:
-                    ctx["jackal_news"].setdefault(t, []).append(item)
-    except Exception:
-        pass
-
-    return ctx
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -1014,35 +947,6 @@ day1 vs swing 구분:
                 "swing_type": swing_type, "bull_case": "", "entry_zone": "",
                 "target_1d": "", "target_5d": "", "stop_loss": "", "expected_days": 3}
 
-def _devil_swing(ticker: str, tech: dict, analyst: dict, aria: dict, cur: str) -> dict:
-    price_str = f"{tech['price']:,.2f}" if cur == "$" else f"{tech['price']:,.0f}"
-    tk_text = "".join(
-        f"\n  • {tk.get('event','')}: {tk.get('invalidates_if','')}"
-        for tk in aria.get("thesis_killers",[])[:2] if tk.get("invalidates_if")
-    )
-    prompt = f"""{ticker}({cur}{price_str}) 반등 반박. JSON만.
-Analyst:{analyst['analyst_score']}점 {analyst.get('swing_setup','')} {analyst.get('bull_case','')[:50]}
-RSI:{tech['rsi']} BB:{tech['bb_pos']:.0f}% 5일:{tech['change_5d']:+.1f}%
-레짐:{aria['regime']} TK:{tk_text or '없음'}
-{{"devil_score":0~100,"verdict":"동의/부분동의/반대",
-  "main_risk":"1줄","is_dead_cat":true/false,"thesis_killer_hit":true/false}}"""
-
-    try:
-        resp = Anthropic().messages.create(
-            model=MODEL_H, max_tokens=200,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        r = _safe_parse_json(re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip())
-        r["devil_score"] = int(r.get("devil_score", 30))
-        r.setdefault("verdict","부분동의"); r.setdefault("main_risk","")
-        r.setdefault("thesis_killer_hit",False); r.setdefault("is_dead_cat",False)
-        return r
-    except Exception as e:
-        log.error(f"  Devil 실패 {ticker}: {e}")
-        return {"devil_score":30,"verdict":"부분동의","main_risk":"",
-                "thesis_killer_hit":False,"is_dead_cat":False}
-
-
 
 def _devil_swing(ticker: str, tech: dict, analyst: dict, aria: dict, cur: str) -> dict:
     price_str  = f"{tech['price']:,.2f}" if cur == "$" else f"{tech['price']:,.0f}"
@@ -1078,17 +982,6 @@ def _devil_swing(ticker: str, tech: dict, analyst: dict, aria: dict, cur: str) -
         "MA지지반등":     "MA50 이탈 시 다음 지지선까지 빠르게 하락. 이탈 가능성이 더 높은 환경인지 점검.",
         "기술적과매도":   "RSI 과매도는 충분조건이 아님. 하락 이유가 구조적이면 과매도에서 추가 하락 가능.",
     }.get(swing_type, "")
-
-    # 백테스트 기반 권장 보유기간
-    opt_days = {
-        "강세다이버전스": "3~5일 (다이버전스 해소 시점)",
-        "섹터로테이션":   "5~7일 (섹터 유입 반영까지)",
-        "패닉셀반등":     "1~3일 (스냅백 빠름)",
-        "모멘텀눌림목":   "5~8일 (SK하이닉스 D8.5, 삼성 D7.8)",
-        "MA지지반등":     "3~5일 (NVDA D3.9, AVGO D3.7)",
-        "기술적과매도":   "3~5일",
-    }
-    recommended_days = opt_days.get(swing_type, "3~5일")
 
     relevant_news = _extract_relevant_news(ticker, ticker, aria)
 
@@ -1144,6 +1037,7 @@ BB: {tech['bb_pos']:.0f}% (하단 터치가 반등 보장 아님)
         return {"devil_score": 30, "verdict": "부분동의", "main_risk": "",
                 "thesis_killer_hit": False, "is_dead_cat": False,
                 "structural_decline": False, "volume_concern": "정상"}
+
 
 ALERT_THRESHOLD = 55   # 재설계된 공식 기준 (이전 68은 사실상 통과 불가)
 
@@ -1313,6 +1207,7 @@ def _set_cooldown(ticker: str, hours: float = HUNT_COOLDOWN_H):
     cd[ticker] = {"ts": datetime.now().isoformat(), "hours": hours}
     HUNT_COOL_FILE.write_text(json.dumps(cd, ensure_ascii=False), encoding="utf-8")
 
+
 def _send_telegram(text: str) -> bool:
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         print(text); return False
@@ -1326,6 +1221,7 @@ def _send_telegram(text: str) -> bool:
         return r.json().get("ok", False)
     except Exception as e:
         log.error(f"텔레그램 오류: {e}"); return False
+
 
 def _build_alert(item: dict, aria: dict) -> str:
     ticker     = item["ticker"]; name = item["name"]
@@ -1356,6 +1252,7 @@ def _build_alert(item: dict, aria: dict) -> str:
         f"⏰ {now_str} KST | Jackal Hunter"
     )
 
+
 def _build_summary(top5: list, aria: dict) -> str:
     now_str  = datetime.now(KST).strftime("%m/%d %H:%M")
     best     = top5[0] if top5 else None
@@ -1384,6 +1281,7 @@ def _build_summary(top5: list, aria: dict) -> str:
         f"⏰ {now_str} KST | Jackal Hunter",
     ]
     return "\n".join(lines)
+
 
 def _save_log(entry: dict):
     """
