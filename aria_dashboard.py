@@ -14,6 +14,10 @@ try:
 except ImportError:
     PORTFOLIO_FILE = Path("portfolio.json")
 
+# ── Jackal 경로 (aria_paths에 없으므로 직접 정의) ─────────────────
+HUNT_LOG_FILE      = Path("jackal") / "hunt_log.json"
+JACKAL_WEIGHTS_FILE = Path("jackal") / "jackal_weights.json"
+
 def _load(path, default=None):
     if path.exists():
         try: return json.loads(path.read_text(encoding="utf-8"))
@@ -33,6 +37,10 @@ def build_dashboard():
     cost   = _load(COST_FILE,      {})
     pat    = _load(PATTERN_DB_FILE,{})
     mkt    = _load(DATA_FILE,      {})
+
+    # ── Jackal 데이터 ────────────────────────────────────────────
+    hunt_log = _load(HUNT_LOG_FILE, [])
+    jweights = _load(JACKAL_WEIGHTS_FILE, {})
 
     cur    = sent.get("current",{})
     h30    = sent.get("history",[])[-30:]
@@ -202,6 +210,107 @@ def build_dashboard():
         o+='</div>'
         return o
 
+    # ── Jackal Hunter 섹션 ──────────────────────────────────────
+    def jackal_block():
+        """hunt_log.json 기반 최근 5건 타점 행 + 통계 생성."""
+        if not hunt_log:
+            return (
+                '<div style="padding:16px;text-align:center;color:var(--mu);font-size:12px;">'
+                '🦊 Jackal 미실행 — hunt_log.json 없음</div>',
+                "", ""
+            )
+
+        # 최신순 정렬, 최대 5건
+        recent = sorted(hunt_log, key=lambda e: e.get("timestamp",""), reverse=True)[:5]
+
+        rows_html = ""
+        for e in recent:
+            ticker = _e(e.get("ticker", "—"))
+            name   = _e(e.get("name", e.get("ticker", ""))[:12])
+            score  = e.get("final_score") or e.get("analyst_score") or 0
+            try: score = float(score)
+            except: score = 0.0
+            is_entry = bool(e.get("is_entry") or e.get("alerted"))
+
+            # 점수 색상
+            sc_col = "#14E87A" if score>=65 else "#FFB547" if score>=50 else "#909090"
+
+            # 뱃지
+            if is_entry:
+                badge_cls = "jb-entry"; badge_txt = "🔥 타점"
+            else:
+                badge_cls = "jb-pass";  badge_txt = "⚪ 관망"
+
+            # 메타 정보
+            rsi    = e.get("rsi")
+            chg5   = e.get("change_5d")
+            peak   = e.get("peak_pct")
+            peak_d = e.get("peak_day")
+            ts     = (e.get("timestamp",""))[5:10].replace("-","/")
+            div    = "★" if ("rsi_divergence" in (e.get("signals_fired") or []) or
+                             e.get("bullish_div")) else ""
+
+            meta_parts = []
+            if rsi   is not None: meta_parts.append(f"RSI {rsi:.0f}")
+            if chg5  is not None:
+                meta_parts.append(f'<span class="{"neg" if chg5<0 else "pos"}">'
+                                  f'{chg5:+.1f}%</span>')
+            if peak  is not None: meta_parts.append(f'<span class="pos">Peak+{peak:.1f}% D{peak_d}</span>')
+            if ts: meta_parts.append(ts)
+            meta_html = " · ".join(meta_parts)
+
+            rows_html += (
+                f'<div class="jrow">'
+                f'<span class="jtk">{ticker}</span>'
+                f'<div style="flex:1;min-width:0;">'
+                f'<div class="jname">{name}{div}</div>'
+                f'<div class="jmeta">{meta_html}</div>'
+                f'</div>'
+                f'<span class="jscore" style="color:{sc_col};">{score:.0f}</span>'
+                f'<span class="jbadge {badge_cls}">{badge_txt}</span>'
+                f'</div>'
+            )
+
+        # 통계
+        sw = jweights.get("swing_accuracy")
+        d1 = jweights.get("d1_accuracy")
+        n  = jweights.get("total_tracked")
+        stat_html = (
+            f'<div class="jstat">'
+            f'<span class="js">스윙 <b>{sw:.1f}%</b></span>'
+            f'<span class="js">1일 <b>{d1:.1f}%</b></span>'
+            f'<span class="js">추적 <b>{n}건</b></span>'
+            f'</div>'
+        ) if (sw is not None and d1 is not None and n is not None) else ""
+
+        # Macro Gate 배지
+        mg = jweights.get("last_macro_gate", {})
+        if mg:
+            lvl = mg.get("risk_level","normal")
+            gate_cls = ("jgate-danger" if lvl=="extreme"
+                        else "jgate-warn" if lvl=="elevated"
+                        else "jgate-ok")
+            gate_icon = "🚨" if lvl=="extreme" else "⚠️" if lvl=="elevated" else "✅"
+            vix_v  = mg.get("vix","—")
+            yc_v   = mg.get("yield_curve")
+            hy_v   = mg.get("hy_chg5")
+            yc_str = f"{yc_v:+.2f}%" if yc_v is not None else "—"
+            hy_str = f"{hy_v:+.1f}%" if hy_v is not None else "—"
+            reason = _e(mg.get("reason","")[:40])
+            gate_html = (
+                f'<div class="jgate {gate_cls}">'
+                f'{gate_icon} Macro Gate &nbsp;|&nbsp; '
+                f'VIX <b>{vix_v}</b> · YC <b>{yc_str}</b> · HY <b>{hy_str}</b>'
+                f'</div>'
+            )
+        else:
+            gate_html = ""
+
+        return rows_html, stat_html, gate_html
+
+    j_rows, j_stat, j_gate = jackal_block()
+
+    # ── 포트폴리오
     # ── 포트폴리오
     if port_rows:
         port_html=""
@@ -364,6 +473,23 @@ body{{
 /* ── 유틸 */
 .pos{{color:var(--gr);}} .neg{{color:var(--rd);}} .neu{{color:var(--mu);}}
 .footer{{text-align:center;font-size:11px;color:var(--mu);padding:20px 16px 8px;line-height:1.75;opacity:.6;}}
+/* ── Jackal Hunter */
+.jrow{{display:flex;align-items:center;padding:8px 0;border-bottom:.5px solid var(--bd);gap:8px;font-size:13px;}}
+.jrow:last-child{{border-bottom:none;}}
+.jtk{{font-weight:700;min-width:52px;font-size:12px;flex-shrink:0;}}
+.jname{{font-weight:600;font-size:13px;}}
+.jmeta{{font-size:10px;color:var(--mu);margin-top:2px;}}
+.jscore{{font-weight:800;font-size:15px;min-width:36px;text-align:right;flex-shrink:0;}}
+.jbadge{{font-size:10px;padding:3px 7px;border-radius:10px;font-weight:600;white-space:nowrap;flex-shrink:0;}}
+.jb-entry{{background:rgba(20,232,122,.15);color:#0DAE6B;}}
+.jb-pass{{background:rgba(100,100,110,.1);color:var(--mu);}}
+.jstat{{display:flex;gap:12px;padding:10px 0 4px;border-top:.5px solid var(--bd);margin-top:4px;}}
+.js{{font-size:11px;color:var(--mu);}}
+.js b{{color:var(--tx);font-weight:700;}}
+.jgate{{display:flex;align-items:center;gap:6px;padding:7px 12px;font-size:11px;border-radius:10px;margin-bottom:8px;}}
+.jgate-ok{{background:rgba(20,232,122,.08);color:#0DAE6B;}}
+.jgate-warn{{background:rgba(255,181,71,.1);color:#D4872A;}}
+.jgate-danger{{background:rgba(255,82,82,.1);color:#E03030;}}
 </style>
 </head>
 <body>
@@ -483,6 +609,14 @@ body{{
   <div class="card" style="padding:{'8px 16px' if port_rows else '0'};">{port_html}</div>
 </div>
 
+
+<!-- ⑬ Jackal Hunter 타점 -->
+{"" if not hunt_log else f'''<div class="sec">
+  <div class="sh"><span class="st">🦊 Jackal 스윙 타점</span><span class="sn">최근 알림 · 100→5단계</span></div>
+  {j_gate}<div class="card" style="padding:8px 16px;">{j_rows}</div>{j_stat}
+</div>'''}
+
+<!-- ⑭ 비용 -->
 <!-- ⑬ 비용 -->
 <div class="sec">
   <div class="sh"><span class="st">이번 달 비용</span></div>
