@@ -1166,24 +1166,46 @@ def _stage4_full_analysis(top10: list, aria: dict) -> list:
 # ══════════════════════════════════════════════════════════════════
 
 def _is_on_cooldown(ticker: str) -> bool:
+    """
+    쿨다운 체크.
+    포맷 하위 호환:
+      구포맷: {ticker: "iso_timestamp_str"}
+      신포맷: {ticker: {"ts": "iso_str", "hours": N}}
+    """
     if not HUNT_COOL_FILE.exists():
         return False
     try:
-        cd = json.loads(HUNT_COOL_FILE.read_text(encoding="utf-8"))
-        last = cd.get(ticker)
-        return bool(last) and \
-               (datetime.now() - datetime.fromisoformat(last)).total_seconds() / 3600 < HUNT_COOLDOWN_H
+        cd  = json.loads(HUNT_COOL_FILE.read_text(encoding="utf-8"))
+        val = cd.get(ticker)
+        if not val:
+            return False
+        if isinstance(val, dict):          # 신포맷
+            ts    = val["ts"]
+            hours = float(val.get("hours", HUNT_COOLDOWN_H))
+        else:                               # 구포맷 (문자열)
+            ts    = val
+            hours = float(HUNT_COOLDOWN_H)
+        elapsed = (datetime.now() - datetime.fromisoformat(ts)).total_seconds() / 3600
+        return elapsed < hours
     except Exception:
         return False
 
-def _set_cooldown(ticker: str):
+
+def _set_cooldown(ticker: str, hours: float = HUNT_COOLDOWN_H):
+    """
+    쿨다운 설정.
+    hours 파라미터로 종류별 냉각 시간 조절:
+      alerted (알림 발송)  : HUNT_COOLDOWN_H (6h, 기본값)
+      분석 완료, 미발송    : HUNT_COOLDOWN_H / 2 (3h)
+      API 실패             : 호출 안 함 → 즉시 재시도 허용
+    """
     cd: dict = {}
     if HUNT_COOL_FILE.exists():
         try:
             cd = json.loads(HUNT_COOL_FILE.read_text(encoding="utf-8"))
         except Exception:
             pass
-    cd[ticker] = datetime.now().isoformat()
+    cd[ticker] = {"ts": datetime.now().isoformat(), "hours": hours}
     HUNT_COOL_FILE.write_text(json.dumps(cd, ensure_ascii=False), encoding="utf-8")
 
 def _send_telegram(text: str) -> bool:
@@ -1259,14 +1281,63 @@ def _build_summary(top5: list, aria: dict) -> str:
     return "\n".join(lines)
 
 def _save_log(entry: dict):
+    """
+    hunt_log.json 저장.
+    중복 방지: 같은 ticker + 같은 KST 날짜 → 최신으로 교체.
+    alerted=True 보존: 기존 항목이 alerted=True면 새 항목에도 유지
+    (한번 알림 보낸 기록은 덮어쓰지 않음).
+    """
     logs: list = []
     if HUNT_LOG_FILE.exists():
         try:
             logs = json.loads(HUNT_LOG_FILE.read_text(encoding="utf-8"))
         except Exception:
             pass
-    logs.append(entry)
-    HUNT_LOG_FILE.write_text(json.dumps(logs[-500:], ensure_ascii=False, indent=2), encoding="utf-8")
+
+    ticker = entry.get("ticker", "")
+    try:
+        entry_date = datetime.fromisoformat(
+            entry["timestamp"]).astimezone(KST).strftime("%Y-%m-%d")
+    except Exception:
+        entry_date = entry.get("timestamp", "")[:10]
+
+    new_logs  = []
+    replaced  = False
+    for existing in logs:
+        try:
+            ex_date = datetime.fromisoformat(
+                existing.get("timestamp", "")).astimezone(KST).strftime("%Y-%m-%d")
+        except Exception:
+            ex_date = existing.get("timestamp", "")[:10]
+
+        if existing.get("ticker") == ticker and ex_date == entry_date:
+            if replaced:
+                continue  # 이미 교체됨 — 추가 중복은 버림
+            # alerted=True였으면 새 항목에도 보존
+            if existing.get("alerted") and not entry.get("alerted"):
+                entry["alerted"]  = True
+                entry["is_entry"] = existing.get("is_entry", entry.get("is_entry", False))
+            # outcome이 이미 채워진 항목이면 덮지 않음
+            if existing.get("outcome_checked"):
+                entry.update({
+                    k: existing[k]
+                    for k in ("outcome_checked", "price_1d_later", "outcome_1d_pct",
+                              "outcome_1d_hit", "price_peak", "peak_day",
+                              "peak_pct", "outcome_swing_hit",
+                              "price_5d_later", "outcome_pct", "outcome_correct")
+                    if k in existing
+                })
+            new_logs.append(entry)
+            replaced = True
+        else:
+            new_logs.append(existing)
+
+    if not replaced:
+        new_logs.append(entry)
+
+    HUNT_LOG_FILE.write_text(
+        json.dumps(new_logs[-500:], ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -1343,14 +1414,26 @@ def run_hunt(force: bool = False) -> dict:
 
     alerted = 0
     for item in top5:
-        final = item["final"]
+        final  = item["final"]
+        ticker = item["ticker"]
+        sigs   = item["analyst"].get("signals_fired", [])
+        # signals_fired=[] + analyst_score==50 → Analyst API 실패 (기본값 반환)
+        api_failed = (not sigs) and (item["analyst"].get("analyst_score", 50) == 50)
 
         if final["is_entry"]:
             ok = _send_telegram(_build_alert(item, aria))
             if ok:
-                _set_cooldown(item["ticker"])
                 alerted += 1
-                log.info(f"  ✅ 알림: {item['ticker']}")
+                log.info(f"  ✅ 알림: {ticker}")
+            # 텔레그램 성공/실패 무관하게 full 쿨다운 (스팸 방지)
+            _set_cooldown(ticker, hours=HUNT_COOLDOWN_H)
+        elif api_failed:
+            # Analyst API 실패 → 쿨다운 없이 다음 실행에서 재시도
+            log.info(f"  ⚠️  {ticker}: Analyst 실패(기본값) — 쿨다운 생략")
+        else:
+            # 분석 성공, 알림 기준 미달 → 절반 쿨다운으로 너무 잦은 재분석 방지
+            _set_cooldown(ticker, hours=HUNT_COOLDOWN_H / 2)
+            log.info(f"  ⏸  {ticker}: 미발송 → {HUNT_COOLDOWN_H / 2:.0f}h 쿨다운")
 
         _save_log({
             "timestamp":         now_kst.isoformat(),
