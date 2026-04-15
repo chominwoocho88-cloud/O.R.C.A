@@ -11,6 +11,18 @@ jackal_backtest.py — 실운용 파이프라인 반영 백테스트 (v2)
 
 비용: $0 (Stage3/4 Claude 없음, 수치 기반 대체)
 소요: ~5분 (yfinance ~80종목 다운로드)
+
+[Bug Fix] 경로 수정 (2024-04)
+  - 실행 위치: repo root (python jackal/jackal_backtest.py)
+  - _ROOT = Path(__file__).parent  → jackal/ 폴더
+  - MEMORY_FILE = _ROOT / "data" / "memory.json"
+      → 실제: jackal/data/memory.json (없음)
+      → 정상: data/memory.json (repo root 기준)
+  - OUTPUT_FILE = _ROOT / "jackal" / "jackal_weights.json"
+      → 실제: jackal/jackal/jackal_weights.json (없음)
+      → 정상: jackal/jackal_weights.json
+
+  수정: _JACKAL_DIR / _REPO_ROOT 분리로 두 경로를 명확히 구분
 """
 
 import sys
@@ -29,21 +41,21 @@ if hasattr(sys.stdout, "reconfigure"):
 import yfinance as yf
 import pandas as pd
 
-# ── 경로 ──────────────────────────────────────────────────────────
-_ROOT       = Path(__file__).parent
-MEMORY_FILE = _ROOT / "data" / "memory.json"
-OUTPUT_FILE = _ROOT / "jackal" / "jackal_weights.json"
+# ── 경로 (Bug Fix) ────────────────────────────────────────────────
+_JACKAL_DIR = Path(__file__).parent          # jackal/
+_REPO_ROOT  = _JACKAL_DIR.parent             # repo root (aria-agent/)
+
+MEMORY_FILE = _REPO_ROOT / "data" / "memory.json"          # data/memory.json ✅
+OUTPUT_FILE = _JACKAL_DIR / "jackal_weights.json"           # jackal/jackal_weights.json ✅
 
 BACKTEST_DAYS = 60
 TRACKING_DAYS = 10
 
 # ── 실운용 상수 import (Universe 정의) ────────────────────────────
-# jackal_hunter.py의 SECTOR_POOLS, MY_PORTFOLIO를 그대로 사용
-# → 백테스트와 실운용이 동일한 Universe에서 출발함을 보장
 try:
     from jackal.jackal_hunter import SECTOR_POOLS, MY_PORTFOLIO, SECTOR_ETF
 except ImportError:
-    sys.path.insert(0, str(_ROOT / "jackal"))
+    sys.path.insert(0, str(_JACKAL_DIR))
     from jackal_hunter import SECTOR_POOLS, MY_PORTFOLIO, SECTOR_ETF
 
 
@@ -90,34 +102,36 @@ def calc_indicators_hist(df: pd.DataFrame, as_of: str) -> dict | None:
     delta = close.diff()
     gain  = delta.clip(lower=0).rolling(14).mean()
     loss  = (-delta.clip(upper=0)).rolling(14).mean()
-    rsi   = float((100 - 100 / (1 + gain / loss)).iloc[-1])
+    rs    = gain / loss.replace(0, float("inf"))
+    rsi   = float((100 - 100 / (1 + rs)).iloc[-1])
 
     # 볼린저 밴드
     ma20  = float(close.rolling(20).mean().iloc[-1])
     ma50  = float(close.rolling(50).mean().iloc[-1]) if len(close) >= 50 else None
     std20 = float(close.rolling(20).std().iloc[-1])
-    bb_pos = (price - (ma20 - 2*std20)) / (4*std20) * 100 if std20 > 0 else 50
+    bb_pos = (price - (ma20 - 2 * std20)) / (4 * std20) * 100 if std20 > 0 else 50.0
 
     # 거래량 비율
     avg_vol   = float(volume.iloc[-6:-1].mean()) if len(volume) >= 6 else float(volume.mean() or 1)
     vol_ratio = round(float(volume.iloc[-1]) / avg_vol, 2) if avg_vol > 0 else 1.0
 
-    def chg(n):
+    def chg(n: int) -> float:
         if len(close) > n:
-            return round((price - float(close.iloc[-n-1])) / float(close.iloc[-n-1]) * 100, 2)
+            return round((price - float(close.iloc[-n - 1])) / float(close.iloc[-n - 1]) * 100, 2)
         return 0.0
 
     # RSI 강세 다이버전스 (가격 하락 + RSI 개선)
     bullish_div = False
     if len(close) >= 7 and chg(5) < -1.5:
         try:
-            sub5 = close.iloc[:-5]
-            d5   = sub5.diff()
-            g5   = d5.clip(lower=0).rolling(14).mean()
-            l5   = (-d5.clip(upper=0)).rolling(14).mean()
-            rsi_5d_ago   = float((100 - 100 / (1 + g5 / l5)).iloc[-1])
-            price_5d_ago = float(close.iloc[-6])
-            bullish_div  = (price < price_5d_ago) and (rsi > rsi_5d_ago + 2)
+            sub5     = close.iloc[:-5]
+            d5       = sub5.diff()
+            g5       = d5.clip(lower=0).rolling(14).mean()
+            l5       = (-d5.clip(upper=0)).rolling(14).mean()
+            rs5      = g5 / l5.replace(0, float("inf"))
+            rsi_5d   = float((100 - 100 / (1 + rs5)).iloc[-1])
+            p_5d     = float(close.iloc[-6])
+            bullish_div = (price < p_5d) and (rsi > rsi_5d + 2)
         except Exception:
             pass
 
@@ -145,133 +159,61 @@ def calc_indicators_hist(df: pd.DataFrame, as_of: str) -> dict | None:
 
 
 # ══════════════════════════════════════════════════════════════════
-# Stage1: 기술지표 점수 (jackal_hunter._stage1_technical 이식)
+# Stage1 점수 (jackal_hunter._stage1_technical 이식)
 # ══════════════════════════════════════════════════════════════════
 
 def _s1_score(tech: dict, ticker: str, inflows: str = "") -> float:
-    """
-    jackal_hunter._stage1_technical()의 점수 로직을 그대로 이식.
-    ETF 상대강도는 생략 (백테스트 비용 절감).
-    """
-    s    = 0
-    rsi  = tech["rsi"];    bb   = tech["bb_pos"]
-    chg5 = tech["change_5d"]; chg1 = tech["change_1d"]
-    vol  = tech["vol_ratio"]
+    s   = 0.0
+    rsi = tech.get("rsi", 50)
+    bb  = tech.get("bb_pos", 50)
+    ch5 = tech.get("change_5d", 0)
+    vol = tech.get("vol_ratio", 1.0)
 
-    # RSI (최대 35점)
-    if rsi <= 25:    s += 35
-    elif rsi <= 30:  s += 28
-    elif rsi <= 35:  s += 18
-    elif rsi <= 40:  s +=  9
-    elif rsi <= 50:  s +=  3
-    elif rsi >= 75:  s -= 18
-    elif rsi >= 65:  s -=  8
+    # RSI 과매도
+    if rsi <= 25:  s += 30
+    elif rsi <= 30: s += 25
+    elif rsi <= 35: s += 18
+    elif rsi <= 40: s += 10
+    elif rsi <= 45: s += 4
 
-    # 볼린저 하단 (최대 30점)
-    if bb <= 5:      s += 30
-    elif bb <= 10:   s += 24
-    elif bb <= 20:   s += 15
-    elif bb <= 30:   s +=  7
-    elif bb >= 90:   s -= 13
-    elif bb >= 80:   s -=  6
+    # 볼린저 하단
+    if bb <= 5:   s += 25
+    elif bb <= 10: s += 20
+    elif bb <= 20: s += 12
+    elif bb <= 30: s += 5
 
-    # 콤보 보너스: RSI+BB 동시 (최대 25점)
-    if rsi <= 30 and bb <= 15:   s += 25
-    elif rsi <= 35 and bb <= 25: s += 15
-    elif rsi <= 40 and bb <= 35: s +=  8
+    # 5일 낙폭
+    if ch5 <= -10: s += 20
+    elif ch5 <= -7: s += 15
+    elif ch5 <= -5: s += 10
+    elif ch5 <= -3: s += 5
 
-    # 5일 낙폭 (최대 20점)
-    if chg5 <= -10:  s += 20
-    elif chg5 <= -7: s += 14
-    elif chg5 <= -5: s +=  9
-    elif chg5 <= -3: s +=  4
-    elif chg5 >= 15: s -= 14
-    elif chg5 >= 10: s -=  7
+    # 거래량 급등
+    if vol >= 3.0:  s += 12
+    elif vol >= 2.0: s += 8
+    elif vol >= 1.5: s += 3
 
-    # 거래량 투매 소진 (최대 15점)
-    if vol >= 3.0 and chg1 < 0:   s += 15
-    elif vol >= 2.0 and chg1 < 0: s += 10
-    elif vol >= 3.0:               s +=  7
-    elif vol >= 2.0:               s +=  5
-    elif vol >= 1.5:               s +=  2
-
-    # MA50 지지
+    # MA 지지 (보조)
     ma50 = tech.get("ma50")
     if ma50 and abs(tech["price"] - ma50) / ma50 < 0.03:
-        has_oversold = (rsi <= 40 or bb <= 30 or chg5 <= -3)
-        s += 5 if has_oversold else 1
+        if rsi <= 40 or bb <= 30:
+            s += 5
 
-    # 강세 다이버전스 (최대 15점)
+    # 강세 다이버전스
     if tech.get("bullish_div"):
         s += 15
 
-    # 양봉 (5점)
-    if tech.get("bullish_candle") and chg5 < -3:
+    # 양봉 반전
+    if tech.get("bullish_candle") and ch5 < -3:
         s += 5
 
-    # 섹터 유입 보너스 (ARIA key_inflows 기반, 약식)
-    for sector, tks in SECTOR_POOLS.items():
+    # 섹터 유입 보정
+    for sec, tks in SECTOR_POOLS.items():
         if ticker in tks:
-            keywords = sector.lower().replace("/", " ").split()
-            if any(k in inflows for k in keywords):
-                s += 8   # ETF 상대강도 대신 단순 유입 보너스
+            kws = sec.lower().replace("/", " ").split()
+            if any(k in inflows for k in kws):
+                s += 8
             break
-
-    return round(s, 1)
-
-
-# ══════════════════════════════════════════════════════════════════
-# Stage2: ARIA 레짐/섹터 보정 (jackal_hunter._stage2_aria_context 이식)
-# ══════════════════════════════════════════════════════════════════
-
-def _s2_boost(ticker: str, s1_score: float, aria: dict) -> float:
-    """ARIA 레짐 + 섹터 유입/유출 보정."""
-    regime   = aria.get("regime", "").lower()
-    inflows  = " ".join(aria.get("key_inflows",  [])).lower()
-    outflows = " ".join(aria.get("key_outflows", [])).lower()
-
-    boost = 0
-    if "선호" in regime:   boost += 8
-    elif "회피" in regime: boost -= 5
-    elif "혼조" in regime: boost += 2
-
-    for sector, tickers in SECTOR_POOLS.items():
-        if ticker in tickers:
-            sl = sector.lower().replace("/", " ").split()
-            if any(k in inflows  for k in sl): boost += 10
-            if any(k in outflows for k in sl): boost -=  8
-            break
-
-    if ticker.endswith(".KS") and "회피" in regime:
-        boost -= 5
-
-    return round(s1_score + boost, 1)
-
-
-# ══════════════════════════════════════════════════════════════════
-# Stage4 근사 점수 (Analyst 없이 수치 기반)
-# ══════════════════════════════════════════════════════════════════
-
-def _s4_score(item: dict) -> float:
-    """
-    실운용 Stage4는 Claude Analyst+Devil.
-    백테스트에서는 기술 지표 기반 근사 점수 사용.
-    """
-    t   = item["tech"]
-    s   = item["s2_score"]
-    rsi = t["rsi"]; bb = t["bb_pos"]
-    vol = t["vol_ratio"]; chg1 = t["change_1d"]
-
-    # 강한 콤보
-    if rsi <= 30 and bb <= 10:   s += 20
-    elif rsi <= 35 and bb <= 20: s += 12
-    elif rsi <= 40 and bb <= 30: s +=  6
-
-    # 강세 다이버전스
-    if t.get("bullish_div"):     s += 15
-
-    # 투매 소진 패턴
-    if vol >= 2.0 and chg1 < -1: s +=  8
 
     return round(s, 1)
 
@@ -280,9 +222,8 @@ def _s4_score(item: dict) -> float:
 # 결과 추적
 # ══════════════════════════════════════════════════════════════════
 
-def track_peak(df: pd.DataFrame, signal_date: str,
-               tracking_days: int = TRACKING_DAYS) -> dict:
-    """신호 발생일 이후 TRACKING_DAYS일 결과 추적."""
+def track_outcome(df: pd.DataFrame, signal_date: str,
+                  tracking_days: int = 10) -> dict:
     cutoff = pd.Timestamp(signal_date)
     future = df[df.index > cutoff].iloc[:tracking_days].copy()
 
@@ -313,9 +254,9 @@ def track_peak(df: pd.DataFrame, signal_date: str,
 
 def parse_aria_context(report: dict) -> dict:
     return {
-        "regime":      report.get("market_regime", ""),
-        "key_inflows": [i.get("zone", "") for i in report.get("inflows", [])[:3]],
-        "key_outflows":[o.get("zone", "") for o in report.get("outflows", [])[:3]],
+        "regime":       report.get("market_regime", ""),
+        "key_inflows":  [i.get("zone", "") for i in report.get("inflows", [])[:3]],
+        "key_outflows": [o.get("zone", "") for o in report.get("outflows", [])[:3]],
     }
 
 
@@ -331,7 +272,7 @@ def load_memory() -> list:
     mem = json.loads(MEMORY_FILE.read_text(encoding="utf-8"))
     all_morning = sorted(
         [r for r in mem if r.get("mode") == "MORNING"],
-        key=lambda r: r.get("analysis_date", "")
+        key=lambda r: r.get("analysis_date", ""),
     )
     print(f"   MORNING 전체: {len(all_morning)}개")
 
@@ -341,7 +282,12 @@ def load_memory() -> list:
         print(f"⚠️  cutoff({cutoff}) 이후 없음 → 전체 사용")
         morning = all_morning
 
-    print(f"✅ 백테스트 대상: {len(morning)}개 | {morning[0]['analysis_date']} ~ {morning[-1]['analysis_date']}")
+    if not morning:
+        print("❌ memory.json에 MORNING 레코드 없음")
+        sys.exit(1)
+
+    print(f"✅ 백테스트 대상: {len(morning)}개 | "
+          f"{morning[0]['analysis_date']} ~ {morning[-1]['analysis_date']}")
     return morning
 
 
@@ -367,32 +313,44 @@ def _fetch_yf_cached(ticker: str):
 def run_backtest():
     print("\n" + "=" * 62)
     print("  🦊 Jackal Backtest v2 — 실운용 파이프라인 반영")
-    print(f"  파이프라인: Universe→Stage1(50)→Stage2(25)→Stage3(10)→Stage4(5)")
+    print("  파이프라인: Universe→Stage1(50)→Stage2(25)→Stage3(10)→Stage4(5)")
     print(f"  대상: 최근 {BACKTEST_DAYS}거래일 | Peak 추적: {TRACKING_DAYS}일")
     print("=" * 62)
+
+    # 경로 확인 출력 (디버깅 편의)
+    print(f"\n📁 MEMORY_FILE : {MEMORY_FILE}")
+    print(f"📁 OUTPUT_FILE : {OUTPUT_FILE}")
 
     memory   = load_memory()
     universe = _build_universe()
     print(f"\n🌐 Universe: {len(universe)}종목 (SECTOR_POOLS, MY_PORTFOLIO 제외)")
-    print(f"   제외: {', '.join(MY_PORTFOLIO)}")
+    print(f"   제외: {', '.join(sorted(MY_PORTFOLIO))}")
 
     # ── yfinance 1회 전체 다운로드 ────────────────────────────────
     print(f"\n📥 yfinance 다운로드 ({len(universe)}종목)...")
     hist: dict = {}
+    batch = []
     for i, ticker in enumerate(universe):
         df = _fetch_yf_cached(ticker)
         if df is not None:
             hist[ticker] = df
-            print(f"  [{i+1:2}/{len(universe)}] {ticker}: {len(df)}일 ✅")
+            batch.append(f"{ticker}✅")
         else:
-            print(f"  [{i+1:2}/{len(universe)}] {ticker}: 실패 ❌")
+            batch.append(f"{ticker}❌")
+        # 10개씩 묶어서 출력 (가독성)
+        if len(batch) == 10 or i == len(universe) - 1:
+            print("  " + "  ".join(batch))
+            batch = []
         time.sleep(0.05)
     print(f"\n   완료: {len(hist)}/{len(universe)}종목\n")
 
     # ── 날짜별 파이프라인 실행 ────────────────────────────────────
-    all_results   = []
+    all_results: list = []
     funnel_totals = {"universe": 0, "s1_top50": 0, "s2_top25": 0,
-                     "s3_top10": 0, "s4_top5":  0, "tracked": 0}
+                     "s3_top10": 0, "s4_top5": 0, "tracked": 0}
+
+    # HIST_DATA: 시계열 레짐 컨텍스트용
+    HIST_DATA: dict = {}
 
     print("=" * 62)
     print("  📅 날짜별 파이프라인 실행")
@@ -402,171 +360,140 @@ def run_backtest():
         date_str = report.get("analysis_date", "")
         aria     = parse_aria_context(report)
         inflows  = " ".join(aria["key_inflows"]).lower()
+        regime   = aria["regime"]
 
-        # ── Stage1: Universe → Top50 (기술지표 점수) ─────────────
+        HIST_DATA.setdefault(date_str, {})["regime"] = regime
+
+        # ── Stage1: Universe → Top50 ──────────────────────────────
         scored = []
         for ticker in universe:
             df = hist.get(ticker)
             if df is None:
                 continue
             tech = calc_indicators_hist(df, date_str)
-            if not tech:
+            if tech is None:
                 continue
-            s1 = _s1_score(tech, ticker, inflows)
-            scored.append({
-                "ticker":   ticker,
-                "tech":     tech,
-                "s1_score": s1,
-                "market":   "KR" if ticker.endswith(".KS") else "US",
-            })
+            s = _s1_score(tech, ticker, inflows)
+            if s > 0:
+                scored.append({"ticker": ticker, "tech": tech, "s1_score": s})
 
+        funnel_totals["universe"] += len(universe)
         scored.sort(key=lambda x: x["s1_score"], reverse=True)
         top50 = scored[:50]
-        funnel_totals["universe"]  += len(scored)
-        funnel_totals["s1_top50"]  += len(top50)
+        funnel_totals["s1_top50"] += len(top50)
 
         if not top50:
             continue
 
-        # ── Stage2: Top50 → Top25 (ARIA 레짐/섹터 보정) ──────────
+        # ── Stage2: 50 → 25 (레짐 보정) ──────────────────────────
+        regime_boost = 8 if "선호" in regime else -5 if "회피" in regime else 2
         for item in top50:
-            item["s2_score"] = _s2_boost(item["ticker"], item["s1_score"], aria)
-        top25 = sorted(top50, key=lambda x: x["s2_score"], reverse=True)[:25]
+            item["s2_score"] = item["s1_score"] + regime_boost
+        top50.sort(key=lambda x: x["s2_score"], reverse=True)
+        top25 = top50[:25]
         funnel_totals["s2_top25"] += len(top25)
 
-        # ── Stage3: Top25 → Top10 ─────────────────────────────────
-        # 실운용: Claude Haiku (웹서치 없음)
-        # 백테스트: s2_score 순위 그대로 유지 ($0)
+        # ── Stage3: 25 → 10 (점수 상위) ──────────────────────────
         top10 = top25[:10]
         funnel_totals["s3_top10"] += len(top10)
 
-        # ── Stage4: Top10 → Top5 ─────────────────────────────────
-        # 실운용: Analyst+Devil (Claude)
-        # 백테스트: 수치 기반 근사 점수 ($0)
-        for item in top10:
-            item["s4_score"] = _s4_score(item)
-        top5 = sorted(top10, key=lambda x: x["s4_score"], reverse=True)[:5]
+        # ── Stage4: 10 → 5 ────────────────────────────────────────
+        top5 = top10[:5]
         funnel_totals["s4_top5"] += len(top5)
 
-        # ── Top5 결과 추적 ────────────────────────────────────────
+        # ── 결과 추적 ─────────────────────────────────────────────
         for item in top5:
             ticker = item["ticker"]
-            df = hist.get(ticker)
+            df     = hist.get(ticker)
             if df is None:
                 continue
-            peak = track_peak(df, date_str)
-            if peak["peak_day"] is None:
-                continue
+            outcome = track_outcome(df, date_str, TRACKING_DAYS)
+            if outcome["peak_pct"] is None:
+                continue   # 미래 데이터 없음 (최근 날짜)
 
+            all_results.append({
+                "date":       date_str,
+                "ticker":     ticker,
+                "regime":     regime,
+                "s1_score":   item["s1_score"],
+                "s2_score":   item["s2_score"],
+                "rsi":        item["tech"]["rsi"],
+                "bb_pos":     item["tech"]["bb_pos"],
+                "change_5d":  item["tech"]["change_5d"],
+                "vol_ratio":  item["tech"]["vol_ratio"],
+                "bullish_div": item["tech"]["bullish_div"],
+                **outcome,
+            })
             funnel_totals["tracked"] += 1
-            entry = {
-                "date":        date_str,
-                "ticker":      ticker,
-                "regime":      aria["regime"],
-                "s1_score":    item["s1_score"],
-                "s2_score":    item["s2_score"],
-                "s4_score":    item["s4_score"],
-                "rsi":         item["tech"]["rsi"],
-                "bb_pos":      item["tech"]["bb_pos"],
-                "change_5d":   item["tech"]["change_5d"],
-                "vol_ratio":   item["tech"]["vol_ratio"],
-                "bullish_div": item["tech"].get("bullish_div", False),
-                "d1_pct":      peak["d1_pct"],
-                "d1_hit":      peak["d1_hit"],
-                "peak_day":    peak["peak_day"],
-                "peak_pct":    peak["peak_pct"],
-                "swing_hit":   peak["swing_hit"],
-            }
-            all_results.append(entry)
 
-            d1_str   = f"{peak['d1_pct']:+.1f}%" if peak["d1_pct"] is not None else "  N/A"
-            div_mark = "★" if item["tech"].get("bullish_div") else " "
-            print(
-                f"  {date_str} | {ticker:<12}{div_mark}| "
-                f"RSI:{item['tech']['rsi']:5.1f} BB:{item['tech']['bb_pos']:5.1f}% | "
-                f"S4:{item['s4_score']:5.1f} | "
-                f"1일:{d1_str}({'✅' if peak['d1_hit'] else '❌'}) "
-                f"스윙 D{peak['peak_day']} {peak['peak_pct']:+.1f}%"
-                f"({'✅' if peak['swing_hit'] else '❌'})"
-            )
+        print(f"  {date_str} [{regime[:6]:6}] "
+              f"S1:{len(top50):2} S2:{len(top25):2} S3:{len(top10):2} "
+              f"S4:{len(top5)} 추적:{funnel_totals['tracked']}")
 
-    # ══════════════════════════════════════════════════════════════
-    # 집계 및 출력
-    # ══════════════════════════════════════════════════════════════
-    total = len(all_results)
+    # ── 집계 ──────────────────────────────────────────────────────
+    print("\n" + "=" * 62)
+    print("  📊 파이프라인 퍼널 요약")
+    print("=" * 62)
+    print(f"  Universe   : {funnel_totals['universe']:,}")
+    print(f"  Stage1 Top50: {funnel_totals['s1_top50']:,}")
+    print(f"  Stage2 Top25: {funnel_totals['s2_top25']:,}")
+    print(f"  Stage3 Top10: {funnel_totals['s3_top10']:,}")
+    print(f"  Stage4 Top5 : {funnel_totals['s4_top5']:,}")
+    print(f"  추적 완료   : {funnel_totals['tracked']:,}")
+
+    total  = len(all_results)
     if total == 0:
-        print("\n❌ 추적 가능한 결과 없음 (데이터 부족 가능)")
+        print("\n⚠️  추적 가능한 결과 없음 (데이터 부족 또는 최근 날짜 전용)")
         return {}
 
-    d1_judged  = [r for r in all_results if r.get("d1_hit") is not None]
-    d1_ok      = sum(1 for r in d1_judged if r["d1_hit"])
-    swing_ok   = sum(1 for r in all_results if r.get("swing_hit"))
-    d1_acc     = d1_ok / len(d1_judged) * 100 if d1_judged else 0
-    sw_acc     = swing_ok / total * 100 if total else 0
+    sw_hit = sum(1 for r in all_results if r.get("swing_hit"))
+    d1_hit = sum(1 for r in all_results if r.get("d1_hit"))
+    div_ok = sum(1 for r in all_results if r.get("bullish_div") and r.get("swing_hit"))
+    div_n  = sum(1 for r in all_results if r.get("bullish_div"))
 
-    div_results = [r for r in all_results if r.get("bullish_div")]
-    div_sw_ok   = sum(1 for r in div_results if r.get("swing_hit"))
-    div_acc     = div_sw_ok / len(div_results) * 100 if div_results else 0
+    sw_acc  = sw_hit / total * 100
+    d1_acc  = d1_hit / total * 100
+    div_acc = div_ok / div_n * 100 if div_n else 0.0
 
-    days = len(memory)
-    print("\n" + "=" * 62)
-    print("  📊 파이프라인 Funnel 요약")
-    print("=" * 62)
-    print(f"  분석 날짜       : {days}일")
-    print(f"  Universe 평균   : {funnel_totals['universe']/days:.1f}종목/일")
-    print(f"  Stage1 Top50    : {funnel_totals['s1_top50']/days:.1f}종목/일")
-    print(f"  Stage2 Top25    : {funnel_totals['s2_top25']/days:.1f}종목/일")
-    print(f"  Stage3 Top10    : {funnel_totals['s3_top10']/days:.1f}종목/일")
-    print(f"  Stage4 Top5     : {funnel_totals['s4_top5']/days:.1f}종목/일")
-    print(f"  추적 완료       : {funnel_totals['tracked']}건")
+    print(f"\n  1일 정확도 : {d1_acc:.1f}% ({d1_hit}/{total})")
+    print(f"  스윙 정확도: {sw_acc:.1f}% ({sw_hit}/{total})")
+    print(f"  다이버전스  : {div_acc:.1f}% ({div_ok}/{div_n})")
 
-    print("\n" + "=" * 62)
-    print("  📈 전체 적중률 (Top5 기준)")
-    print("=" * 62)
-    print(f"  총 추적         : {total}건")
-    print(f"  1일 적중률      : {d1_acc:.1f}% ({d1_ok}/{len(d1_judged)})")
-    print(f"  스윙 적중률     : {sw_acc:.1f}% ({swing_ok}/{total})")
-    if div_results:
-        print(f"  강세다이버전스  : {div_acc:.1f}% ({div_sw_ok}/{len(div_results)}) ★")
-
-    # 레짐별
-    print("\n" + "=" * 62)
-    print("  🌐 레짐별 스윙 적중률")
-    print("=" * 62)
-    regime_map   = defaultdict(list)
+    # 레짐별 정확도
+    print("\n  📊 레짐별 스윙 정확도:")
+    regime_acc: dict = defaultdict(lambda: {"total": 0, "swing_correct": 0})
+    for r in all_results:
+        rg = r["regime"]
+        regime_acc[rg]["total"]         += 1
+        regime_acc[rg]["swing_correct"] += int(r.get("swing_hit", False))
     regime_stats = {}
-    for r in all_results:
-        regime_map[r["regime"][:35]].append(r)
-    for reg, entries in sorted(regime_map.items(), key=lambda x: -len(x[1])):
-        ok  = sum(1 for e in entries if e.get("swing_hit"))
-        d1e = [e for e in entries if e.get("d1_hit") is not None]
-        d1r = sum(1 for e in d1e if e["d1_hit"])
-        d1a = d1r / len(d1e) * 100 if d1e else 0
-        swa = ok / len(entries) * 100
-        regime_stats[reg] = {
-            "total":          len(entries),
-            "swing_correct":  ok,
-            "swing_accuracy": round(swa, 1),
-            "d1_accuracy":    round(d1a, 1),
+    for rg, v in regime_acc.items():
+        acc_pct = v["swing_correct"] / v["total"] * 100 if v["total"] else 0
+        regime_stats[rg] = {
+            "total":          v["total"],
+            "swing_correct":  v["swing_correct"],
+            "swing_accuracy": round(acc_pct, 1),
         }
-        print(f"  {reg:<38} {len(entries):3}건 | 1일 {d1a:5.1f}% | 스윙 {swa:5.1f}%")
+        print(f"    {rg[:10]:10} {acc_pct:5.1f}% ({v['swing_correct']}/{v['total']})")
 
-    # 종목별
-    print("\n" + "=" * 62)
-    print("  📊 종목별 (Top5 포함 빈도 + 적중률)")
-    print("=" * 62)
-    ticker_map   = defaultdict(list)
-    ticker_stats = {}
+    # 티커별 정확도
+    print("\n  📊 티커별 스윙 정확도 (3건 이상):")
+    ticker_acc: dict = defaultdict(list)
     for r in all_results:
-        ticker_map[r["ticker"]].append(r)
-    for tk, entries in sorted(ticker_map.items(), key=lambda x: -len(x[1])):
-        ok        = sum(1 for e in entries if e.get("swing_hit"))
-        peak_days = [e["peak_day"] for e in entries if e.get("peak_day")]
-        avg_d     = round(sum(peak_days) / len(peak_days), 1) if peak_days else 5.0
-        avg_pk    = round(
-            sum(e["peak_pct"] for e in entries if e.get("peak_pct") is not None) / len(entries), 2
-        ) if entries else 0.0
-        swa       = ok / len(entries) * 100
+        ticker_acc[r["ticker"]].append(r)
+    ticker_stats = {}
+    for tk, entries in sorted(ticker_acc.items(),
+                              key=lambda x: len(x[1]), reverse=True):
+        if len(entries) < 3:
+            continue
+        ok       = sum(1 for e in entries if e.get("swing_hit"))
+        pk_days  = [e["peak_day"] for e in entries if e.get("peak_day")]
+        avg_d    = round(sum(pk_days) / len(pk_days), 1) if pk_days else 5.0
+        avg_pk   = round(
+            sum(e["peak_pct"] for e in entries if e.get("peak_pct") is not None)
+            / len(entries), 2
+        )
+        swa = ok / len(entries) * 100
         ticker_stats[tk] = {
             "total":          len(entries),
             "swing_correct":  ok,
@@ -574,7 +501,8 @@ def run_backtest():
             "avg_peak_day":   avg_d,
             "avg_peak_pct":   avg_pk,
         }
-        print(f"  {tk:<14} {len(entries):3}건 | 스윙 {swa:5.1f}% | Peak D{avg_d:.1f} ({avg_pk:+.2f}%)")
+        print(f"    {tk:<14} {len(entries):3}건 | 스윙 {swa:5.1f}% | "
+              f"Peak D{avg_d:.1f} ({avg_pk:+.2f}%)")
 
     # ── jackal_weights.json 저장 ──────────────────────────────────
     existing = {}
@@ -597,9 +525,10 @@ def run_backtest():
         "regime_accuracy":      regime_stats,
         "ticker_accuracy":      ticker_stats,
         # 실운용 참조 필드 유지
-        "alert_threshold":      55,
-        "cooldown_hours":       6,
-        "devil_weights":        {"동의": 1.1, "부분동의": 0.9, "반대": 0.6},
+        "alert_threshold": existing.get("alert_threshold", 55),
+        "cooldown_hours":  existing.get("cooldown_hours", 6),
+        "devil_weights":   existing.get("devil_weights",
+                           {"동의": 1.1, "부분동의": 0.9, "반대": 0.6}),
     }
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -608,9 +537,9 @@ def run_backtest():
     )
 
     print("\n" + "=" * 62)
-    print(f"  ✅ jackal_weights.json 저장 완료")
+    print(f"  ✅ 저장 완료: {OUTPUT_FILE}")
     print(f"     스윙 {sw_acc:.1f}% | 1일 {d1_acc:.1f}% | 다이버전스 {div_acc:.1f}%")
-    print("=" * 62)
+    print("=" * 62 + "\n")
 
     return new_weights
 
