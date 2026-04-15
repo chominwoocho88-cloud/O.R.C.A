@@ -78,10 +78,12 @@ def parse_json(text: str) -> dict:
 
 
 
-def call_api(system: str, user: str, use_search=False,
-             model=MODEL_ANALYST, max_tokens=2000, _retry: int = 0) -> str:
-    """Anthropic API 호출 — 500/529 서버 오류 시 1회 자동 재시도"""
-    import anthropic as _ac, time as _t
+def call_api(system: str, user: str, use_search: bool = False,
+             model: str = MODEL_ANALYST, max_tokens: int = 2000,
+             max_retries: int = 2) -> str:
+    """Anthropic API 호출 — 루프 방식 재시도"""
+    import anthropic as _ac
+    import time as _t
     kwargs = dict(
         model=model, max_tokens=max_tokens,
         system=system,
@@ -89,35 +91,32 @@ def call_api(system: str, user: str, use_search=False,
     )
     if use_search:
         kwargs["tools"] = [{"type": "web_search_20250305", "name": "web_search"}]
-
-    full = ""; sc = 0
-    try:
-        with client.messages.stream(**kwargs) as s:
-            for ev in s:
-                t = getattr(ev, "type", "")
-                if t == "content_block_start":
-                    blk = getattr(ev, "content_block", None)
-                    if blk and getattr(blk, "type", "") == "tool_use":
-                        sc += 1
-                        q = getattr(blk, "input", {}).get("query", "")
-                        console.print("    [dim]Search [" + str(sc) + "]: " + q + "[/dim]")
-                elif t == "content_block_delta":
-                    d = getattr(ev, "delta", None)
-                    if d and getattr(d, "type", "") == "text_delta":
-                        full += d.text
-    except _ac.InternalServerError:
-        if _retry < 1:
-            console.print("  [yellow]⚠️ Anthropic 500 — 20초 후 재시도[/yellow]")
-            _t.sleep(20)
-            return call_api(system, user, use_search, model, max_tokens, _retry=1)
-        raise
-    except _ac.RateLimitError:
-        if _retry < 1:
-            console.print("  [yellow]⚠️ Rate limit — 60초 후 재시도[/yellow]")
-            _t.sleep(60)
-            return call_api(system, user, use_search, model, max_tokens, _retry=1)
-        raise
-    return full
+    _DELAYS = {_ac.InternalServerError: 20, _ac.RateLimitError: 60}
+    last_exc = None
+    for attempt in range(max_retries):
+        full = ""; sc = 0
+        try:
+            with client.messages.stream(**kwargs) as s:
+                for ev in s:
+                    t = getattr(ev, "type", "")
+                    if t == "content_block_start":
+                        blk = getattr(ev, "content_block", None)
+                        if blk and getattr(blk, "type", "") == "tool_use":
+                            sc += 1
+                            q = getattr(blk, "input", {}).get("query", "")
+                            console.print("    [dim]Search [" + str(sc) + "]: " + q + "[/dim]")
+                    elif t == "content_block_delta":
+                        d = getattr(ev, "delta", None)
+                        if d and getattr(d, "type", "") == "text_delta":
+                            full += d.text
+            return full
+        except tuple(_DELAYS.keys()) as e:
+            last_exc = e
+            delay = _DELAYS.get(type(e), 30)
+            if attempt < max_retries - 1:
+                console.print(f"  [yellow]⚠️ {type(e).__name__} — {delay}s 후 재시도[/yellow]")
+                _t.sleep(delay)
+    raise last_exc
 
 
 def get_mode_context(mode: str, lessons_prompt: str = "") -> str:
