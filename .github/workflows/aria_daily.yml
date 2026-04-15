@@ -40,7 +40,7 @@ jobs:
         if: >
           github.event.schedule == '30 23 * * 0-4' ||
           (github.event_name == 'workflow_dispatch' &&
-           github.event.inputs.mode == 'MORNING')
+           (github.event.inputs.mode == 'MORNING' || github.event.inputs.mode == ''))
         env:
           PYTHONIOENCODING:    utf-8
           ARIA_MODE:           MORNING
