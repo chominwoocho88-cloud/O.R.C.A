@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "last_updated": "",
-  "total_learning_cycles": 0,
+  "last_updated": "2026-04-16",
+  "total_learning_cycles": 1,
   "sentiment": {
     "시장레짐": 1.0,
     "추세방향": 1.0,
@@ -14,7 +14,7 @@
   "prediction_confidence": {
     "금리": 0.8,
     "환율": 0.5,
-    "주식": 1.0,
+    "주식": 1.05,
     "지정학": 0.7,
     "원자재": 0.9,
     "기업": 1.0,
