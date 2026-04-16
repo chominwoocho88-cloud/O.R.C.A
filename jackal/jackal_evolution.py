@@ -610,34 +610,37 @@ class JackalEvolution:
         }
 
     def _ask_claude(self, context: dict) -> str:
-        prompt = f"""
-너는 Jackal, 주식 타점 분석 AI의 자동 진화 엔진이다.
-아래 7일간 타점 분석 성과를 보고 패턴을 파악해 JSON으로만 반환하라.
+        prompt = f"""You are a Jackal trading signal AI evolution engine.
+Analyze the 7-day performance data below and return patterns as JSON.
 
-### 성과 데이터
+CRITICAL: Return ONLY valid JSON. No markdown, no code blocks, no explanation text.
+All string values must use escaped quotes inside JSON strings.
+Do NOT use unescaped double quotes inside string values.
+
+### Performance Data
 {json.dumps(context, ensure_ascii=False, indent=2)[:4000]}
 
-### 반환 형식
+### Required JSON format (return EXACTLY this structure):
 {{
   "new_skills": [
     {{
-      "name": "snake_case 이름",
-      "description": "어떤 상황에서 쓰는 Skill",
-      "trigger": "발동 조건 (구체적 수치 포함)",
-      "action": "판단 방법"
+      "name": "snake_case_name",
+      "description": "skill description",
+      "trigger": "trigger condition with numbers",
+      "action": "action to take"
     }}
   ],
   "new_instincts": [
     {{
-      "name": "instinct_이름",
-      "warning": "피해야 할 패턴",
-      "reason": "왜 실패했는가",
-      "regime_context": "어떤 레짐에서 발생했는가"
+      "name": "instinct_name",
+      "warning": "pattern to avoid",
+      "reason": "why it fails",
+      "regime_context": "which regime"
     }}
   ],
   "prompt_improvements": {{
-    "analyst": "Analyst 프롬프트 개선사항",
-    "devil": "Devil 프롬프트 개선사항"
+    "analyst": "improvement suggestion",
+    "devil": "improvement suggestion"
   }},
   "weight_adjustments": {{
     "rsi_oversold": 0.0,
@@ -646,16 +649,15 @@ class JackalEvolution:
     "golden_cross": 0.0,
     "sector_inflow": 0.0
   }},
-  "regime_insights": "레짐별 성과에서 발견된 패턴",
-  "devil_insights": "Devil 판정 정확도에서 발견된 패턴"
+  "regime_insights": "pattern found in regime performance",
+  "devil_insights": "pattern found in devil accuracy"
 }}
 
-규칙:
-- 기존 Skill과 중복 제외
-- 데이터 3건 미만이면 빈 배열
-- weight_adjustments는 -0.15 ~ +0.15 범위
-- 정확도가 60% 이상인 신호는 가중치 ↑, 40% 미만은 ↓ 권장
-""".strip()
+Rules:
+- Skip new_skills/instincts if fewer than 3 data samples
+- weight_adjustments range: -0.15 to +0.15
+- Signals with accuracy >= 60% get positive adjustment
+- Signals with accuracy <= 40% get negative adjustment""".strip()
 
         resp = self.client.messages.create(
             model=MODEL_S,
@@ -665,13 +667,54 @@ class JackalEvolution:
         return resp.content[0].text
 
     def _parse_response(self, raw: str) -> dict:
+        """
+        [Bug Fix] 다단계 JSON 파싱 폴백.
+        Claude가 JSON 내부 문자열에 따옴표/개행을 넣어 파싱 실패하는 케이스 대응.
+        """
+        empty = {"new_skills": [], "new_instincts": [],
+                 "prompt_improvements": {}, "weight_adjustments": {}}
+
+        # 1단계: 코드블록 제거 후 바로 파싱
         cleaned = re.sub(r"```(?:json)?|```", "", raw).strip()
         try:
             return json.loads(cleaned)
-        except Exception as e:
-            log.error(f"파싱 실패: {e}")
-            return {"new_skills": [], "new_instincts": [],
-                    "prompt_improvements": {}, "weight_adjustments": {}}
+        except Exception:
+            pass
+
+        # 2단계: 첫 { ~ 마지막 } 추출
+        m = re.search(r"\{[\s\S]*\}", cleaned)
+        if not m:
+            log.error(f"Evolution 파싱 실패: JSON 객체 미발견")
+            return empty
+        s = m.group()
+
+        # 3단계: trailing comma 제거
+        s2 = re.sub(r",\s*([}\]])", r"\1", s)
+        try:
+            return json.loads(s2)
+        except Exception:
+            pass
+
+        # 4단계: 문자열 내 개행 이스케이프
+        s3 = re.sub(r'(?<!\\)\n(?=[^"]*"(?:[^"]*"[^"]*")*[^"]*$)', r'\\n', s2)
+        try:
+            return json.loads(s3)
+        except Exception:
+            pass
+
+        # 5단계: 핵심 필드만 개별 추출 (weight_adjustments는 살릴 수 있음)
+        result = empty.copy()
+        wa_m = re.search(r'"weight_adjustments"\s*:\s*(\{[^}]+\})', s2)
+        if wa_m:
+            try:
+                result["weight_adjustments"] = json.loads(wa_m.group(1))
+                log.warning("Evolution 파싱 부분 성공: weight_adjustments만 복구")
+                return result
+            except Exception:
+                pass
+
+        log.error(f"Evolution 파싱 5단계 모두 실패 — 빈 결과 반환")
+        return empty
 
     # ══════════════════════════════════════════════════════════════
     # Skill / Instinct 저장
