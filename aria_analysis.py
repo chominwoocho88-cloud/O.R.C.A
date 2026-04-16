@@ -454,98 +454,45 @@ Return ONLY valid JSON. No markdown.
 
 
 def _verify_price(thesis_killers: list, market_data: dict) -> list:
-    """
-    [Bug Fix] 백테스트 check_direction() 로직 적용.
-    기존: 임계값 초과만 confirmed → dead zone 속출 → 방향 맞아도 오답 처리
-    수정: 방향 일치 + ±0.3% 이상이면 partial confirmed 인정
-          VIX / 환율 자동 unclear (정확도 22.8% / 0%)
-    """
-    import re as _re
-
-    def _pct(v):
-        try: return float(str(v or "0").replace("%", "").replace("+", ""))
-        except: return 0.0
-
-    nq  = _pct(market_data.get("nasdaq_change"))
-    sp  = _pct(market_data.get("sp500_change"))
-    ks  = _pct(market_data.get("kospi_change"))
-    sk  = _pct(market_data.get("sk_hynix_change"))
-    sam = _pct(market_data.get("samsung_change"))
-    nv  = _pct(market_data.get("nvda_change"))
-
-    def _extract_thr(text):
-        nums = _re.findall(r"[+-]?\d+\.?\d*", str(text))
-        return float(nums[0]) if nums else None
-
-    def check_direction(chg: float, conf: str, inv: str) -> tuple:
-        """
-        방향 + 임계값으로 verdict 결정.
-        임계값 완전 달성 → confirmed(100%)
-        방향 일치 + ±0.3% 이상 → confirmed(partial)
-        반대 방향 + ±0.3% 이상 → invalidated
-        그 외 → unclear
-        """
-        thr = abs(_extract_thr(conf) or 1.0)
-        c_l, i_l = conf.lower(), inv.lower()
-        up   = any(w in c_l for w in ["상승","반등","올라","증가","+"])
-        down = any(w in c_l for w in ["하락","급락","내려","감소","-"])
-
-        if up:
-            if chg >= thr:         return "confirmed",   f"실제 {chg:+.2f}% (예측 +{thr:.1f}% 이상)"
-            if 0.3 <= chg < thr:   return "confirmed",   f"실제 {chg:+.2f}% (방향 일치, 수치 부분달성)"
-            if chg <= -0.3:        return "invalidated", f"실제 {chg:+.2f}% (예측 반대)"
-        if down:
-            if chg <= -thr:        return "confirmed",   f"실제 {chg:+.2f}% (예측 -{thr:.1f}% 이하)"
-            if -thr < chg <= -0.3: return "confirmed",   f"실제 {chg:+.2f}% (방향 일치, 수치 부분달성)"
-            if chg >= 0.3:         return "invalidated", f"실제 {chg:+.2f}% (예측 반대)"
-
-        return "unclear", f"변동 미미 ({chg:+.2f}%)"
-
     results = []
     for tk in thesis_killers:
-        event    = tk.get("event", "")
-        confirms = tk.get("confirms_if", "")
-        invalids = tk.get("invalidates_if", "")
-        ev_l     = event.lower()
-        verdict, evidence, category = "unclear", "", tk.get("category", "기타")
+        event     = tk.get("event", "")
+        confirms  = tk.get("confirms_if", "")
+        invalids  = tk.get("invalidates_if", "")
+        verdict   = "unclear"
+        evidence  = ""
+        category  = tk.get("category", "기타")
 
-        # 환율: 정확도 0% → 자동 제외
-        if any(k in ev_l for k in ["환율","원달러","krw","원화"]):
-            category = "환율"
-            verdict, evidence = "unclear", "환율 예측 제외 (정확도 0%)"
+        # 간단한 가격 기반 검증
+        import re as _re
+        nums_c = _re.findall(r"[-+]?\d+\.?\d*", confirms)
+        nums_i = _re.findall(r"[-+]?\d+\.?\d*", invalids)
 
-        # VIX: 정확도 22.8% → 자동 제외
-        elif any(k in ev_l for k in ["vix","변동성","공포지수"]):
-            category = "VIX"
-            verdict, evidence = "unclear", "VIX 예측 제외 (정확도 22.8%)"
+        # 나스닥/S&P 검증
+        if "나스닥" in event or "nasdaq" in event.lower():
+            chg = market_data.get("nasdaq_change", "")
+            try:
+                chg_f = float(str(chg).replace("%", "").replace("+", ""))
+                if nums_c:
+                    thr = float(nums_c[0])
+                    if "+" in confirms and chg_f >= thr:
+                        verdict = "confirmed"; evidence = f"나스닥 {chg_f:+.1f}%"
+                    elif "-" in invalids and chg_f <= -abs(float(nums_i[0])) if nums_i else False:
+                        verdict = "invalidated"; evidence = f"나스닥 {chg_f:+.1f}%"
+            except Exception:
+                pass
 
-        # 나스닥 / 기술주 / S&P
-        elif any(k in ev_l for k in ["나스닥","nasdaq","기술주"]):
-            category = "주식"
-            verdict, evidence = check_direction(nq, confirms, invalids)
-        elif any(k in ev_l for k in ["s&p","sp500","s&p500"]):
-            category = "주식"
-            verdict, evidence = check_direction(sp, confirms, invalids)
-
-        # 코스피
-        elif any(k in ev_l for k in ["코스피","kospi","한국 주식"]):
-            category = "주식"
-            verdict, evidence = check_direction(ks, confirms, invalids)
-
-        # 개별 종목
-        elif any(k in ev_l for k in ["sk하이닉스","하이닉스","sk hynix"]):
-            category = "주식"
-            verdict, evidence = check_direction(sk, confirms, invalids)
-        elif any(k in ev_l for k in ["삼성전자","삼성"]):
-            category = "주식"
-            verdict, evidence = check_direction(sam, confirms, invalids)
-        elif any(k in ev_l for k in ["엔비디아","nvidia","nvda"]):
-            category = "주식"
-            verdict, evidence = check_direction(nv, confirms, invalids)
-        elif any(k in ev_l for k in ["반도체","semiconductor","hbm"]):
-            category = "주식"
-            chg = max([sk, nv], key=abs)
-            verdict, evidence = check_direction(chg, confirms, invalids)
+        # 코스피 검증
+        elif "코스피" in event or "kospi" in event.lower():
+            chg = market_data.get("kospi_change", "")
+            try:
+                chg_f = float(str(chg).replace("%", "").replace("+", ""))
+                if nums_c and chg_f >= float(nums_c[0]):
+                    verdict = "confirmed"; evidence = f"코스피 {chg_f:+.1f}%"
+                elif nums_i and chg_f <= -abs(float(nums_i[0])):
+                    verdict = "invalidated"; evidence = f"코스피 {chg_f:+.1f}%"
+            except Exception:
+                pass
 
         results.append({
             "event":    event,
@@ -785,37 +732,99 @@ def add_lesson(source: str, category: str, lesson_text: str, severity: str = "me
     _save(LESSONS_FILE, data)
 
 
-def get_active_lessons(max_lessons: int = 8) -> list:
-    data    = load_lessons()
-    lessons = data.get("lessons", [])
-    today   = _today()
-    expiry  = {"high": 30, "medium": 14, "low": 7}
-    active  = []
-    for l in lessons:
-        days = expiry.get(l.get("severity", "medium"), 14)
+def get_active_lessons(max_lessons: int = 8,
+                       current_regime: str = "") -> list:
+    """
+    [Updated] 3개 파일에서 교훈을 읽고 regime + severity 기반으로 우선순위 결정.
+    라이브 시스템용: current_date 필터 없음 (모든 교훈이 과거).
+    """
+    from aria_paths import LESSONS_FILE as _LF
+    _data_dir = _LF.parent
+
+    REGIME_SIM = {
+        "위험선호": {"위험선호", "전환중", "혼조"},
+        "위험회피": {"위험회피", "전환중", "혼조"},
+        "전환중":   {"전환중", "위험선호", "위험회피", "혼조"},
+        "혼조":     {"혼조", "전환중", "위험선호", "위험회피"},
+    }
+    similar = REGIME_SIM.get(current_regime, set())
+
+    today  = _today()
+    expiry = {"high": 45, "medium": 21, "low": 10}
+
+    def _is_active(l: dict) -> bool:
+        days = expiry.get(l.get("severity", "medium"), 21)
         try:
-            if (datetime.strptime(today, "%Y-%m-%d") - datetime.strptime(l["date"], "%Y-%m-%d")).days <= days:
-                active.append(l)
+            return (datetime.strptime(today, "%Y-%m-%d") -
+                    datetime.strptime(l["date"], "%Y-%m-%d")).days <= days
         except Exception:
-            active.append(l)
+            return True
 
-    def pri(l):
-        return (3 if l["severity"] == "high" else 2 if l["severity"] == "medium" else 1) * 2 + l.get("reinforced", 0)
-    sorted_l = sorted(active, key=pri, reverse=True)
-    for l in sorted_l[:max_lessons]:
-        l["applied"] = l.get("applied", 0) + 1
-    _save(LESSONS_FILE, data)
-    return sorted_l[:max_lessons]
+    def _priority(l: dict) -> float:
+        sev_w = {"high": 3.0, "medium": 2.0, "low": 0.5}.get(l.get("severity","medium"), 1.0)
+        # 동일/유사 레짐 보너스 +40%
+        if similar and l.get("regime","") in similar:
+            sev_w *= 1.4
+        return sev_w + l.get("reinforced", 0) * 0.3
+
+    all_lessons: list = []
+
+    # 3개 파일에서 통합 수집
+    for fname in ("lessons_failure.json", "lessons_strength.json", "lessons_regime.json"):
+        try:
+            path = _data_dir / fname
+            data = _load(path, {"lessons": []})
+            for l in data.get("lessons", []):
+                if _is_active(l):
+                    all_lessons.append(l)
+        except Exception:
+            pass
+
+    # 3파일 없으면 레거시 fallback
+    if not all_lessons:
+        data = load_lessons()
+        all_lessons = [l for l in data.get("lessons", []) if _is_active(l)]
+
+    ranked = sorted(all_lessons, key=_priority, reverse=True)
+
+    # apply 카운트 업데이트 (레거시 파일 기준 — 대시보드용)
+    top = ranked[:max_lessons]
+    try:
+        legacy = load_lessons()
+        for l in legacy.get("lessons", []):
+            if any(l.get("lesson") == t.get("lesson") for t in top):
+                l["applied"] = l.get("applied", 0) + 1
+        _save(LESSONS_FILE, legacy)
+    except Exception:
+        pass
+
+    return top
 
 
-def build_lessons_prompt(max_lessons: int = 6) -> str:
-    lessons = get_active_lessons(max_lessons)
-    if not lessons:
-        return ""
-    lines = ["[과거 교훈 — 반드시 반영]"]
-    for l in lessons:
-        sev = "🔴" if l["severity"] == "high" else "🟡" if l["severity"] == "medium" else "🟢"
-        lines.append(f"{sev} [{l['category']}] {l['lesson'][:80]}")
+def build_lessons_prompt(max_lessons: int = 6,
+                          current_regime: str = "") -> str:
+    """
+    라이브 시스템용 교훈 프롬프트 빌더.
+    regime 기반으로 우선 교훈을 선택하고, VIX/환율 TK 금지 지시를 포함.
+    """
+    lessons = get_active_lessons(max_lessons, current_regime=current_regime)
+    lines   = []
+
+    if lessons:
+        lines.append("[과거 교훈 — 반드시 반영]")
+        for l in lessons:
+            sev        = "🔴" if l.get("severity") == "high" else "🟡" if l.get("severity") == "medium" else "🟢"
+            regime_tag = f"[{l.get('regime','')}] " if l.get("regime") else ""
+            lines.append(f"{sev} [{l.get('category','')}] {regime_tag}{l.get('lesson','')[:80]}")
+        lines.append("")
+
+    # [Phase 3] Analyst/Devil 단계 VIX·환율 TK 차단 — aria_agents.py 없이도 여기서 적용
+    lines.append(
+        "🚫 [thesis_killer 필수 규칙] "
+        "VIX와 원달러 환율은 thesis_killer 주제로 절대 사용 금지. "
+        "나스닥·코스피·반도체(SK하이닉스·삼성전자·엔비디아) 주가 수치만 사용할 것."
+    )
+
     return "\n".join(lines) + "\n\n"
 
 
