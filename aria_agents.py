@@ -256,6 +256,15 @@ ANALYST_SYSTEM_BASE = """You are a capital flow analysis agent.
 Analyze Hunter data and map capital flows.
 Use the real-time market data numbers provided — do not override them with estimates.
 
+[⛔ thesis_killers 생성 금지 대상 — FIRST RULE, 위반 시 전체 분석 무효]
+❌ 절대 금지 (Claude 자체 필터링 적용):
+   - VIX 변동  → 정확도 32%, 검증 불안정, 허용 금지
+   - 원달러 환율  → 정확도 0%, 절대 금지
+   - 기타 환율 (엔/위안/달러인덱스 포함)
+   - 금리·국채 수익률
+✅ thesis_killers 허용 대상 (아래 주가만):
+   나스닥 / S&P500 / 코스피 / SK하이닉스 / 삼성전자 / 엔비디아
+
 [백테스트 60거래일 실증 분석 지침 — 2026-01-13~04-11]
 - 주식 예측 정확도 51% / VIX 32% / 환율 0%
   → thesis_killers는 주식/반도체만. VIX 단독 검증 금지. 환율 절대 금지.
@@ -267,8 +276,6 @@ Use the real-time market data numbers provided — do not override them with est
   → 이 조건 해당 시 반드시 "급등 후 되돌림 리스크" 반론 필수 포함
 - FG<20 정확도 61%: 방향 판단 가능. FG>=20 정확도 17%: "방향 불명확" 인정
 - SK하이닉스 나스닥 대비 1.36배 변동폭 → 반도체 예측에 베타 반영
-- 원달러 thesis_killers 생성 절대 금지 (60일 정확도 0%)
-- VIX thesis_killers 최소화 (60일 정확도 32%)
 
 Return ONLY valid JSON in Korean. No markdown.
 {
@@ -294,6 +301,17 @@ Return ONLY valid JSON in Korean. No markdown.
 def agent_analyst(hunter_data: dict, mode: str, lessons_prompt: str = "", memory: list = None) -> dict:
     console.print("\n[bold yellow]Agent 2 - ANALYST [" + mode + "][/bold yellow]")
 
+    # ── regime 기반 교훈 주입 (메모리에서 레짐 추출) ─────────────
+    effective_lessons = lessons_prompt
+    try:
+        from aria_analysis import build_lessons_prompt as _blp
+        recent_regime = memory[-1].get("market_regime", "") if memory else ""
+        if recent_regime:
+            effective_lessons = _blp(current_regime=recent_regime)
+            console.print(f"  [dim]교훈 주입: regime={recent_regime}[/dim]")
+    except Exception:
+        pass  # 실패 시 외부에서 전달된 lessons_prompt 그대로 사용
+
     # 패턴 힌트 (메모리에서 로컬 계산, 비용 0)
     pattern_hint = ""
     if memory and len(memory) >= 3:
@@ -309,7 +327,7 @@ def agent_analyst(hunter_data: dict, mode: str, lessons_prompt: str = "", memory
         except Exception:
             pass
 
-    mode_ctx = get_mode_context(mode, lessons_prompt + ("\n" + pattern_hint if pattern_hint else ""))
+    mode_ctx = get_mode_context(mode, effective_lessons + ("\n" + pattern_hint if pattern_hint else ""))
     slim = {
         "market_snapshot": hunter_data.get("market_snapshot", {}),
         "raw_signals":     hunter_data.get("raw_signals", [])[:15],  # 8 → 15 (Hunter 확장에 맞춤)
@@ -389,8 +407,10 @@ def agent_devil(analyst_data: dict, memory: list, mode: str) -> dict:
     result = parse_json(raw)
 
     # ── thesis_killers 후처리: VIX·환율 event 자동 제거 (백테스트 정확도 0~32%)
-    _BLOCKED_EVENTS = {"vix", "환율", "원달러", "달러", "달러/원", "금리", "국채"}
-    _ALLOWED_EVENTS = {"나스닥", "nasdaq", "코스피", "kospi", "sk하이닉스", "삼성전자", "엔비디아", "s&p", "반도체"}
+    _BLOCKED_EVENTS = {"vix", "환율", "원달러", "달러", "달러/원", "금리", "국채",
+                        "달러인덱스", "dxy", "엔화", "위안", "통화", "fx", "원화"}
+    _ALLOWED_EVENTS = {"나스닥", "nasdaq", "코스피", "kospi", "sk하이닉스", "삼성전자",
+                        "엔비디아", "s&p", "반도체", "sp500", "s&p500"}
     filtered_tks = []
     for tk in result.get("thesis_killers", []):
         event_lower = tk.get("event", "").lower()
@@ -543,6 +563,24 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
     )
     result = parse_json(raw)
     result["mode"] = mode
+
+    # ── [3차 필터] Reporter: VIX·환율 thesis_killers 최종 제거 ────────────
+    # Devil 2차 필터를 통과했더라도 Reporter가 재생성할 수 있음 → 마지막 관문
+    _RPT_BLOCKED = {"vix", "환율", "원달러", "달러", "달러/원", "금리", "국채",
+                    "달러인덱스", "dxy", "엔화", "위안", "통화", "fx", "원화"}
+    _RPT_ALLOWED = {"나스닥", "nasdaq", "코스피", "kospi", "sk하이닉스", "삼성전자",
+                    "엔비디아", "s&p", "반도체", "sp500", "s&p500"}
+    rpt_filtered = []
+    for tk in result.get("thesis_killers", []):
+        ev_lower = tk.get("event", "").lower()
+        if any(b in ev_lower for b in _RPT_BLOCKED):
+            console.print(f"  [dim]Reporter 3차 제거 (VIX/환율): {tk.get('event','')}[/dim]")
+            continue
+        if not any(a in ev_lower for a in _RPT_ALLOWED):
+            console.print(f"  [dim]Reporter 3차 제거 (검증불가): {tk.get('event','')}[/dim]")
+            continue
+        rpt_filtered.append(tk)
+    result["thesis_killers"] = rpt_filtered
 
     # ── one_line_summary 비어있으면 자동 생성 ─────────────────────────────
     if not result.get("one_line_summary", "").strip():
