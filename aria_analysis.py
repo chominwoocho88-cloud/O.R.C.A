@@ -280,8 +280,33 @@ def _analyze_trend(history: list) -> dict:
     }
 
 
+def _normalize_sentiment_components(entry: dict) -> dict:
+    """
+    [Bug Fix] sentiment.json components 스키마 정규화.
+    구버전: {"시장레짐": {"score": 20, "reason": "..."}, ...}  (dict)
+    신버전: {"시장레짐": 70, ...}                             (int 0-100)
+    두 형태가 혼재할 때 트렌드 계산에서 TypeError 방지.
+    """
+    comps = entry.get("components", {})
+    if not comps:
+        return entry
+    normalized = {}
+    for k, v in comps.items():
+        if isinstance(v, dict):
+            # 구버전: score 키가 있으면 그 값, 없으면 50 기본값
+            normalized[k] = int(v.get("score", 50))
+        elif isinstance(v, (int, float)):
+            normalized[k] = int(v)
+        else:
+            normalized[k] = 50
+    entry = {**entry, "components": normalized}
+    return entry
+
+
 def run_sentiment(report: dict, market_data: dict = None) -> dict:
     data    = _load(SENTIMENT_FILE, {"history": [], "current": None})
+    # [Bug Fix] 기존 이력의 dict 형태 components를 int로 정규화
+    data["history"] = [_normalize_sentiment_components(h) for h in data.get("history", [])]
     new     = calculate_sentiment(report, market_data)
     history = data.get("history", [])
 
