@@ -1,7 +1,0 @@
-{
-  "name": "qcom_reliable_swing",
-  "description": "QCOM achieves 90% swing accuracy with avg peak day 5.2 and avg peak pct 3.2%, showing consistent late-developing moves",
-  "trigger": "QCOM signal triggered in any regime except 위험회피 극단공포",
-  "action": "Enter on confirmation and hold minimum 4 days before evaluating exit",
-  "created_at": "2026-04-16T06:26:29.875452"
-}

@@ -1,7 +1,0 @@
-{
-  "name": "slb_high_return_energy_play",
-  "description": "SLB shows 85.7% accuracy with highest avg peak pct at 8.02% among energy names, indicating strong sector momentum capture",
-  "trigger": "SLB signal triggered with sector_inflow confirmed and regime not 위험회피 극단공포",
-  "action": "Prioritize entry and hold to day 5-6 for full peak capture",
-  "created_at": "2026-04-16T06:26:29.875613"
-}

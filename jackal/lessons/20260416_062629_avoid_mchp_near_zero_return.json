@@ -1,7 +1,0 @@
-{
-  "name": "avoid_mchp_near_zero_return",
-  "warning": "MCHP shows 50% accuracy with avg peak pct of only 0.19%, meaning even correct signals yield negligible returns",
-  "reason": "Near-zero avg peak return makes MCHP signals not worth taking regardless of accuracy rate",
-  "regime_context": "All regimes",
-  "timestamp": "2026-04-16T06:26:29.876288"
-}
