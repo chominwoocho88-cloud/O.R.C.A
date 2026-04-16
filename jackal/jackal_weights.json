@@ -201,11 +201,11 @@
   "last_macro_gate": {
     "risk_level": "normal",
     "score_penalty": 0,
-    "vix": 20.0,
-    "yield_curve": 0.0,
-    "hy_chg5": 0.0,
+    "vix": 18.1,
+    "yield_curve": 0.67,
+    "hy_chg5": 0.34,
     "reason": "정상",
-    "checked_at": "2026-04-16T19:03:17.693052+09:00"
+    "checked_at": "2026-04-16T19:44:44.231017+09:00"
   },
   "_reset_at": "2026-04-16T16:44:02.036366+09:00",
   "_note": "aria_reset.py 실행으로 초기화됨",
