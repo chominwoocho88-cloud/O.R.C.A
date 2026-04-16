@@ -1291,93 +1291,134 @@ def classify_task_type(note: str, vix, fg) -> str:
         return "volatility_regime"
     return "continuation"
 
-def _fetch_recent_data() -> None:
+def _vix_to_fg(vix: float) -> tuple:
+    """VIX → Fear&Greed 프록시 (실제 F&G API 없을 때 사용)."""
+    v = float(vix)
+    if v < 12:  return 90, "Extreme Greed"
+    if v < 15:  return 75, "Greed"
+    if v < 18:  return 62, "Greed"
+    if v < 20:  return 55, "Neutral"
+    if v < 23:  return 45, "Neutral"
+    if v < 27:  return 35, "Fear"
+    if v < 32:  return 25, "Fear"
+    if v < 40:  return 15, "Extreme Fear"
+    return 5, "Extreme Fear"
+
+
+def _fetch_dynamic_hist(months: int = 6) -> None:
     """
-    HIST_DATA 마지막 날짜 이후 ~ 오늘까지 yfinance로 자동 보완.
-    최대 20거래일치만 추가 (비용 0, yfinance 무료).
+    yfinance로 최근 N개월 시장 데이터를 HIST_DATA에 동적 추가.
+    - HIST_DATA에 이미 있는 날짜는 하드코딩 값 우선 (더 정확)
+    - Fear&Greed는 VIX 프록시 사용
+    - 앞(과거) + 뒤(미래) 양방향 확장
     """
     import yfinance as yf
     from datetime import date as _date
 
-    last = datetime.strptime(DATES[-1], "%Y-%m-%d").date()
     today = _date.today()
-    if (today - last).days <= 1:
-        return  # 이미 최신
+    start = today - timedelta(days=int(months * 30.5) + 10)
 
-    print(f"\n📥 HIST_DATA 자동 보완: {last} 이후 ~ {today}")
+    print(f"\n📥 {months}개월 데이터 동적 fetch: {start} ~ {today}")
 
-    # yfinance 다운로드 (한 번에)
-    tickers = {
-        "^GSPC": "sp500", "^IXIC": "nasdaq", "^VIX": "vix",
-        "^KS11": "kospi", "000660.KS": "sk_hynix",
-        "005930.KS": "samsung", "NVDA": "nvda",
+    YF_MAP = {
+        "^GSPC":     "sp500",
+        "^IXIC":     "nasdaq",
+        "^VIX":      "vix",
+        "^KS11":     "kospi",
+        "USDKRW=X":  "krw_usd",
+        "000660.KS": "sk_hynix",
+        "005930.KS": "samsung",
+        "NVDA":      "nvda",
     }
+
     try:
-        start_str = (last + timedelta(days=1)).strftime("%Y-%m-%d")
         raw = yf.download(
-            list(tickers.keys()),
-            start=start_str,
-            end=today.strftime("%Y-%m-%d"),
-            auto_adjust=True,
-            progress=False,
+            list(YF_MAP.keys()),
+            start=str(start),
+            end=str(today + timedelta(days=1)),
+            auto_adjust=True, progress=False,
         )
         if raw.empty:
             print("  yfinance 데이터 없음 — 스킵")
             return
 
         closes = raw["Close"] if "Close" in raw.columns else raw
-        dates_fetched = [d.strftime("%Y-%m-%d") for d in closes.index]
+        dates_list = [d.strftime("%Y-%m-%d") for d in closes.index]
 
+        prev_vals: dict = {}
         added = 0
-        for i, d_str in enumerate(dates_fetched[:20]):  # 최대 20일
-            row = {}
-            for yf_ticker, key in tickers.items():
+
+        for i, d_str in enumerate(dates_list):
+            row: dict = {}
+            valid = True
+
+            for yt, key in YF_MAP.items():
                 try:
-                    val = float(closes[yf_ticker].iloc[i])
+                    val = float(closes[yt].iloc[i])
+                    import math
+                    if math.isnan(val) or val <= 0:
+                        if key in ("sp500", "nasdaq"):
+                            valid = False
+                        continue
                     row[key] = round(val, 2)
                     # 전일 대비 변화율
-                    if i > 0:
-                        prev = float(closes[yf_ticker].iloc[i - 1])
-                        chg  = (val - prev) / prev * 100
+                    prev = prev_vals.get(key)
+                    if prev and prev > 0:
+                        chg = (val - prev) / prev * 100
                         row[f"{key}_change"] = f"{chg:+.2f}%"
-                    elif d_str in HIST_DATA:
-                        # 첫날은 HIST_DATA의 마지막 값과 비교
-                        prev_val = HIST_DATA[DATES[-1]].get(key)
-                        if prev_val:
-                            chg = (val - prev_val) / prev_val * 100
-                            row[f"{key}_change"] = f"{chg:+.2f}%"
-                        else:
-                            row[f"{key}_change"] = "N/A"
                     else:
                         row[f"{key}_change"] = "N/A"
+                    prev_vals[key] = val
                 except Exception:
-                    row[key] = None
                     row[f"{key}_change"] = "N/A"
 
-            if row.get("sp500") and d_str not in HIST_DATA:
-                row["fear_greed"] = "50"  # F&G는 실시간 API 없어 중립으로 설정
-                row["fear_greed_label"] = "Neutral (추정)"
-                row["krw_usd"] = "N/A"
-                row["note"] = f"yfinance 자동 수집 ({d_str})"
-                HIST_DATA[d_str] = row
-                added += 1
-                print(f"  + {d_str}: S&P {row['sp500']} ({row.get('sp500_change','N/A')}) VIX {row.get('vix','N/A')}")
+            # 하드코딩 날짜: prev_vals 업데이트만 하고 데이터는 덮지 않음
+            if d_str in HIST_DATA:
+                for key in YF_MAP.values():
+                    if key in HIST_DATA[d_str] and HIST_DATA[d_str][key]:
+                        try:
+                            prev_vals[key] = float(HIST_DATA[d_str][key])
+                        except Exception:
+                            pass
+                continue
 
-        # DATES 갱신
+            if not valid or not row.get("sp500"):
+                continue
+
+            # VIX 프록시 Fear&Greed
+            fg, fg_label = _vix_to_fg(row.get("vix", 20))
+            row["fear_greed"]       = str(fg)
+            row["fear_greed_label"] = fg_label
+            row["note"]             = f"yfinance 수집 ({d_str})"
+            HIST_DATA[d_str] = row
+            added += 1
+
         global DATES
         DATES = sorted(HIST_DATA.keys())
-        print(f"  ✅ {added}일 추가 → 총 {len(DATES)}거래일")
+        print(f"  ✅ {added}일 추가 → 총 {len(DATES)}거래일 ({DATES[0]} ~ {DATES[-1]})")
 
     except Exception as e:
-        print(f"  yfinance 자동 보완 실패 (스킵): {e}")
+        print(f"  동적 fetch 실패: {e}")
+        import traceback; traceback.print_exc()
+
+
+def _fetch_recent_data() -> None:
+    """하위호환 래퍼 — _fetch_dynamic_hist(months=1) 호출."""
+    _fetch_dynamic_hist(months=1)
         
 def main():
     global market_data_snapshot
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dry", action="store_true")
+    parser = argparse.ArgumentParser(description="ARIA Backtest")
+    parser.add_argument("--dry",    action="store_true", help="분석만, 데이터 저장 없음")
+    parser.add_argument("--months", type=int, default=0,
+                        help="백테스트 기간 확장 (개월). 0=HIST_DATA만, 6=최근 6개월 yfinance 추가")
     args = parser.parse_args()
 
-    _fetch_recent_data()  # HIST_DATA 최신화
+    # 데이터 확장
+    if args.months > 0:
+        _fetch_dynamic_hist(months=args.months)
+    else:
+        _fetch_recent_data()  # 기존: 마지막 날짜 이후만 보완
     print("=" * 65)
     print(f"ARIA Backtest — {len(DATES)}거래일 사전 학습" + (" [DRY RUN]" if args.dry else ""))
     print(f"기간: {DATES[0]} ~ {DATES[-1]}")
