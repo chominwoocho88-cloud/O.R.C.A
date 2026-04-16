@@ -23,6 +23,7 @@ from aria_paths import DATA_DIR as _DATA_DIR
 LESSONS_FAILURE_FILE  = _DATA_DIR / "lessons_failure.json"   # cap 120 — 실패 교훈
 LESSONS_STRENGTH_FILE = _DATA_DIR / "lessons_strength.json"  # cap 30  — 강점 교훈
 LESSONS_REGIME_FILE   = _DATA_DIR / "lessons_regime.json"    # 레짐별 cap 40
+LESSONS_PATTERN_FILE  = _DATA_DIR / "lessons_pattern.json"  # 조건별 통계 룰 60슬롯
 
 _REGIME_MAP = {
     "위험회피에서 위험선호": "전환중",
@@ -957,10 +958,28 @@ def generate_analysis(date, market_data, dry=False):
         pass
     lessons_ctx = _load_lessons_context(current_date=date, current_regime=prev_regime)
 
+    # ── 패턴 신호 주입 (방법 3 + 방법 2) ─────────────────────────────────
+    # 전일 추세도 참조
+    prev_trend = ""
+    try:
+        if dates_before:
+            prev_trend = HIST_DATA.get(dates_before[-1], {}).get("trend", "")
+    except Exception:
+        pass
+    pattern_block, signal_override = _get_pattern_signal(
+        regime=prev_regime or "혼조",
+        fg=fg,
+        trend=prev_trend or "횡보추세",
+        current_date=date,
+    )
+    if signal_override:
+        signals.insert(0, signal_override)   # 방법 2: 최상단에 역바이어스 경고
+
     # 시계열 컨텍스트 (레짐 연속일, VIX/FG 방향, 자기 피드백)
     trend_ctx = _build_trend_context(date, HIST_DATA, _backtest_results)
 
     user_msg = (
+        f"{pattern_block}"          # ← 방법 3: 통계 룰 최상단 강조
         f"{lessons_ctx}"
         f"{na_warning}"
         f"{trend_ctx}"
@@ -1598,6 +1617,138 @@ def _count_lessons() -> int:
             return 0
 
 
+# ── 패턴 저장 시스템 ──────────────────────────────────────────────────────────
+def _fg_bucket(fg: float) -> str:
+    if fg <= 20: return "극단공포"
+    if fg <= 35: return "공포"
+    if fg <= 50: return "중립"
+    if fg <= 70: return "탐욕"
+    return "과열"
+
+
+def _pattern_key(regime: str, fg: float, trend: str) -> str:
+    return f"{regime}|{_fg_bucket(fg)}|{trend}"
+
+
+def _generate_rule_text(key: str, acc: float, n: int) -> str:
+    """acc 범위에 따라 방향성 룰 텍스트 생성."""
+    regime, fg_b, trend = key.split("|")
+    pct = f"{acc:.0%}"
+    if acc >= 0.70:
+        return (f"{regime}+{fg_b} 조건에서 {trend} 정확도 {pct} ({n}회) "
+                f"— 현재 방향 유지, 역방향 예측 억제")
+    elif acc >= 0.45:
+        return (f"{regime}+{fg_b} 조건 방향 불명확 ({pct}, {n}회) "
+                f"— 과신 금지, confidence 낮음 설정")
+    else:
+        return (f"{regime}+{fg_b} 조건에서 {trend} 예측 {pct} ({n}회) "
+                f"— 역방향 검토 필요, 현재 방향 신호 의심")
+
+
+def _update_pattern(regime: str, fg: float, trend: str,
+                    judged: list, correct: list, date: str) -> None:
+    """검증 결과를 패턴 파일에 누적 업데이트."""
+    if not judged:
+        return
+    key  = _pattern_key(regime, fg, trend)
+    data = _load(LESSONS_PATTERN_FILE, {"patterns": {}, "global_stats": {}})
+
+    p = data["patterns"].setdefault(key, {
+        "key": key, "total": 0, "correct": 0, "accuracy": 0.0,
+        "primary_rule": "", "last_seen": "", "min_samples": 5,
+    })
+    p["total"]   += len(judged)
+    p["correct"] += len(correct)
+    p["accuracy"] = round(p["correct"] / p["total"], 4) if p["total"] else 0.0
+    p["last_seen"] = date
+
+    if p["total"] >= p["min_samples"]:
+        p["primary_rule"] = _generate_rule_text(key, p["accuracy"], p["total"])
+
+    # 글로벌 통계 업데이트
+    gs = data.setdefault("global_stats", {"total": 0, "correct": 0})
+    gs["total"]   += len(judged)
+    gs["correct"] += len(correct)
+    gs["accuracy"] = round(gs["correct"] / gs["total"], 4) if gs["total"] else 0.0
+
+    _save(LESSONS_PATTERN_FILE, data)
+
+
+def _get_pattern_signal(regime: str, fg: float, trend: str,
+                        current_date: str = None) -> tuple[str, str]:
+    """
+    현재 조건에 맞는 패턴 룰을 반환.
+    Returns: (pattern_block, signal_override)
+      pattern_block  — 프롬프트 최상단 강조 블록 (방법 3)
+      signal_override — acc < 0.45일 때 signal_str에 추가할 역방향 경고 (방법 2)
+    """
+    try:
+        data = _load(LESSONS_PATTERN_FILE, {"patterns": {}})
+    except Exception:
+        return "", ""
+
+    patterns = data.get("patterns", {})
+    if not patterns:
+        return "", ""
+
+    key = _pattern_key(regime, fg, trend)
+
+    # 1순위: 완전 일치
+    p = patterns.get(key)
+
+    # 2순위: 레짐+FG 일치 (추세만 다름)
+    if not p or p.get("total", 0) < p.get("min_samples", 5):
+        partial_key = f"{regime}|{_fg_bucket(fg)}|"
+        candidates  = [v for k, v in patterns.items()
+                       if k.startswith(partial_key)
+                       and v.get("total", 0) >= v.get("min_samples", 5)]
+        if candidates:
+            p = max(candidates, key=lambda x: x["total"])
+
+    # 3순위: 레짐만 일치
+    if not p or p.get("total", 0) < p.get("min_samples", 5):
+        regime_cands = [v for k, v in patterns.items()
+                        if k.startswith(f"{regime}|")
+                        and v.get("total", 0) >= v.get("min_samples", 5)]
+        if regime_cands:
+            p = max(regime_cands, key=lambda x: x["total"])
+
+    if not p or not p.get("primary_rule"):
+        return "", ""
+
+    # 날짜 필터: 미래 패턴 주입 차단
+    if current_date and p.get("last_seen", "") >= current_date:
+        return "", ""
+
+    acc   = p["accuracy"]
+    n     = p["total"]
+    rule  = p["primary_rule"]
+    pkey  = p["key"]
+
+    # ── 방법 3: 완전 일치 시 고강도 강조 블록
+    border   = "═" * 50
+    conf_bar = "█" * int(acc * 10) + "░" * (10 - int(acc * 10))
+    pattern_block = (
+        f"\n{border}\n"
+        f"📊 [통계 룰 — {n}회 관측, 무시 금지]\n"
+        f"조건: {pkey.replace('|', ' + ')}\n"
+        f"정확도: {acc:.0%} [{conf_bar}]\n"
+        f"룰: {rule}\n"
+        f"{border}\n"
+    )
+
+    # ── 방법 2: acc < 0.45이면 기존 신호 방향과 충돌하는 역바이어스 경고
+    signal_override = ""
+    if acc < 0.45:
+        signal_override = (
+            f"⚠️ [패턴 역바이어스 경고] {pkey} 조건에서 "
+            f"현재 방향 예측 정확도 {acc:.0%} ({n}회) — "
+            f"반대 방향 thesis_killer 반드시 1개 이상 포함"
+        )
+
+    return pattern_block, signal_override
+
+
 def _run_phase_dates(dates_slice: list, phase_label: str,
                      dry: bool, save_accuracy: bool) -> tuple:
     """
@@ -1610,12 +1761,25 @@ def _run_phase_dates(dates_slice: list, phase_label: str,
     phase_judged = phase_correct = 0
     all_results: dict = {}
 
+    from datetime import datetime as _dt
     dates_all = DATES
     for i, date in enumerate(dates_slice):
         md        = HIST_DATA[date]
         date_idx  = dates_all.index(date)
         next_date = dates_all[date_idx + 1] if date_idx + 1 < len(dates_all) else None
         next_data = HIST_DATA.get(next_date, {}) if next_date else {}
+
+        # ── 주말(토/일) 날짜: 장이 열리지 않음 → 분석은 컨텍스트로 저장하되
+        #    검증 집계에서 제외. 분모에 넣으면 안 되는 날짜.
+        is_weekend = _dt.strptime(date, "%Y-%m-%d").weekday() >= 5
+        if is_weekend:
+            analysis = generate_analysis(date, md, dry=dry)
+            analysis["vix_at_time"] = md.get("vix", 20)
+            save_to_memory(analysis)
+            HIST_DATA.setdefault(date, {})["regime"] = analysis.get("market_regime", "")
+            print(f"  📅[{i+1:>3}/{len(dates_slice)}] {date} "
+                  f"주말 — 컨텍스트만 저장, 검증 제외")
+            continue
 
         analysis = generate_analysis(date, md, dry=dry)
         analysis["vix_at_time"] = md.get("vix", 20)
@@ -1643,6 +1807,16 @@ def _run_phase_dates(dates_slice: list, phase_label: str,
                 "verdict": r.get("verdict", "unclear"),
                 "event":   r.get("event", ""),
             })
+
+        # 패턴 누적 업데이트 (방법 3+2의 데이터 수집)
+        _update_pattern(
+            regime=analysis.get("market_regime", "혼조"),
+            fg=float(str(md.get("fear_greed", 50))),
+            trend=analysis.get("trend_phase", "횡보추세"),
+            judged=judged,
+            correct=correct,
+            date=date,
+        )
 
         # unclear-only 날 스킵: 교훈 추출 건너뜀 (오염 방지 + 비용 절감)
         all_unclear = len(results) > 0 and all(r.get("verdict") == "unclear" for r in results)
