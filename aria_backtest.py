@@ -797,13 +797,13 @@ def generate_analysis(date, market_data, dry=False):
         f"{lessons_ctx}"
         f"{trend_ctx}"
         f"분석 날짜: {date}\n이벤트: {d['note']}\n\n"
-        f"S&P500: {d['sp500']} ({d['sp500_change']})\n"
-        f"나스닥: {d['nasdaq']} ({d['nasdaq_change']})\n"
-        f"VIX: {d['vix']}\n코스피: {d['kospi']} ({d['kospi_change']})\n"
-        f"원달러: {d['krw_usd']}\nSK하이닉스: {d['sk_hynix']} ({d['sk_hynix_change']})\n"
-        f"삼성전자: {d['samsung']} ({d['samsung_change']})\n"
-        f"엔비디아: {d['nvda']} ({d['nvda_change']})\n"
-        f"Fear&Greed: {d['fear_greed']} ({d['fear_greed_label']})"
+        f"S&P500: {d.get('sp500','N/A')} ({d.get('sp500_change','N/A')})\n"
+        f"나스닥: {d.get('nasdaq','N/A')} ({d.get('nasdaq_change','N/A')})\n"
+        f"VIX: {d.get('vix','N/A')}\n코스피: {d.get('kospi','N/A')} ({d.get('kospi_change','N/A')})\n"
+        f"원달러: {d.get('krw_usd','N/A')}\nSK하이닉스: {d.get('sk_hynix','N/A')} ({d.get('sk_hynix_change','N/A')})\n"
+        f"삼성전자: {d.get('samsung','N/A')} ({d.get('samsung_change','N/A')})\n"
+        f"엔비디아: {d.get('nvda','N/A')} ({d.get('nvda_change','N/A')})\n"
+        f"Fear&Greed: {d.get('fear_greed','50')} ({d.get('fear_greed_label','Neutral')})"
         f"{signal_str}\n"
         f"thesis_killers는 내일 주가/지수 수치로 검증 가능하게 작성. JSON 반환:"
     )
@@ -1385,6 +1385,11 @@ def _fetch_dynamic_hist(months: int = 6) -> None:
             if not valid or not row.get("sp500"):
                 continue
 
+            # 누락 필드 N/A 기본값 보장 (한국장 휴장 등으로 kospi 없을 수 있음)
+            for key in ("kospi", "krw_usd", "sk_hynix", "samsung"):
+                row.setdefault(key, "N/A")
+                row.setdefault(f"{key}_change", "N/A")
+
             # VIX 프록시 Fear&Greed
             fg, fg_label = _vix_to_fg(row.get("vix", 20))
             row["fear_greed"]       = str(fg)
@@ -1437,7 +1442,7 @@ def main():
 
         print(f"\n{'─'*50}")
         print(f"📅 [{i+1}/{len(DATES)}] {date} — {md['note'][:40]}")
-        print(f"   S&P {md['sp500']:>7} ({md['sp500_change']:>7}) | VIX {md['vix']:>5} | FG {md['fear_greed']}")
+        print(f"   S&P {md.get('sp500','N/A'):>7} ({md.get('sp500_change','N/A'):>7}) | VIX {md.get('vix','N/A'):>5} | FG {md.get('fear_greed','N/A')}")
 
         analysis = generate_analysis(date, md, dry=args.dry)
         # VIX 현재값 저장 (다음날 VIX 검증용)
