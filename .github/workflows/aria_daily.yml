@@ -136,15 +136,12 @@ jobs:
           git add reports/       2>/dev/null || true
           git add dashboard.html 2>/dev/null || true
 
-          git stash
-          git fetch origin main
-          git reset --hard origin/main
-          git stash pop || true
+          git diff --cached --quiet && exit 0
 
-          git add data/          2>/dev/null || true
-          git add reports/       2>/dev/null || true
-          git add dashboard.html 2>/dev/null || true
+          git commit -m "ARIA: $(date +'%Y-%m-%d %H:%M') [${ARIA_MODE:-AUTO}] 저장"
 
-          git diff --staged --quiet || \
-            git commit -m "ARIA: $(date +'%Y-%m-%d %H:%M') [${ARIA_MODE:-AUTO}] 저장"
-          git push
+          # push — 충돌 시 rebase 후 재시도 (stash/reset --hard 제거)
+          git push || {
+            git pull --rebase origin main || git rebase --abort
+            git push
+          }
