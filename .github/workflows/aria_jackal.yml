@@ -43,6 +43,8 @@ on:
 jobs:
   jackal:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # [Fix] Node.js 20 deprecation 대응 (2026-06-02 강제 전환)
     permissions:
       contents: write
 
@@ -57,14 +59,15 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: pip install anthropic httpx yfinance
+        # [Bug Fix] 버전 고정: yfinance 미고정 시 최신버전(1.2.x) 자동 설치 → ARIA의 0.2.55와 불일치
+        run: pip install anthropic httpx yfinance==0.2.55
 
       - name: Run Jackal
         env:
           ANTHROPIC_API_KEY:   ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_TOKEN:      ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
-          ANTHROPIC_MODEL:     "claude-sonnet-4-20250514"
+          ANTHROPIC_MODEL:     "claude-sonnet-4-6"        # [Fix] ARIA와 동일 모델로 통일
           SUBAGENT_MODEL:      "claude-haiku-4-5-20251001"
           JACKAL_DAILY_BUDGET: "500000"
           JACKAL_AUTOCOMPACT:  "true"
