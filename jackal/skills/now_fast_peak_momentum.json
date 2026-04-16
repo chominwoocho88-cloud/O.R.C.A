@@ -1,0 +1,7 @@
+{
+  "name": "now_fast_peak_momentum",
+  "description": "NOW achieves 81.2% accuracy with fast avg peak day of 3.3 and high avg peak pct 4.71%, ideal for quick swing trades",
+  "trigger": "NOW signal triggered with volume surge and RSI oversold condition",
+  "action": "Enter aggressively and target exit by day 3 to capture fast momentum peak",
+  "created_at": "2026-04-16T06:26:29.875793"
+}

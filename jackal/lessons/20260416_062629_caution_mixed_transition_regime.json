@@ -1,0 +1,7 @@
+{
+  "name": "caution_mixed_transition_regime",
+  "warning": "위험선호/위험회피 전환중 shows only 60% accuracy, lowest among standard transition regimes",
+  "reason": "Ambiguous dual-directional transition creates conflicting signals and reduces swing trade reliability",
+  "regime_context": "위험선호/위험회피 전환중",
+  "timestamp": "2026-04-16T06:26:29.876604"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "orcl_late_peak_capture",
+  "description": "ORCL shows 100% swing accuracy with avg peak day 5.2 and avg peak pct 8.74%, indicating strong late-peak momentum",
+  "trigger": "ORCL signal triggered with avg_peak_day >= 5 and sector inflow confirmed",
+  "action": "Hold position to day 5+ and set trailing stop at 4% below intraday high",
+  "created_at": "2026-04-16T06:26:29.875292"
+}

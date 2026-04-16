@@ -1,0 +1,7 @@
+{
+  "name": "avoid_bac_low_conviction",
+  "warning": "BAC signals show only 33.3% swing accuracy with avg peak day 2.0 and avg peak pct 1.32%",
+  "reason": "BAC consistently underperforms with low return potential and poor directional accuracy, suggesting high noise-to-signal ratio",
+  "regime_context": "All regimes, especially 위험회피",
+  "timestamp": "2026-04-16T06:26:29.875967"
+}

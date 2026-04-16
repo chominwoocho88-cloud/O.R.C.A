@@ -1,0 +1,7 @@
+{
+  "name": "avoid_txn_semiconductor_noise",
+  "warning": "TXN shows only 46.2% accuracy with avg peak pct of 0.97%, barely above random with minimal return",
+  "reason": "TXN signals lack sufficient edge; low peak return combined with sub-50% accuracy destroys expectancy",
+  "regime_context": "위험회피 and 전환중",
+  "timestamp": "2026-04-16T06:26:29.876130"
+}
