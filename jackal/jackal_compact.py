@@ -22,6 +22,7 @@ from anthropic import Anthropic
 log = logging.getLogger("jackal_compact")
 
 _BASE          = Path(__file__).parent
+_REPO_ROOT     = _BASE.parent          # jackal/ → repo root
 _COMPACT_LOG   = _BASE / "compact_log.json"
 _COMPACT_CACHE = _BASE / "compact_cache.json"
 _USAGE_LOG     = _BASE / "jackal_usage_log.json"   # Bug Fix 2 연동
@@ -132,7 +133,7 @@ class JackalCompact:
     def _collect_compressible_data(self) -> dict:
         data = {}
 
-        acc_path = _BASE / "accuracy.json"
+        acc_path = _REPO_ROOT / "data" / "accuracy.json"   # data/accuracy.json (repo root 기준)
         if acc_path.exists():
             try:
                 data["accuracy"] = json.loads(acc_path.read_text(encoding="utf-8"))
