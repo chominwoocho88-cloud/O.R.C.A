@@ -89,8 +89,28 @@ def load_memory() -> list:
 
 def save_memory(memory: list, analysis: dict):
     memory = [m for m in memory if m.get("analysis_date") != analysis.get("analysis_date")]
-    memory = (memory + [analysis])[-90:]
-    MEMORY_FILE.write_text(json.dumps(memory, ensure_ascii=False, indent=2), encoding="utf-8")
+    new_memory = memory + [analysis]
+
+    # 90일 초과분 → memory_archive.json에 누적 보존 (영구 소실 방지)
+    if len(new_memory) > 90:
+        overflow = new_memory[:-90]
+        archive_file = MEMORY_FILE.with_name("memory_archive.json")
+        archived: list = []
+        if archive_file.exists():
+            try:
+                archived = json.loads(archive_file.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+        archived.extend(overflow)
+        archive_file.write_text(
+            json.dumps(archived[-365:], ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    MEMORY_FILE.write_text(
+        json.dumps(new_memory[-90:], ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
 
 
 def save_report(analysis: dict) -> Path:
