@@ -43,6 +43,7 @@ from aria_adapter import (
     load_aria_context     as _load_aria_context,
     aria_baseline_exists  as _aria_baseline_exists,
 )
+from jackal_shield import log_usage   # [Bug Fix] 비용 추적 활성화
 
 TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
@@ -252,6 +253,9 @@ JSON만 반환:
             tools=[{"type": "web_search_20250305", "name": "web_search"}],
             messages=[{"role": "user", "content": prompt}],
         )
+        # [Bug Fix] 비용 추적
+        log_usage("hunter_suggest20", resp.usage.input_tokens,
+                  resp.usage.output_tokens, model=MODEL_H)
         full = "".join(getattr(b, "text", "") for b in resp.content)
         m    = re.search(r"\{[\s\S]*\}", re.sub(r"```(?:json)?|```", "", full).strip())
         if not m:
@@ -767,6 +771,9 @@ JSON만: {{"top10": ["TICKER1", "TICKER2", ...]}}"""
             model=MODEL_H, max_tokens=200,
             messages=[{"role": "user", "content": prompt}],
         )
+        # [Bug Fix] Stage 3 비용 추적
+        log_usage("hunter_stage3", resp.usage.input_tokens,
+                  resp.usage.output_tokens, model=MODEL_H)
         raw  = re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip()
         m    = re.search(r"\{[\s\S]*\}", raw)
         if not m:
@@ -948,6 +955,9 @@ day1 vs swing 구분:
             model=MODEL_H, max_tokens=450,
             messages=[{"role": "user", "content": prompt}],
         )
+        # [Bug Fix] Stage 4 Analyst 비용 추적
+        log_usage("hunter_stage4_analyst", resp.usage.input_tokens,
+                  resp.usage.output_tokens, model=MODEL_H)
         r = _safe_parse_json(re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip())
         r["analyst_score"] = int(r.get("analyst_score", 50))
         r["day1_score"]    = int(r.get("day1_score",    50))
@@ -1049,6 +1059,9 @@ BB: {tech['bb_pos']:.0f}% (하단 터치가 반등 보장 아님)
             model=MODEL_H, max_tokens=300,
             messages=[{"role": "user", "content": prompt}],
         )
+        # [Bug Fix] Stage 4 Devil 비용 추적
+        log_usage("hunter_stage4_devil", resp.usage.input_tokens,
+                  resp.usage.output_tokens, model=MODEL_H)
         r = _safe_parse_json(re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip())
         r["devil_score"] = int(r.get("devil_score", 30))
         r.setdefault("verdict", "부분동의"); r.setdefault("main_risk", "")
@@ -1396,13 +1409,11 @@ def run_hunt(force: bool = False) -> dict:
     log.info(f"🎯 Jackal Hunter | {now_kst.strftime('%Y-%m-%d %H:%M KST')}")
 
     if not _aria_baseline_exists():
-        log.info("  ARIA baseline 없음 — 스킵")
-        _send_status("⚠️ ARIA morning 분석 대기 중\n(매일 오전 ARIA 실행 후 활성화)")
-        return {"hunted": 0, "alerted": 0}
-
-    if not _aria_baseline_exists():
+        # [Bug Fix] 중복 체크 제거: baseline 없어도 fallback 레짐으로 계속 진행.
+        # 이전 코드는 여기서 즉시 return해버려 aria_adapter의 fallback 로직이
+        # 절대 실행되지 않았음. 이제 경고만 남기고 load_aria_context()가
+        # fallback을 처리하도록 위임.
         log.warning("  ⚠️  ARIA baseline 없음 — fallback 레짐으로 계속 진행")
-        # fallback은 load_aria_context() 내부에서 자동 처리됨
 
     aria = _load_aria_context()
     regime_source = aria.get("regime_source", "none")
