@@ -19,6 +19,8 @@ on:
 jobs:
   run-aria:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # [Fix] Node.js 20 deprecation 대응 (2026-06-02 강제 전환)
     permissions:
       contents: write
 
