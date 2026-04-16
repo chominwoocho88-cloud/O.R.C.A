@@ -49,7 +49,8 @@ jobs:
           TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
           GH_TOKEN:            ${{ secrets.GH_TOKEN }}
           GH_REPO:             ${{ secrets.GH_REPO }}
-          ANTHROPIC_MODEL:     "claude-sonnet-4-20250514"
+          ARIA_MODEL:          "claude-sonnet-4-6"
+          ANTHROPIC_MODEL:     "claude-sonnet-4-6"
           MAX_THINKING_TOKENS: "8000"
           SUBAGENT_MODEL:      "claude-haiku-4-5-20251001"
           FRED_API_KEY:        ${{ secrets.FRED_API_KEY }}
@@ -71,7 +72,8 @@ jobs:
           TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
           GH_TOKEN:            ${{ secrets.GH_TOKEN }}
           GH_REPO:             ${{ secrets.GH_REPO }}
-          ANTHROPIC_MODEL:     "claude-sonnet-4-20250514"
+          ARIA_MODEL:          "claude-sonnet-4-6"
+          ANTHROPIC_MODEL:     "claude-sonnet-4-6"
           MAX_THINKING_TOKENS: "8000"
           SUBAGENT_MODEL:      "claude-haiku-4-5-20251001"
           FRED_API_KEY:        ${{ secrets.FRED_API_KEY }}
@@ -110,14 +112,12 @@ jobs:
         run: |
           python3 -c "
           import json
-          from pathlib import Path
           from aria_notify import send_monthly_report
           from aria_analysis import extract_monthly_lessons
+          from aria_paths import MEMORY_FILE, ACCURACY_FILE
           send_monthly_report()
-          mem = Path('memory.json') if Path('memory.json').exists() else Path('data/memory.json')
-          acc = Path('accuracy.json') if Path('accuracy.json').exists() else Path('data/accuracy.json')
-          memory   = json.loads(mem.read_text()) if mem.exists() else []
-          accuracy = json.loads(acc.read_text()) if acc.exists() else {}
+          memory   = json.loads(MEMORY_FILE.read_text(encoding='utf-8')) if MEMORY_FILE.exists() else []
+          accuracy = json.loads(ACCURACY_FILE.read_text(encoding='utf-8')) if ACCURACY_FILE.exists() else {}
           extract_monthly_lessons(memory, accuracy)
           "
 
