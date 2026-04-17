@@ -1,0 +1,106 @@
+{
+  "analysis_date": "2026-04-17",
+  "analysis_time": "23:56 KST",
+  "mode": "EVENING",
+  "mode_label": "저녁 마감",
+  "one_line_summary": "나스닥 24,479·S&P 7,134 강세 유지 중이나 브렌트 $103 고착·VIX 17.73 정상화 속 유가 2차 파급(인플레 재가속→FOMC 강경) 위험 과소평가 경계, 확신 판단 유보",
+  "market_regime": "위험선호(조건부) — Devil 반론: 유가 충격 2차 파급 시 위험회피 전환 경고",
+  "trend_phase": "상승추세",
+  "trend_strategy": {
+    "recommended": "반도체·AI 섹터 분할 추종 매수 유지, 단기 급등 구간 익절 병행. 에너지 상류(E&P·방산) 소량 헤지 편입 고려",
+    "caution": "나스닥 3일+ 연속 상승 후 블랙스완 리스크 경계. 브렌트 $115/bbl 도달 시 FOMC 강경 전환→기술주 밸류에이션 재조정(-5~8%) 시나리오 현실화 가능. FG 70(Greed) 구간은 역사적으로 단기 되돌림 빈도 높음",
+    "difficulty": "높음"
+  },
+  "confidence_overall": "낮음",
+  "consensus_level": "낮음",
+  "top_headlines": [
+    {
+      "headline": "TSMC Q1 순이익 +58% YoY 어닝 비트 — AI칩 수요 $500B 시장 추정 강화",
+      "signal_tag": "반도체 강세",
+      "impact": "높음"
+    },
+    {
+      "headline": "ASML 실적 상향 발표, 중국 수출 규제 강화로 중국 매출 비중 ~20% 유지 압력",
+      "signal_tag": "반도체 장비 혼재",
+      "impact": "높음"
+    },
+    {
+      "headline": "브렌트유 $103/bbl 고착, Q2 $115/bbl 전망 — 호르무즈 봉쇄 장기화 우려",
+      "signal_tag": "에너지 쇼크 경고",
+      "impact": "높음"
+    },
+    {
+      "headline": "코스피 외국인 4월 초 5.25조 원 순매수 전환 — 3월 35조 원 순매도 이후 재유입",
+      "signal_tag": "수급 회복",
+      "impact": "보통"
+    },
+    {
+      "headline": "VIX 17.73 정상화 — 극단공포 해소 확인, 단 방향 확신 신뢰도 낮음",
+      "signal_tag": "변동성 완화",
+      "impact": "보통"
+    }
+  ],
+  "volatility_index": {
+    "vkospi": "미제공",
+    "vix": "17.73",
+    "fear_greed": "70 (Greed)",
+    "level": "중립~탐욕",
+    "interpretation": "VIX 17.73은 극단공포 해소 후 정상화 구간으로 위험선호 전환 신호. 단 Fear&Greed 70(Greed) 구간은 과열 경계선 접근으로 단기 되돌림 빈도 역사적으로 높음. FG 미반영 시 방향 예측 정확도 17% 수준으로 단독 확신 판단 금지. 나스닥·코스피 가격 흐름을 1순위 신호로 활용할 것"
+  },
+  "retail_reversal_signal": {
+    "retail_behavior": "3월 외국인 35조 원 대규모 순매도 이후 4월 1~10일 5.25조 원 순매수 전환. 국내 개인투자자는 3월 급락 구간에서 역매수(저가 매집) 후 현재 수익권 진입 추정. 개인 단기 차익실현 물량 출회 가능성 상존",
+    "contrarian_implication": "외국인 재유입 초기 단계로 추가 매수 여력 존재하나, 개인 차익실현 압력이 상승 속도 제한. 방향 전환 신호는 아니나 속도 조절 필요. 외국인 수급 데이터 결측으로 신뢰도 제한",
+    "reliability": "보통"
+  },
+  "outflows": [
+    {
+      "zone": "에너지 다소비 섹터 (항공·해운·정유 하류)",
+      "reason": "호르무즈 봉쇄로 브렌트 $103/bbl 고착, Q2 $115/bbl 예상. 연료비 급등으로 수익성 직격",
+      "severity": "높음",
+      "data_point": "OPEC+ 생산 42.4 mb/d(2월 51.8에서 급감), 사우디 -3.15 mb/d, 이라크 -3.0 mb/d"
+    },
+    {
+      "zone": "중국 노출 반도체 장비주",
+      "reason": "ASML 중국 수출 규제 강화 → 중국 매출 비중 ~20% 수준 하향 압력. HBM·DRAM 공급망 교란 2차 파급 경로 주의",
+      "severity": "보통",
+      "data_point": "ASML 2026년 Low-NA EUV 60대 이상 출하 계획, 중국 매출 ~20% 유지 예상"
+    },
+    {
+      "zone": "경기소비재·일반 소비주",
+      "reason": "에너지 가격 급등 → 가처분소득 감소 우려. 유가 $115/bbl 시나리오에서 소비심리 위축 및 CPI 재가속 압력",
+      "severity": "보통",
+      "data_point": "EIA Q2 2026 브렌트 피크 $115/bbl 전망; 글로벌 수요 성장 0.6 mb/d로 반토막"
+    }
+  ],
+  "thesis_killers": [],
+  "data_quality": "ok",
+  "jackal_candidate_review": {
+    "analysis_date": "2026-04-17",
+    "market_bias": "mixed",
+    "market_bias_label": "혼조/관망",
+    "reviewed_count": 0,
+    "aligned_count": 0,
+    "neutral_count": 0,
+    "opposed_count": 0,
+    "follow_count": 0,
+    "watch_count": 0,
+    "avoid_count": 0,
+    "highlights": []
+  },
+  "jackal_probability_summary": {
+    "window_days": 90,
+    "min_samples": 3,
+    "overall": {
+      "wins": 0,
+      "losses": 0,
+      "total": 0,
+      "win_rate": 0.0,
+      "qualified": false
+    },
+    "trusted_families": [],
+    "cautious_families": [],
+    "alignment_summary": {},
+    "best_aligned_families": [],
+    "best_opposed_families": []
+  }
+}

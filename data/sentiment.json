@@ -2,25 +2,25 @@
   "history": [
     {
       "date": "2026-04-17",
-      "score": 63,
+      "score": 62,
       "level": "탐욕",
       "emoji": "😏",
       "components": {
         "시장레짐": 70,
         "추세방향": 70,
         "변동성지수": 72,
-        "자금흐름": 50,
+        "자금흐름": 40,
         "반론강도": 65,
         "한국시장": 40,
         "숨은시그널": 35
       },
-      "regime": "위험선호(반론 제기 중 - 유가충격 2차 파급 시 위험회피 전환 가능)",
+      "regime": "위험선호(조건부) — Devil 반론: 유가 충격 2차 파급 시 위험회피 전환 경고",
       "trend": "상승추세",
       "vix_level": "중립~탐욕",
-      "vix_val": 17.94,
+      "vix_val": 17.73,
       "vkospi_val": 15.0,
       "fear_greed": 70.0,
-      "internal_raw": 60.0,
+      "internal_raw": 58.507462686567166,
       "divergence": false,
       "fred_score": 50,
       "fred_indicators": {}
@@ -28,25 +28,25 @@
   ],
   "current": {
     "date": "2026-04-17",
-    "score": 63,
+    "score": 62,
     "level": "탐욕",
     "emoji": "😏",
     "components": {
       "시장레짐": 70,
       "추세방향": 70,
       "변동성지수": 72,
-      "자금흐름": 50,
+      "자금흐름": 40,
       "반론강도": 65,
       "한국시장": 40,
       "숨은시그널": 35
     },
-    "regime": "위험선호(반론 제기 중 - 유가충격 2차 파급 시 위험회피 전환 가능)",
+    "regime": "위험선호(조건부) — Devil 반론: 유가 충격 2차 파급 시 위험회피 전환 경고",
     "trend": "상승추세",
     "vix_level": "중립~탐욕",
-    "vix_val": 17.94,
+    "vix_val": 17.73,
     "vkospi_val": 15.0,
     "fear_greed": 70.0,
-    "internal_raw": 60.0,
+    "internal_raw": 58.507462686567166,
     "divergence": false,
     "fred_score": 50,
     "fred_indicators": {}
@@ -59,5 +59,5 @@
     "max_30d": 50,
     "avg_30d": 50
   },
-  "last_updated": "2026-04-17T08:05:40.470077+09:00"
+  "last_updated": "2026-04-17T23:56:32.128921+09:00"
 }
