@@ -37,6 +37,22 @@ LESSONS_REGIME_FILE   = _DATA_DIR / "lessons_regime.json"    # 레짐별 cap 40
 LESSONS_PATTERN_FILE  = _DATA_DIR / "lessons_pattern.json"  # 조건별 통계 룰 60슬롯
 
 _RESEARCH_SESSION_ID: str | None = None
+_DYNAMIC_FETCH_SUMMARY: dict[str, object] = {}
+
+
+def _hist_coverage_snapshot() -> dict[str, object]:
+    dates = sorted(HIST_DATA.keys())
+    return {
+        "trading_days": len(dates),
+        "first_date": dates[0] if dates else "",
+        "last_date": dates[-1] if dates else "",
+    }
+
+
+def _store_dynamic_fetch_summary(summary: dict[str, object]) -> dict[str, object]:
+    global _DYNAMIC_FETCH_SUMMARY
+    _DYNAMIC_FETCH_SUMMARY = summary
+    return summary
 
 
 def _default_accuracy_state() -> dict:
@@ -1444,13 +1460,7 @@ def update_research_weights_from_accuracy(accuracy_data: dict) -> list:
     weights = _load(WEIGHTS_FILE, _default_weights_state())
     conf = weights.get("prediction_confidence", {})
 
-    recent: dict[str, dict[str, int]] = {}
-    for snap in accuracy_data.get("history_by_category", [])[-30:]:
-        for cat, stats in snap.get("by_category", {}).items():
-            bucket = recent.setdefault(cat, {"correct": 0, "total": 0})
-            bucket["correct"] += stats.get("correct", 0)
-            bucket["total"] += stats.get("total", 0)
-
+    recent = _summarize_weight_update_window(accuracy_data)
     changes = []
     for cat, stats in recent.items():
         if stats["total"] < 3:
@@ -1470,6 +1480,46 @@ def update_research_weights_from_accuracy(accuracy_data: dict) -> list:
         _save(WEIGHTS_FILE, weights)
 
     return changes
+
+
+def _summarize_weight_update_window(accuracy_data: dict) -> dict[str, dict[str, int]]:
+    recent: dict[str, dict[str, int]] = {}
+    for snap in accuracy_data.get("history_by_category", [])[-30:]:
+        for cat, stats in snap.get("by_category", {}).items():
+            bucket = recent.setdefault(cat, {"correct": 0, "total": 0})
+            bucket["correct"] += stats.get("correct", 0)
+            bucket["total"] += stats.get("total", 0)
+    return recent
+
+
+def _describe_weight_update_readiness(accuracy_data: dict) -> str:
+    recent = _summarize_weight_update_window(accuracy_data)
+    if not recent:
+        return "최근 30개 accuracy 스냅샷에 카테고리 데이터가 없습니다."
+
+    eligible = {cat: stats for cat, stats in recent.items() if stats["total"] >= 3}
+    if not eligible:
+        tops = sorted(
+            recent.items(),
+            key=lambda item: item[1]["total"],
+            reverse=True,
+        )[:3]
+        preview = ", ".join(f"{cat} {stats['total']}건" for cat, stats in tops) or "없음"
+        return f"최근 30개 스냅샷 기준 3건 이상 카테고리가 없습니다. 상위 표본: {preview}"
+
+    neutral = []
+    for cat, stats in sorted(eligible.items()):
+        acc = stats["correct"] / stats["total"] if stats["total"] else 0.0
+        if 0.4 < acc < 0.7:
+            neutral.append(f"{cat} {acc:.0%}/{stats['total']}건")
+    if neutral:
+        return "임계값 미도달: " + ", ".join(neutral[:4])
+
+    preview = ", ".join(
+        f"{cat} {stats['correct']}/{stats['total']}"
+        for cat, stats in list(sorted(eligible.items()))[:4]
+    )
+    return f"조정 가능한 표본은 있으나 weight 변화가 발생하지 않았습니다. {preview}"
 
 
 def extract_lessons(results, analysis, date):
@@ -1626,7 +1676,7 @@ def _vix_to_fg(vix: float) -> tuple:
     return 5, "Extreme Fear"
 
 
-def _fetch_dynamic_hist(months: int = 6) -> None:
+def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
     """
     yfinance로 최근 N개월 시장 데이터를 HIST_DATA에 동적 추가.
     - HIST_DATA에 이미 있는 날짜는 하드코딩 값 우선 (더 정확)
@@ -1638,6 +1688,28 @@ def _fetch_dynamic_hist(months: int = 6) -> None:
 
     today = _date.today()
     start = today - timedelta(days=int(months * 30.5) + 10)
+    before = _hist_coverage_snapshot()
+    summary: dict[str, object] = {
+        "requested_months": int(months),
+        "requested_start": str(start),
+        "requested_end": str(today),
+        "initial_trading_days": before["trading_days"],
+        "initial_first_date": before["first_date"],
+        "initial_last_date": before["last_date"],
+        "expected_extension": bool(before["first_date"] and str(start) < str(before["first_date"])),
+        "fetched_ticker_count": 0,
+        "tickers_with_data": [],
+        "ticker_observations": {},
+        "ticker_failures": {},
+        "added_days": 0,
+        "effective_trading_days": before["trading_days"],
+        "effective_first_date": before["first_date"],
+        "effective_last_date": before["last_date"],
+        "data_source": "hardcoded_only",
+        "empty_extension_warning": False,
+        "warning": "",
+        "status": "started",
+    }
 
     print(f"\n📥 {months}개월 데이터 동적 fetch: {start} ~ {today}")
 
@@ -1669,9 +1741,11 @@ def _fetch_dynamic_hist(months: int = 6) -> None:
                 )
             except Exception as exc:
                 print(f"  {yt} yfinance fetch 실패 — {exc}")
+                summary["ticker_failures"][yt] = str(exc)
                 continue
 
             if raw is None or raw.empty:
+                summary["ticker_observations"][yt] = 0
                 continue
 
             closes = raw["Close"] if "Close" in raw.columns else raw.squeeze()
@@ -1680,15 +1754,27 @@ def _fetch_dynamic_hist(months: int = 6) -> None:
             except Exception:
                 pass
             if getattr(closes, "empty", False):
+                summary["ticker_observations"][yt] = 0
                 continue
 
             closes_map[yt] = closes
+            summary["tickers_with_data"].append(yt)
+            summary["ticker_observations"][yt] = int(len(closes))
             for idx in closes.index:
                 all_dates.add(idx.strftime("%Y-%m-%d"))
 
         if not closes_map:
             print("  yfinance 데이터 없음 — 스킵")
-            return
+            summary["status"] = "no_data"
+            summary["fetched_ticker_count"] = 0
+            summary["empty_extension_warning"] = bool(summary["expected_extension"])
+            if summary["empty_extension_warning"]:
+                summary["warning"] = (
+                    f"요청한 {months}개월 확장을 위한 추가 데이터가 수집되지 않았습니다. "
+                    "현재 백테스트는 하드코딩 HIST_DATA 범위만 사용합니다."
+                )
+                print(f"  ⚠️ {summary['warning']}")
+            return _store_dynamic_fetch_summary(summary)
 
         dates_list = sorted(all_dates)
 
@@ -1756,16 +1842,83 @@ def _fetch_dynamic_hist(months: int = 6) -> None:
 
         global DATES
         DATES = sorted(HIST_DATA.keys())
+        after = _hist_coverage_snapshot()
+        summary["status"] = "completed"
+        summary["fetched_ticker_count"] = len(summary["tickers_with_data"])
+        summary["added_days"] = added
+        summary["effective_trading_days"] = after["trading_days"]
+        summary["effective_first_date"] = after["first_date"]
+        summary["effective_last_date"] = after["last_date"]
+        summary["data_source"] = "dynamic_extended" if added > 0 else "hardcoded_only"
+        summary["empty_extension_warning"] = bool(summary["expected_extension"] and added == 0)
+        if summary["empty_extension_warning"]:
+            summary["warning"] = (
+                f"요청한 {months}개월 확장에서 추가 거래일이 0일입니다. "
+                f"실제 사용 범위는 {after['trading_days']}거래일 "
+                f"({after['first_date']} ~ {after['last_date']})입니다."
+            )
         print(f"  ✅ {added}일 추가 → 총 {len(DATES)}거래일 ({DATES[0]} ~ {DATES[-1]})")
+        print(
+            "  ↳ data_source="
+            f"{summary['data_source']} | requested={summary['requested_months']}m | "
+            f"effective_days={summary['effective_trading_days']}"
+        )
+        if summary["empty_extension_warning"]:
+            print(f"  ⚠️ {summary['warning']}")
+        return _store_dynamic_fetch_summary(summary)
 
     except Exception as e:
+        summary["status"] = "failed"
+        summary["warning"] = str(e)
         print(f"  동적 fetch 실패: {e}")
         import traceback; traceback.print_exc()
+        return _store_dynamic_fetch_summary(summary)
 
 
-def _fetch_recent_data() -> None:
-    """하위호환 래퍼 — _fetch_dynamic_hist(months=1) 호출."""
-    _fetch_dynamic_hist(months=1)
+def _fetch_recent_data() -> dict[str, object]:
+    """하위호환 요약 — 동적 확장 없이 현재 HIST_DATA 범위만 사용."""
+    current = _hist_coverage_snapshot()
+    return _store_dynamic_fetch_summary({
+        "requested_months": 0,
+        "requested_start": current["first_date"],
+        "requested_end": current["last_date"],
+        "initial_trading_days": current["trading_days"],
+        "initial_first_date": current["first_date"],
+        "initial_last_date": current["last_date"],
+        "expected_extension": False,
+        "fetched_ticker_count": 0,
+        "tickers_with_data": [],
+        "ticker_observations": {},
+        "ticker_failures": {},
+        "added_days": 0,
+        "effective_trading_days": current["trading_days"],
+        "effective_first_date": current["first_date"],
+        "effective_last_date": current["last_date"],
+        "data_source": "hardcoded_only",
+        "empty_extension_warning": False,
+        "warning": "",
+        "status": "skipped",
+    })
+
+
+def _print_dynamic_fetch_summary() -> None:
+    summary = dict(_DYNAMIC_FETCH_SUMMARY or {})
+    if not summary:
+        return
+    print(
+        "  데이터 범위 : "
+        f"{summary.get('data_source', 'unknown')} | "
+        f"requested={summary.get('requested_months', 0)}m | "
+        f"added={summary.get('added_days', 0)}일 | "
+        f"effective={summary.get('effective_trading_days', 0)}거래일"
+    )
+    first_date = summary.get("effective_first_date", "")
+    last_date = summary.get("effective_last_date", "")
+    if first_date and last_date:
+        print(f"  사용 구간   : {first_date} ~ {last_date}")
+    warning = str(summary.get("warning") or "")
+    if warning:
+        print(f"  경고       : {warning}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -2154,7 +2307,7 @@ def run_walk_forward(dry: bool = False) -> dict:
         if changes:
             for ch in changes: print(f"   → {ch}")
         else:
-            print("   변경 없음 (데이터 부족)")
+            print(f"   변경 없음 ({_describe_weight_update_readiness(acc_data)})")
     except Exception as e:
         print(f"   스킵: {e}")
 
@@ -2169,6 +2322,7 @@ def run_walk_forward(dry: bool = False) -> dict:
     print(f"{'─' * 65}")
     print(f"  Final Pass{'':>5} {'전체':>8} {final_acc:>6}%  {final_c:>5}/{final_j}")
     print(f"{'=' * 65}")
+    _print_dynamic_fetch_summary()
 
     acc_data = _load(ACCURACY_FILE, {})
     print(f"\n  누적 교훈 : {_count_lessons()}개")
@@ -2187,6 +2341,11 @@ def run_walk_forward(dry: bool = False) -> dict:
         "lesson_count": _count_lessons(),
         "strong_areas": acc_data.get("strong_areas", []),
         "weak_areas": acc_data.get("weak_areas", []),
+        "dynamic_fetch": dict(_DYNAMIC_FETCH_SUMMARY),
+        "requested_months": (_DYNAMIC_FETCH_SUMMARY or {}).get("requested_months", 0),
+        "added_days": (_DYNAMIC_FETCH_SUMMARY or {}).get("added_days", 0),
+        "effective_trading_days": (_DYNAMIC_FETCH_SUMMARY or {}).get("effective_trading_days", len(DATES)),
+        "data_source": (_DYNAMIC_FETCH_SUMMARY or {}).get("data_source", "hardcoded_only"),
     }
         
 def main():
@@ -2198,6 +2357,8 @@ def main():
                         help="백테스트 기간 확장 (개월). 0=HIST_DATA만, 6=최근 6개월 yfinance 추가")
     parser.add_argument("--walk-forward",   action="store_true",
                         help="Walk-Forward Optimization 실행 (월별 순차 학습 → Final Pass)")
+    parser.add_argument("--fail-on-empty-dynamic-fetch", action="store_true",
+                        help="개월 확장을 요청했는데 추가 거래일이 0일이면 즉시 실패")
     args = parser.parse_args()
 
     _RESEARCH_SESSION_ID = start_backtest_session(
@@ -2207,6 +2368,7 @@ def main():
             "dry": args.dry,
             "months": args.months,
             "walk_forward": args.walk_forward,
+            "fail_on_empty_dynamic_fetch": args.fail_on_empty_dynamic_fetch,
         },
     )
 
@@ -2216,6 +2378,8 @@ def main():
             _fetch_dynamic_hist(months=args.months)
         else:
             _fetch_recent_data()
+        if args.fail_on_empty_dynamic_fetch and (_DYNAMIC_FETCH_SUMMARY or {}).get("empty_extension_warning"):
+            raise RuntimeError(str((_DYNAMIC_FETCH_SUMMARY or {}).get("warning") or "동적 데이터 확장 실패"))
 
         # Walk-Forward 모드
         if args.walk_forward:
@@ -2298,7 +2462,7 @@ def main():
             if changes:
                 for c in changes: print(f"   → {c}")
             else:
-                print("   변경 없음 (데이터 부족)")
+                print(f"   변경 없음 ({_describe_weight_update_readiness(acc)})")
         except Exception as e:
             print(f"   스킵: {e}")
 
@@ -2315,6 +2479,7 @@ def main():
         print(f"   생성된 교훈: {len(lessons.get('lessons',[]))}개")
         if acc.get("strong_areas"): print(f"   강점: {acc['strong_areas']}")
         if acc.get("weak_areas"):   print(f"   약점: {acc['weak_areas']}")
+        _print_dynamic_fetch_summary()
         print(f"   → 연구 세션에만 저장됨 (운영 MORNING 상태와 분리)")
         print("=" * 65)
         summary = {
@@ -2328,6 +2493,11 @@ def main():
             "lesson_count": len(lessons.get("lessons", [])),
             "strong_areas": acc.get("strong_areas", []),
             "weak_areas": acc.get("weak_areas", []),
+            "dynamic_fetch": dict(_DYNAMIC_FETCH_SUMMARY),
+            "requested_months": (_DYNAMIC_FETCH_SUMMARY or {}).get("requested_months", 0),
+            "added_days": (_DYNAMIC_FETCH_SUMMARY or {}).get("added_days", 0),
+            "effective_trading_days": (_DYNAMIC_FETCH_SUMMARY or {}).get("effective_trading_days", len(DATES)),
+            "data_source": (_DYNAMIC_FETCH_SUMMARY or {}).get("data_source", "hardcoded_only"),
         }
         finish_backtest_session(_RESEARCH_SESSION_ID, "completed", summary=summary)
         print(f"\n🗃️ Research session saved to SQLite: {_RESEARCH_SESSION_ID}")
@@ -2338,7 +2508,14 @@ def main():
                 finish_backtest_session(
                     _RESEARCH_SESSION_ID,
                     "failed",
-                    summary={"error": str(e)},
+                    summary={
+                        "error": str(e),
+                        "dynamic_fetch": dict(_DYNAMIC_FETCH_SUMMARY),
+                        "requested_months": (_DYNAMIC_FETCH_SUMMARY or {}).get("requested_months", args.months),
+                        "added_days": (_DYNAMIC_FETCH_SUMMARY or {}).get("added_days", 0),
+                        "effective_trading_days": (_DYNAMIC_FETCH_SUMMARY or {}).get("effective_trading_days", len(DATES)),
+                        "data_source": (_DYNAMIC_FETCH_SUMMARY or {}).get("data_source", "hardcoded_only"),
+                    },
                 )
             except Exception:
                 pass
