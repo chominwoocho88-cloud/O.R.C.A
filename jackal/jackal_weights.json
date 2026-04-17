@@ -1,7 +1,7 @@
-﻿{
+{
   "signal_weights": {
-    "bb_touch": 0.95,
-    "rsi_oversold": 0.95,
+    "bb_touch": 1.0,
+    "rsi_oversold": 1.0,
     "volume_climax": 1.0,
     "ma_support": 1.0,
     "momentum_dip": 1.0,
@@ -42,7 +42,7 @@
       "total": 0
     }
   },
-  "last_updated": "2026-04-16T08:20:53.791894",
+  "last_updated": "2026-04-17T15:37:05.068407",
   "rule_registry_status": {
     "sector_rebound_base": {
       "active": true,
@@ -197,17 +197,5 @@
       "mae_source": "backtest_60d"
     }
   },
-  "last_evolved_at": "2026-04-16T08:20:53.791888",
-  "last_macro_gate": {
-    "risk_level": "normal",
-    "score_penalty": 5,
-    "vix": 20.0,
-    "yield_curve": 0.0,
-    "hy_chg5": 0.0,
-    "reason": "ARIA위험회피",
-    "checked_at": "2026-04-17T08:11:50.530580+09:00"
-  },
-  "_reset_at": "2026-04-16T16:44:02.036366+09:00",
-  "_note": "orca_reset.py executed",
-  "swing_type_optimal": {}
+  "last_evolved_at": "2026-04-17T15:37:05.068403"
 }
