@@ -1,4 +1,4 @@
-﻿"""
+"""
 JACKAL scanner module.
 Jackal Scanner — Analyst → Devil → Final 3단계 타점 분석
 
@@ -18,6 +18,7 @@ import sys
 import json
 import re
 import logging
+import argparse
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -27,6 +28,7 @@ from anthropic import Anthropic
 from orca.paths import DATA_FILE, atomic_write_json
 from orca.state import (
     list_jackal_recommendations,
+    list_candidates,
     load_jackal_cooldown_state,
     load_latest_jackal_weight_snapshot,
     record_jackal_shadow_signal,
@@ -120,6 +122,116 @@ def _load_portfolio() -> dict:
     except Exception as e:
         log.warning(f"portfolio.json 로드 실패: {e} — 기본값 사용")
         return default
+
+
+def _load_candidate_watchlist(*, max_age_days: int = 7, limit: int = 20) -> dict:
+    """
+    ORCA candidate registry의 최근 JACKAL 후보를 스캔 watchlist로 승격.
+    portfolio가 비어 있어도 Scanner가 학습 후보를 다시 점검할 수 있게 한다.
+    """
+    now = datetime.now(KST)
+    watchlist: dict[str, dict] = {}
+    try:
+        candidates = list_candidates(source_system="jackal", unresolved_only=True, limit=max(limit * 3, 30))
+    except Exception as exc:
+        log.warning(f"candidate watchlist 로드 실패: {exc}")
+        return {}
+
+    for candidate in candidates:
+        ticker = str(candidate.get("ticker", "")).strip()
+        if not ticker:
+            continue
+        source_type = str(candidate.get("source_event_type", "")).strip().lower()
+        if source_type not in {"hunt", "shadow", "scan"}:
+            continue
+        detected_at = str(candidate.get("detected_at", "")).strip()
+        try:
+            dt = datetime.fromisoformat(detected_at) if detected_at else None
+            if dt and dt.tzinfo is None:
+                dt = dt.replace(tzinfo=KST)
+            if dt and (now - dt.astimezone(KST)) > timedelta(days=max_age_days):
+                continue
+        except Exception:
+            pass
+
+        payload = candidate.get("payload", {}) or {}
+        market = str(candidate.get("market") or payload.get("market") or ("KR" if ticker.endswith(".KS") else "US"))
+        watchlist[ticker] = {
+            "name": candidate.get("name") or payload.get("name") or ticker,
+            "avg_cost": None,
+            "market": market,
+            "currency": payload.get("currency") or ("₩" if market == "KR" else "$"),
+            "portfolio": False,
+            "source": f"candidate:{source_type}",
+            "reason": payload.get("reason") or payload.get("orca_reason") or candidate.get("signal_family", ""),
+            "candidate_id": candidate.get("candidate_id"),
+        }
+        if len(watchlist) >= limit:
+            break
+    return watchlist
+
+
+def _load_recommendation_watchlist(*, max_age_hours: int = 72, limit: int = 20) -> dict:
+    """
+    최근 recommendation log를 watchlist로 재사용.
+    Scanner가 ORCA 추천 종목을 같은 세션/다음 세션에서 다시 검토할 수 있게 한다.
+    """
+    now = datetime.now(KST)
+    watchlist: dict[str, dict] = {}
+    for entry in reversed(_load_recommendation_log()):
+        ticker = str(entry.get("ticker", "")).strip()
+        if not ticker or ticker in watchlist:
+            continue
+        ts = str(entry.get("recommended_at", "")).strip()
+        try:
+            dt = datetime.fromisoformat(ts) if ts else None
+            if dt and dt.tzinfo is None:
+                dt = dt.replace(tzinfo=KST)
+            if dt and (now - dt.astimezone(KST)) > timedelta(hours=max_age_hours):
+                continue
+        except Exception:
+            pass
+
+        market = str(entry.get("market") or ("KR" if ticker.endswith(".KS") else "US"))
+        watchlist[ticker] = {
+            "name": entry.get("name", ticker),
+            "avg_cost": None,
+            "market": market,
+            "currency": entry.get("currency") or ("₩" if market == "KR" else "$"),
+            "portfolio": False,
+            "source": "recommendation_log",
+            "reason": entry.get("reason", ""),
+        }
+        if len(watchlist) >= limit:
+            break
+    return watchlist
+
+
+def _merge_watchlists(*sources: dict) -> dict:
+    merged: dict[str, dict] = {}
+    for source in sources:
+        for ticker, info in (source or {}).items():
+            if ticker not in merged:
+                merged[ticker] = dict(info)
+            else:
+                merged[ticker].update({k: v for k, v in info.items() if v not in (None, "", [])})
+                merged[ticker]["portfolio"] = bool(merged[ticker].get("portfolio")) or bool(info.get("portfolio"))
+    return merged
+
+
+def _save_watchlist_snapshot(watchlist: dict) -> None:
+    payload = {
+        "generated_at": datetime.now(KST).isoformat(),
+        "tickers": list(watchlist.keys()),
+        "details": watchlist,
+        "counts": {
+            "total": len(watchlist),
+            "portfolio": sum(1 for info in watchlist.values() if info.get("portfolio")),
+            "candidate": sum(1 for info in watchlist.values() if str(info.get("source", "")).startswith("candidate:")),
+            "recommendation": sum(1 for info in watchlist.values() if info.get("source") == "recommendation_log"),
+        },
+    }
+    atomic_write_json(JACKAL_WATCHLIST, payload)
 
 ALERT_THRESHOLD = 65
 STRONG_THRESHOLD = 78
@@ -1386,7 +1498,7 @@ def _build_summary_message(results: list, macro: dict, aria: dict) -> str:
     top_score = max((r["final_score"] for r in results), default=0)
 
     lines = [
-        "📊 <b>Jackal Hunter — 타점 없음</b>",
+        "📊 <b>JACKAL Scanner — 타점 없음</b>",
         "━━━━━━━━━━━━━━━━━━━━",
         f"최고점수: {top_score:.0f}/100 (임계값 {ALERT_THRESHOLD})",
         "",
@@ -1430,7 +1542,7 @@ def _build_summary_message(results: list, macro: dict, aria: dict) -> str:
 
     if aria.get("regime"):
         lines.append(f"🌐 {aria['regime'][:35]}")
-    lines.append(f"⏰ {now_str} KST | Jackal Hunter")
+    lines.append(f"⏰ {now_str} KST | JACKAL Scanner")
     return "\n".join(lines)
 
 
@@ -1549,17 +1661,23 @@ def run_scan(force: bool = False) -> dict:
     log.info(f"   ARIA 레짐: {aria['regime'][:20] if aria['regime'] else '정보없음'} | "
              f"센티먼트: {aria['sentiment_score']}점")
 
-    # 포트폴리오 로드
+    # watchlist 구성: portfolio + candidate registry + recent recommendations
     portfolio = _load_portfolio()
+    candidate_watch = _load_candidate_watchlist()
+    recommendation_watch = _load_recommendation_watchlist()
+    base_watchlist = _merge_watchlists(portfolio, candidate_watch, recommendation_watch)
     log.info(f"   포트폴리오: {len(portfolio)}종목")
+    log.info(f"   후보 watchlist: {len(candidate_watch)}종목")
+    log.info(f"   추천 watchlist: {len(recommendation_watch)}종목")
 
-    # ARIA 기반 추가 5종목 추천 → 별도 메시지로 즉시 전송
-    extra = _suggest_extra_tickers(aria, portfolio)
+    # ARIA 기반 추가 5종목 추천 → 별도 메시지 + watchlist snapshot 반영
+    extra = _suggest_extra_tickers(aria, base_watchlist)
     if extra:
         _send_orca_extra_message(extra, aria)
 
-    # 스캔 대상은 포트폴리오만 (extra는 별도 메시지로 처리됨)
-    watchlist = portfolio
+    watchlist = _merge_watchlists(base_watchlist, extra)
+    _save_watchlist_snapshot(watchlist)
+    log.info(f"   최종 watchlist: {len(watchlist)}종목")
 
     scanned = 0
     alerted = 0
@@ -1852,6 +1970,25 @@ def run_scan(force: bool = False) -> dict:
         _send_telegram(_build_summary_message(results, macro, aria))
 
     return {"scanned": scanned, "alerted": alerted}
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="JACKAL Scanner")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="시장 개장 여부와 무관하게 스캔 실행",
+    )
+    args = parser.parse_args()
+    result = run_scan(force=args.force)
+    print(
+        f"JACKAL Scanner 완료 | scanned={result.get('scanned', 0)} | "
+        f"alerted={result.get('alerted', 0)}"
+    )
+
+
+if __name__ == "__main__":
+    main()
 
 
 
