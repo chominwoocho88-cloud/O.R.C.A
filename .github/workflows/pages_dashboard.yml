@@ -1,0 +1,65 @@
+name: ORCA Dashboard Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "reports/**"
+      - "data/**"
+      - "orca/**"
+      - ".github/workflows/pages_dashboard.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: orca-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build dashboard artifact
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          python -m orca.dashboard
+          mkdir -p site/reports
+          cp reports/dashboard.html site/reports/dashboard.html
+          cat > site/index.html <<'EOF'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta http-equiv="refresh" content="0; url=./reports/dashboard.html">
+            <title>ORCA Dashboard</title>
+          </head>
+          <body>
+            <p>Redirecting to <a href="./reports/dashboard.html">ORCA Dashboard</a>...</p>
+          </body>
+          </html>
+          EOF
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
