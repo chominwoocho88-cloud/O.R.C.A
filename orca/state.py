@@ -13,6 +13,7 @@ from jackal.families import canonical_family_key, family_label
 from .paths import STATE_DB_FILE
 
 KST = timezone(timedelta(hours=9))
+_STATE_HEALTH_EVENTS: list[dict[str, str]] = []
 
 
 def _now() -> datetime:
@@ -21,6 +22,39 @@ def _now() -> datetime:
 
 def _now_iso() -> str:
     return datetime.now(KST).isoformat()
+
+
+def _single_line_message(message: str, *, max_len: int = 160) -> str:
+    text = " ".join(str(message or "").split())
+    if len(text) <= max_len:
+        return text
+    return text[: max_len - 3] + "..."
+
+
+def _record_health_event(
+    code: str,
+    where: str,
+    exception: Exception | None = None,
+    *,
+    message: str | None = None,
+) -> None:
+    detail = {
+        "code": code,
+        "where": where,
+        "exception_type": type(exception).__name__ if exception else "",
+        "message": _single_line_message(message or (str(exception) if exception else "")),
+    }
+    _STATE_HEALTH_EVENTS.append(detail)
+
+
+def clear_health_events() -> None:
+    _STATE_HEALTH_EVENTS.clear()
+
+
+def drain_health_events() -> list[dict[str, str]]:
+    events = list(_STATE_HEALTH_EVENTS)
+    clear_health_events()
+    return events
 
 
 def _json(data: Any) -> str | None:
@@ -398,6 +432,7 @@ def init_state_db() -> None:
 
 
 def start_run(system: str, mode: str, analysis_date: str, metadata: dict | None = None) -> str:
+    clear_health_events()
     init_state_db()
     run_id = f"run_{uuid4().hex}"
     with _connect() as conn:
@@ -2592,7 +2627,13 @@ def list_candidates(
         latest_outcome: dict[str, Any] = {}
         try:
             payload = json.loads(row["payload_json"] or "{}")
-        except Exception:
+        except (json.JSONDecodeError, TypeError) as exc:
+            _record_health_event(
+                "state_payload_invalid",
+                "orca/state.py::list_candidates",
+                exc,
+                message="candidate_registry.payload_json 파싱 실패",
+            )
             payload = {}
         try:
             latest_outcome = json.loads(row["latest_outcome_json"] or "{}")
@@ -2705,7 +2746,13 @@ def list_candidate_reviews(
         payload: dict[str, Any] = {}
         try:
             payload = json.loads(row["review_json"] or "{}")
-        except Exception:
+        except (json.JSONDecodeError, TypeError) as exc:
+            _record_health_event(
+                "state_payload_invalid",
+                "orca/state.py::list_candidate_reviews",
+                exc,
+                message="candidate_reviews.review_json 파싱 실패",
+            )
             payload = {}
         results.append(
             {
@@ -2891,7 +2938,13 @@ def backfill_candidate_signal_families(*, limit: int | None = None) -> int:
         for row in rows:
             try:
                 payload = json.loads(row["payload_json"] or "{}")
-            except Exception:
+            except (json.JSONDecodeError, TypeError) as exc:
+                _record_health_event(
+                    "state_payload_invalid",
+                    "orca/state.py::backfill_candidate_signal_families",
+                    exc,
+                    message="candidate_registry.payload_json 파싱 실패",
+                )
                 payload = {}
             signals_fired = _candidate_signals_fired(payload)
             canonical_signal_family = canonical_family_key(
