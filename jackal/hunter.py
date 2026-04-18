@@ -1,4 +1,4 @@
-﻿"""
+"""
 JACKAL hunter module.
 Jackal Hunter — 100→50→25→10→5 단계별 스윙 타점 탐색
 
@@ -19,6 +19,7 @@ import json
 import re
 import logging
 import time
+import functools
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -42,9 +43,12 @@ log = logging.getLogger("jackal_hunter")
 
 KST   = timezone(timedelta(hours=9))
 _BASE = Path(__file__).parent
+_DATA_DIR = _BASE.parent / "data"
 
 HUNT_LOG_FILE  = _BASE / "hunt_log.json"
 HUNT_COOL_FILE = _BASE / "hunt_cooldown.json"
+PORTFOLIO_FILE = _DATA_DIR / "portfolio.json"
+JACKAL_WATCHLIST = _DATA_DIR / "jackal_watchlist.json"
 
 from .adapter import (
     load_orca_context as _load_orca_context,
@@ -58,11 +62,36 @@ MODEL_H          = os.environ.get("SUBAGENT_MODEL", "claude-haiku-4-5-20251001")
 ANALYZE_FINAL   = 5     # 최종 Analyst+Devil 실행 수
 HUNT_COOLDOWN_H = 6
 
-# ── 내 포트폴리오 제외 ──────────────────────────────────────────
-MY_PORTFOLIO = {
+# ── 기본 제외 포트폴리오 (portfolio.json 없을 때 fallback) ─────────────
+DEFAULT_PORTFOLIO_EXCLUSIONS = {
     "NVDA", "AVGO", "SCHD", "000660.KS",
     "005930.KS", "035720.KS", "466920.KS",
 }
+
+
+@functools.lru_cache(maxsize=1)
+def get_portfolio_exclusions() -> set[str]:
+    """
+    JACKAL Hunter에서 새 종목 발굴 시 제외할 현재 보유 종목.
+    기본값은 legacy fallback이고, portfolio.json이 있으면 ticker_yf 기준으로 대체.
+    """
+    if os.environ.get("JACKAL_EXCLUDE_PORTFOLIO", "true").lower() in {"0", "false", "no"}:
+        return set()
+
+    if not PORTFOLIO_FILE.exists():
+        return set(DEFAULT_PORTFOLIO_EXCLUSIONS)
+
+    try:
+        data = json.loads(PORTFOLIO_FILE.read_text(encoding="utf-8"))
+        excluded = {
+            str(h.get("ticker_yf", "")).strip()
+            for h in data.get("holdings", [])
+            if h.get("ticker_yf")
+        }
+        return excluded or set(DEFAULT_PORTFOLIO_EXCLUSIONS)
+    except Exception as exc:
+        log.warning(f"portfolio exclusion load 실패: {exc}")
+        return set(DEFAULT_PORTFOLIO_EXCLUSIONS)
 
 # ══════════════════════════════════════════════════════════════════
 # 고정 섹터풀 (~80 종목)
@@ -208,6 +237,7 @@ def _build_universe(aria: dict) -> list:
     """
     inflows = " ".join(aria["key_inflows"]).lower()
     universe_set = set()
+    exclusions = get_portfolio_exclusions()
 
     # ARIA 유입 섹터 풀 우선 추가
     sector_priority = []
@@ -221,14 +251,14 @@ def _build_universe(aria: dict) -> list:
             sector_priority.extend(tickers[:5])
 
     for t in sector_priority:
-        if t not in MY_PORTFOLIO:
+        if t not in exclusions:
             universe_set.add(t)
 
     # Claude 추천 20개 추가 (ARIA 뉴스 기반)
     claude_suggestions = _claude_suggest_20(aria, universe_set)
     for s in claude_suggestions:
         t = s.get("ticker", "")
-        if t and t not in MY_PORTFOLIO:
+        if t and t not in exclusions:
             universe_set.add(t)
 
     universe = list(universe_set)
@@ -241,7 +271,8 @@ def _claude_suggest_20(aria: dict, existing: set) -> list:
     headlines = "\n".join(f"  - {h}" for h in aria["top_headlines"] if h)
     actionable = "\n".join(f"  - {a}" for a in aria["actionable"] if a)
     existing_str = ", ".join(list(existing)[:20])
-    exclude_str  = ", ".join(MY_PORTFOLIO)
+    exclusions   = get_portfolio_exclusions()
+    exclude_str  = ", ".join(sorted(exclusions))
 
     prompt = f"""오늘 ARIA 시장 분석에서 스윙 가능 종목 20개를 추천하세요.
 레짐: {aria['regime']} | 요약: {aria['one_line'][:60]}
@@ -265,12 +296,55 @@ JSON만 반환:
             return []
         data = json.loads(m.group())
         sugg = [s for s in data.get("suggestions", [])
-                if s.get("ticker") and s["ticker"] not in MY_PORTFOLIO][:20]
+                if s.get("ticker") and s["ticker"] not in exclusions][:20]
         log.info(f"  Claude 추천: {[s['ticker'] for s in sugg]}")
         return sugg
     except Exception as e:
         log.error(f"  Claude 추천 실패: {e}")
         return []
+
+
+def _save_watchlist_snapshot(top5: list, aria: dict) -> None:
+    details = {}
+    for item in top5:
+        ticker = str(item.get("ticker", "")).strip()
+        if not ticker:
+            continue
+        tech = item.get("tech", {}) or {}
+        analyst = item.get("analyst", {}) or {}
+        final = item.get("final", {}) or {}
+        market = "KR" if ticker.endswith(".KS") else "US"
+        details[ticker] = {
+            "name": item.get("name", ticker),
+            "market": market,
+            "currency": "₩" if market == "KR" else "$",
+            "portfolio": False,
+            "source": "hunter_top5",
+            "reason": final.get("reason") or analyst.get("swing_setup") or ", ".join(aria.get("key_inflows", [])[:2]),
+            "signal_family": canonical_family_key(
+                signal_family=analyst.get("swing_type", ""),
+                signals_fired=analyst.get("signals_fired", []),
+            ),
+            "quality_score": final.get("final_score"),
+            "price": tech.get("price"),
+            "is_entry": bool(final.get("is_entry")),
+        }
+
+    payload = {
+        "generated_at": datetime.now(KST).isoformat(),
+        "tickers": list(details.keys()),
+        "details": details,
+        "counts": {
+            "total": len(details),
+            "hunter_top5": len(details),
+        },
+        "market_context": {
+            "regime": aria.get("regime", ""),
+            "inflows": aria.get("key_inflows", []),
+            "outflows": aria.get("key_outflows", []),
+        },
+    }
+    atomic_write_json(JACKAL_WATCHLIST, payload)
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -1511,6 +1585,11 @@ def run_hunt(force: bool = False) -> dict:
     if not top5:
         _send_status(f"📊 스캔 완료 — 타점 없음\nUniverse {len(universe)}개 → Stage4 후보 없음", aria)
         return {"hunted": 0, "alerted": 0}
+
+    try:
+        _save_watchlist_snapshot(top5, aria)
+    except Exception as watch_err:
+        log.warning(f"  watchlist snapshot 저장 실패: {watch_err}")
 
     alerted = 0
     for item in top5:
