@@ -1,4 +1,4 @@
-﻿"""
+"""
 orca_notify.py — ORCA 알림 모듈 통합
 포함: telegram · weekly · monthly · breaking · calendar
 """
@@ -47,6 +47,32 @@ def _load(path: Path, default=None):
 
 def _save(path: Path, data):
     atomic_write_json(path, data)
+
+
+def _dashboard_url() -> str:
+    explicit = os.environ.get("ORCA_DASHBOARD_URL", "").strip()
+    if explicit:
+        return explicit
+
+    repo = os.environ.get("GH_REPO", "").strip()
+    if "/" not in repo:
+        return ""
+
+    owner, name = repo.split("/", 1)
+    owner = owner.strip()
+    name = name.strip()
+    if not owner or not name:
+        return ""
+    return f"https://{owner}.github.io/{name}/reports/dashboard.html"
+
+
+def _build_health_badge(report: dict) -> str:
+    health = report.get("health") or {}
+    status = health.get("status") or "ok"
+    if status == "ok":
+        return ""
+    reasons = health.get("degraded_reasons") or ["unknown_failure"]
+    return "⚠ degraded: " + ", ".join(reasons)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -159,11 +185,15 @@ def send_report(report: dict, run_number: int) -> bool:
         "DAWN":      _build_dawn,
     }
     lines = header + builders.get(mode, _build_morning)(report)
+    dash_url = _dashboard_url()
+    if dash_url:
+        lines += ["", f"📊 <a href=\"{dash_url}\">대시보드 보기</a>"]
     lines += [
-        "",
-        "📊 <a href=\"https://chominwoocho88-cloud.github.io/aria-agent/reports/dashboard.html\">대시보드 보기</a>",
         "<code>" + ORCA_NAME + " | " + ORCA_FULL_NAME + "</code>",
     ]
+    badge = _build_health_badge(report)
+    if badge:
+        lines.append(badge)
     return send_message("\n".join(lines), reply_markup=make_buttons())
 
 
