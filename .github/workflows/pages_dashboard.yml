@@ -23,6 +23,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,10 +59,48 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Verify GitHub Pages is enabled
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.error
+          import urllib.request
+
+          repo = os.environ["REPO"]
+          token = os.environ["GH_TOKEN"]
+          url = f"https://api.github.com/repos/{repo}/pages"
+          req = urllib.request.Request(
+              url,
+              headers={
+                  "User-Agent": "ORCA Pages Check",
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+              },
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=20) as resp:
+                  data = json.load(resp)
+                  print(f"GitHub Pages enabled: {data.get('html_url', '')}")
+          except urllib.error.HTTPError as exc:
+              if exc.code == 404:
+                  print(
+                      "::error::GitHub Pages is not enabled for this repository. "
+                      "Go to Settings > Pages and set Build and deployment source to GitHub Actions, then rerun this workflow."
+                  )
+                  sys.exit(1)
+              raise
+          PY
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
