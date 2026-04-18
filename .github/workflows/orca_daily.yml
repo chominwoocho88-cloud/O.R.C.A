@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      ORCA_DASHBOARD_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/reports/dashboard.html
     permissions:
       contents: write
 
@@ -47,6 +48,7 @@ jobs:
           PYTHONIOENCODING: utf-8
           ORCA_MODE: MORNING
           GH_REPO: ${{ github.repository }}
+          ORCA_DASHBOARD_URL: ${{ env.ORCA_DASHBOARD_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -69,6 +71,7 @@ jobs:
           PYTHONIOENCODING: utf-8
           ORCA_MODE: EVENING
           GH_REPO: ${{ github.repository }}
+          ORCA_DASHBOARD_URL: ${{ env.ORCA_DASHBOARD_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -131,6 +134,9 @@ jobs:
           git add data/orca_weights.json 2>/dev/null || true
           git add data/orca_lessons.json 2>/dev/null || true
           git add data/orca_cost.json 2>/dev/null || true
+          git add data/morning_baseline.json 2>/dev/null || true
+          git add data/orca_market_data.json 2>/dev/null || true
+          git add data/breaking_sent.json 2>/dev/null || true
           git add data/sentiment.json 2>/dev/null || true
           git add data/rotation.json 2>/dev/null || true
           git add data/portfolio.json 2>/dev/null || true
