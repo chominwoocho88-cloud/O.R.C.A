@@ -41,6 +41,7 @@ from .state import (
 KST     = timezone(timedelta(hours=9))
 from .paths import MEMORY_FILE, REPORTS_DIR, atomic_write_json
 MODE    = get_orca_env("ORCA_MODE", "MORNING")
+_ORCA_PROBABILITY_MIN_SAMPLES = 5  # PR 2에서 shared learning_policy 로 이전 예정
 console = Console()
 
 
@@ -206,8 +207,8 @@ def save_memory(memory: list, analysis: dict):
         if archive_file.exists():
             try:
                 archived = json.loads(archive_file.read_text(encoding="utf-8"))
-            except (json.JSONDecodeError, OSError):
-                pass
+            except (json.JSONDecodeError, OSError) as exc:
+                print(f"⚠️ memory_archive.json 로드 실패 ({exc}) — 새로 작성", file=sys.stderr)
         archived.extend(overflow)
         atomic_write_json(archive_file, archived[-365:])
 
@@ -352,7 +353,7 @@ def print_report(report: dict, run_n: int):
 
     console.rule()
 
-def _compact_probability_summary(*, days: int = 90, min_samples: int = 5) -> dict:
+def _compact_probability_summary(*, days: int = 90, min_samples: int = _ORCA_PROBABILITY_MIN_SAMPLES) -> dict:
     summary = summarize_candidate_probabilities(days=days, min_samples=min_samples)
     trusted = [
         item for item in summary.get("best_signal_families", [])
@@ -452,7 +453,7 @@ def _collect_jackal_news(hunter_data: dict):
                         "impact":   item.get("impact", "neutral"),
                         "source":   "web_search",
                     })
-        except (json.JSONDecodeError, TypeError, ValueError, httpx.HTTPError, OSError, RuntimeError) as e:
+        except (json.JSONDecodeError, TypeError, ValueError, OSError, RuntimeError) as e:
             console.print(f"[yellow]{JACKAL_NAME} 뉴스 보완 검색 실패: {e}[/yellow]")
 
     # 저장
@@ -823,12 +824,6 @@ def main():
         )
 
     except Exception as e:
-        health_tracker.record_exception(
-            "run_failed",
-            "orca/main.py::main",
-            e,
-            message=str(e),
-        )
         failed_report = _build_minimal_failed_report()
         failed_path = save_report(failed_report)
         _finish_state("failed", report_path=str(failed_path), metadata={"error": str(e)})
