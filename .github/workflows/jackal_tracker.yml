@@ -55,6 +55,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           ARGS=""
+          [ "${{ github.event_name }}"           = "schedule" ] && ARGS="$ARGS --notify"
           [ "${{ github.event.inputs.all_entries }}" = "true" ] && ARGS="$ARGS --all"
           [ "${{ github.event.inputs.dry_run }}"    = "true" ] && ARGS="$ARGS --dry-run"
           [ "${{ github.event.inputs.notify }}"     = "true" ] && ARGS="$ARGS --notify"
@@ -66,8 +67,19 @@ jobs:
           git config user.name  "JACKAL Tracker"
           git config user.email "tracker@orca-agent"
 
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          db = Path("data/orca_state.db")
+          if db.exists():
+              conn = sqlite3.connect(db)
+              conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+              conn.close()
+          PY
+
           git add jackal/hunt_log.json       2>/dev/null || true
           git add jackal/jackal_weights.json 2>/dev/null || true
+          git add -f data/orca_state.db      2>/dev/null || true
 
           git stash
           git fetch origin main
@@ -76,6 +88,7 @@ jobs:
 
           git add jackal/hunt_log.json       2>/dev/null || true
           git add jackal/jackal_weights.json 2>/dev/null || true
+          git add -f data/orca_state.db      2>/dev/null || true
 
           git diff --cached --quiet || \
             git commit -m "📍 JACKAL Tracker: outcome 추적 $(date +'%Y-%m-%d %H:%M') [skip ci]"
