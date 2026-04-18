@@ -1,4 +1,4 @@
-"""SQLite-backed state spine for ORCA runs, predictions, and outcomes."""
+﻿"""SQLite-backed state spine for ORCA runs, predictions, and outcomes."""
 from __future__ import annotations
 
 import json
