@@ -197,5 +197,14 @@
       "mae_source": "backtest_60d"
     }
   },
-  "last_evolved_at": "2026-04-18T14:46:47.374637"
+  "last_evolved_at": "2026-04-18T14:46:47.374637",
+  "last_macro_gate": {
+    "risk_level": "normal",
+    "score_penalty": 0,
+    "vix": 20.0,
+    "yield_curve": 0.0,
+    "hy_chg5": 0.0,
+    "reason": "정상",
+    "checked_at": "2026-04-19T00:20:06.421381+09:00"
+  }
 }
