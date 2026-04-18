@@ -4,6 +4,7 @@ data/morning_baseline.json
 data/breaking_sent.json
 data/pattern_db.json
 data/jackal_shadow_accuracy.json
+data/jackal_technicals_cache.json
 data/orca_state.db
 data/orca_state.db-shm
 data/orca_state.db-wal
