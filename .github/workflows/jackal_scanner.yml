@@ -1,15 +1,10 @@
-name: JACKAL Scanner
+name: JACKAL Scanner (Manual)
 
 concurrency:
   group: orca-repo-state
   cancel-in-progress: false
 
 on:
-  schedule:
-    - cron: "0 1 * * 1-5"    # KST 10:00
-    - cron: "0 5 * * 1-5"    # KST 14:00
-    - cron: "0 15 * * 2-6"   # KST 00:00
-    - cron: "0 19 * * 2-6"   # KST 04:00
   workflow_dispatch:
     inputs:
       force:
