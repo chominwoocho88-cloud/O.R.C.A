@@ -1,0 +1,67 @@
+{
+  "generated_at": "2026-04-18T23:48:50.006725+09:00",
+  "tickers": [
+    "NVDA",
+    "000660.KS",
+    "005930.KS",
+    "AVGO",
+    "035720.KS",
+    "466920.KS"
+  ],
+  "details": {
+    "NVDA": {
+      "name": "엔비디아",
+      "avg_cost": 182.99,
+      "market": "US",
+      "currency": "$",
+      "portfolio": true,
+      "asset_type": "stock"
+    },
+    "000660.KS": {
+      "name": "SK하이닉스",
+      "avg_cost": null,
+      "market": "KR",
+      "currency": "₩",
+      "portfolio": true,
+      "asset_type": "stock"
+    },
+    "005930.KS": {
+      "name": "삼성전자",
+      "avg_cost": null,
+      "market": "KR",
+      "currency": "₩",
+      "portfolio": true,
+      "asset_type": "stock"
+    },
+    "AVGO": {
+      "name": "브로드컴",
+      "avg_cost": null,
+      "market": "US",
+      "currency": "$",
+      "portfolio": true,
+      "asset_type": "stock"
+    },
+    "035720.KS": {
+      "name": "카카오",
+      "avg_cost": null,
+      "market": "KR",
+      "currency": "₩",
+      "portfolio": true,
+      "asset_type": "stock"
+    },
+    "466920.KS": {
+      "name": "SOL 코리아고배당",
+      "avg_cost": null,
+      "market": "KR",
+      "currency": "₩",
+      "portfolio": true,
+      "asset_type": "etf_sector_concentrated"
+    }
+  },
+  "counts": {
+    "total": 6,
+    "portfolio": 6,
+    "candidate": 0,
+    "recommendation": 0
+  }
+}
