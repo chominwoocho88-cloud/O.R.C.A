@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-19 00:46 KST",
+  "collected_at": "2026-04-19 21:22 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia Launches Open-Source Quantum AI Model; RTX 3060 Revival Plans Announced",
+      "headline": "Nvidia Stock Jumps on Reports of RTX 3060 Revival and Quantum AI Breakthroughs",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix Hits Record High Near 1.128M Won as AI Hardware Trade Accelerates",
-      "impact": "bullish",
+      "headline": "SK Hynix Stock Declines 2.34% on Profit-Taking Despite Memory Chip Demand",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics Approaches 220K Won; HBM Expansion and AI Semiconductor Momentum Continue",
-      "impact": "bullish",
+      "headline": "Samsung Electronics Down 0.69% as Market Consolidates After Strong Gains",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom Stock Erupts on Meta AI Chip Partnership Extension Through 2029",
+      "headline": "Broadcom Expands Meta AI Chip Partnership Through 2029 Amid 28% April Surge",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp Strengthens AI Position with OpenAI Partnership; Stock Shows Bullish Momentum",
+      "headline": "Kakao Corp Rises 2.69% on Partnership with Lotte Mart for Online Grocery Services",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF Reaches 400B Won AUM; Strong Dividend Flow Continues",
+      "headline": "SOL Korea High Dividend ETF Maintains Stability with 0.13% Dividend Yield Focus",
       "impact": "neutral",
       "source": "web_search"
     }
