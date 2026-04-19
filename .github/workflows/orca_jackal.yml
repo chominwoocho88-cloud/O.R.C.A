@@ -24,15 +24,15 @@ on:
         required: false
         default: "full"
       force_hunt:
-        description: "?쒖옣 ?곹깭? 臾닿??섍쾶 Hunter 媛뺤젣 ?ㅽ뻾"
+        description: "Force Hunter even if market state is unclear"
         required: false
         default: "false"
       force_scan:
-        description: "?쒖옣 ?곹깭? 臾닿??섍쾶 Scanner 媛뺤젣 ?ㅽ뻾"
+        description: "Force Scanner even if market state is unclear"
         required: false
         default: "false"
       force_evolve:
-        description: "Evolution 媛뺤젣 ?ㅽ뻾 (true ?낅젰 ??24h 誘멸꼍怨쇳빐???숈뒿 利됱떆 ?ㅽ뻾)"
+        description: "Force Evolution run even if 24h has not elapsed"
         required: false
         default: "false"
 
@@ -40,7 +40,7 @@ jobs:
   jackal:
     runs-on: ubuntu-latest
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # [Fix] Node.js 20 deprecation ???(2026-06-02 媛뺤젣 ?꾪솚)
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # [Fix] Node.js 20 deprecation workaround
     permissions:
       contents: write
 
@@ -68,7 +68,7 @@ jobs:
           ANTHROPIC_API_KEY:   ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_TOKEN:      ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
-          ANTHROPIC_MODEL:     "claude-sonnet-4-6"        # [Fix] ARIA? ?숈씪 紐⑤뜽濡??듭씪
+          ANTHROPIC_MODEL:     "claude-sonnet-4-6"        # [Fix] Keep ARIA on the same model
           SUBAGENT_MODEL:      "claude-haiku-4-5-20251001"
           JACKAL_DAILY_BUDGET: "500000"
           JACKAL_AUTOCOMPACT:  "true"
