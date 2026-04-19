@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-19 21:22 KST",
+  "collected_at": "2026-04-20 08:19 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia Stock Jumps on Reports of RTX 3060 Revival and Quantum AI Breakthroughs",
+      "headline": "Nvidia Revives RTX 3060 as Stock Targets Big Upside; Nvidia continues to benefit from AI boom with strong demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix Stock Declines 2.34% on Profit-Taking Despite Memory Chip Demand",
-      "impact": "bearish",
+      "headline": "SK Hynix stock climbed to record high as investors doubled down on AI hardware trade; Target price set at 1.3M KRW",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics Down 0.69% as Market Consolidates After Strong Gains",
-      "impact": "bearish",
+      "headline": "Samsung Electronics issued strong first-quarter earnings forecast; Stock jumped nearly 5% as AI-driven semiconductor demand lifts",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom Expands Meta AI Chip Partnership Through 2029 Amid 28% April Surge",
+      "headline": "Broadcom Stock Erupts in Historic 28% April Surge; Extended Meta partnership through 2029 for custom AI chips",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp Rises 2.69% on Partnership with Lotte Mart for Online Grocery Services",
+      "headline": "Kakao signed partnership deal with OpenAI as part of Stargate initiative expansion in Asia",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF Maintains Stability with 0.13% Dividend Yield Focus",
+      "headline": "Shinhan SOL Korea High Dividend ETF maintains dividend strategy focus; Technical signals show strong sell on daily basis",
       "impact": "neutral",
       "source": "web_search"
     }
