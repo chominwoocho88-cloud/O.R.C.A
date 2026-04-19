@@ -24,15 +24,15 @@ on:
         required: false
         default: "full"
       force_hunt:
-        description: "시장 상태와 무관하게 Hunter 강제 실행"
+        description: "?쒖옣 ?곹깭? 臾닿??섍쾶 Hunter 媛뺤젣 ?ㅽ뻾"
         required: false
         default: "false"
       force_scan:
-        description: "시장 상태와 무관하게 Scanner 강제 실행"
+        description: "?쒖옣 ?곹깭? 臾닿??섍쾶 Scanner 媛뺤젣 ?ㅽ뻾"
         required: false
         default: "false"
       force_evolve:
-        description: "Evolution 강제 실행 (true 입력 시 24h 미경과해도 학습 즉시 실행)"
+        description: "Evolution 媛뺤젣 ?ㅽ뻾 (true ?낅젰 ??24h 誘멸꼍怨쇳빐???숈뒿 利됱떆 ?ㅽ뻾)"
         required: false
         default: "false"
 
@@ -40,7 +40,7 @@ jobs:
   jackal:
     runs-on: ubuntu-latest
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # [Fix] Node.js 20 deprecation 대응 (2026-06-02 강제 전환)
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # [Fix] Node.js 20 deprecation ???(2026-06-02 媛뺤젣 ?꾪솚)
     permissions:
       contents: write
 
@@ -68,7 +68,7 @@ jobs:
           ANTHROPIC_API_KEY:   ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_TOKEN:      ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
-          ANTHROPIC_MODEL:     "claude-sonnet-4-6"        # [Fix] ARIA와 동일 모델로 통일
+          ANTHROPIC_MODEL:     "claude-sonnet-4-6"        # [Fix] ARIA? ?숈씪 紐⑤뜽濡??듭씪
           SUBAGENT_MODEL:      "claude-haiku-4-5-20251001"
           JACKAL_DAILY_BUDGET: "500000"
           JACKAL_AUTOCOMPACT:  "true"
@@ -98,37 +98,105 @@ jobs:
 
       - name: Save JACKAL session state
         run: |
+          set -euo pipefail
+
+          # NOTE: This is a symptom-level hotfix, not the architectural fix.
+          # ORCA is treated as truth for data/orca_state.db.
+          # JACKAL's SQLite writes in the same window may be lost.
+          # Root fix: PR 5 (persistence boundary).
           git config user.name  "JACKAL Session"
           git config user.email "jackal-session@orca-agent"
 
-          python - <<'PY'
-          import sqlite3
-          from pathlib import Path
-          db = Path("data/orca_state.db")
-          if db.exists():
-              conn = sqlite3.connect(db)
-              conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
-              conn.close()
-          PY
+          # Persistent artifacts owned by JACKAL. Safe to reapply after reset.
+          JACKAL_FILES=(
+            "jackal/hunt_log.json"
+            "jackal/hunt_cooldown.json"
+            "jackal/jackal_weights.json"
+            "jackal/scan_log.json"
+            "jackal/scan_cooldown.json"
+            "jackal/recommendation_log.json"
+            "jackal/compact_log.json"
+            "jackal/jackal_usage_log.json"
+            "data/jackal_watchlist.json"
+          )
 
-          git add jackal/hunt_log.json          2>/dev/null || true
-          git add jackal/hunt_cooldown.json     2>/dev/null || true
-          git add jackal/jackal_weights.json    2>/dev/null || true
-          git add jackal/skills/                2>/dev/null || true
-          git add jackal/lessons/               2>/dev/null || true
-          git add jackal/compact_log.json       2>/dev/null || true
-          git add jackal/scan_log.json          2>/dev/null || true
-          git add jackal/scan_cooldown.json     2>/dev/null || true
-          git add jackal/recommendation_log.json 2>/dev/null || true
-          git add data/jackal_watchlist.json    2>/dev/null || true
-          git add data/jackal_news.json         2>/dev/null || true
-          git add -f data/orca_state.db         2>/dev/null || true
+          # JACKAL skill/lesson directories. Reapplied wholesale.
+          JACKAL_DIRS=(
+            "jackal/skills"
+            "jackal/lessons"
+          )
 
-          git diff --cached --quiet && exit 0
+          # Intentionally excluded (ORCA-owned or cache-only):
+          #   data/orca_state.db                  ORCA truth; JACKAL writes lost in conflict window
+          #   data/jackal_news.json               ORCA writes, JACKAL reads
+          #   data/jackal_technicals_cache.json   cache
+          #   jackal/compact_cache.json           cache
+          BACKUP_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/jackal-save-XXXXXX")"
+          STASH_NAME="jackal-save-$(date +%s)"
+          COPIED=0
 
-          git commit -m "🦊 JACKAL Session: $(date +'%Y-%m-%d %H:%M') [skip ci]"
+          # Back up JACKAL-owned outputs before resetting to origin/main.
+          for path in "${JACKAL_FILES[@]}"; do
+            if [ -e "$path" ]; then
+              mkdir -p "$BACKUP_DIR/$(dirname "$path")"
+              cp -p "$path" "$BACKUP_DIR/$path"
+              COPIED=1
+            fi
+          done
 
-          git push || {
-            git pull --rebase origin main || git rebase --abort
-            git push
-          }
+          for path in "${JACKAL_DIRS[@]}"; do
+            if [ -d "$path" ]; then
+              mkdir -p "$BACKUP_DIR/$(dirname "$path")"
+              cp -a "$path" "$BACKUP_DIR/$path"
+              COPIED=1
+            fi
+          done
+
+          [ "$COPIED" -eq 0 ] && exit 0
+
+          # Keep a full stash as an extra safety net before destructive reset.
+          git stash push -u -m "$STASH_NAME" >/dev/null 2>&1 || true
+
+          for attempt in 1 2 3; do
+            echo "Save JACKAL session state attempt $attempt/3"
+
+            # Respect origin/main as source of truth for shared ORCA-owned files.
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            # Reapply only JACKAL-owned artifacts after aligning with origin/main.
+            for path in "${JACKAL_FILES[@]}"; do
+              if [ -e "$BACKUP_DIR/$path" ]; then
+                mkdir -p "$(dirname "$path")"
+                cp -p "$BACKUP_DIR/$path" "$path"
+              fi
+            done
+
+            for path in "${JACKAL_DIRS[@]}"; do
+              if [ -d "$BACKUP_DIR/$path" ]; then
+                rm -rf "$path"
+                mkdir -p "$(dirname "$path")"
+                cp -a "$BACKUP_DIR/$path" "$path"
+              fi
+            done
+
+            git add -- "${JACKAL_FILES[@]}" "${JACKAL_DIRS[@]}" 2>/dev/null || true
+
+            if git diff --cached --quiet; then
+              echo "No JACKAL-owned changes to save"
+              exit 0
+            fi
+
+            git commit -m "🦊 JACKAL Session: $(date +'%Y-%m-%d %H:%M') [skip ci]"
+
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Push failed on attempt $attempt, retrying..." >&2
+            sleep "$attempt"
+          done
+
+          echo "JACKAL session save failed after 3 attempts" >&2
+          exit 1
