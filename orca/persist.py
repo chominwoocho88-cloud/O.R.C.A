@@ -9,6 +9,10 @@ Report, memory, and prediction persistence helpers.
 # Allowed imports: .paths, .state, .learning_policy
 # Allowed local imports: .present.console (one-way, singleton only)
 # Forbidden imports: .analysis, .notify, .dashboard, .agents
+# where="orca/main.py::main" preserved for PR 1 health contract.
+# Do not change to new module names. Rationale: report JSON field stability.
+# Future PR may migrate where values after verifying no downstream consumer
+# parses them by value. Tracked in Backlog.
 
 from __future__ import annotations
 

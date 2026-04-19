@@ -8,6 +8,10 @@ Top-level ORCA run orchestration and HealthTracker ownership.
 """
 # Allowed imports: .data, .analysis, .pipeline, .postprocess, .persist, .present, .state, .brand
 # Forbidden imports: .agents, .notify, .dashboard
+# where="orca/main.py::main" preserved for PR 1 health contract.
+# Do not change to new module names. Rationale: report JSON field stability.
+# Future PR may migrate where values after verifying no downstream consumer
+# parses them by value. Tracked in Backlog.
 
 from __future__ import annotations
 
@@ -27,7 +31,7 @@ from .analysis import (
 )
 from .brand import ORCA_NAME
 from .data import fetch_all_market_data, get_monthly_cost_summary, update_cost
-from .persist import REPORTS_DIR
+from .paths import REPORTS_DIR
 from .state import finish_run as state_finish_run
 from .state import start_run as state_start_run
 

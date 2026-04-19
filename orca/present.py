@@ -11,6 +11,10 @@ Console rendering, notifier calls, and dashboard hooks.
 # send_generic_notice: thin wrapper only. No composition logic.
 # postprocess.py: may import present.console (one-way).
 #                 MUST NOT be imported by present.py.
+# where="orca/main.py::main" preserved for PR 1 health contract.
+# Do not change to new module names. Rationale: report JSON field stability.
+# Future PR may migrate where values after verifying no downstream consumer
+# parses them by value. Tracked in Backlog.
 
 from __future__ import annotations
 

@@ -12,6 +12,10 @@ Report post-processing and secondary analysis hooks.
 #                 MUST NOT be imported by present.py.
 # Signature expanded in Step 2-2: update_pattern_database accepts health_tracker
 # (consistency with run_candidate_review / record_predictions pattern)
+# where="orca/main.py::main" preserved for PR 1 health contract.
+# Do not change to new module names. Rationale: report JSON field stability.
+# Future PR may migrate where values after verifying no downstream consumer
+# parses them by value. Tracked in Backlog.
 
 from __future__ import annotations
 
