@@ -225,6 +225,45 @@ def _build_morning(report: dict) -> list:
     for idx, a in enumerate(report.get("actionable_watch", [])[:3], 1):
         lines.append("📌 " + str(idx) + ". " + a)
 
+    candidate_review = report.get("jackal_candidate_review", {})
+    if candidate_review.get("reviewed_count", 0) > 0:
+        breakdown = candidate_review.get("review_verdict_breakdown", {})
+        lines += [
+            "",
+            "━━ 🐺 JACKAL 후보 리뷰 ━━",
+            "시장 바이어스: " + candidate_review.get("market_bias_label", ""),
+            "분류: aligned {a} / neutral {n} / opposed {o}".format(
+                a=candidate_review.get("aligned_count", 0),
+                n=candidate_review.get("neutral_count", 0),
+                o=candidate_review.get("opposed_count", 0),
+            ),
+        ]
+        if sum(int(breakdown.get(key, 0) or 0) for key in ("strong_aligned", "aligned", "neutral", "opposed", "strong_opposed")) > 0:
+            lines.append(
+                "정밀: SA {sa} / A {a} / N {n} / O {o} / SO {so}".format(
+                    sa=breakdown.get("strong_aligned", 0),
+                    a=breakdown.get("aligned", 0),
+                    n=breakdown.get("neutral", 0),
+                    o=breakdown.get("opposed", 0),
+                    so=breakdown.get("strong_opposed", 0),
+                )
+            )
+        avg_conf = candidate_review.get("average_review_confidence", "")
+        if avg_conf:
+            lines.append("평균 확신도: " + avg_conf)
+        for item in candidate_review.get("highlights", [])[:3]:
+            reasons = item.get("alignment_reason_codes", [])[:2]
+            reason_suffix = " [" + ", ".join(reasons) + "]" if reasons else ""
+            lines.append(
+                "• {ticker} {alignment}/{verdict} ({quality}){suffix}".format(
+                    ticker=item.get("ticker", ""),
+                    alignment=item.get("alignment", ""),
+                    verdict=item.get("review_verdict", ""),
+                    quality=item.get("quality_score", "-"),
+                    suffix=reason_suffix,
+                )
+            )
+
     try:
         from .analysis import get_active_lessons
         lessons = get_active_lessons(max_lessons=3)

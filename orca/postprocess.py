@@ -120,6 +120,9 @@ def run_candidate_review(
             "aligned_count": 0,
             "neutral_count": 0,
             "opposed_count": 0,
+            "review_verdict_breakdown": {},
+            "average_review_confidence": "low",
+            "reason_code_frequency": {},
             "error": str(candidate_err),
         }
     finally:
@@ -134,6 +137,18 @@ def run_candidate_review(
                 opposed=candidate_review.get("opposed_count", 0),
             )
         )
+        breakdown = candidate_review.get("review_verdict_breakdown") or {}
+        if sum(int(breakdown.get(key, 0) or 0) for key in ("strong_aligned", "aligned", "neutral", "opposed", "strong_opposed")) > 0:
+            console.print(
+                "[dim]   avg_conf: {conf} | strong_aligned {sa} / aligned {a} / neutral {n} / opposed {o} / strong_opposed {so}[/dim]".format(
+                    conf=candidate_review.get("average_review_confidence", "low"),
+                    sa=breakdown.get("strong_aligned", 0),
+                    a=breakdown.get("aligned", 0),
+                    n=breakdown.get("neutral", 0),
+                    o=breakdown.get("opposed", 0),
+                    so=breakdown.get("strong_opposed", 0),
+                )
+            )
     else:
         report["jackal_candidate_review"] = candidate_review
         console.print("[dim]No recent unresolved JACKAL candidates to review[/dim]")

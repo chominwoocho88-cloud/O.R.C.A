@@ -111,13 +111,30 @@ def print_report(report: dict, run_n: int):
             "시장 바이어스: " + candidate_review.get("market_bias_label", ""),
             "분류: aligned {aligned_count} / neutral {neutral_count} / opposed {opposed_count}".format(**candidate_review),
         ]
-        for item in candidate_review.get("highlights", [])[:3]:
+        breakdown = candidate_review.get("review_verdict_breakdown") or {}
+        if sum(int(breakdown.get(key, 0) or 0) for key in ("strong_aligned", "aligned", "neutral", "opposed", "strong_opposed")) > 0:
             lines.append(
-                "- {ticker} {alignment}/{review_verdict} ({quality})".format(
+                "정밀: strong_aligned {sa} / aligned {a} / neutral {n} / opposed {o} / strong_opposed {so}".format(
+                    sa=breakdown.get("strong_aligned", 0),
+                    a=breakdown.get("aligned", 0),
+                    n=breakdown.get("neutral", 0),
+                    o=breakdown.get("opposed", 0),
+                    so=breakdown.get("strong_opposed", 0),
+                )
+            )
+            avg_conf = candidate_review.get("average_review_confidence", "")
+            if avg_conf:
+                lines.append("평균 확신도: " + avg_conf)
+        for item in candidate_review.get("highlights", [])[:3]:
+            reasons = item.get("alignment_reason_codes", [])[:2]
+            reason_suffix = " [" + ", ".join(reasons) + "]" if reasons else ""
+            lines.append(
+                "- {ticker} {alignment}/{review_verdict} ({quality}){reason_suffix}".format(
                     ticker=item.get("ticker", ""),
                     alignment=item.get("alignment", ""),
                     review_verdict=item.get("review_verdict", ""),
                     quality=item.get("quality_score", "-"),
+                    reason_suffix=reason_suffix,
                 )
             )
         console.print(Panel("\n".join(lines), title=JACKAL_NAME + " Candidate Review", border_style="magenta"))
