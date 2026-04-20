@@ -477,15 +477,109 @@ def fetch_fsc_data() -> dict:
 def fetch_all_market_data():
     now=datetime.now(KST)
     market_status, data_label = _get_market_status(now)
-    print("[Yahoo Finance] (" + data_label + ")"); yahoo=fetch_yahoo_data()
-    print("[Fear & Greed]"); fg=fetch_fear_greed(yahoo)
-    print("[풋/콜 비율]"); pcr=fetch_put_call_ratio()
-    print("[KRX 투자자 수급]"); krx_flow=fetch_krx_flow()
-    print("[FRED 매크로지표]"); fred=fetch_fred_indicators()
-    print("[FSC 금융위 API]"); fsc=fetch_fsc_data()
-    print("[한국 특수 뉴스]"); kr_n=fetch_korea_news()
+    failed_primary, failed_secondary = [], []
+
+    def _fit_error(error):
+        text = " ".join(str(error or "unavailable").split())
+        return text[:100]
+
+    def _record_failure(source, error, category):
+        bucket = failed_primary if category == "primary" else failed_secondary
+        if any(item.get("source") == source for item in bucket):
+            return
+        bucket.append({
+            "source": source,
+            "error": _fit_error(error),
+            "category": category,
+        })
+
+    print("[Yahoo Finance] (" + data_label + ")")
+    try:
+        yahoo = fetch_yahoo_data()
+    except Exception as e:
+        yahoo = {"data_quality": "poor"}
+        _record_failure("YAHOO_CORE", e, "primary")
+
+    if yahoo.get("data_quality", "ok") == "poor":
+        _record_failure("YAHOO_CORE", "core_data_missing", "primary")
+
+    print("[Fear & Greed]")
+    try:
+        fg = fetch_fear_greed(yahoo)
+    except Exception as e:
+        fg = {"value": "N/A", "rating": "N/A", "prev_close": "N/A"}
+        _record_failure("FEAR_GREED", e, "primary")
+
+    if fg.get("value", "N/A") in ("N/A", "", None) or fg.get("source", "unknown") == "unknown":
+        _record_failure("FEAR_GREED", "unavailable", "primary")
+
+    print("[풋/콜 비율]")
+    try:
+        pcr = fetch_put_call_ratio()
+    except Exception as e:
+        pcr = {"pcr_spy": None, "pcr_qqq": None, "pcr_avg": None, "pcr_signal": "N/A"}
+        _record_failure("PCR", e, "primary")
+
+    if pcr.get("pcr_avg") is None and pcr.get("pcr_spy") is None and pcr.get("pcr_qqq") is None:
+        _record_failure("PCR", "unavailable", "primary")
+
+    print("[KRX 투자자 수급]")
+    try:
+        krx_flow = fetch_krx_flow()
+    except Exception as e:
+        krx_flow = {"source": "none", "date": "N/A", "krx_kospi_close": "N/A", "krx_kospi_change": "N/A"}
+        _record_failure("KRX_API", e, "primary")
+
+    if krx_flow.get("source", "none") == "none":
+        krx_error = "missing_api_key" if not os.environ.get("KRX_API_KEY", "") else "unavailable"
+        _record_failure("KRX_API", krx_error, "primary")
+
+    print("[FRED 매크로지표]")
+    try:
+        fred = fetch_fred_indicators()
+    except Exception as e:
+        fred = {"fred_source": False}
+        _record_failure("FRED_MACRO", e, "primary")
+
+    fred_missing = [
+        key for key in ("hy_spread", "yield_curve", "consumer_sent", "rrp", "dxy")
+        if fred.get(key) is None
+    ]
+    if not fred.get("fred_source", False) or fred_missing:
+        fred_error = (
+            "partial_missing:" + ",".join(fred_missing[:3])
+            if fred_missing else
+            ("missing_api_key" if not os.environ.get("FRED_API_KEY", "") else "unavailable")
+        )
+        _record_failure("FRED_MACRO", fred_error, "primary")
+
+    print("[FSC 금융위 API]")
+    try:
+        fsc = fetch_fsc_data()
+    except Exception as e:
+        fsc = {"fsc_source": False}
+        _record_failure("FSC_API", e, "secondary")
+
+    if not fsc.get("fsc_source", False):
+        fsc_error = "missing_api_key" if not os.environ.get("FSCAPI_KEY", "") else "unavailable"
+        _record_failure("FSC_API", fsc_error, "secondary")
+
+    print("[한국 특수 뉴스]")
+    try:
+        kr_n = fetch_korea_news()
+    except Exception as e:
+        kr_n = []
+        _record_failure("KOREA_NEWS", e, "secondary")
+
+    if not kr_n:
+        _record_failure("KOREA_NEWS", "no_headlines", "secondary")
+
+    data_quality = yahoo.get("data_quality", "ok")
+    if data_quality != "poor" and failed_primary:
+        data_quality = "degraded"
+
     keys=["sp500","sp500_change","nasdaq","nasdaq_change","vix","vix_change","us_10y","kospi","kospi_change","krw_usd","sk_hynix","sk_hynix_change","samsung","samsung_change","kakao","kakao_change","kodex","kodex_change","nvda","nvda_change","avgo","avgo_change","schd","schd_change"]
-    data={"fetched_at":now.strftime("%Y-%m-%d %H:%M KST"),"market_status":market_status,"data_label":data_label,"data_quality":yahoo.get("data_quality","ok"),
+    data={"fetched_at":now.strftime("%Y-%m-%d %H:%M KST"),"market_status":market_status,"data_label":data_label,"data_quality":data_quality,
           **{k:yahoo.get(k,"N/A") for k in keys},
           "fear_greed_value":fg.get("value","N/A"),"fear_greed_rating":fg.get("rating","N/A"),"fear_greed_prev":fg.get("prev_close","N/A"),
           "fear_greed_source":fg.get("source","unknown"),"fear_greed_confidence":fg.get("confidence","낮음"),
@@ -513,7 +607,9 @@ def fetch_all_market_data():
           "fsc_oil_diesel":   fsc.get("oil_price_diesel"),
           "fsc_oil_gasoline": fsc.get("oil_price_gasoline"),
           "fsc_source":       fsc.get("fsc_source", False),
-          "korea_special_news":kr_n,"source":"Yahoo Finance + FearGreedChart + KRX + FRED + FSC"}
+          "korea_special_news":kr_n,
+          "failed_sources": failed_primary + failed_secondary,
+          "source":"Yahoo Finance + FearGreedChart + KRX + FRED + FSC"}
     data["volatility_alert"]=check_volatility_alert(data)
     if data["data_quality"]=="poor":
         try:
