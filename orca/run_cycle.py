@@ -147,14 +147,17 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
     def _ingest_state_health() -> None:
         health_tracker.ingest_state_events(state_module.drain_health_events())
 
-    def _build_minimal_failed_report() -> dict:
-        return {
+    def _build_minimal_failed_report(failed_sources: list | None = None) -> dict:
+        report = {
             "status": "failed",
             "health": health_tracker.to_report_payload(failed=True),
             "mode": mode,
             "analysis_date": today,
             "timestamp": datetime.now(KST).isoformat(),
         }
+        if failed_sources is not None:
+            report["failed_sources"] = failed_sources
+        return report
 
     def _print_health_badge() -> None:
         badge = health_tracker.badge_text()
@@ -242,14 +245,21 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
                 message="\uc6d4 API \ube44\uc6a9 \uacbd\uace0 \ubc1c\uc1a1 \uc2e4\ud328",
             )
 
-        if market_data.get("data_quality") == "poor":
+        quality = market_data.get("data_quality", "ok")
+        failed_sources = market_data.get("failed_sources", [])
+
+        if quality == "poor":
             msg = "\u26a0\ufe0f \ud575\uc2ec \uc2dc\uc7a5 \ub370\uc774\ud130 \uc218\uc9d1 \uc2e4\ud328 \u2014 \ubd84\uc11d \uc911\ub2e8"
             health_tracker.record(
                 "external_data_degraded",
                 "orca/main.py::main",
-                message="data quality poor",
+                message=(
+                    "data quality poor; failed: "
+                    + ", ".join(source.get("source", "?") for source in failed_sources[:3])
+                    if failed_sources else "data quality poor"
+                ),
             )
-            minimal_report = _build_minimal_failed_report()
+            minimal_report = _build_minimal_failed_report(failed_sources=failed_sources)
             path = persist.save_report(minimal_report)
             present.console.print("[bold red]" + msg + "[/bold red]")
             _print_health_badge()
@@ -264,6 +274,16 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
                 metadata={"reason": "poor_market_data"},
             )
             sys.exit(1)
+        elif quality == "degraded":
+            health_tracker.record(
+                "external_data_degraded",
+                "orca/run_cycle.py::run_orca_cycle",
+                message=(
+                    "partial data failure: "
+                    + ", ".join(source.get("source", "?") for source in failed_sources[:3])
+                    if failed_sources else "partial data failure"
+                ),
+            )
 
         lessons_prompt = ""
         if mode == "MORNING":
@@ -374,7 +394,11 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
         if mode == "MORNING":
             present.maybe_build_dashboard(mode=mode, health_tracker=health_tracker)
 
-        path = persist.persist_final_report(report, health_tracker)
+        path = persist.persist_final_report(
+            report,
+            health_tracker,
+            failed_sources=failed_sources,
+        )
         present.console.print("[dim]Saved: " + str(path) + "[/dim]")
 
         present.print_report(report, len(memory) + 1)

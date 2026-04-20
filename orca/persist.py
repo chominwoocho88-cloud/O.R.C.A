@@ -109,8 +109,15 @@ def record_predictions(*, run_id: str | None, report: dict, health_tracker: Any)
     return prediction_stats
 
 
-def persist_final_report(report: dict, health_tracker: Any) -> Path:
+def persist_final_report(
+    report: dict,
+    health_tracker: Any,
+    *,
+    failed_sources: list | None = None,
+) -> Path:
     report["learning_policy"] = describe_policy()
     report["health"] = health_tracker.to_report_payload(failed=False)
+    if failed_sources is not None:
+        report["failed_sources"] = failed_sources
     path = save_report(report)
     return path
