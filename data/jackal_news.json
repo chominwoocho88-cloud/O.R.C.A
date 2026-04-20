@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-20 08:19 KST",
+  "collected_at": "2026-04-20 21:34 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,38 +12,38 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia Revives RTX 3060 as Stock Targets Big Upside; Nvidia continues to benefit from AI boom with strong demand",
+      "headline": "NVIDIA stock on 10-day winning streak, up 18% over that stretch",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix stock climbed to record high as investors doubled down on AI hardware trade; Target price set at 1.3M KRW",
+      "headline": "SK하이닉스 SOCAMM2 192GB 양산 발표, 엔비디아 베라 루빈에 최적화되며 장중 52주 신고가 갱신",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics issued strong first-quarter earnings forecast; Stock jumped nearly 5% as AI-driven semiconductor demand lifts",
+      "headline": "Samsung Electronics 메모리 반도체 재고 역사적 저점, AI 데이터센터 수요 강세로 2분기 증가세 전망",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom Stock Erupts in Historic 28% April Surge; Extended Meta partnership through 2029 for custom AI chips",
+      "headline": "Broadcom reiterated Outperform rating by Mizuho with $480 price target, AI infrastructure momentum strong",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao signed partnership deal with OpenAI as part of Stargate initiative expansion in Asia",
-      "impact": "bullish",
+      "headline": "Kakao Corp 주가 약세, 약 6개월 52주 고점 대비 34% 하락 중",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "Shinhan SOL Korea High Dividend ETF maintains dividend strategy focus; Technical signals show strong sell on daily basis",
-      "impact": "neutral",
+      "headline": "SOL 코리아고배당 순자산 5000억원 돌파, 월배당 ETF로 개인투자자 1위 자금 유입",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
