@@ -599,5 +599,132 @@
       "best_aligned_families": [],
       "best_opposed_families": []
     }
+  },
+  {
+    "analysis_date": "2026-04-21",
+    "analysis_time": "00:17 KST",
+    "mode": "EVENING",
+    "mode_label": "저녁 마감",
+    "one_line_summary": "나스닥 24,268 연고점 인근 유지 불구 WTI +4.87% 급등·중동 리스크 재점화로 코스피 외국인 순매도 지속, 혼조 횡보 레짐 내 방향성 불명확 상태 지속",
+    "market_regime": "혼조",
+    "trend_phase": "횡보추세",
+    "trend_strategy": {
+      "recommended": "중동 지정학 리스크 헤지 유지, AI반도체 선별 매수 (SK하이닉스 중심), 단기 방향성 배팅 자제",
+      "caution": "호르무즈 해협 봉쇄 장기화 시 에너지 인플레 재점화 → 연준 긴축 재개 우려로 기술주 전체 재조정 가능",
+      "difficulty": "어려움"
+    },
+    "confidence_overall": "보통",
+    "consensus_level": "보통",
+    "top_headlines": [
+      {
+        "headline": "WTI 원유 $87.94 (+4.87%) 급등 — 미-이란 갈등 재점화 및 호르무즈 해협 봉쇄 우려",
+        "signal_tag": "지정학 리스크",
+        "impact": "높음"
+      },
+      {
+        "headline": "TSMC Q1 순이익 +58.3% YoY 서프라이즈 — AI칩 수요 급증·$500B 시장 상향 조정",
+        "signal_tag": "AI반도체 강세",
+        "impact": "높음"
+      },
+      {
+        "headline": "코스피 외국인 4/17 -2.0조원 순매도 — 반등일에도 이탈 지속, 한국 비중 축소 추세",
+        "signal_tag": "외국인 수급 이탈",
+        "impact": "높음"
+      },
+      {
+        "headline": "삼성전자 214,500원 (-1.38%) — HBM 수율 우려·AI메모리 경쟁 열위 지속",
+        "signal_tag": "반도체 약세 신호",
+        "impact": "보통"
+      },
+      {
+        "headline": "SK하이닉스 1,166,000원 (+0.95%) — HBM 수요 급증 수혜, 삼성과 차별화 지속",
+        "signal_tag": "AI메모리 수혜",
+        "impact": "보통"
+      }
+    ],
+    "volatility_index": {
+      "vkospi": "제공 데이터 없음",
+      "vix": "19.53",
+      "fear_greed": "63 (Greed)",
+      "level": "중립",
+      "interpretation": "VIX 19.53은 공포 임계(20) 직하 수준으로 시장이 중동 충격에도 패닉 매도로 전환하지 않았음을 시사. Fear & Greed 63(탐욕) 구간은 단기 과열 경계선 근접. 호르무즈 사태 확전 시 VIX 20 돌파 → 공포 구간 진입 가능성 상존하며, 현재는 탐욕과 공포 사이 팽팽한 균형 상태."
+    },
+    "retail_reversal_signal": {
+      "retail_behavior": "코스피 개인투자자 4/17 +1.4조원 순매수 — 외국인 -2.0조원 매도에 역행 매수, 국내 기관 +150억 소극적 참여",
+      "contrarian_implication": "개인 역행매수는 단기 반등 소진 또는 외국인 추가 이탈 시 손실 노출 위험 고조. 기관이 동조하지 않아 개인 홀로 떠받치는 구조는 지속 불가능. 과거 유사 패턴에서 외국인 순매도 지속 시 개인 역매수 포지션 손절로 이어진 사례 다수 존재.",
+      "reliability": "낮음"
+    },
+    "outflows": [
+      {
+        "zone": "코스피 외국인 포지션",
+        "reason": "코스피 +2.21% 반등일(4/17)에도 외국인 -2.0조원 순매도. 한국 시장 비중 축소 추세 확인, 지정학 리스크 및 원화 약세(1,470원)가 이탈 가속화",
+        "severity": "높음",
+        "data_point": "외국인 순매도 2.0조원 (4/17, 코스피 6,226)"
+      },
+      {
+        "zone": "삼성전자",
+        "reason": "HBM 수율 우려 및 AI메모리 경쟁 열위, 호르무즈발 공급망 불확실성 복합 작용. SK하이닉스와의 차별화 속 약세 지속",
+        "severity": "보통",
+        "data_point": "삼성전자 214,500원 (-1.38%, 4/21)"
+      },
+      {
+        "zone": "에너지 수입 의존 아시아 내수 소비주",
+        "reason": "WTI $87.94 (+4.87%) 급등 → 한국 수입물가 상승 압력, 내수 소비 여력 잠식 우려. 특히 항공·운송·유틸리티 섹터 비용 증가",
+        "severity": "보통",
+        "data_point": "WTI $87.94/bbl +4.87% (4/20)"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "SK하이닉스 / AI메모리",
+        "reason": "AI칩 시장 $500B 상향, TSMC +58% 순이익 서프라이즈, HBM 수요 급증 수혜 지속. 삼성전자와의 HBM 기술 격차 부각으로 수급 차별화",
+        "momentum": "강함",
+        "data_point": "SK하이닉스 1,166,000원 (+0.95%, 4/21); TSMC Q1 순이익 +58.3% YoY"
+      }
+    ],
+    "thesis_killers": [],
+    "data_quality": "degraded",
+    "jackal_candidate_review": {
+      "analysis_date": "2026-04-21",
+      "market_bias": "mixed",
+      "market_bias_label": "혼조/관망",
+      "reviewed_count": 0,
+      "aligned_count": 0,
+      "neutral_count": 0,
+      "opposed_count": 0,
+      "follow_count": 0,
+      "watch_count": 0,
+      "avoid_count": 0,
+      "review_verdict_breakdown": {
+        "strong_aligned": 0,
+        "aligned": 0,
+        "neutral": 0,
+        "opposed": 0,
+        "strong_opposed": 0
+      },
+      "average_review_confidence": "low",
+      "reason_code_frequency": {},
+      "highlights": []
+    },
+    "jackal_probability_summary": {
+      "window_days": 90,
+      "min_samples": 5,
+      "raw_rows": 0,
+      "deduped_rows": 0,
+      "duplicates_skipped": 0,
+      "overall": {
+        "wins": 0,
+        "losses": 0,
+        "total": 0,
+        "win_rate": 0.0,
+        "effective_win_rate": 0.0,
+        "qualified": false
+      },
+      "trusted_families": [],
+      "cautious_families": [],
+      "alignment_summary": {},
+      "best_aligned_families": [],
+      "best_opposed_families": []
+    }
   }
 ]
