@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-20 21:34 KST",
+  "collected_at": "2026-04-20 23:18 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,40 +12,64 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA stock on 10-day winning streak, up 18% over that stretch",
+      "headline": "NVIDIA announces $1 trillion in GPU orders through 2027 and shows record FY2026 revenue of $215.9B (up 65% YoY)",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "NVIDIA stock on 10-day winning streak, up 18% with Blackwell GPUs sold out and strong data center demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK하이닉스 SOCAMM2 192GB 양산 발표, 엔비디아 베라 루빈에 최적화되며 장중 52주 신고가 갱신",
+      "headline": "SK Hynix earnings announcement expected to serve as catalyst; memory chip recovery driving upside momentum",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK Hynix stock down 2.34% on market volatility; analysts maintain Strong Buy rating with 25.58% upside potential",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics posts record Q1 2026 operating profit of 57 trillion won (up 185% sequentially) driven by AI chip demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics 메모리 반도체 재고 역사적 저점, AI 데이터센터 수요 강세로 2분기 증가세 전망",
+      "headline": "Samsung Electronics earnings beat consensus on sharp memory price increases; strong Q1 performance exceeds expectations",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom reiterated Outperform rating by Mizuho with $480 price target, AI infrastructure momentum strong",
+      "headline": "Broadcom expands partnership with Meta through 2029 for custom AI chip development; strengthening AI sector position",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom FY2025 revenue up 23.87% to $63.89B; earnings surged 292.30%; analysts rate stock Strong Buy with $438.43 target",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp 주가 약세, 약 6개월 52주 고점 대비 34% 하락 중",
-      "impact": "bearish",
+      "headline": "Kakao partners with OpenAI on Stargate initiative; stock up 2.69% amid AI expansion expectations",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "466920.KS",
-      "headline": "SOL 코리아고배당 순자산 5000억원 돌파, 월배당 ETF로 개인투자자 1위 자금 유입",
+      "ticker": "035720.KS",
+      "headline": "Kakao Q3 2025 earnings show record revenue with strategic AI expansion; analyst consensus target price 74,692 KRW (58.92% upside)",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 6
+  "total": 11
 }
