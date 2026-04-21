@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-22 01:03 KST",
+  "collected_at": "2026-04-22 08:20 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,38 +12,38 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA maintains strong position with 91.5% AI data center revenue; Adobe, Microsoft, Anthropic partnership announced",
-      "impact": "bullish",
+      "headline": "Nvidia stock remains under pressure despite strong AI infrastructure demand driving data center revenue",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix begins mass production of next-generation SOCAMM2 AI server memory module with improved energy efficiency",
+      "headline": "SK Hynix begins mass production of next-generation memory module amid record Q1 operating profit expectations",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics stock down 1.38% amid technical resistance; accelerating development of next-generation high-bandwidth memory",
-      "impact": "neutral",
+      "headline": "Samsung Electronics accelerates high-bandwidth memory development with strong Q1 earnings exceeding estimates",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom expanded partnership with Meta through 2029 for custom AI microchips; 28% April surge as AI dealmaking accelerates",
+      "headline": "Broadcom extends partnership with Meta for custom AI chips through 2029 amid historic April surge",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao signed AI partnership with OpenAI; stock trading with +51% upside potential according to analyst targets",
+      "headline": "Kakao partners with OpenAI for Stargate initiative expansion while demonstrating record revenue growth",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF recording strong inflows; highest ranked among Korean high-dividend ETFs with 6% yield",
-      "impact": "bullish",
+      "headline": "Shinhan SOL Shipbuilding Top3 Plus ETF shows 154.17% annual return with technical indicators flashing strong sell signal",
+      "impact": "bearish",
       "source": "web_search"
     }
   ],
