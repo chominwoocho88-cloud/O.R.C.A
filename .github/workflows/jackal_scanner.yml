@@ -61,11 +61,17 @@ jobs:
               conn.close()
           PY
 
+          python - <<'PY'
+          from orca.state import checkpoint_jackal_db
+          checkpoint_jackal_db()
+          PY
+
           git add jackal/scan_log.json            2>/dev/null || true
           git add jackal/scan_cooldown.json       2>/dev/null || true
           git add jackal/recommendation_log.json  2>/dev/null || true
           git add data/jackal_watchlist.json      2>/dev/null || true
           git add -f data/orca_state.db           2>/dev/null || true
+          git add -f data/jackal_state.db         2>/dev/null || true
 
           git diff --cached --quiet && exit 0
 
