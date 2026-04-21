@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-04-21T13:53:38.199686+09:00",
-  "source_report_generated_at": "2026-04-21T13:53:38.036358+09:00",
-  "status": "fail",
-  "fail_count": 1,
+  "generated_at": "2026-04-21T14:03:24.308618+09:00",
+  "source_report_generated_at": "2026-04-21T14:03:20.384341+09:00",
+  "status": "warn",
+  "fail_count": 0,
   "warn_count": 7,
   "thresholds": {
     "orca_final_accuracy_min_delta": -5.0,
@@ -23,7 +23,7 @@
       "name": "jackal_swing_accuracy_delta",
       "status": "warn",
       "reason": "insufficient_history",
-      "current": null,
+      "current": 75.6,
       "delta": null,
       "threshold": -5.0
     },
@@ -31,7 +31,7 @@
       "name": "jackal_d1_accuracy_delta",
       "status": "warn",
       "reason": "insufficient_history",
-      "current": null,
+      "current": 47.8,
       "delta": null,
       "threshold": -5.0
     },
@@ -45,9 +45,9 @@
     },
     {
       "name": "jackal_linked_to_latest_orca",
-      "status": "fail",
-      "reason": "mismatch",
-      "current": false
+      "status": "pass",
+      "reason": "ok",
+      "current": true
     }
   ],
   "report_warnings": [

@@ -1,6 +1,6 @@
 # ORCA vs JACKAL Research Comparison
 
-- Generated: `2026-04-21T13:53:38.036358+09:00`
+- Generated: `2026-04-21T14:03:20.384341+09:00`
 - State DB: `C:\Users\skyco\OneDrive\문서\GitHub\O.R.C.A\data\orca_state.db`
 
 ## Snapshot
@@ -10,9 +10,9 @@
 | ORCA | Final accuracy | 58.7% | +0.0pp |
 | ORCA | Judged count | 126 | +0.0 |
 | ORCA | Applied lessons | 115 | -55.0 |
-| JACKAL | Swing accuracy | n/a | n/a |
-| JACKAL | D1 accuracy | n/a | n/a |
-| JACKAL | Tracked picks | 0 | n/a |
+| JACKAL | Swing accuracy | 75.6% | n/a |
+| JACKAL | D1 accuracy | 47.8% | n/a |
+| JACKAL | Tracked picks | 205 | +205.0 |
 | Shadow | Latest batch rate | n/a | n/a |
 | Shadow | Rolling 10 rate | 0.0% | n/a |
 
@@ -28,12 +28,12 @@
 
 ## JACKAL Backtest
 
-- Session: `bt_0adc13689a6d423784475d39f0ad38a3`
-- Source ORCA session: `n/a`
-- Linked to latest ORCA: `False`
-- Pipeline: `n/a`
-- Backtest days: `n/a`
-- Funnel totals: `{"s1_top50": 0, "s2_top25": 0, "s3_top10": 0, "s4_top5": 0, "tracked": 0, "universe": 82}`
+- Session: `bt_733af4eab88c4f2ab1cbc46254c23862`
+- Source ORCA session: `bt_184710a95f7a40a29ce1972751c5fe6c`
+- Linked to latest ORCA: `True`
+- Pipeline: `Universe→Stage1(50)→Stage2(25)→Stage3(10)→Stage4(5)`
+- Backtest days: `41`
+- Funnel totals: `{"s1_top50": 1812, "s2_top25": 1025, "s3_top10": 410, "s4_top5": 205, "tracked": 205, "universe": 3362}`
 
 ## JACKAL Shadow
 

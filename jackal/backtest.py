@@ -3,7 +3,7 @@ JACKAL backtest module.
 Jackal research backtest runner (v2).
 
 기존 문제:
-  - load_tickers()가 포트폴리오 6개만 봄 (MY_PORTFOLIO와 동일)
+  - load_tickers()가 포트폴리오 제외 종목만 봄 (legacy MY_PORTFOLIO와 동일 개념)
   - Stage 파이프라인 없이 신호 규칙만 직접 적용
 
 수정:
@@ -58,7 +58,7 @@ BACKTEST_DAYS = 60
 TRACKING_DAYS = 10
 
 # ── 실운용 상수 import (Universe 정의) ────────────────────────────
-from .hunter import SECTOR_POOLS, MY_PORTFOLIO, SECTOR_ETF
+from .hunter import SECTOR_POOLS, get_portfolio_exclusions
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -67,14 +67,15 @@ from .hunter import SECTOR_POOLS, MY_PORTFOLIO, SECTOR_ETF
 
 def _build_universe() -> list:
     """
-    SECTOR_POOLS 전체에서 MY_PORTFOLIO 제외.
+    SECTOR_POOLS 전체에서 현재 포트폴리오 제외 종목 제거.
     실운용: SECTOR_POOLS 80개 + Claude 추천 20개 → 백테스트는 Claude 없이 80개만.
     """
+    excluded = get_portfolio_exclusions()
     seen = set()
     universe = []
     for tickers in SECTOR_POOLS.values():
         for t in tickers:
-            if t not in MY_PORTFOLIO and t not in seen:
+            if t not in excluded and t not in seen:
                 universe.append(t)
                 seen.add(t)
     return universe
@@ -367,8 +368,9 @@ def run_backtest():
     print(f"\n🗃️ Jackal research session: {_JACKAL_SESSION_ID}")
     try:
         universe = _build_universe()
-        print(f"\n🌐 Universe: {len(universe)}종목 (SECTOR_POOLS, MY_PORTFOLIO 제외)")
-        print(f"   제외: {', '.join(sorted(MY_PORTFOLIO))}")
+        excluded = get_portfolio_exclusions()
+        print(f"\n🌐 Universe: {len(universe)}종목 (SECTOR_POOLS, portfolio exclusions 제외)")
+        print(f"   제외: {', '.join(sorted(excluded))}")
 
         print(f"\n📥 yfinance 다운로드 ({len(universe)}종목)...")
         hist: dict = {}
