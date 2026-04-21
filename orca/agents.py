@@ -40,6 +40,11 @@ _TOK = {
 console = Console()
 client  = anthropic.Anthropic(api_key=API_KEY)
 
+_THESIS_KILLER_BLOCKED_EVENTS = {"vix", "환율", "원달러", "달러", "달러/원", "금리", "국채",
+                                 "달러인덱스", "dxy", "엔화", "위안", "통화", "fx", "원화"}
+_THESIS_KILLER_ALLOWED_EVENTS = {"나스닥", "nasdaq", "코스피", "kospi", "sk하이닉스", "삼성전자",
+                                 "엔비디아", "s&p", "반도체", "sp500", "s&p500"}
+
 
 # ── 공통 유틸 ──────────────────────────────────────────────────────────────────
 def parse_json(text: str) -> dict:
@@ -75,6 +80,23 @@ def parse_json(text: str) -> dict:
     except json.JSONDecodeError as e:
         print("❌ JSON 파싱 3단계 모두 실패: " + str(e)[:200])
         raise
+
+
+def _normalize_thesis_killers(thesis_killers: list | None, *, source_label: str) -> list[dict]:
+    filtered_tks = []
+    for tk in thesis_killers or []:
+        event_name = str(tk.get("event", "")).strip()
+        if not event_name:
+            continue
+        event_lower = event_name.lower()
+        if any(blocked in event_lower for blocked in _THESIS_KILLER_BLOCKED_EVENTS):
+            console.print(f"  [dim]{source_label} thesis_killer 제거 (VIX/환율): {event_name}[/dim]")
+            continue
+        if not any(allowed in event_lower for allowed in _THESIS_KILLER_ALLOWED_EVENTS):
+            console.print(f"  [dim]{source_label} thesis_killer 제거 (검증불가): {event_name}[/dim]")
+            continue
+        filtered_tks.append(tk)
+    return filtered_tks
 
 
 
@@ -408,23 +430,10 @@ def agent_devil(analyst_data: dict, memory: list, mode: str) -> dict:
     )
     result = parse_json(raw)
 
-    # ── thesis_killers 후처리: VIX·환율 event 자동 제거 (백테스트 정확도 0~32%)
-    _BLOCKED_EVENTS = {"vix", "환율", "원달러", "달러", "달러/원", "금리", "국채",
-                        "달러인덱스", "dxy", "엔화", "위안", "통화", "fx", "원화"}
-    _ALLOWED_EVENTS = {"나스닥", "nasdaq", "코스피", "kospi", "sk하이닉스", "삼성전자",
-                        "엔비디아", "s&p", "반도체", "sp500", "s&p500"}
-    filtered_tks = []
-    for tk in result.get("thesis_killers", []):
-        event_lower = tk.get("event", "").lower()
-        # 차단 키워드 포함 또는 허용 키워드 없으면 제거
-        if any(b in event_lower for b in _BLOCKED_EVENTS):
-            console.print("  [dim]thesis_killer 제거 (VIX/환율): " + tk.get("event", "") + "[/dim]")
-            continue
-        if not any(a in event_lower for a in _ALLOWED_EVENTS):
-            console.print("  [dim]thesis_killer 제거 (검증불가): " + tk.get("event", "") + "[/dim]")
-            continue
-        filtered_tks.append(tk)
-    result["thesis_killers"] = filtered_tks
+    result["thesis_killers"] = _normalize_thesis_killers(
+        result.get("thesis_killers", []),
+        source_label="Devil",
+    )
 
     console.print("  [green]Done: " + str(result.get("verdict", ""))
                   + " / " + str(len(result.get("counterarguments", []))) + " counters[/green]")
@@ -566,23 +575,24 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
     result = parse_json(raw)
     result["mode"] = mode
 
-    # ── [3차 필터] Reporter: VIX·환율 thesis_killers 최종 제거 ────────────
-    # Devil 2차 필터를 통과했더라도 Reporter가 재생성할 수 있음 → 마지막 관문
-    _RPT_BLOCKED = {"vix", "환율", "원달러", "달러", "달러/원", "금리", "국채",
-                    "달러인덱스", "dxy", "엔화", "위안", "통화", "fx", "원화"}
-    _RPT_ALLOWED = {"나스닥", "nasdaq", "코스피", "kospi", "sk하이닉스", "삼성전자",
-                    "엔비디아", "s&p", "반도체", "sp500", "s&p500"}
-    rpt_filtered = []
-    for tk in result.get("thesis_killers", []):
-        ev_lower = tk.get("event", "").lower()
-        if any(b in ev_lower for b in _RPT_BLOCKED):
-            console.print(f"  [dim]Reporter 3차 제거 (VIX/환율): {tk.get('event','')}[/dim]")
-            continue
-        if not any(a in ev_lower for a in _RPT_ALLOWED):
-            console.print(f"  [dim]Reporter 3차 제거 (검증불가): {tk.get('event','')}[/dim]")
-            continue
-        rpt_filtered.append(tk)
-    result["thesis_killers"] = rpt_filtered
+    reporter_tks = _normalize_thesis_killers(
+        result.get("thesis_killers", []),
+        source_label="Reporter",
+    )
+    if reporter_tks:
+        result["thesis_killers"] = reporter_tks
+    else:
+        devil_tks = _normalize_thesis_killers(
+            devil.get("thesis_killers", []),
+            source_label="Devil fallback",
+        )
+        result["thesis_killers"] = devil_tks[:3]
+        if devil_tks:
+            console.print(
+                "  [dim]Reporter thesis_killers 비어 있어 Devil 결과 "
+                + str(len(result["thesis_killers"]))
+                + "개 승계[/dim]"
+            )
 
     # ── one_line_summary 비어있으면 자동 생성 ─────────────────────────────
     if not result.get("one_line_summary", "").strip():

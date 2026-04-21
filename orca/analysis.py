@@ -1233,13 +1233,24 @@ def run_verification() -> dict:
 
 def _send_verification_report(results, accuracy, today_acc, dir_acc=0):
     try:
-        from .notify import send_message
+        from .notify import _format_accuracy_display, send_message
     except ImportError:
         return
 
     judged    = [r for r in results if r["verdict"] != "unclear"]
-    total_acc = round(accuracy["correct"] / accuracy["total"] * 100, 1) if accuracy["total"] > 0 else 0
-    d_pct     = accuracy.get("dir_accuracy_pct", 0)
+    today_display = _format_accuracy_display(
+        len([r for r in results if r["verdict"] == "confirmed"]),
+        len(judged),
+    )
+    today_dir_text = f"{dir_acc}%" if judged else "N/A"
+    total_display = _format_accuracy_display(
+        accuracy.get("correct", 0),
+        accuracy.get("total", 0),
+    )
+    dir_display = _format_accuracy_display(
+        accuracy.get("dir_correct", 0),
+        accuracy.get("dir_total", 0),
+    )
 
     lines = ["<b>📋 어제 예측 채점</b>", "<code>" + _today() + "</code>", ""]
     for r in results:
@@ -1247,9 +1258,9 @@ def _send_verification_report(results, accuracy, today_acc, dir_acc=0):
         lines.append(em + " <b>" + r.get("event", "")[:40] + "</b>")
         if r.get("evidence"): lines.append("  <i>" + r["evidence"] + "</i>")
     lines += ["",
-              "오늘: <b>" + str(today_acc) + "%</b> (" + str(len([r for r in results if r["verdict"] == "confirmed"])) + "/" + str(len(judged)) + ")",
-              "  방향정확도: <b>" + str(dir_acc) + "%</b>",
-              "누적 방향: <b>" + str(d_pct) + "%</b> | 종합: <b>" + str(total_acc) + "%</b> (" + str(accuracy["correct"]) + "/" + str(accuracy["total"]) + ")"]
+              "오늘: <b>" + str(today_display["pct_text"]) + "</b> (" + str(today_display["count_text"]) + ")",
+              "  방향정확도: <b>" + today_dir_text + "</b>",
+              "누적 방향: <b>" + str(dir_display["pct_text"]) + "</b> | 종합: <b>" + str(total_display["pct_text"]) + "</b> (" + str(total_display["count_text"]) + ")"]
     if accuracy.get("strong_areas"): lines.append("💪 강점: " + ", ".join(accuracy["strong_areas"][:3]))
     if accuracy.get("weak_areas"):   lines.append("⚠️ 약점: " + ", ".join(accuracy["weak_areas"][:3]))
     send_message("\n".join(lines))

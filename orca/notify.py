@@ -49,6 +49,34 @@ def _save(path: Path, data):
     atomic_write_json(path, data)
 
 
+def _format_accuracy_display(correct, total, *, empty_label: str = "N/A") -> dict:
+    try:
+        total_value = int(total or 0)
+    except (TypeError, ValueError):
+        total_value = 0
+
+    try:
+        correct_value = int(correct or 0)
+    except (TypeError, ValueError):
+        correct_value = 0
+
+    if total_value <= 0:
+        return {
+            "has_data": False,
+            "pct": None,
+            "pct_text": empty_label,
+            "count_text": "검증 데이터 없음",
+        }
+
+    pct = round(correct_value / total_value * 100, 1)
+    return {
+        "has_data": True,
+        "pct": pct,
+        "pct_text": f"{pct}%",
+        "count_text": f"{correct_value}/{total_value}개",
+    }
+
+
 def _dashboard_url() -> str:
     explicit = os.environ.get("ORCA_DASHBOARD_URL", "").strip()
     if explicit:
@@ -414,12 +442,12 @@ def send_weekly_report():
 
     total   = sum(h.get("total",0) for h in wa)
     correct = sum(h.get("correct",0) for h in wa)
-    wacc    = round(correct / total * 100, 1) if total > 0 else 0
-    pacc    = 0
+    week_acc = _format_accuracy_display(correct, total)
+    prev_acc = _format_accuracy_display(0, 0)
     if len(all_hist) >= 14:
         pw = all_hist[-14:-7]
         pt, pc = sum(h.get("total",0) for h in pw), sum(h.get("correct",0) for h in pw)
-        pacc   = round(pc / pt * 100, 1) if pt > 0 else 0
+        prev_acc = _format_accuracy_display(pc, pt)
 
     sc = [h.get("score",50) for h in ws]
     sent_avg  = round(sum(sc)/len(sc),1) if sc else 50
@@ -449,17 +477,33 @@ def send_weekly_report():
               else "보통")
         risk_counts[lv] = risk_counts.get(lv, 0) + 1
 
-    acc_chg  = round(wacc - pacc, 1)
+    acc_chg = None
+    if week_acc["has_data"] and prev_acc["has_data"]:
+        acc_chg = round(float(week_acc["pct"]) - float(prev_acc["pct"]), 1)
     sent_chg = round(sent_avg - prev_sent, 1)
     lines = [
         "<b>📊 " + ORCA_NAME + " 주간 성장 리포트</b>",
         "<code>" + now.strftime("%Y-%m-%d") + " (주간)</code>", "",
         "━━ 이번 주 예측 성과 ━━",
-        ("📈" if acc_chg > 0 else "📉" if acc_chg < 0 else "➡️")
-        + " 정확도: <b>" + str(wacc) + "%</b>",
-        "   지난주 " + str(pacc) + "% → " + ("+" if acc_chg >= 0 else "") + str(acc_chg) + "%p",
-        "   적중: " + str(correct) + "/" + str(total) + "개", "",
+        ("📈" if acc_chg and acc_chg > 0 else "📉" if acc_chg and acc_chg < 0 else "➡️")
+        + " 정확도: <b>" + str(week_acc["pct_text"]) + "</b>",
     ]
+    if week_acc["has_data"]:
+        if prev_acc["has_data"] and acc_chg is not None:
+            lines.append(
+                "   지난주 "
+                + str(prev_acc["pct_text"])
+                + " → "
+                + ("+" if acc_chg >= 0 else "")
+                + str(acc_chg)
+                + "%p"
+            )
+        else:
+            lines.append("   지난주 N/A → 비교 불가")
+        lines.append("   적중: " + str(week_acc["count_text"]))
+    else:
+        lines.append("   검증 데이터 없음")
+    lines.append("")
     strong = accuracy.get("strong_areas",[])
     weak   = accuracy.get("weak_areas",[])
     if strong:
@@ -503,7 +547,7 @@ def send_monthly_report():
 
     total   = sum(h.get("total",0) for h in ma)
     correct = sum(h.get("correct",0) for h in ma)
-    acc     = round(correct / total * 100, 1) if total > 0 else 0
+    month_acc = _format_accuracy_display(correct, total)
 
     regimes = [m.get("market_regime","") for m in mm]
     reg_cnt = {}
@@ -522,14 +566,16 @@ def send_monthly_report():
     ranking = rotation.get("ranking",[])
     t_all   = _load(ACCURACY_FILE,{}).get("total",0)
     c_all   = _load(ACCURACY_FILE,{}).get("correct",0)
+    cumulative_acc = _format_accuracy_display(c_all, t_all)
 
     lines = [
         "<b>📊 " + ORCA_NAME + " " + last_month + " 월간 리포트</b>", "",
         "━━ 이달의 분석 성과 ━━",
         "분석 일수: <b>" + str(len(mm)) + "일</b>",
-        ("📈" if acc >= 65 else "📉" if acc < 50 else "➡️") + " 예측 정확도: <b>" + str(acc) + "%</b>",
-        "   (" + str(correct) + "/" + str(total) + "개 적중)",
-        "누적 정확도: " + str(round(c_all/t_all*100,1) if t_all else 0) + "%", "",
+        ("📈" if month_acc["has_data"] and float(month_acc["pct"]) >= 65 else "📉" if month_acc["has_data"] and float(month_acc["pct"]) < 50 else "➡️")
+        + " 예측 정확도: <b>" + str(month_acc["pct_text"]) + "</b>",
+        "   " + str(month_acc["count_text"]),
+        "누적 정확도: " + str(cumulative_acc["pct_text"]), "",
         "━━ 이달의 시장 특성 ━━",
         "지배 레짐: <b>" + (max(reg_cnt, key=reg_cnt.get) if reg_cnt else "") + "</b>",
         "분포: " + " | ".join(k + " " + str(v) + "일" for k, v in reg_cnt.items()),

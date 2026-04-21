@@ -1,7 +1,7 @@
 # ORCA vs JACKAL Research Comparison
 
-- Generated: `2026-04-17T22:13:16.870291+09:00`
-- State DB: `C:\Users\cho.minwoo\Desktop\aria-agent-main\data\orca_state.db`
+- Generated: `2026-04-20T23:48:05.431209+09:00`
+- State DB: `C:\Users\skyco\OneDrive\문서\GitHub\O.R.C.A\data\orca_state.db`
 
 ## Snapshot
 
