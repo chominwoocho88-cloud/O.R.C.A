@@ -107,6 +107,11 @@ jobs:
           git config user.name  "JACKAL Session"
           git config user.email "jackal-session@orca-agent"
 
+          python - <<'PY'
+          from orca.state import checkpoint_jackal_db
+          checkpoint_jackal_db()
+          PY
+
           # Persistent artifacts owned by JACKAL. Safe to reapply after reset.
           JACKAL_FILES=(
             "jackal/hunt_log.json"
@@ -118,6 +123,7 @@ jobs:
             "jackal/compact_log.json"
             "jackal/jackal_usage_log.json"
             "data/jackal_watchlist.json"
+            "data/jackal_state.db"
           )
 
           # JACKAL skill/lesson directories. Reapplied wholesale.
