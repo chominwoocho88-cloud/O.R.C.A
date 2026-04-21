@@ -1,6 +1,6 @@
 # ORCA vs JACKAL Research Comparison
 
-- Generated: `2026-04-21T13:28:04.339964+09:00`
+- Generated: `2026-04-21T13:53:38.036358+09:00`
 - State DB: `C:\Users\skyco\OneDrive\문서\GitHub\O.R.C.A\data\orca_state.db`
 
 ## Snapshot
@@ -9,7 +9,7 @@
 | --- | --- | ---: | ---: |
 | ORCA | Final accuracy | 58.7% | +0.0pp |
 | ORCA | Judged count | 126 | +0.0 |
-| ORCA | Lesson count | 170 | +0.0 |
+| ORCA | Applied lessons | 115 | -55.0 |
 | JACKAL | Swing accuracy | n/a | n/a |
 | JACKAL | D1 accuracy | n/a | n/a |
 | JACKAL | Tracked picks | 0 | n/a |
@@ -18,7 +18,7 @@
 
 ## ORCA Research
 
-- Session: `bt_85442e23e7ee4d56b2fe055e7e0226b3`
+- Session: `bt_184710a95f7a40a29ce1972751c5fe6c`
 - Label: `walk_forward`
 - Date range: `2026-01-13` -> `2026-04-11`
 - Stored day rows: `119`

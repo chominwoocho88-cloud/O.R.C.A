@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-04-21T13:28:04.339964+09:00",
+  "generated_at": "2026-04-21T13:53:38.036358+09:00",
   "state_db": "C:\\Users\\skyco\\OneDrive\\문서\\GitHub\\O.R.C.A\\data\\orca_state.db",
   "orca": {
     "latest": {
-      "session_id": "bt_85442e23e7ee4d56b2fe055e7e0226b3",
+      "session_id": "bt_184710a95f7a40a29ce1972751c5fe6c",
       "system": "orca",
       "label": "walk_forward",
-      "started_at": "2026-04-21T13:27:40.813371+09:00",
-      "ended_at": "2026-04-21T13:27:58.121941+09:00",
+      "started_at": "2026-04-21T13:52:18.295583+09:00",
+      "ended_at": "2026-04-21T13:52:37.013994+09:00",
       "status": "completed",
       "config": {
         "dry": true,
@@ -43,7 +43,7 @@
         "effective_trading_days": 60,
         "final_accuracy": 58.7,
         "judged_count": 126,
-        "lesson_count": 170,
+        "lesson_count": 115,
         "mode": "walk_forward",
         "phase_count": 4,
         "requested_months": 0,
@@ -52,11 +52,11 @@
       }
     },
     "previous": {
-      "session_id": "bt_d378cf328c04466a8d5389debf90139e",
+      "session_id": "bt_85442e23e7ee4d56b2fe055e7e0226b3",
       "system": "orca",
       "label": "walk_forward",
-      "started_at": "2026-04-21T13:22:04.845158+09:00",
-      "ended_at": "2026-04-21T13:22:20.272619+09:00",
+      "started_at": "2026-04-21T13:27:40.813371+09:00",
+      "ended_at": "2026-04-21T13:27:58.121941+09:00",
       "status": "completed",
       "config": {
         "dry": true,
@@ -128,7 +128,7 @@
       "effective_trading_days": 60,
       "final_accuracy": 58.7,
       "judged_count": 126,
-      "lesson_count": 170,
+      "lesson_count": 115,
       "mode": "walk_forward",
       "phase_count": 4,
       "requested_months": 0,
@@ -151,7 +151,7 @@
     },
     "deltas": {
       "final_accuracy": 0.0,
-      "lesson_count": 0.0,
+      "lesson_count": -55.0,
       "judged_count": 0.0
     }
   },

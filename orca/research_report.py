@@ -49,6 +49,27 @@ def _fmt_value(value: Any, suffix: str = "") -> str:
     return f"{value}{suffix}"
 
 
+def _sanitize_orca_summary(summary: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(summary, dict):
+        return {}
+    clean = dict(summary)
+    lesson_count = clean.get("lesson_count")
+    if lesson_count is None:
+        lesson_count = clean.get("_lessons_applied")
+    if lesson_count is not None:
+        clean["lesson_count"] = lesson_count
+    clean.pop("generated_lesson_count", None)
+    return clean
+
+
+def _sanitize_orca_session(session: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(session, dict):
+        return None
+    clean = dict(session)
+    clean["summary"] = _sanitize_orca_summary(clean.get("summary"))
+    return clean
+
+
 def _find_latest_orca_sessions() -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     for label in ("walk_forward", "backtest"):
         sessions = list_backtest_sessions("orca", label=label, limit=2)
@@ -210,6 +231,8 @@ def _write_report_outputs(markdown_path: Path, json_path: Path, report: dict[str
 def build_report() -> dict[str, Any]:
     generated_at = _now_iso()
     orca_latest, orca_prev = _find_latest_orca_sessions()
+    orca_latest = _sanitize_orca_session(orca_latest)
+    orca_prev = _sanitize_orca_session(orca_prev)
     jackal_latest, jackal_prev = _find_latest_jackal_sessions()
     shadow_batches = list_jackal_shadow_batches(20)
 
@@ -329,7 +352,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "| --- | --- | ---: | ---: |",
         f"| {ORCA_NAME} | Final accuracy | {_fmt_value(orca_summary.get('final_accuracy'), '%')} | {_fmt_delta(orca['deltas'].get('final_accuracy'))} |",
         f"| {ORCA_NAME} | Judged count | {_fmt_value(orca_summary.get('judged_count'))} | {_fmt_delta(orca['deltas'].get('judged_count'), '')} |",
-        f"| {ORCA_NAME} | Lesson count | {_fmt_value(orca_summary.get('lesson_count'))} | {_fmt_delta(orca['deltas'].get('lesson_count'), '')} |",
+        f"| {ORCA_NAME} | Applied lessons | {_fmt_value(orca_summary.get('lesson_count'))} | {_fmt_delta(orca['deltas'].get('lesson_count'), '')} |",
         f"| {JACKAL_NAME} | Swing accuracy | {_fmt_value(jackal_summary.get('swing_accuracy'), '%')} | {_fmt_delta(jackal['deltas'].get('swing_accuracy'))} |",
         f"| {JACKAL_NAME} | D1 accuracy | {_fmt_value(jackal_summary.get('d1_accuracy'), '%')} | {_fmt_delta(jackal['deltas'].get('d1_accuracy'))} |",
         f"| {JACKAL_NAME} | Tracked picks | {_fmt_value(jackal_summary.get('total_tracked'))} | {_fmt_delta(jackal['deltas'].get('tracked'), '')} |",

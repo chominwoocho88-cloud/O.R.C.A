@@ -971,6 +971,18 @@ def _count_lessons_in_context(context: str) -> int:
     )
 
 
+def _resolve_lesson_counts(accuracy_data: dict | None, generated_count: int) -> tuple[int, int]:
+    data = accuracy_data if isinstance(accuracy_data, dict) else {}
+    applied = data.get("_lessons_applied")
+    if applied is None:
+        applied = generated_count
+    try:
+        applied_count = int(applied)
+    except Exception:
+        applied_count = generated_count
+    return applied_count, int(generated_count)
+
+
 def generate_analysis(date, market_data, dry=False):
     dates_before = []
     prev_regime = ""
@@ -2391,7 +2403,9 @@ def run_walk_forward(dry: bool = False) -> dict:
     _print_dynamic_fetch_summary()
 
     acc_data = _load(ACCURACY_FILE, {})
-    print(f"\n  누적 교훈 : {_count_lessons()}개")
+    applied_lessons, generated_lessons = _resolve_lesson_counts(acc_data, _count_lessons())
+    print(f"\n  적용 교훈 : {applied_lessons}개")
+    print(f"  생성 교훈 : {generated_lessons}개")
     print(f"  강점      : {acc_data.get('strong_areas', [])}")
     print(f"  약점      : {acc_data.get('weak_areas',   [])}")
     print(f"  → 연구 세션에만 반영 (운영 MORNING 상태와 분리)")
@@ -2404,7 +2418,8 @@ def run_walk_forward(dry: bool = False) -> dict:
         "final_accuracy": final_acc,
         "judged_count": final_j,
         "correct_count": final_c,
-        "lesson_count": _count_lessons(),
+        "lesson_count": applied_lessons,
+        "generated_lesson_count": generated_lessons,
         "strong_areas": acc_data.get("strong_areas", []),
         "weak_areas": acc_data.get("weak_areas", []),
         "dynamic_fetch": dict(_DYNAMIC_FETCH_SUMMARY),
@@ -2536,13 +2551,17 @@ def main():
 
         acc     = _load(ACCURACY_FILE, {})
         lessons = _load(LESSONS_FILE, {})
+        applied_lessons, generated_lessons = _resolve_lesson_counts(
+            acc, len(lessons.get("lessons", []))
+        )
         overall = round(total_correct/total_judged*100,1) if total_judged else 0
 
         print(f"\n{'='*65}")
         print(f"✅ Backtest 완료 — {len(DATES)}거래일")
         print(f"   총 검증:  {total_judged}건 | 적중: {total_correct} | 오판: {total_wrong} | 불명: {total_unclear}")
         print(f"   전체 정확도: {overall}%")
-        print(f"   생성된 교훈: {len(lessons.get('lessons',[]))}개")
+        print(f"   적용 교훈: {applied_lessons}개")
+        print(f"   생성 교훈: {generated_lessons}개")
         if acc.get("strong_areas"): print(f"   강점: {acc['strong_areas']}")
         if acc.get("weak_areas"):   print(f"   약점: {acc['weak_areas']}")
         _print_dynamic_fetch_summary()
@@ -2556,7 +2575,8 @@ def main():
             "correct_count": total_correct,
             "wrong_count": total_wrong,
             "unclear_count": total_unclear,
-            "lesson_count": len(lessons.get("lessons", [])),
+            "lesson_count": applied_lessons,
+            "generated_lesson_count": generated_lessons,
             "strong_areas": acc.get("strong_areas", []),
             "weak_areas": acc.get("weak_areas", []),
             "dynamic_fetch": dict(_DYNAMIC_FETCH_SUMMARY),
