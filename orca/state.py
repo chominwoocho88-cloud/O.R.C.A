@@ -1154,7 +1154,7 @@ def record_jackal_shadow_signal(entry: dict[str, Any]) -> str:
         or f"{signal_timestamp}|{ticker}|{signal_family}|{quality_score}"
     )
 
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         existing = conn.execute(
             """
             SELECT shadow_id
@@ -1190,13 +1190,30 @@ def record_jackal_shadow_signal(entry: dict[str, Any]) -> str:
                     _now_iso(),
                 ),
             )
-    record_candidate(
-        entry,
-        source_system="jackal",
-        source_event_type="shadow",
-        source_external_key=external_key,
-        source_event_id=shadow_id,
-    )
+    try:
+        record_candidate(
+            entry,
+            source_system="jackal",
+            source_event_type="shadow",
+            source_external_key=external_key,
+            source_event_id=shadow_id,
+        )
+    except Exception as e:
+        # NOTE (Phase 5 Path B):
+        # Secondary write to orca_state.db (candidate_registry) failed.
+        # Primary (jackal_state.db) already succeeded.
+        # JACKAL learning loop remains consistent.
+        # candidate may be missing for this event. Phase 6 will address.
+        import sys
+
+        print(
+            "[WARN] cross-DB secondary write failed in "
+            "record_jackal_shadow_signal: "
+            + type(e).__name__
+            + ": "
+            + str(e),
+            file=sys.stderr,
+        )
     return shadow_id
 
 
@@ -1220,7 +1237,7 @@ def list_pending_jackal_shadow_signals(
         query += " LIMIT ?"
         params.append(limit)
 
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         rows = conn.execute(query, params).fetchall()
 
     items: list[dict[str, Any]] = []
@@ -1265,7 +1282,7 @@ def resolve_jackal_shadow_signal(
 ) -> None:
     init_state_db()
     source_external_key: str | None = None
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         row = conn.execute(
             """
             SELECT external_key, payload_json
@@ -1298,13 +1315,30 @@ def resolve_jackal_shadow_signal(
             (_json(payload) or "{}", _json(outcome) or "{}", _now_iso(), shadow_id),
         )
     if source_external_key:
-        record_candidate(
-            payload,
-            source_system="jackal",
-            source_event_type="shadow",
-            source_external_key=source_external_key,
-            source_event_id=shadow_id,
-        )
+        try:
+            record_candidate(
+                payload,
+                source_system="jackal",
+                source_event_type="shadow",
+                source_external_key=source_external_key,
+                source_event_id=shadow_id,
+            )
+        except Exception as e:
+            # NOTE (Phase 5 Path B):
+            # Secondary write to orca_state.db (candidate_registry) failed.
+            # Primary (jackal_state.db) already succeeded.
+            # JACKAL learning loop remains consistent.
+            # candidate may be missing for this event. Phase 6 will address.
+            import sys
+
+            print(
+                "[WARN] cross-DB secondary write failed in "
+                "resolve_jackal_shadow_signal: "
+                + type(e).__name__
+                + ": "
+                + str(e),
+                file=sys.stderr,
+            )
 
 
 def record_jackal_shadow_accuracy_batch(
@@ -1318,7 +1352,7 @@ def record_jackal_shadow_accuracy_batch(
     batch_id = f"shadow_batch_{uuid4().hex}"
     recorded_at = _now_iso()
 
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         conn.execute(
             """
             INSERT INTO jackal_shadow_batches (
@@ -1369,7 +1403,7 @@ def record_jackal_shadow_accuracy_batch(
 
 def list_jackal_shadow_batches(limit: int = 90) -> list[dict[str, Any]]:
     init_state_db()
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         rows = conn.execute(
             """
             SELECT batch_id, recorded_at, total, worked, rate, metadata_json
@@ -1417,7 +1451,7 @@ def sync_jackal_live_events(
     updated_at = _now_iso()
     synced = 0
     candidate_jobs: list[tuple[dict[str, Any], str, str]] = []
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         for entry in entries:
             ts = str(entry.get("timestamp", ""))
             ticker = str(entry.get("ticker", ""))
@@ -1468,13 +1502,30 @@ def sync_jackal_live_events(
             candidate_jobs.append((deepcopy(entry), event_id, external_key))
             synced += 1
     for entry, event_id, external_key in candidate_jobs:
-        record_candidate(
-            entry,
-            source_system="jackal",
-            source_event_type=event_type,
-            source_external_key=external_key,
-            source_event_id=event_id,
-        )
+        try:
+            record_candidate(
+                entry,
+                source_system="jackal",
+                source_event_type=event_type,
+                source_external_key=external_key,
+                source_event_id=event_id,
+            )
+        except Exception as e:
+            # NOTE (Phase 5 Path B):
+            # Secondary write to orca_state.db (candidate_registry) failed.
+            # Primary (jackal_state.db) already succeeded.
+            # JACKAL learning loop remains consistent.
+            # candidate may be missing for this event. Phase 6 will address.
+            import sys
+
+            print(
+                "[WARN] cross-DB secondary write failed in "
+                "sync_jackal_live_events: "
+                + type(e).__name__
+                + ": "
+                + str(e),
+                file=sys.stderr,
+            )
     return synced
 
 
@@ -1499,7 +1550,7 @@ def list_jackal_live_events(
     query += " ORDER BY event_timestamp DESC LIMIT ?"
     params.append(limit)
 
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         rows = conn.execute(query, params).fetchall()
 
     result: list[dict[str, Any]] = []
@@ -1519,7 +1570,7 @@ def record_jackal_weight_snapshot(
     init_state_db()
     snapshot_id = f"weights_{uuid4().hex}"
     captured_at = _now_iso()
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         conn.execute(
             """
             INSERT INTO jackal_weight_snapshots (
@@ -1539,7 +1590,7 @@ def record_jackal_weight_snapshot(
 
 def load_latest_jackal_weight_snapshot() -> dict[str, Any] | None:
     init_state_db()
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         row = conn.execute(
             """
             SELECT weights_json
@@ -1558,7 +1609,7 @@ def load_latest_jackal_weight_snapshot() -> dict[str, Any] | None:
 
 def load_jackal_cooldown_state() -> dict[str, Any]:
     init_state_db()
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         rows = conn.execute(
             """
             SELECT ticker, signal_family, cooldown_at, quality_score,
@@ -1710,7 +1761,7 @@ def sync_jackal_cooldown_state(state: dict[str, Any]) -> int:
         )
         target_keys.append(family_key)
 
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         if target_keys:
             placeholders = ",".join("?" for _ in target_keys)
             conn.execute(
@@ -1761,7 +1812,7 @@ def sync_jackal_recommendations(entries: list[dict[str, Any]]) -> int:
     init_state_db()
     updated_at = _now_iso()
     synced = 0
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         for entry in entries:
             recommended_at = str(entry.get("recommended_at") or entry.get("timestamp") or "")
             ticker = str(entry.get("ticker", ""))
@@ -1833,7 +1884,7 @@ def list_jackal_recommendations(
     query += " ORDER BY recommended_at DESC LIMIT ?"
     params.append(limit)
 
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         rows = conn.execute(query, params).fetchall()
 
     results: list[dict[str, Any]] = []
@@ -2008,7 +2059,7 @@ def sync_jackal_accuracy_projection(
         source=source,
         captured_at=captured_at,
     )
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         conn.execute(
             "DELETE FROM jackal_accuracy_projection WHERE snapshot_id = ?",
             (snapshot_id,),
@@ -2073,7 +2124,7 @@ def list_jackal_accuracy_projection(
     query += " ORDER BY captured_at DESC, family, scope, entity_key LIMIT ?"
     params.append(limit)
 
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         rows = conn.execute(query, params).fetchall()
 
     results: list[dict[str, Any]] = []
@@ -2102,7 +2153,7 @@ def list_jackal_accuracy_projection(
 
 def rebuild_latest_jackal_accuracy_projection() -> int:
     init_state_db()
-    with _connect() as conn:
+    with _connect_jackal() as conn:
         row = conn.execute(
             """
             SELECT snapshot_id, source, captured_at, weights_json
