@@ -83,6 +83,116 @@
 - boot-time env validation 추가
 - report export 전 scrub pass 추가
 
+## Phase 6 Candidates (Post-Phase 5)
+
+귀속 그룹: Phase 6 후보 (Phase 5 완료 후)
+
+전제 조건:
+- Phase 5 완료 (`JACKAL` 학습 상태 보존 구조 확립)
+- scheduled run 에서 shadow batch 누적 시작 확인
+- 이후 새 factor 의 효과를 shadow batch 기준으로 확인 가능
+
+### P1. Cross-stock correlation (최우선)
+
+위치:
+- `jackal/scanner.py` (새 factor 추가)
+- `jackal/market_data.py` (correlation 계산)
+
+내용:
+- 같은 섹터 내 `N` 종목의 최근 `5~10일` 수익률 correlation 계산
+- 대상 종목과 sector peer 들의 움직임 동조 여부를 signal 에 반영
+- peer 들의 동조 움직임을 별도 factor 로 기록
+
+근거:
+- 사용자 직접 요청 (`2026-04-21`)
+- Cross-sectional momentum factor (`Jegadeesh & Titman 1993` 이후 실증 축)
+- Summary Map `☐ Cross-stock correlation matrix`
+  - `docs/jackal/current-signals.md`
+
+왜 Phase 5 후인가:
+- Phase 5 없으면 scheduled run 에서 새 factor 의 shadow batch 누적이 이어지지 않음
+- 보존 구조 없이 추가된 factor 는 검증 이력 누적이 어려움
+
+### P2. Relative strength vs market (2순위)
+
+위치:
+- `jackal/market_data.py` (benchmark fetch)
+- `jackal/scanner.py` (RS 반영)
+
+내용:
+- `KOSPI` / `S&P500` 대비 ticker 의 누적 초과수익률 계산
+- `RS percentile >= 80` 구간을 별도 component 로 반영
+- 현재 Hunter 에 있는 sector ETF 대비 상대 낙폭과 별도로, 시장 benchmark 기준 relative strength 를 기록
+
+근거:
+- `O'Neil CANSLIM` 의 relative strength 축
+- `Jegadeesh-Titman` momentum 실증 축
+- Summary Map `☐ Market benchmark relative strength line`
+  - `docs/jackal/current-signals.md`
+- 현재 sector ETF 대비 상대낙폭은 Hunter 에 부분 구현
+  - `jackal/hunter.py:678-692`
+
+왜 Phase 5 후인가:
+- Phase 5 없으면 scheduled run 에서 새 factor 의 shadow batch 누적이 이어지지 않음
+- 보존 구조 없이 추가된 factor 는 검증 이력 누적이 어려움
+
+### P3. Squeeze + breakout direction (3순위)
+
+위치:
+- `jackal/market_data.py` (squeeze detection)
+- `jackal/scanner.py` (결합)
+
+내용:
+- `bb_width` 가 최근 `20일` 중 하위 `10%` 이면 squeeze flag 계산
+- squeeze 단독으로 entry 를 결정하지 않고 기존 신호와 AND 조건으로 결합
+- 기존 신호 예시:
+  - `RSI oversold`
+  - `volume surge`
+- 수렴 후 방향성 신호를 별도 component 로 기록
+
+근거:
+- 사용자 질문 `그래프 수렴 → 터짐`
+- Bollinger squeeze 는 breakout 임박 구간 탐지 패턴으로 자주 사용됨
+- Summary Map `☐ Squeeze 감지`
+  - `docs/jackal/current-signals.md`
+- 현재 구현은 `bb_width`, `bb_expanding` 까지 존재
+  - `jackal/market_data.py:380-387`
+  - `jackal/scanner.py:915-919`
+
+왜 Phase 5 후인가:
+- Phase 5 없으면 scheduled run 에서 새 factor 의 shadow batch 누적이 이어지지 않음
+- 단독 후보가 아니라 P1 또는 P2 구현 중 보조 feature 로 흡수 가능
+
+### Phase 6 Common Policy
+
+- Phase 5 완료 확인 후 `P1` 부터 순차 진행
+- `P3` 는 `P1` 또는 `P2` 구현 과정에서 보조 feature 로 포함 가능
+- 각 factor 는 독립 PR 단위로 설계
+- 기존 `quality_score` 계산 로직은 유지하고 새 component 추가 방식으로 확장
+- `PR 1-5` 운영 원칙 재적용
+  - drift `0`
+  - Backlog 상시 유지
+  - 멈춤 보고
+
+### Duplicate / Conflict Check
+
+중복 확인:
+- 이 문서 내에 `Cross-stock correlation`, `Relative strength vs market`, `Squeeze + breakout direction` 항목은 기존에 없음
+- 현재 repo 에서 위 세 항목은 backlog 로 등록된 상태가 아니라 조사 문서의 현재 상태 설명으로만 존재
+  - `docs/jackal/current-signals.md:1004`
+  - `docs/jackal/current-signals.md:1052`
+  - `docs/jackal/current-signals.md:1086`
+  - `docs/jackal/current-signals.md:1090`
+  - `docs/jackal/current-signals.md:1096`
+
+충돌 확인:
+- 직접 충돌하는 기존 backlog 항목은 없음
+- 관련성이 있는 기존 항목은 아래 두 축
+  - `P4. Build The Evaluation Spine`
+  - `P5. Redesign GitHub Actions`
+- 이번 Phase 6 후보는 `Phase 5` 완료 후 검증 가능한 factor 후보로 기록하며, `P4/P5` 의 선행 조건을 전제로 둠
+  - `docs/orca_v2_backlog.md:50-73`
+
 ## Suggested Order
 
 ### Week 1
