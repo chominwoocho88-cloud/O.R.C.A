@@ -8,6 +8,8 @@ data/jackal_technicals_cache.json
 data/orca_state.db
 data/orca_state.db-shm
 data/orca_state.db-wal
+data/*.db-shm
+data/*.db-wal
 
 # Legacy JACKAL runtime JSON still used as compatibility mirrors
 jackal/jackal_shadow_log.json
