@@ -1,15 +1,39 @@
 {
   "ranking": [
     [
-      "미국 소비재·리테일(에너지 제외)",
+      "반도체 / AI 인프라 (TSMC·SK하이닉스·ASML)",
+      1
+    ],
+    [
+      "빅테크 (Meta·Microsoft·Alphabet)",
+      1
+    ],
+    [
+      "에너지 섹터",
+      1
+    ],
+    [
+      "테슬라",
       -2
     ],
     [
-      "항공·화학(에너지 비용 민감 섹터)",
+      "인텔",
+      -2
+    ],
+    [
+      "에너지 인플레 수혜 이외 성장주",
+      -2
+    ],
+    [
+      "KOSPI / 한국 주식",
       -3
     ]
   ],
-  "rotation_signal": {},
+  "rotation_signal": {
+    "from": "KOSPI / 한국 주식",
+    "to": "반도체 / AI 인프라 (TSMC·SK하이닉스·ASML)",
+    "strength": "보통"
+  },
   "history": [
     {
       "date": "2026-04-17",
@@ -488,6 +512,44 @@
         ]
       ],
       "rotation_signal": {}
+    },
+    {
+      "date": "2026-04-22",
+      "ranking": [
+        [
+          "반도체 / AI 인프라 (TSMC·SK하이닉스·ASML)",
+          1
+        ],
+        [
+          "빅테크 (Meta·Microsoft·Alphabet)",
+          1
+        ],
+        [
+          "에너지 섹터",
+          1
+        ],
+        [
+          "테슬라",
+          -2
+        ],
+        [
+          "인텔",
+          -2
+        ],
+        [
+          "에너지 인플레 수혜 이외 성장주",
+          -2
+        ],
+        [
+          "KOSPI / 한국 주식",
+          -3
+        ]
+      ],
+      "rotation_signal": {
+        "from": "KOSPI / 한국 주식",
+        "to": "반도체 / AI 인프라 (TSMC·SK하이닉스·ASML)",
+        "strength": "보통"
+      }
     }
   ],
   "last_updated": "2026-04-22"
