@@ -1,0 +1,235 @@
+{
+  "analysis_date": "2026-04-21",
+  "analysis_time": "09:06 KST",
+  "mode": "MORNING",
+  "mode_label": "아침 풀분석",
+  "one_line_summary": "나스닥 24,404 연고점권 유지에도 NFLX -9.3% 가이던스 미스·WTI +4.87% 중동 충격 동시 발생, 위험선호 레짐 판정 신뢰도 낮음—위험회피 전환 경계 유지",
+  "market_regime": "혼조(위험회피 전환 경계)",
+  "trend_phase": "횡보추세",
+  "trend_strategy": {
+    "recommended": "반도체·AI 핵심주 비중 유지하되 신규 매수는 자제, 실적 발표 전후 가이던스 미스 여부 확인 후 대응",
+    "caution": "나스닥 3일+ 연속 상승 고점권에서 NFLX식 어닝 비트·가이던스 미스 패턴이 빅테크로 전이될 경우 SK하이닉스 베타 1.36x 적용 시 -2.1% 이상 낙폭 가능. 4/22 호르무즈 휴전 만료 이벤트 전 포지션 축소 고려",
+    "difficulty": "높음"
+  },
+  "confidence_overall": "낮음",
+  "consensus_level": "낮음",
+  "top_headlines": [
+    {
+      "headline": "NFLX Q1 실적 비트에도 Q2 가이던스 컨센서스 하회 + 공동창업자 헤이스팅스 6월 퇴임 발표, 주가 -9.3% 급락",
+      "signal_tag": "어닝 비트·가이던스 미스 패턴 경계",
+      "impact": "높음"
+    },
+    {
+      "headline": "호르무즈 해협 원유 통과량 20→2mb/d(-90%) 급감, 4/22 20:00 ET 휴전 만료 임박—에너지 공급망 혼란 심화",
+      "signal_tag": "중동 지정학 리스크 최고조",
+      "impact": "높음"
+    },
+    {
+      "headline": "WTI +4.87% 급등·LNG 300억 m³/일 차질, IEA '원유 공급 회복 2년 소요' 경고",
+      "signal_tag": "인플레이션 재점화 리스크",
+      "impact": "높음"
+    },
+    {
+      "headline": "TSMC Q1 순이익 58% 급증·ASML 가이던스 상향으로 반도체 업황 호조 확인",
+      "signal_tag": "반도체 펀더멘털 긍정",
+      "impact": "보통"
+    },
+    {
+      "headline": "글로벌 주식펀드 4주 연속 순유입($31.26B), 미국 주식 단독 +$21.25B—기관·개인 동반 매수세 지속",
+      "signal_tag": "과열 역발상 경계",
+      "impact": "보통"
+    }
+  ],
+  "volatility_index": {
+    "vkospi": "N/A",
+    "vix": "18.87",
+    "fear_greed": "65 (Greed)",
+    "level": "중립~탐욕 경계",
+    "interpretation": "VIX 18.87은 공포 완화 구간이나 호르무즈 봉쇄·휴전 만료(4/22) 이벤트가 수일 내 VIX 급등 트리거로 작동 가능. Fear&Greed 65(탐욕) 구간은 단기 과열 신호로 역발상 매도 압력 잠재. FG>=20 구간 방향 정확도 17%로 단독 방향 판단 불가—혼조 해석 유지"
+  },
+  "retail_reversal_signal": {
+    "retail_behavior": "4주 연속 글로벌 주식펀드 순유입($31.26B), 미국 주식 단독 +$21.25B—개인·기관 동반 매수세 확인",
+    "contrarian_implication": "4주 연속 강한 유입 + 나스닥 연고점권 = 과열 신호. 역발상 관점에서 단기 차익실현 출회 및 포지션 정리 압력 주의. 신규 자금 유입 여력 소진 시 급격한 되돌림 가능",
+    "reliability": "보통"
+  },
+  "outflows": [
+    {
+      "zone": "넷플릭스(NFLX) 및 스트리밍·OTT 섹터",
+      "reason": "Q1 실적 비트에도 Q2 가이던스 미스 + 마진 약화 + 헤이스팅스 퇴임으로 9.3% 급락. 어닝 비트·가이던스 미스 패턴이 빅테크 전반으로 전이될 경우 나스닥 밸류에이션 재조정 압력 확대 우려",
+      "severity": "높음",
+      "data_point": "NFLX -9.3%; Q2 가이던스 컨센서스 하회; Hastings 2026년 6월 퇴임"
+    },
+    {
+      "zone": "중동 연계 에너지·물류·해운 및 글로벌 공급망",
+      "reason": "호르무즈 원유 통과량 -90%(20→2mb/d), 걸프 정제 3mb/d 가동 중단, LNG 차질, 4/22 휴전 만료 임박으로 에너지 공급망 혼란 심화. 글로벌 인플레이션 재점화 및 연준 금리 경로 변경 리스크 내재",
+      "severity": "높음",
+      "data_point": "WTI +4.87%; 원유 통과량 20→2mb/d; LNG 300억 m³/일 차질; IEA '회복 2년 소요'; 중동 직항 수출 -49.1%"
+    },
+    {
+      "zone": "코스피 외국인 수급",
+      "reason": "전일까지 코스피 외국인 순매도 지속 확인(2조원 수준), 원화 약세(1470원대) 기조에서 외국인 자금 이탈 압력 구조적 유지",
+      "severity": "보통",
+      "data_point": "KRW/USD 1470.58; 외국인 수급 데이터 미제공(결측)"
+    }
+  ],
+  "inflows": [
+    {
+      "zone": "반도체·AI 인프라 (TSMC, ASML, SK하이닉스)",
+      "reason": "TSMC 58% 순이익 급증, ASML 가이던스 상향, 한국 반도체 수출 +152.5% YoY 사상 최대로 업황 호조 펀더멘털 뒷받침",
+      "momentum": "강함",
+      "data_point": "TSMC Q1 순이익 +58% YoY; ASML 가이던스 상향; 한국 반도체 수출 +152.5% YoY"
+    },
+    {
+      "zone": "미국 주식펀드 (기관·개인 동반)",
+      "reason": "4주 연속 글로벌 주식펀드 순유입, 미국 주식 단독 +$21.25B로 기관·개인 동반 매수세 지속—단기 과열 역발상 경계 필요",
+      "momentum": "보통",
+      "data_point": "글로벌 주식펀드 $31.26B 순유입(4주 연속); 미국 주식 +$21.25B"
+    }
+  ],
+  "neutral_waiting": [
+    {
+      "zone": "빅테크 어닝 시즌 (Meta, Alphabet, Microsoft, Apple 등)",
+      "catalyst_needed": "가이던스 미스 없는 실적 서프라이즈 확인 시 위험선호 레짐 복귀 가능. 반대로 NFLX식 패턴 반복 시 나스닥 밸류에이션 재조정 본격화"
+    },
+    {
+      "zone": "이란-미국 호르무즈 협상 (4/22 휴전 만료)",
+      "catalyst_needed": "4/22 20:00 ET 휴전 연장 합의 시 에너지 리스크 완화·위험선호 재개. 봉쇄 지속 시 WTI 추가 급등·VIX 급등 트리거로 작동"
+    },
+    {
+      "zone": "코스피 외국인 수급 방향성",
+      "catalyst_needed": "외국인 순매수 전환 및 원화 강세(1450원 이하) 확인 시 코스피 상승 탄력 회복 가능"
+    }
+  ],
+  "hidden_signals": [
+    {
+      "signal": "글로벌 주식펀드 4주 연속 순유입 + 나스닥 연고점권 동시 확인",
+      "implication": "신규 자금 유입 여력 소진 구간 진입 가능성. 역발상 관점에서 대규모 차익실현 트리거 이벤트(가이던스 미스·지정학 충격) 발생 시 수급 급반전 리스크 내재",
+      "confidence": "보통"
+    }
+  ],
+  "thesis_killers": [],
+  "data_quality": "degraded",
+  "jackal_candidate_review": {
+    "analysis_date": "2026-04-21",
+    "market_bias": "risk_off",
+    "market_bias_label": "위험회피",
+    "reviewed_count": 0,
+    "aligned_count": 0,
+    "neutral_count": 0,
+    "opposed_count": 0,
+    "follow_count": 0,
+    "watch_count": 0,
+    "avoid_count": 0,
+    "review_verdict_breakdown": {
+      "strong_aligned": 0,
+      "aligned": 0,
+      "neutral": 0,
+      "opposed": 0,
+      "strong_opposed": 0
+    },
+    "average_review_confidence": "low",
+    "reason_code_frequency": {},
+    "highlights": []
+  },
+  "jackal_probability_summary": {
+    "window_days": 90,
+    "min_samples": 5,
+    "raw_rows": 0,
+    "deduped_rows": 0,
+    "duplicates_skipped": 0,
+    "overall": {
+      "wins": 0,
+      "losses": 0,
+      "total": 0,
+      "win_rate": 0.0,
+      "effective_win_rate": 0.0,
+      "qualified": false
+    },
+    "trusted_families": [],
+    "cautious_families": [],
+    "alignment_summary": {},
+    "best_aligned_families": [],
+    "best_opposed_families": []
+  },
+  "learning_policy": {
+    "version": "v1",
+    "policy_source": "orca/learning_policy.py",
+    "min_samples": 5,
+    "prior_wins": 2,
+    "prior_total": 4,
+    "trusted_threshold": 0.58,
+    "cautious_threshold": 0.46,
+    "weight_adjustment_ladder": [
+      {
+        "threshold": 0.7,
+        "delta": 0.05
+      },
+      {
+        "threshold": 0.4,
+        "delta": -0.05
+      }
+    ],
+    "probability_score_adjustment_ladder": [
+      {
+        "min_samples": 12,
+        "threshold": 0.68,
+        "delta": 4.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.62,
+        "delta": 2.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.58,
+        "delta": 1.0
+      },
+      {
+        "min_samples": 12,
+        "threshold": 0.38,
+        "delta": -5.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.43,
+        "delta": -3.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.46,
+        "delta": -1.5
+      }
+    ]
+  },
+  "health": {
+    "status": "degraded",
+    "degraded_reasons": [
+      "external_data_degraded"
+    ],
+    "counters": {
+      "warnings": 1,
+      "soft_fails": 1
+    },
+    "details": [
+      {
+        "code": "external_data_degraded",
+        "where": "orca/run_cycle.py::run_orca_cycle",
+        "exception_type": "",
+        "message": "partial data failure: KRX_API, KOREA_NEWS"
+      }
+    ]
+  },
+  "failed_sources": [
+    {
+      "source": "KRX_API",
+      "error": "unavailable",
+      "category": "primary"
+    },
+    {
+      "source": "KOREA_NEWS",
+      "error": "no_headlines",
+      "category": "secondary"
+    }
+  ]
+}

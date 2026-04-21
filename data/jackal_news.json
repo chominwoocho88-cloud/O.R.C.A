@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-20 23:18 KST",
+  "collected_at": "2026-04-21 09:06 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,64 +12,40 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA announces $1 trillion in GPU orders through 2027 and shows record FY2026 revenue of $215.9B (up 65% YoY)",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "NVIDIA stock on 10-day winning streak, up 18% with Blackwell GPUs sold out and strong data center demand",
+      "headline": "Nvidia continues to thrive in the AI market with strong partnerships and rising demand for its technology",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix earnings announcement expected to serve as catalyst; memory chip recovery driving upside momentum",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix stock down 2.34% on market volatility; analysts maintain Strong Buy rating with 25.58% upside potential",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics posts record Q1 2026 operating profit of 57 trillion won (up 185% sequentially) driven by AI chip demand",
+      "headline": "SK Hynix climbed to record high as investors doubled down on AI hardware trades with mass production of advanced memory",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics earnings beat consensus on sharp memory price increases; strong Q1 performance exceeds expectations",
+      "headline": "Samsung Electronics forecasted record-high first-quarter operating profit driven by AI chip demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom expands partnership with Meta through 2029 for custom AI chip development; strengthening AI sector position",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom FY2025 revenue up 23.87% to $63.89B; earnings surged 292.30%; analysts rate stock Strong Buy with $438.43 target",
+      "headline": "Broadcom extended collaboration with Meta through 2029 for custom AI accelerators and strengthened AI sector position",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao partners with OpenAI on Stargate initiative; stock up 2.69% amid AI expansion expectations",
+      "headline": "Kakao signed partnership deal with OpenAI to expand AI innovation across digital services platform",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "035720.KS",
-      "headline": "Kakao Q3 2025 earnings show record revenue with strategic AI expansion; analyst consensus target price 74,692 KRW (58.92% upside)",
+      "ticker": "466920.KS",
+      "headline": "SOL Korea High Dividend ETF surged 42.7% year-to-date outperforming broader KOSPI market",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 11
+  "total": 6
 }
