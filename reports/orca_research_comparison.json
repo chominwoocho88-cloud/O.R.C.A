@@ -1,15 +1,158 @@
 {
-  "generated_at": "2026-04-20T23:48:05.431209+09:00",
+  "generated_at": "2026-04-21T13:28:04.339964+09:00",
   "state_db": "C:\\Users\\skyco\\OneDrive\\문서\\GitHub\\O.R.C.A\\data\\orca_state.db",
   "orca": {
-    "latest": null,
-    "previous": null,
-    "summary": {},
-    "phase_summary": {},
+    "latest": {
+      "session_id": "bt_85442e23e7ee4d56b2fe055e7e0226b3",
+      "system": "orca",
+      "label": "walk_forward",
+      "started_at": "2026-04-21T13:27:40.813371+09:00",
+      "ended_at": "2026-04-21T13:27:58.121941+09:00",
+      "status": "completed",
+      "config": {
+        "dry": true,
+        "fail_on_empty_dynamic_fetch": false,
+        "months": 0,
+        "walk_forward": true
+      },
+      "summary": {
+        "added_days": 0,
+        "correct_count": 74,
+        "data_source": "hardcoded_only",
+        "dynamic_fetch": {
+          "added_days": 0,
+          "data_source": "hardcoded_only",
+          "effective_first_date": "2026-01-13",
+          "effective_last_date": "2026-04-11",
+          "effective_trading_days": 60,
+          "empty_extension_warning": false,
+          "expected_extension": false,
+          "fetched_ticker_count": 0,
+          "initial_first_date": "2026-01-13",
+          "initial_last_date": "2026-04-11",
+          "initial_trading_days": 60,
+          "requested_end": "2026-04-11",
+          "requested_months": 0,
+          "requested_start": "2026-01-13",
+          "status": "skipped",
+          "ticker_failures": {},
+          "ticker_observations": {},
+          "tickers_with_data": [],
+          "warning": ""
+        },
+        "effective_trading_days": 60,
+        "final_accuracy": 58.7,
+        "judged_count": 126,
+        "lesson_count": 170,
+        "mode": "walk_forward",
+        "phase_count": 4,
+        "requested_months": 0,
+        "strong_areas": [],
+        "weak_areas": []
+      }
+    },
+    "previous": {
+      "session_id": "bt_d378cf328c04466a8d5389debf90139e",
+      "system": "orca",
+      "label": "walk_forward",
+      "started_at": "2026-04-21T13:22:04.845158+09:00",
+      "ended_at": "2026-04-21T13:22:20.272619+09:00",
+      "status": "completed",
+      "config": {
+        "dry": true,
+        "fail_on_empty_dynamic_fetch": false,
+        "months": 0,
+        "walk_forward": true
+      },
+      "summary": {
+        "added_days": 0,
+        "correct_count": 74,
+        "data_source": "hardcoded_only",
+        "dynamic_fetch": {
+          "added_days": 0,
+          "data_source": "hardcoded_only",
+          "effective_first_date": "2026-01-13",
+          "effective_last_date": "2026-04-11",
+          "effective_trading_days": 60,
+          "empty_extension_warning": false,
+          "expected_extension": false,
+          "fetched_ticker_count": 0,
+          "initial_first_date": "2026-01-13",
+          "initial_last_date": "2026-04-11",
+          "initial_trading_days": 60,
+          "requested_end": "2026-04-11",
+          "requested_months": 0,
+          "requested_start": "2026-01-13",
+          "status": "skipped",
+          "ticker_failures": {},
+          "ticker_observations": {},
+          "tickers_with_data": [],
+          "warning": ""
+        },
+        "effective_trading_days": 60,
+        "final_accuracy": 58.7,
+        "judged_count": 126,
+        "lesson_count": 170,
+        "mode": "walk_forward",
+        "phase_count": 4,
+        "requested_months": 0,
+        "strong_areas": [],
+        "weak_areas": []
+      }
+    },
+    "summary": {
+      "added_days": 0,
+      "correct_count": 74,
+      "data_source": "hardcoded_only",
+      "dynamic_fetch": {
+        "added_days": 0,
+        "data_source": "hardcoded_only",
+        "effective_first_date": "2026-01-13",
+        "effective_last_date": "2026-04-11",
+        "effective_trading_days": 60,
+        "empty_extension_warning": false,
+        "expected_extension": false,
+        "fetched_ticker_count": 0,
+        "initial_first_date": "2026-01-13",
+        "initial_last_date": "2026-04-11",
+        "initial_trading_days": 60,
+        "requested_end": "2026-04-11",
+        "requested_months": 0,
+        "requested_start": "2026-01-13",
+        "status": "skipped",
+        "ticker_failures": {},
+        "ticker_observations": {},
+        "tickers_with_data": [],
+        "warning": ""
+      },
+      "effective_trading_days": 60,
+      "final_accuracy": 58.7,
+      "judged_count": 126,
+      "lesson_count": 170,
+      "mode": "walk_forward",
+      "phase_count": 4,
+      "requested_months": 0,
+      "strong_areas": [],
+      "weak_areas": []
+    },
+    "phase_summary": {
+      "day_count": 119,
+      "phase_counts": {
+        "2026-01": 13,
+        "Final": 59,
+        "2026-02": 18,
+        "2026-03": 21,
+        "2026-04": 8
+      },
+      "date_range": {
+        "start": "2026-01-13",
+        "end": "2026-04-11"
+      }
+    },
     "deltas": {
-      "final_accuracy": null,
-      "lesson_count": null,
-      "judged_count": null
+      "final_accuracy": 0.0,
+      "lesson_count": 0.0,
+      "judged_count": 0.0
     }
   },
   "jackal_backtest": {
@@ -109,7 +252,6 @@
     "recommendation_inflow_leaders": []
   },
   "warnings": [
-    "No completed ORCA research session found.",
     "No JACKAL shadow batch history recorded yet.",
     "No SQL-projected JACKAL swing signal accuracy snapshot with enough samples yet.",
     "No SQL-projected JACKAL ticker accuracy snapshot with enough samples yet.",

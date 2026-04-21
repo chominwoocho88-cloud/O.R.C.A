@@ -961,7 +961,28 @@ def _load_lessons_context(current_date: str = None,
     return "\n".join(lines) + "\n"
 
 
+def _count_lessons_in_context(context: str) -> int:
+    if not context:
+        return 0
+    return sum(
+        1
+        for line in context.splitlines()
+        if line.strip() and not line.lstrip().startswith("[")
+    )
+
+
 def generate_analysis(date, market_data, dry=False):
+    dates_before = []
+    prev_regime = ""
+    try:
+        dates_before = [d_ for d_ in DATES if d_ < date]
+        if dates_before:
+            prev_regime = HIST_DATA.get(dates_before[-1], {}).get("regime", "")
+    except Exception:
+        pass
+    lessons_ctx = _load_lessons_context(current_date=date, current_regime=prev_regime)
+    debug_lessons_count = _count_lessons_in_context(lessons_ctx)
+
     if dry:
         fg  = float(market_data.get("fear_greed","50"))
         spd = float(market_data["sp500_change"].replace("%","").replace("+",""))
@@ -982,7 +1003,9 @@ def generate_analysis(date, market_data, dry=False):
             "outflows": [{"zone":"위험자산","reason":"관세 불확실성","severity":"높음"}],
             "inflows":  [{"zone":"현금/안전자산","reason":"공포 구간","momentum":"강함"}],
             "korea_focus": {"krw_usd":str(market_data["krw_usd"]),
-                           "kospi_flow":market_data["kospi_change"],"assessment":"추정"}
+                           "kospi_flow":market_data["kospi_change"],"assessment":"추정"},
+            "debug_lessons_count": debug_lessons_count,
+            "debug_lessons_present": bool(lessons_ctx.strip()),
         }
 
     import anthropic
@@ -2250,12 +2273,14 @@ def _run_phase_dates(dates_slice: list, phase_label: str,
         if save_accuracy:
             acc_pct_today, _, _ = update_accuracy(results, date)
             icon = "✅" if acc_pct_today >= 70 else "⚠️" if acc_pct_today >= 50 else "❌"
+            lesson_suffix = f" L:{analysis.get('debug_lessons_count', 0)}" if dry else ""
             print(f"  {icon}[{i+1:>3}/{len(dates_slice)}] {date} "
-                  f"{acc_pct_today:>5}% ({len(correct)}/{len(judged)}) TK:{len(results)}")
+                  f"{acc_pct_today:>5}% ({len(correct)}/{len(judged)}) TK:{len(results)}{lesson_suffix}")
         elif not all_unclear:
             today_acc = round(len(correct)/len(judged)*100, 1) if judged else 0
+            lesson_suffix = f" L:{analysis.get('debug_lessons_count', 0)}" if dry else ""
             print(f"  📖[{i+1:>3}/{len(dates_slice)}] {date} "
-                  f"{today_acc:>5}% ({len(correct)}/{len(judged)}) TK:{len(results)}")
+                  f"{today_acc:>5}% ({len(correct)}/{len(judged)}) TK:{len(results)}{lesson_suffix}")
 
         phase_judged  += len(judged)
         phase_correct += len(correct)

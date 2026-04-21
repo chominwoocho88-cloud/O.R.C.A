@@ -1,15 +1,15 @@
 # ORCA vs JACKAL Research Comparison
 
-- Generated: `2026-04-20T23:48:05.431209+09:00`
+- Generated: `2026-04-21T13:28:04.339964+09:00`
 - State DB: `C:\Users\skyco\OneDrive\문서\GitHub\O.R.C.A\data\orca_state.db`
 
 ## Snapshot
 
 | Area | Metric | Latest | Delta |
 | --- | --- | ---: | ---: |
-| ORCA | Final accuracy | n/a | n/a |
-| ORCA | Judged count | n/a | n/a |
-| ORCA | Lesson count | n/a | n/a |
+| ORCA | Final accuracy | 58.7% | +0.0pp |
+| ORCA | Judged count | 126 | +0.0 |
+| ORCA | Lesson count | 170 | +0.0 |
 | JACKAL | Swing accuracy | n/a | n/a |
 | JACKAL | D1 accuracy | n/a | n/a |
 | JACKAL | Tracked picks | 0 | n/a |
@@ -18,11 +18,11 @@
 
 ## ORCA Research
 
-- Session: `n/a`
-- Label: `n/a`
-- Date range: `n/a` -> `n/a`
-- Stored day rows: `0`
-- Phase counts: `{}`
+- Session: `bt_85442e23e7ee4d56b2fe055e7e0226b3`
+- Label: `walk_forward`
+- Date range: `2026-01-13` -> `2026-04-11`
+- Stored day rows: `119`
+- Phase counts: `{"2026-01": 13, "2026-02": 18, "2026-03": 21, "2026-04": 8, "Final": 59}`
 - Strong areas: `[]`
 - Weak areas: `[]`
 
@@ -58,7 +58,6 @@
 
 ## Watch Items
 
-- No completed ORCA research session found.
 - No JACKAL shadow batch history recorded yet.
 - No SQL-projected JACKAL swing signal accuracy snapshot with enough samples yet.
 - No SQL-projected JACKAL ticker accuracy snapshot with enough samples yet.
