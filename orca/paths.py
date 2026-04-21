@@ -31,6 +31,7 @@ COST_FILE = DATA_DIR / "orca_cost.json"
 PORTFOLIO_FILE = DATA_DIR / "portfolio.json"
 PATTERN_DB_FILE = DATA_DIR / "pattern_db.json"
 STATE_DB_FILE = DATA_DIR / "orca_state.db"
+JACKAL_DB_FILE = DATA_DIR / "jackal_state.db"
 
 # Runtime / ephemeral files
 BASELINE_FILE = DATA_DIR / "morning_baseline.json"

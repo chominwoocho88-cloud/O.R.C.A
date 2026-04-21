@@ -229,3 +229,24 @@
 - JACKAL shadow와 ORCA production metric이 섞이지 않는다.
 - mutable state를 main branch에 자동 커밋하지 않는다.
 - 어떤 결론이든 evidence chain을 역추적할 수 있다.
+
+## Deferred Improvement: cross-DB secondary write observability
+
+위치:
+- `orca/state.py`
+- `sync_jackal_live_events()`
+- `record_jackal_shadow_signal()`
+- `resolve_jackal_shadow_signal()`
+
+내용:
+- Secondary write 실패 시 현재는 `stderr` 경고만 남기는 정책을 사용한다.
+- `candidate_registry` / `candidate_outcomes` 쪽 secondary propagation 실패를 더 구조적으로 관측하는 경로는 아직 없다.
+- `HealthTracker` 통합은 `Phase 6` candidate spine 재설계와 함께 처리한다.
+
+왜 지금 말고 나중인지:
+- `PR 1` 의 health code `10개 불변` 계약을 유지해야 한다.
+- 새 health code 추가는 이번 Phase 5-C 범위를 넘어선다.
+- `Phase 6` 에서 candidate spine 재설계와 observability 를 함께 처리하는 편이 경계가 명확하다.
+
+귀속 PR:
+- `Phase 6` 또는 별도 observability PR

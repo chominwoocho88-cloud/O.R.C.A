@@ -1,6 +1,14 @@
 ﻿"""SQLite-backed state spine for ORCA runs, predictions, and outcomes."""
 from __future__ import annotations
 
+# NOTE (Phase 5 Path B):
+# This module is a shared persistence adapter.
+# It owns SQL for both orca_state.db (ORCA core)
+# and jackal_state.db (JACKAL learning).
+# Path B decision: accept this duality.
+# Full adapter split deferred to Phase 6.
+# See docs/phase5/02-path-decision.md for rationale.
+
 import json
 import sqlite3
 from copy import deepcopy
@@ -10,7 +18,7 @@ from uuid import uuid4
 
 from jackal.families import canonical_family_key, family_label
 
-from .paths import STATE_DB_FILE
+from .paths import JACKAL_DB_FILE, STATE_DB_FILE
 
 KST = timezone(timedelta(hours=9))
 _STATE_HEALTH_EVENTS: list[dict[str, str]] = []
@@ -77,8 +85,38 @@ def _connect() -> sqlite3.Connection:
     return conn
 
 
-def init_state_db() -> None:
-    with _connect() as conn:
+def _connect_orca() -> sqlite3.Connection:
+    """Return connection to orca_state.db (ORCA core + shared + ambiguous)."""
+    STATE_DB_FILE.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(STATE_DB_FILE, timeout=30)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA synchronous = NORMAL")
+    return conn
+
+
+def _connect_jackal() -> sqlite3.Connection:
+    """Return connection to jackal_state.db (JACKAL learning state).
+
+    Category 1 tables only. See docs/phase5/02-path-decision.md.
+    """
+    JACKAL_DB_FILE.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(JACKAL_DB_FILE, timeout=30)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA synchronous = NORMAL")
+    return conn
+
+
+def _init_orca_tables() -> None:
+    """Create tables in orca_state.db.
+
+    Tables: ORCA-only (4) + Shared (5) + Ambiguous (2) = 11 tables.
+    See docs/phase5/01-db-audit.md Section 5 for classification.
+    """
+    with _connect_orca() as conn:
         conn.executescript(
             """
             CREATE TABLE IF NOT EXISTS runs (
@@ -202,6 +240,104 @@ def init_state_db() -> None:
             CREATE INDEX IF NOT EXISTS idx_backtest_picks_session
                 ON backtest_pick_results(session_id, analysis_date);
 
+            CREATE TABLE IF NOT EXISTS candidate_registry (
+                candidate_id TEXT PRIMARY KEY,
+                external_key TEXT NOT NULL UNIQUE,
+                source_system TEXT NOT NULL,
+                source_event_type TEXT NOT NULL,
+                source_event_id TEXT,
+                source_run_id TEXT,
+                source_session_id TEXT,
+                ticker TEXT NOT NULL,
+                name TEXT,
+                market TEXT,
+                detected_at TEXT NOT NULL,
+                analysis_date TEXT NOT NULL,
+                signal_family TEXT,
+                quality_label TEXT,
+                quality_score REAL,
+                orca_alignment TEXT,
+                status TEXT NOT NULL DEFAULT 'open',
+                payload_json TEXT NOT NULL,
+                latest_outcome_horizon TEXT,
+                latest_outcome_at TEXT,
+                latest_outcome_json TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_candidate_registry_status
+                ON candidate_registry(status, detected_at DESC);
+
+            CREATE INDEX IF NOT EXISTS idx_candidate_registry_lookup
+                ON candidate_registry(source_system, source_event_type, analysis_date, ticker);
+
+            CREATE TABLE IF NOT EXISTS candidate_reviews (
+                review_id TEXT PRIMARY KEY,
+                candidate_id TEXT NOT NULL,
+                run_id TEXT,
+                analysis_date TEXT NOT NULL,
+                reviewed_at TEXT NOT NULL,
+                alignment TEXT,
+                review_verdict TEXT,
+                orca_regime TEXT,
+                orca_trend TEXT,
+                confidence TEXT,
+                thesis_killer TEXT,
+                review_json TEXT NOT NULL,
+                UNIQUE(candidate_id, run_id),
+                FOREIGN KEY(candidate_id) REFERENCES candidate_registry(candidate_id),
+                FOREIGN KEY(run_id) REFERENCES runs(run_id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_candidate_reviews_candidate
+                ON candidate_reviews(candidate_id, reviewed_at DESC);
+
+            CREATE TABLE IF NOT EXISTS candidate_outcomes (
+                outcome_id TEXT PRIMARY KEY,
+                candidate_id TEXT NOT NULL,
+                horizon_label TEXT NOT NULL,
+                status TEXT NOT NULL,
+                observed_at TEXT NOT NULL,
+                price_reference REAL,
+                price_outcome REAL,
+                return_pct REAL,
+                hit INTEGER,
+                outcome_json TEXT NOT NULL,
+                UNIQUE(candidate_id, horizon_label),
+                FOREIGN KEY(candidate_id) REFERENCES candidate_registry(candidate_id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_candidate_outcomes_candidate
+                ON candidate_outcomes(candidate_id, observed_at DESC);
+
+            CREATE TABLE IF NOT EXISTS candidate_lessons (
+                lesson_id TEXT PRIMARY KEY,
+                candidate_id TEXT NOT NULL,
+                outcome_id TEXT,
+                lesson_type TEXT NOT NULL,
+                label TEXT,
+                lesson_value REAL,
+                lesson_timestamp TEXT NOT NULL,
+                lesson_json TEXT NOT NULL,
+                FOREIGN KEY(candidate_id) REFERENCES candidate_registry(candidate_id),
+                FOREIGN KEY(outcome_id) REFERENCES candidate_outcomes(outcome_id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_candidate_lessons_candidate
+                ON candidate_lessons(candidate_id, lesson_timestamp DESC);
+            """
+        )
+
+
+def _init_jackal_tables() -> None:
+    """Create tables in jackal_state.db.
+
+    Tables: Category 1 JACKAL-only (7 tables).
+    """
+    with _connect_jackal() as conn:
+        conn.executescript(
+            """
             CREATE TABLE IF NOT EXISTS jackal_shadow_signals (
                 shadow_id TEXT PRIMARY KEY,
                 external_key TEXT NOT NULL UNIQUE,
@@ -340,95 +476,18 @@ def init_state_db() -> None:
                AND p.scope = latest.scope
                AND p.entity_key = latest.entity_key
                AND p.captured_at = latest.captured_at;
-
-            CREATE TABLE IF NOT EXISTS candidate_registry (
-                candidate_id TEXT PRIMARY KEY,
-                external_key TEXT NOT NULL UNIQUE,
-                source_system TEXT NOT NULL,
-                source_event_type TEXT NOT NULL,
-                source_event_id TEXT,
-                source_run_id TEXT,
-                source_session_id TEXT,
-                ticker TEXT NOT NULL,
-                name TEXT,
-                market TEXT,
-                detected_at TEXT NOT NULL,
-                analysis_date TEXT NOT NULL,
-                signal_family TEXT,
-                quality_label TEXT,
-                quality_score REAL,
-                orca_alignment TEXT,
-                status TEXT NOT NULL DEFAULT 'open',
-                payload_json TEXT NOT NULL,
-                latest_outcome_horizon TEXT,
-                latest_outcome_at TEXT,
-                latest_outcome_json TEXT,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_candidate_registry_status
-                ON candidate_registry(status, detected_at DESC);
-
-            CREATE INDEX IF NOT EXISTS idx_candidate_registry_lookup
-                ON candidate_registry(source_system, source_event_type, analysis_date, ticker);
-
-            CREATE TABLE IF NOT EXISTS candidate_reviews (
-                review_id TEXT PRIMARY KEY,
-                candidate_id TEXT NOT NULL,
-                run_id TEXT,
-                analysis_date TEXT NOT NULL,
-                reviewed_at TEXT NOT NULL,
-                alignment TEXT,
-                review_verdict TEXT,
-                orca_regime TEXT,
-                orca_trend TEXT,
-                confidence TEXT,
-                thesis_killer TEXT,
-                review_json TEXT NOT NULL,
-                UNIQUE(candidate_id, run_id),
-                FOREIGN KEY(candidate_id) REFERENCES candidate_registry(candidate_id),
-                FOREIGN KEY(run_id) REFERENCES runs(run_id)
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_candidate_reviews_candidate
-                ON candidate_reviews(candidate_id, reviewed_at DESC);
-
-            CREATE TABLE IF NOT EXISTS candidate_outcomes (
-                outcome_id TEXT PRIMARY KEY,
-                candidate_id TEXT NOT NULL,
-                horizon_label TEXT NOT NULL,
-                status TEXT NOT NULL,
-                observed_at TEXT NOT NULL,
-                price_reference REAL,
-                price_outcome REAL,
-                return_pct REAL,
-                hit INTEGER,
-                outcome_json TEXT NOT NULL,
-                UNIQUE(candidate_id, horizon_label),
-                FOREIGN KEY(candidate_id) REFERENCES candidate_registry(candidate_id)
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_candidate_outcomes_candidate
-                ON candidate_outcomes(candidate_id, observed_at DESC);
-
-            CREATE TABLE IF NOT EXISTS candidate_lessons (
-                lesson_id TEXT PRIMARY KEY,
-                candidate_id TEXT NOT NULL,
-                outcome_id TEXT,
-                lesson_type TEXT NOT NULL,
-                label TEXT,
-                lesson_value REAL,
-                lesson_timestamp TEXT NOT NULL,
-                lesson_json TEXT NOT NULL,
-                FOREIGN KEY(candidate_id) REFERENCES candidate_registry(candidate_id),
-                FOREIGN KEY(outcome_id) REFERENCES candidate_outcomes(outcome_id)
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_candidate_lessons_candidate
-                ON candidate_lessons(candidate_id, lesson_timestamp DESC);
             """
         )
+
+
+def init_state_db() -> None:
+    """Initialize both orca_state.db and jackal_state.db.
+
+    Idempotent: safe to call multiple times.
+    Safe to call when one DB exists and the other does not.
+    """
+    _init_orca_tables()
+    _init_jackal_tables()
 
 
 def start_run(system: str, mode: str, analysis_date: str, metadata: dict | None = None) -> str:
