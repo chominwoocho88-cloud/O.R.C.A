@@ -250,3 +250,23 @@
 
 귀속 PR:
 - `Phase 6` 또는 별도 observability PR
+
+## Deferred Improvement: research artifact scope 재검토
+
+위치:
+- `.github/workflows/orca_backtest.yml:47`
+- `.github/workflows/policy_eval.yml:88`
+
+내용:
+- 현재 두 workflow 가 `data/orca_state.db` 와 sidecar (`data/orca_state.db-shm`, `data/orca_state.db-wal`) 를 artifact 로 upload 한다.
+- `Phase 5-D` 이후 `data/jackal_state.db` 도 연구 / 평가 artifact 범위에 포함할지 별도 판단이 필요하다.
+- 연구 / 평가에서 JACKAL 학습 상태가 실제로 필요한 경우 artifact 대상에 추가할 수 있다.
+- 필요하지 않다면 현재 범위를 유지한다.
+
+왜 지금 말고 나중인지:
+- `Phase 5-D` 범위는 scheduled run 사이의 DB 보존 문제다.
+- artifact upload 는 연구 / 평가 snapshot 경계 문제로, scheduled persistence 와 분리된 별도 의사결정이다.
+- 실제 `orca_backtest.yml` / `policy_eval.yml` 가 `jackal_state.db` 를 소비하는지 확인한 뒤 결정하는 편이 범위가 명확하다.
+
+귀속 PR:
+- `research artifact scope PR` (가칭)

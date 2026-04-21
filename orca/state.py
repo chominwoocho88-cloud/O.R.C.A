@@ -110,6 +110,23 @@ def _connect_jackal() -> sqlite3.Connection:
     return conn
 
 
+def checkpoint_jackal_db() -> None:
+    """Force WAL checkpoint on jackal_state.db.
+
+    Flushes data/jackal_state.db-wal into data/jackal_state.db.
+    Called by workflows before git add to ensure main DB file
+    contains all recent writes.
+
+    See docs/phase5/04-workflow-design.md Section 3.5 for rationale.
+    """
+    conn = _connect_jackal()
+    try:
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def _init_orca_tables() -> None:
     """Create tables in orca_state.db.
 
