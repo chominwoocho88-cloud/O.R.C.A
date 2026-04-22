@@ -979,50 +979,129 @@ Return ONLY valid JSON. No markdown.
 {"results":[{"event":"","verdict":"confirmed/invalidated/unclear","evidence":"","category":"금리/지정학/기업/기타"}]}"""
 
 
+def _metric_float(value) -> float | None:
+    try:
+        return float(str(value).replace("%", "").replace("+", "").replace(",", "").strip())
+    except Exception:
+        return None
+
+
+def _extract_numeric_thresholds(text: str) -> list[float]:
+    matches = re.findall(r"[-+]?\d[\d,]*\.?\d*", str(text or ""))
+    values: list[float] = []
+    for match in matches:
+        value = _metric_float(match)
+        if value is not None:
+            values.append(value)
+    return values
+
+
+def _direction_flags(text: str) -> tuple[bool, bool]:
+    lower = str(text or "").lower()
+    up_words = ("상승", "반등", "올라", "증가", "+")
+    down_words = ("하락", "급락", "내려", "감소", "-")
+    return any(word in lower for word in up_words), any(word in lower for word in down_words)
+
+
+def _compare_level(level: float | None, confirms: str, invalids: str, label: str) -> tuple[str, str]:
+    if level is None:
+        return "unclear", ""
+
+    def _level_hit(text: str, value: float) -> bool:
+        if "이상" in text or "above" in text.lower() or "over" in text.lower():
+            return level >= value
+        if "이하" in text or "below" in text.lower() or "under" in text.lower():
+            return level <= value
+        return False
+
+    nums_c = _extract_numeric_thresholds(confirms)
+    nums_i = _extract_numeric_thresholds(invalids)
+    if nums_c and _level_hit(confirms, nums_c[0]):
+        return "confirmed", f"{label} {level:,.2f} (레벨 충족)"
+    if nums_i and _level_hit(invalids, nums_i[0]):
+        return "invalidated", f"{label} {level:,.2f} (무효화 레벨 도달)"
+    return "unclear", ""
+
+
+def _compare_change(change: float | None, confirms: str, invalids: str, label: str) -> tuple[str, str]:
+    if change is None:
+        return "unclear", ""
+
+    nums_c = _extract_numeric_thresholds(confirms)
+    nums_i = _extract_numeric_thresholds(invalids)
+    conf_up, conf_down = _direction_flags(confirms)
+    inv_up, inv_down = _direction_flags(invalids)
+
+    conf_thr = abs(nums_c[0]) if nums_c else 1.0
+    inv_thr = abs(nums_i[0]) if nums_i else 1.0
+
+    if conf_up and change >= conf_thr:
+        return "confirmed", f"{label} {change:+.2f}% (예측: +{conf_thr:.1f}% 이상)"
+    if conf_down and change <= -conf_thr:
+        return "confirmed", f"{label} {change:+.2f}% (예측: -{conf_thr:.1f}% 이하)"
+    if conf_up and 0.3 <= change < conf_thr:
+        return "confirmed", f"{label} {change:+.2f}% (예측 방향 일치, 수치 부분달성)"
+    if conf_down and -conf_thr < change <= -0.3:
+        return "confirmed", f"{label} {change:+.2f}% (예측 방향 일치, 수치 부분달성)"
+    if inv_up and change >= inv_thr:
+        return "invalidated", f"{label} {change:+.2f}% (예측 반대)"
+    if inv_down and change <= -inv_thr:
+        return "invalidated", f"{label} {change:+.2f}% (예측 반대)"
+    if conf_up and change <= -0.3:
+        return "invalidated", f"{label} {change:+.2f}% (예측 반대)"
+    if conf_down and change >= 0.3:
+        return "invalidated", f"{label} {change:+.2f}% (예측 반대)"
+    if abs(change) < 0.3:
+        return "unclear", f"변동 미미 ({change:+.2f}%)"
+    return "unclear", f"방향 불명확 ({change:+.2f}%)"
+
+
 def _verify_price(thesis_killers: list, market_data: dict) -> list:
     results = []
+    metric_map = [
+        ("나스닥", "nasdaq", "nasdaq_change", "나스닥"),
+        ("s&p500", "sp500", "sp500_change", "S&P500"),
+        ("s&p", "sp500", "sp500_change", "S&P500"),
+        ("코스피", "kospi", "kospi_change", "코스피"),
+        ("sk하이닉스", "sk_hynix", "sk_hynix_change", "SK하이닉스"),
+        ("sk hynix", "sk_hynix", "sk_hynix_change", "SK하이닉스"),
+        ("삼성전자", "samsung", "samsung_change", "삼성전자"),
+        ("엔비디아", "nvda", "nvda_change", "엔비디아"),
+        ("nvidia", "nvda", "nvda_change", "엔비디아"),
+        ("nvda", "nvda", "nvda_change", "엔비디아"),
+        ("avgo", "avgo", "avgo_change", "AVGO"),
+    ]
+
     for tk in thesis_killers:
-        event     = tk.get("event", "")
-        confirms  = tk.get("confirms_if", "")
-        invalids  = tk.get("invalidates_if", "")
-        verdict   = "unclear"
-        evidence  = ""
-        category  = tk.get("category", "기타")
+        event = tk.get("event", "")
+        event_lower = event.lower()
+        confirms = tk.get("confirms_if", "")
+        invalids = tk.get("invalidates_if", "")
+        verdict = "unclear"
+        evidence = ""
+        category = tk.get("category") or tk.get("quality") or "기타"
 
-        # 간단한 가격 기반 검증
-        import re as _re
-        nums_c = _re.findall(r"[-+]?\d+\.?\d*", confirms)
-        nums_i = _re.findall(r"[-+]?\d+\.?\d*", invalids)
+        for keyword, level_key, pct_key, label in metric_map:
+            if keyword not in event_lower:
+                continue
 
-        # 나스닥/S&P 검증
-        if "나스닥" in event or "nasdaq" in event.lower():
-            chg = market_data.get("nasdaq_change", "")
-            try:
-                chg_f = float(str(chg).replace("%", "").replace("+", ""))
-                if nums_c:
-                    thr = float(nums_c[0])
-                    if "+" in confirms and chg_f >= thr:
-                        verdict = "confirmed"; evidence = f"나스닥 {chg_f:+.1f}%"
-                    elif "-" in invalids and chg_f <= -abs(float(nums_i[0])) if nums_i else False:
-                        verdict = "invalidated"; evidence = f"나스닥 {chg_f:+.1f}%"
-            except Exception:
-                pass
+            level_value = _metric_float(market_data.get(level_key))
+            pct_value = _metric_float(market_data.get(pct_key))
+            level_text = f"{confirms} {invalids}"
+            uses_level = (
+                level_value is not None
+                and ("pt" in level_text.lower() or "종가" in level_text or any(num >= 1000 for num in _extract_numeric_thresholds(level_text)))
+            )
 
-        # 코스피 검증
-        elif "코스피" in event or "kospi" in event.lower():
-            chg = market_data.get("kospi_change", "")
-            try:
-                chg_f = float(str(chg).replace("%", "").replace("+", ""))
-                if nums_c and chg_f >= float(nums_c[0]):
-                    verdict = "confirmed"; evidence = f"코스피 {chg_f:+.1f}%"
-                elif nums_i and chg_f <= -abs(float(nums_i[0])):
-                    verdict = "invalidated"; evidence = f"코스피 {chg_f:+.1f}%"
-            except Exception:
-                pass
+            if uses_level:
+                verdict, evidence = _compare_level(level_value, confirms, invalids, label)
+            if verdict == "unclear":
+                verdict, evidence = _compare_change(pct_value, confirms, invalids, label)
+            break
 
         results.append({
-            "event":    event,
-            "verdict":  verdict,
+            "event": event,
+            "verdict": verdict,
             "evidence": evidence,
             "category": category,
         })
@@ -1227,7 +1306,8 @@ def run_verification() -> dict:
 
     _save(ACCURACY_FILE, accuracy)
     _send_verification_report(results, accuracy, today_acc, dir_acc)
-    print("Done. Today accuracy: " + str(today_acc) + "%")
+    today_acc_text = str(today_acc) + "%" if judged else "N/A"
+    print("Done. Today accuracy: " + today_acc_text)
     return accuracy
 
 

@@ -72,7 +72,12 @@ def _json(data: Any) -> str | None:
 
 
 def _candidate_systems(system: str) -> list[str]:
-    return [system]
+    system_key = str(system or "").strip().lower()
+    aliases = {
+        "orca": ["orca", "aria"],
+        "aria": ["aria", "orca"],
+    }
+    return aliases.get(system_key, [system_key or system])
 
 
 def _connect() -> sqlite3.Connection:
@@ -741,6 +746,10 @@ def resolve_verification_outcomes(
     resolved_at = _now_iso()
 
     systems = _candidate_systems("orca")
+    system_placeholders = ", ".join("?" for _ in systems)
+    system_order = " ".join(
+        f"WHEN '{name}' THEN {idx}" for idx, name in enumerate(systems)
+    )
 
     with _connect() as conn:
         for result in results:
@@ -749,17 +758,17 @@ def resolve_verification_outcomes(
                 continue
 
             prediction = conn.execute(
-                """
+                f"""
                 SELECT prediction_id
                   FROM predictions
-                 WHERE system IN (?, ?)
+                 WHERE system IN ({system_placeholders})
                    AND analysis_date = ?
                    AND prediction_kind = 'thesis_killer'
                    AND event_name = ?
-                 ORDER BY CASE system WHEN 'orca' THEN 0 ELSE 1 END, created_at DESC
+                 ORDER BY CASE system {system_order} ELSE 99 END, created_at DESC
                  LIMIT 1
                 """,
-                (systems[0], systems[1], source_analysis_date, event_name),
+                (*systems, source_analysis_date, event_name),
             ).fetchone()
 
             if not prediction:
