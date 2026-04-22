@@ -944,5 +944,139 @@
       "best_aligned_families": [],
       "best_opposed_families": []
     }
+  },
+  {
+    "analysis_date": "2026-04-23",
+    "analysis_time": "00:07 KST",
+    "mode": "EVENING",
+    "mode_label": "저녁 마감",
+    "one_line_summary": "나스닥 24,530·코스피 6,418 동시 연고점 경신, AI 반도체 강세 지속되나 연속 상승 3일+ 블랙스완 패턴·VIX 19.1 경계 구간으로 추격 매수 자제 권고",
+    "market_regime": "위험선호(전환 경계)",
+    "trend_phase": "상승추세",
+    "trend_strategy": {
+      "recommended": "추세추종 유지 (AI 반도체·HBM 핵심 비중 유지), 단 신규 추격 매수는 자제. 기존 포지션 보유자는 손절선 명확화 후 홀딩.",
+      "caution": "코스피 4월 누적 +26.4% 과열 구간 진입. 나스닥 24,530 연고점권에서 블랙스완 급반전 확률 약 12%(7/60일). SK하이닉스 베타 1.36x 기준 나스닥 -2% 시 -2.8% 낙폭 비대칭 리스크 상존. 4월 30일 Apple Q2 실적 전후 변동성 확대 예고.",
+      "difficulty": "보통"
+    },
+    "confidence_overall": "보통",
+    "consensus_level": "보통",
+    "top_headlines": [
+      {
+        "headline": "나스닥 24,530 / S&P500 7,118 동시 연고점권 강세 유지, AI 반도체 수요 $500B 상방 리비전",
+        "signal_tag": "강세",
+        "impact": "높음"
+      },
+      {
+        "headline": "코스피 6,418 역대 최고가 경신, 외국인 4월 누적 순매수 +5.4조원(전기전자 집중)",
+        "signal_tag": "강세(집중 리스크)",
+        "impact": "높음"
+      },
+      {
+        "headline": "Apple CEO 팀 쿡 9월 퇴임 발표, 후임 Ternus 확정 — 4월 30일 Q2 실적 전후 변동성 예고",
+        "signal_tag": "불확실성",
+        "impact": "보통"
+      },
+      {
+        "headline": "호르무즈 해협 봉쇄 지속·유가 Q2 $115/bbl 피크 전망 — 항공·해운·유틸리티 비용 압박 극대화",
+        "signal_tag": "위험",
+        "impact": "높음"
+      },
+      {
+        "headline": "TSMC·ASML 어닝 서프라이즈 확인, 반도체 전체 2026년 $975B~$1T 성장 전망",
+        "signal_tag": "강세",
+        "impact": "높음"
+      }
+    ],
+    "volatility_index": {
+      "vkospi": "미제공",
+      "vix": "19.1",
+      "fear_greed": "51 (Neutral)",
+      "level": "중립",
+      "interpretation": "VIX 19.1은 공포 완화 후 안정 구간 진입을 의미하나, Fear & Greed 51(중립) 조합은 방향성 확신 불가 구간. FG 20 이상 구간에서 방향 예측 정확도 17%에 불과 — 단독 지표로 방향 판단 금지. 나스닥·코스피 실제 가격 흐름과 외국인 수급을 우선 신뢰할 것."
+    },
+    "retail_reversal_signal": {
+      "retail_behavior": "코스피 4월 외국인 순매수 전환(+5.4조원, 전기전자 5.6조 집중). 3월 -35.9조 극단 이탈 후 급반전. 개인 투자자는 추격 매수 유입 가능성 높음.",
+      "contrarian_implication": "2월(-21.1조)→3월(-35.9조) 극단 매도 후 반전 매수는 기술적 반등 신뢰도 제공. 단 코스피 ATH 동시 달성 구간은 개인 추격 매수 = 고점 신호일 가능성 병존. 외국인 집중 포지션 청산 시 개인 물량 잠김 위험.",
+      "reliability": "보통"
+    },
+    "outflows": [
+      {
+        "zone": "에너지 수입 의존 섹터 (항공·해운·유틸리티)",
+        "reason": "유가 Q2 $115/bbl 피크 전망·호르무즈 봉쇄 지속으로 연료비 및 운송비 비용 압박 극대화",
+        "severity": "높음",
+        "data_point": "EIA: Q2 평균 $115/bbl, 4월 2일 일중 최고 $128/bbl; 역사상 최대 공급 차질 9.1mb/d"
+      },
+      {
+        "zone": "전통 제조업·내수 소비재 (한국)",
+        "reason": "코스피 상승이 전기전자 외국인 집중 매수에만 편중 — 내수·전통 업종 실질 순매도 상태 지속",
+        "severity": "보통",
+        "data_point": "외국인 순매수 5.4조 중 전기전자 5.6조 — 타 업종 실질 순매도"
+      },
+      {
+        "zone": "Apple 관련 소비자 테크",
+        "reason": "팀 쿡 CEO 퇴임 발표에 따른 리더십 불확실성, 4월 30일 Q2 실적 전후 변동성 확대 예고",
+        "severity": "보통",
+        "data_point": "April 21 공시: Ternus 후임 확정, Q2 어닝 4월 30일 발표 예정"
+      }
+    ],
+    "thesis_killers": [
+      {
+        "event": "나스닥",
+        "timeframe": "향후 1~2거래일",
+        "confirms_if": "나스닥 종가 +1% 이상 유지(24,675pt 돌파)",
+        "invalidates_if": "나스닥 종가 -1% 이하(24,187pt 이탈) — 연속 상승 후 블랙스완 패턴 발동 신호",
+        "quality": "ok"
+      },
+      {
+        "event": "SK하이닉스",
+        "timeframe": "향후 1~2거래일",
+        "confirms_if": "SK하이닉스 +2% 이상 종가 마감",
+        "invalidates_if": "SK하이닉스 -2.8% 이하 — 나스닥 -2% 충격 시 베타 1.36x 예상 낙폭 실현 신호",
+        "quality": "ok"
+      }
+    ],
+    "data_quality": "degraded",
+    "jackal_candidate_review": {
+      "analysis_date": "2026-04-23",
+      "market_bias": "mixed",
+      "market_bias_label": "혼조/관망",
+      "reviewed_count": 0,
+      "aligned_count": 0,
+      "neutral_count": 0,
+      "opposed_count": 0,
+      "follow_count": 0,
+      "watch_count": 0,
+      "avoid_count": 0,
+      "review_verdict_breakdown": {
+        "strong_aligned": 0,
+        "aligned": 0,
+        "neutral": 0,
+        "opposed": 0,
+        "strong_opposed": 0
+      },
+      "average_review_confidence": "low",
+      "reason_code_frequency": {},
+      "highlights": []
+    },
+    "jackal_probability_summary": {
+      "window_days": 90,
+      "min_samples": 5,
+      "raw_rows": 0,
+      "deduped_rows": 0,
+      "duplicates_skipped": 0,
+      "overall": {
+        "wins": 0,
+        "losses": 0,
+        "total": 0,
+        "win_rate": 0.0,
+        "effective_win_rate": 0.0,
+        "qualified": false
+      },
+      "trusted_families": [],
+      "cautious_families": [],
+      "alignment_summary": {},
+      "best_aligned_families": [],
+      "best_opposed_families": []
+    }
   }
 ]
