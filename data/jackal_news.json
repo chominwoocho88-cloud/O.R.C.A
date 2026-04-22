@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-22 08:20 KST",
+  "collected_at": "2026-04-22 22:38 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia stock remains under pressure despite strong AI infrastructure demand driving data center revenue",
-      "impact": "neutral",
+      "headline": "Nvidia maintains strong enterprise demand for its AI data center platforms with Blackwell and Vera Rubin systems already factored into guidance",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix begins mass production of next-generation memory module amid record Q1 operating profit expectations",
+      "headline": "SK Hynix began mass production of next-generation memory module; stock price increased 3.37% in past 24 hours",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics accelerates high-bandwidth memory development with strong Q1 earnings exceeding estimates",
+      "headline": "Samsung Electronics accelerating development of next-generation high-bandwidth memory; stock gained 2.10% in past 24 hours",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom extends partnership with Meta for custom AI chips through 2029 amid historic April surge",
+      "headline": "Broadcom expanded AI chip partnerships with Meta, closing extension agreement through 2029 for custom AI accelerators",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao partners with OpenAI for Stargate initiative expansion while demonstrating record revenue growth",
+      "headline": "Kakao Corp partners with OpenAI as part of Stargate initiative expansion in South Korea",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "Shinhan SOL Shipbuilding Top3 Plus ETF shows 154.17% annual return with technical indicators flashing strong sell signal",
+      "headline": "Shinhan SOL Shipbuilding TOP3 Plus ETF trading at 32,100 KRW with strong technical sell signals on daily indicators",
       "impact": "bearish",
       "source": "web_search"
     }
