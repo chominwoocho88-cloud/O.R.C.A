@@ -161,7 +161,7 @@ class StateAliasTests(unittest.TestCase):
             with patch.object(state, "STATE_DB_FILE", state_db), patch.object(state, "JACKAL_DB_FILE", jackal_db):
                 state.init_state_db()
 
-                with state._connect() as conn:
+                with state._connect_orca() as conn:
                     conn.execute(
                         """
                         INSERT INTO runs (run_id, system, analysis_date, started_at, status)
@@ -206,7 +206,7 @@ class StateAliasTests(unittest.TestCase):
                 self.assertEqual(resolution["matched"], 1)
                 self.assertEqual(resolution["updated"], 0)
 
-                with state._connect() as conn:
+                with state._connect_orca() as conn:
                     row = conn.execute(
                         "SELECT verdict FROM outcomes WHERE prediction_id = ?",
                         ("pred_1",),

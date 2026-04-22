@@ -23,6 +23,19 @@ from .paths import JACKAL_DB_FILE, STATE_DB_FILE
 KST = timezone(timedelta(hours=9))
 _STATE_HEALTH_EVENTS: list[dict[str, str]] = []
 
+# === DB Connection Helpers ===
+# Phase 5 Path B introduced dual-DB runtime state.
+#
+# _connect_orca(): connect to data/orca_state.db
+#                  (ORCA core + shared candidate cluster)
+# _connect_jackal(): connect to data/jackal_state.db
+#                    (JACKAL learning tables, Category 1)
+#
+# checkpoint_jackal_db() is used by workflows to ensure
+# WAL is flushed before git add.
+#
+# See docs/phase5/02-path-decision.md for Path B context.
+
 
 def _now() -> datetime:
     return datetime.now(KST)
@@ -78,16 +91,6 @@ def _candidate_systems(system: str) -> list[str]:
         "aria": ["aria", "orca"],
     }
     return aliases.get(system_key, [system_key or system])
-
-
-def _connect() -> sqlite3.Connection:
-    STATE_DB_FILE.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(STATE_DB_FILE, timeout=30)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    conn.execute("PRAGMA journal_mode = WAL")
-    conn.execute("PRAGMA synchronous = NORMAL")
-    return conn
 
 
 def _connect_orca() -> sqlite3.Connection:
@@ -516,7 +519,7 @@ def start_run(system: str, mode: str, analysis_date: str, metadata: dict | None 
     clear_health_events()
     init_state_db()
     run_id = f"run_{uuid4().hex}"
-    with _connect() as conn:
+    with _connect_orca() as conn:
         conn.execute(
             """
             INSERT INTO runs (
@@ -538,7 +541,7 @@ def finish_run(
     metadata: dict | None = None,
 ) -> None:
     init_state_db()
-    with _connect() as conn:
+    with _connect_orca() as conn:
         row = conn.execute(
             "SELECT metadata_json FROM runs WHERE run_id = ?",
             (run_id,),
@@ -667,7 +670,7 @@ def record_report_predictions(run_id: str, report: dict) -> dict[str, Any]:
     confidence = str(report.get("confidence_overall", ""))
 
     created = 0
-    with _connect() as conn:
+    with _connect_orca() as conn:
         summary_payload = {
             "one_line_summary": report.get("one_line_summary", ""),
             "consensus_level": report.get("consensus_level", ""),
@@ -751,7 +754,7 @@ def resolve_verification_outcomes(
         f"WHEN '{name}' THEN {idx}" for idx, name in enumerate(systems)
     )
 
-    with _connect() as conn:
+    with _connect_orca() as conn:
         for result in results:
             event_name = str(result.get("event", "")).strip()
             if not event_name:
@@ -853,7 +856,7 @@ def start_backtest_session(
 ) -> str:
     init_state_db()
     session_id = f"bt_{uuid4().hex}"
-    with _connect() as conn:
+    with _connect_orca() as conn:
         conn.execute(
             """
             INSERT INTO backtest_sessions (
@@ -867,7 +870,7 @@ def start_backtest_session(
 
 def load_backtest_state(session_id: str, state_key: str, default: Any = None) -> Any:
     init_state_db()
-    with _connect() as conn:
+    with _connect_orca() as conn:
         row = conn.execute(
             """
             SELECT payload_json
@@ -886,7 +889,7 @@ def load_backtest_state(session_id: str, state_key: str, default: Any = None) ->
 
 def save_backtest_state(session_id: str, state_key: str, payload: Any) -> None:
     init_state_db()
-    with _connect() as conn:
+    with _connect_orca() as conn:
         conn.execute(
             """
             INSERT INTO backtest_state (
@@ -911,7 +914,7 @@ def record_backtest_day(
     metrics: dict | None = None,
 ) -> None:
     init_state_db()
-    with _connect() as conn:
+    with _connect_orca() as conn:
         conn.execute(
             """
             INSERT INTO backtest_daily_results (
@@ -945,7 +948,7 @@ def finish_backtest_session(
     summary: dict | None = None,
 ) -> None:
     init_state_db()
-    with _connect() as conn:
+    with _connect_orca() as conn:
         row = conn.execute(
             "SELECT summary_json FROM backtest_sessions WHERE session_id = ?",
             (session_id,),
@@ -999,7 +1002,7 @@ def get_latest_backtest_session(
         + " ELSE 99 END, started_at DESC LIMIT 1"
     )
 
-    with _connect() as conn:
+    with _connect_orca() as conn:
         row = conn.execute(query, params).fetchone()
     if not row:
         return None
@@ -1054,7 +1057,7 @@ def list_backtest_sessions(
     )
     params.append(limit)
 
-    with _connect() as conn:
+    with _connect_orca() as conn:
         rows = conn.execute(query, params).fetchall()
 
     def _decode(value: Any) -> Any:
@@ -1097,7 +1100,7 @@ def list_backtest_days(
         params.append(phase_label)
     query += " ORDER BY analysis_date ASC"
 
-    with _connect() as conn:
+    with _connect_orca() as conn:
         rows = conn.execute(query, params).fetchall()
 
     def _decode(value: Any, default: Any) -> Any:
@@ -1133,7 +1136,7 @@ def record_backtest_pick_results(
 ) -> None:
     init_state_db()
     created_at = _now_iso()
-    with _connect() as conn:
+    with _connect_orca() as conn:
         conn.execute(
             """
             DELETE FROM backtest_pick_results
@@ -2634,7 +2637,7 @@ def record_candidate(
         payload["signal_family_label"] = family_label(signal_family)
     status = _candidate_status(payload)
 
-    with _connect() as conn:
+    with _connect_orca() as conn:
         existing = conn.execute(
             """
             SELECT candidate_id
@@ -2754,7 +2757,7 @@ def list_candidates(
     query += " ORDER BY detected_at DESC LIMIT ?"
     params.append(limit)
 
-    with _connect() as conn:
+    with _connect_orca() as conn:
         rows = conn.execute(query, params).fetchall()
 
     results: list[dict[str, Any]] = []
@@ -2821,7 +2824,7 @@ def list_candidate_outcomes(
     limit: int = 20,
 ) -> list[dict[str, Any]]:
     init_state_db()
-    with _connect() as conn:
+    with _connect_orca() as conn:
         rows = conn.execute(
             """
             SELECT outcome_id, horizon_label, status, observed_at,
@@ -2863,7 +2866,7 @@ def list_candidate_reviews(
     limit: int = 20,
 ) -> list[dict[str, Any]]:
     init_state_db()
-    with _connect() as conn:
+    with _connect_orca() as conn:
         rows = conn.execute(
             """
             SELECT review_id, run_id, analysis_date, reviewed_at, alignment,
@@ -2915,7 +2918,7 @@ def summarize_candidate_probabilities(
 ) -> dict[str, Any]:
     init_state_db()
     cutoff = (_now() - timedelta(days=days)).isoformat()
-    with _connect() as conn:
+    with _connect_orca() as conn:
         rows = conn.execute(
             """
             SELECT c.candidate_id,
@@ -3069,7 +3072,7 @@ def backfill_candidate_signal_families(*, limit: int | None = None) -> int:
         params.append(limit)
 
     updated = 0
-    with _connect() as conn:
+    with _connect_orca() as conn:
         rows = conn.execute(query, params).fetchall()
         for row in rows:
             try:
@@ -3144,7 +3147,7 @@ def record_candidate_review(
     init_state_db()
     review_id = f"review_{uuid4().hex}"
     reviewed_at = _now_iso()
-    with _connect() as conn:
+    with _connect_orca() as conn:
         valid_run_id = run_id
         if run_id:
             run_row = conn.execute(
@@ -3222,7 +3225,7 @@ def record_candidate_lesson(
 ) -> str:
     init_state_db()
     lesson_id = f"lesson_{uuid4().hex}"
-    with _connect() as conn:
+    with _connect_orca() as conn:
         conn.execute(
             """
             INSERT INTO candidate_lessons (
