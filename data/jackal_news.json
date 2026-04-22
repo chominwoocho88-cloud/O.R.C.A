@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-21 23:28 KST",
+  "collected_at": "2026-04-22 08:20 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,52 +12,40 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Marvell stock pops on report it will help Google with custom AI chips",
-      "impact": "bearish",
+      "headline": "Nvidia stock remains under pressure despite strong AI infrastructure demand driving data center revenue",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix begins mass production of next-generation AI memory module SOCAMM2",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix starts construction of $3.87B US semiconductor fab in Indiana",
+      "headline": "SK Hynix begins mass production of next-generation memory module amid record Q1 operating profit expectations",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Memory semiconductor inventory at historic lows with strong Q2 demand expected",
+      "headline": "Samsung Electronics accelerates high-bandwidth memory development with strong Q1 earnings exceeding estimates",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Meta extends partnership with Broadcom through 2029 for custom AI accelerators",
+      "headline": "Broadcom extends partnership with Meta for custom AI chips through 2029 amid historic April surge",
       "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Alphabet turns to Marvell for AI chips, diversifying beyond Broadcom",
-      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao stock trading near 52-week highs with 51% upside potential from analyst targets",
+      "headline": "Kakao partners with OpenAI for Stargate initiative expansion while demonstrating record revenue growth",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF achieves #1 fund inflow ranking among domestic dividend ETFs",
-      "impact": "bullish",
+      "headline": "Shinhan SOL Shipbuilding Top3 Plus ETF shows 154.17% annual return with technical indicators flashing strong sell signal",
+      "impact": "bearish",
       "source": "web_search"
     }
   ],
-  "total": 8
+  "total": 6
 }

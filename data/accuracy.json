@@ -2,8 +2,23 @@
   "total": 0,
   "correct": 0,
   "by_category": {},
-  "history": [],
-  "history_by_category": [],
+  "history": [
+    {
+      "date": "2026-04-22",
+      "total": 0,
+      "correct": 0,
+      "accuracy": 0,
+      "dir_correct": 0,
+      "dir_accuracy": 0,
+      "full_correct": 0
+    }
+  ],
+  "history_by_category": [
+    {
+      "date": "2026-04-22",
+      "by_category": {}
+    }
+  ],
   "weak_areas": [],
   "strong_areas": [],
   "dir_total": 0,
