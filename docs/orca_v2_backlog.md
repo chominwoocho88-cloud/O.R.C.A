@@ -298,3 +298,36 @@
 - accuracy debug commit 과 분리 유지
 
 귀속 PR: Phase 6 후보 중 "repo hygiene PR"
+
+## Known Bug: `_calc_signal_quality_core` family ordering hazard
+
+**Discovered during**: P2-3 quality engine extraction (2026-04-22)
+
+**Location**: `jackal/quality_engine.py:252` (references `family`) 
+and `:300` (assigns `family`)
+
+**Origin**: This ordering hazard existed in `jackal/scanner.py` 
+before Phase 6 P2-3 extraction. The refactor moved the code as-is 
+without modification (behavior-preserving rule).
+
+**Symptom**: `family` variable is referenced at line 252 before 
+assignment at line 300. Potential `NameError` in rare input 
+combinations.
+
+**Impact**: Low severity
+- Code works in common code paths where `family` is assigned elsewhere first
+- May fail in specific edge cases where the early reference path is hit
+- Currently no production incident reports for this
+
+**Fix approach**:
+- Option A: Reorder variable assignment (hoist line 300 before line 252)
+- Option B: Default initialization at function entry (`family = None`)
+- Option C: Structural refactor to compute family before micro-gate
+
+**Next step**: Separate bug-fix PR with:
+1. Minimal reproducer (input that triggers the hazard)
+2. Before/after behavior comparison
+3. Unit test that fails before fix, passes after
+
+**Classification**: P3 (low urgency, but should be fixed before any 
+behavior change in that code path)
