@@ -1,13 +1,8 @@
 """Tests for the extracted JACKAL deterministic quality engine.
 
-Deferred bug note:
-- `jackal/quality_engine.py:252` still reads `family` inside the micro-gate
-  branch before `family = _get_signal_family(signals)` at line 300.
-- Repro: call `_calc_signal_quality_core(...)` with a risk-off regime string
-  (`"위험회피"`, `"하락추세"`, or `"bearish"`), `vix >= 22`, and without a
-  higher-uncertainty gate activating first.
-- This refactor intentionally preserves that ordering for behavior parity.
-- Fix deferred to a separate bug-fix PR.
+Includes regression coverage for the family ordering hazard that was
+fixed after P2-3 extraction. The quality core now computes signal family
+before micro-gate and high-uncertainty branches read it.
 """
 
 from __future__ import annotations
@@ -245,6 +240,78 @@ class TestFinalJudgment(unittest.TestCase):
         self.assertEqual(result["signal_type"], "관망")
         self.assertEqual(result["entry_price"], 100)
         self.assertEqual(result["stop_loss"], 92)
+
+
+class TestMicroGateRegressionHazards(unittest.TestCase):
+    """Regression coverage for the former family ordering hazard."""
+
+    def test_bearish_regime_high_vix_does_not_crash(self):
+        from jackal.quality_engine import _calc_signal_quality_core
+
+        result = _calc_signal_quality_core(
+            ["ma_support"],
+            {
+                "price": 100.0,
+                "ma50": 100.0,
+                "rsi": 45,
+                "bb_pos": 50,
+                "vol_ratio": 1.0,
+                "change_1d": 0.0,
+                "change_5d": -1.0,
+                "vix_level": 25,
+            },
+            {
+                "regime": "위험회피",
+                "thesis_killers": [],
+                "note": "",
+                "trend": "",
+                "fear_greed": "40",
+            },
+            weights={},
+            pcr_avg=0.0,
+            cached_vix=25.0,
+            hy_spread=3.0,
+        )
+
+        self.assertEqual(result["signal_family"], "ma_support_solo")
+        self.assertTrue(
+            any("레짐microgate" in reason for reason in result["reasons"]),
+            "Expected regime_micro path to execute without NameError.",
+        )
+
+    def test_high_uncertainty_path_does_not_crash(self):
+        from jackal.quality_engine import _calc_signal_quality_core
+
+        result = _calc_signal_quality_core(
+            ["bb_touch"],
+            {
+                "price": 100.0,
+                "ma50": 99.0,
+                "rsi": 40,
+                "bb_pos": 10,
+                "vol_ratio": 1.0,
+                "change_1d": -1.0,
+                "change_5d": -2.0,
+                "vix_level": 32,
+            },
+            {
+                "regime": "중립",
+                "thesis_killers": [],
+                "note": "",
+                "trend": "",
+                "fear_greed": "50",
+            },
+            weights={},
+            pcr_avg=0.0,
+            cached_vix=32.0,
+            hy_spread=3.0,
+        )
+
+        self.assertEqual(result["signal_family"], "general")
+        self.assertTrue(
+            any("불확실게이트[" in reason for reason in result["reasons"]),
+            "Expected high uncertainty branch to execute without NameError.",
+        )
 
 
 class TestQualityCore(unittest.TestCase):

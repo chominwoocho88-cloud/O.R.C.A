@@ -57,6 +57,7 @@ def _calc_signal_quality_core(
         weights = {}
 
     sig = set(signals)
+    family = _get_signal_family(signals)
     score = 50
     reasons: list = []
 
@@ -296,8 +297,6 @@ def _calc_signal_quality_core(
                 reasons.append(f"종목정확도약(n={total}){acc_adj:+.1f}")
 
     score = max(0, min(100, score))
-
-    family = _get_signal_family(signals)
 
     thresholds = {
         "crash_rebound": 35,  # 3중 combo 가능 family → 임계값 추가 완화
