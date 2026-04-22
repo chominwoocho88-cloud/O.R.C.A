@@ -5,8 +5,14 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
 KST=timezone(timedelta(hours=9))
+from .notify_transport import send_message
 from .paths import COST_FILE, DATA_FILE
 _CORE={"sp500","nasdaq","vix","kospi"}
+
+try:
+    import yfinance as yf
+except ImportError:
+    yf = None
 
 def _fetch_one(ticker,retries=2):
     for i in range(retries+1):
@@ -121,7 +127,9 @@ def fetch_put_call_ratio() -> dict:
     """
     result = {"pcr_spy": None, "pcr_qqq": None, "pcr_avg": None, "pcr_signal": "N/A"}
     try:
-        import yfinance as yf
+        if yf is None:
+            print("  PCR: yfinance 미설치")
+            return result
         pcrs = []
         for ticker in ["SPY", "QQQ"]:
             try:
@@ -157,8 +165,6 @@ def fetch_put_call_ratio() -> dict:
             print("  PCR: SPY=" + str(result.get("pcr_spy","N/A"))
                   + " QQQ=" + str(result.get("pcr_qqq","N/A"))
                   + " 평균=" + str(avg) + " → " + result["pcr_signal"])
-    except ImportError:
-        print("  PCR: yfinance 미설치")
     except Exception as e:
         print("  PCR 실패: " + str(e)[:60])
     return result
@@ -613,7 +619,6 @@ def fetch_all_market_data():
     data["volatility_alert"]=check_volatility_alert(data)
     if data["data_quality"]=="poor":
         try:
-            from .notify import send_message
             send_message("⚠️ <b>ARIA 데이터 경고</b>\n핵심 데이터 수집 불량 — 분석 신뢰도 낮음")
         except: pass
     DATA_FILE.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding="utf-8")

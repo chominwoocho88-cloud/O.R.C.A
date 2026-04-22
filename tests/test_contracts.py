@@ -75,8 +75,6 @@ def _exercise_market_data_contract(
 ) -> dict:
     """Run fetch_all_market_data with fully stubbed dependencies."""
     httpx_stub = _make_httpx_stub()
-    notify_stub = types.ModuleType("orca.notify")
-    notify_stub.send_message = lambda *args, **kwargs: True
 
     base_fg = fear_greed or {
         "value": 55,
@@ -119,7 +117,7 @@ def _exercise_market_data_contract(
     }
 
     sys.modules.pop("orca.data", None)
-    with patch.dict(sys.modules, {"httpx": httpx_stub, "orca.notify": notify_stub}):
+    with patch.dict(sys.modules, {"httpx": httpx_stub}):
         data = importlib.import_module("orca.data")
         with tempfile.TemporaryDirectory() as tmpdir:
             temp_file = Path(tmpdir) / "orca_market_data.json"
@@ -155,6 +153,10 @@ def _exercise_market_data_contract(
                 data,
                 "fetch_korea_news",
                 return_value=["headline"],
+            ), patch.object(
+                data,
+                "send_message",
+                return_value=True,
             ):
                 result = data.fetch_all_market_data()
 

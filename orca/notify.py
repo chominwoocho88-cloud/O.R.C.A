@@ -7,12 +7,13 @@ import sys
 import json
 import re
 import anthropic
-import httpx
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
+from .analysis import get_active_lessons, load_lessons
 from .brand import ORCA_FULL_NAME, ORCA_NAME
 from .compat import get_orca_env
+from .notify_transport import _format_accuracy_display, send_message
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 sys.stdout.reconfigure(encoding="utf-8")
@@ -22,12 +23,8 @@ KST = timezone(timedelta(hours=9))
 
 from .paths import (
     MEMORY_FILE, ACCURACY_FILE, SENTIMENT_FILE,
-    ROTATION_FILE, BREAKING_FILE, atomic_write_json,
+    ROTATION_FILE, BREAKING_FILE, LESSONS_FILE, atomic_write_json,
 )
-
-TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
-BASE_URL         = "https://api.telegram.org/bot" + TELEGRAM_TOKEN
 
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 MODEL_S = "claude-haiku-4-5-20251001"   # 캘린더/속보용 가벼운 모델
@@ -47,34 +44,6 @@ def _load(path: Path, default=None):
 
 def _save(path: Path, data):
     atomic_write_json(path, data)
-
-
-def _format_accuracy_display(correct, total, *, empty_label: str = "N/A") -> dict:
-    try:
-        total_value = int(total or 0)
-    except (TypeError, ValueError):
-        total_value = 0
-
-    try:
-        correct_value = int(correct or 0)
-    except (TypeError, ValueError):
-        correct_value = 0
-
-    if total_value <= 0:
-        return {
-            "has_data": False,
-            "pct": None,
-            "pct_text": empty_label,
-            "count_text": "검증 데이터 없음",
-        }
-
-    pct = round(correct_value / total_value * 100, 1)
-    return {
-        "has_data": True,
-        "pct": pct,
-        "pct_text": f"{pct}%",
-        "count_text": f"{correct_value}/{total_value}개",
-    }
 
 
 def _dashboard_url() -> str:
@@ -106,56 +75,6 @@ def _build_health_badge(report: dict) -> str:
 # ══════════════════════════════════════════════════════════════════════════════
 # TELEGRAM
 # ══════════════════════════════════════════════════════════════════════════════
-def _send_single(text: str, reply_markup=None, parse_mode: str = "HTML") -> bool:
-    """단일 메시지 전송 (4096자 이하 보장된 텍스트)"""
-    try:
-        payload = {
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": text,
-            "parse_mode": parse_mode,
-            "disable_web_page_preview": True,
-        }
-        if reply_markup:
-            payload["reply_markup"] = reply_markup
-        r = httpx.post(BASE_URL + "/sendMessage", json=payload, timeout=10)
-        return r.json().get("ok", False)
-    except Exception as e:
-        print("Telegram send error: " + str(e))
-        return False
-
-
-def send_message(text: str, reply_markup=None, parse_mode: str = "HTML") -> bool:
-    """4096자 초과 시 자동 분할 전송"""
-    LIMIT = 4000
-    if len(text) <= LIMIT:
-        return _send_single(text, reply_markup, parse_mode)
-
-    # 줄 단위로 분할
-    lines  = text.split("\n")
-    chunks = []
-    current = []
-    length  = 0
-
-    for line in lines:
-        if length + len(line) + 1 > LIMIT:
-            chunks.append("\n".join(current))
-            current = [line]
-            length  = len(line)
-        else:
-            current.append(line)
-            length += len(line) + 1
-
-    if current:
-        chunks.append("\n".join(current))
-
-    ok = True
-    for i, chunk in enumerate(chunks):
-        suffix = ("\n<i>(" + str(i+1) + "/" + str(len(chunks)) + ")</i>") if len(chunks) > 1 else ""
-        # 마지막 청크에만 버튼 첨부
-        markup = reply_markup if i == len(chunks) - 1 else None
-        ok = ok and _send_single(chunk + suffix, markup, parse_mode)
-
-    return ok
 
 
 def make_buttons() -> dict:
@@ -292,16 +211,12 @@ def _build_morning(report: dict) -> list:
                 )
             )
 
-    try:
-        from .analysis import get_active_lessons
-        lessons = get_active_lessons(max_lessons=3)
-        if lessons:
-            lines += ["", "━━ 🧠 오늘 반영된 교훈 ━━"]
-            for l in lessons:
-                lines.append(("🔴" if l["severity"]=="high" else "🟡")
-                              + " [" + l["category"] + "] " + l["lesson"][:50])
-    except ImportError:
-        pass
+    lessons = get_active_lessons(max_lessons=3)
+    if lessons:
+        lines += ["", "━━ 🧠 오늘 반영된 교훈 ━━"]
+        for l in lessons:
+            lines.append(("🔴" if l["severity"]=="high" else "🟡")
+                          + " [" + l["category"] + "] " + l["lesson"][:50])
     return lines
 
 
@@ -350,16 +265,13 @@ def _build_dawn(report: dict) -> list:
 
 def send_lessons_status() -> bool:
     try:
-        from .analysis import load_lessons
-        from .paths import LESSONS_FILE as _LF
-        _data_dir = _LF.parent
+        _data_dir = LESSONS_FILE.parent
 
         # ── 3파일 합산 통계 ────────────────────────────────────────
         def _load_file(fname):
             p = _data_dir / fname
             if not p.exists():
                 return []
-            import json
             try:
                 return json.loads(p.read_text(encoding="utf-8")).get("lessons", [])
             except Exception:

@@ -132,9 +132,6 @@ def _exercise_market_data(
     fear_greed: dict | None,
 ) -> dict:
     """Run fetch_all_market_data with all external dependencies stubbed."""
-    notify_stub = types.ModuleType("orca.notify")
-    notify_stub.send_message = lambda *args, **kwargs: True
-
     base_fg = fear_greed or {
         "value": 55,
         "rating": "Neutral",
@@ -177,7 +174,7 @@ def _exercise_market_data(
 
     _reset_modules("orca.data", "orca.notify")
     _install_stub_modules()
-    with patch.dict(sys.modules, {"orca.notify": notify_stub}):
+    with patch.dict(sys.modules, {}):
         data = importlib.import_module("orca.data")
         with tempfile.TemporaryDirectory() as tmpdir:
             temp_file = Path(tmpdir) / "orca_market_data.json"
@@ -213,6 +210,10 @@ def _exercise_market_data(
                 data,
                 "fetch_korea_news",
                 return_value=["headline"],
+            ), patch.object(
+                data,
+                "send_message",
+                return_value=True,
             ):
                 result = data.fetch_all_market_data()
 

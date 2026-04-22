@@ -123,13 +123,12 @@ class NotifyAccuracyDisplayTests(unittest.TestCase):
 
 class VerificationReportTests(unittest.TestCase):
     def test_verification_report_uses_na_when_accuracy_is_empty(self):
-        notify = _import_module("orca.notify")
         analysis = _import_module("orca.analysis")
         captured = []
 
         fake_today = datetime(2026, 4, 21, 9, 0, tzinfo=analysis.KST)
 
-        with patch.object(notify, "send_message", side_effect=lambda text: captured.append(text) or True), patch.object(
+        with patch.object(analysis, "send_message", side_effect=lambda text: captured.append(text) or True), patch.object(
             analysis, "_today", return_value=fake_today.strftime("%Y-%m-%d")
         ):
             analysis._send_verification_report(

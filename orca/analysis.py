@@ -32,8 +32,10 @@ KST = timezone(timedelta(hours=9))
 from .paths import (
     SENTIMENT_FILE, ROTATION_FILE, BASELINE_FILE,
     ACCURACY_FILE, MEMORY_FILE, WEIGHTS_FILE,
-    LESSONS_FILE, PATTERN_DB_FILE, atomic_write_json,
+    LESSONS_FILE, PATTERN_DB_FILE, PORTFOLIO_FILE, atomic_write_json,
 )
+from .data import load_market_data
+from .notify_transport import _format_accuracy_display, send_message
 from .state import (
     list_candidates,
     record_candidate_review,
@@ -304,8 +306,7 @@ def run_sentiment(report: dict, market_data: dict = None) -> dict:
     new_weight = _BLEND_WEIGHT.get(mode, 0.6)
 
     try:
-        from .data import load_market_data
-        md    = load_market_data()
+        md = load_market_data()
         sp_chg = float(str(md.get("sp500_change", "0")).replace("%", "").replace("+", ""))
         if sp_chg <= -3:
             new["score"] = min(new["score"] + 8, 100)
@@ -335,7 +336,6 @@ def run_sentiment(report: dict, market_data: dict = None) -> dict:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def run_portfolio(report: dict, market_data: dict = None) -> dict:
-    from .paths import PORTFOLIO_FILE
     portfolio = _load(PORTFOLIO_FILE, {"holdings": []})
     if not portfolio.get("holdings"):
         print("  포트폴리오 없음 — 스킵")
@@ -1171,7 +1171,6 @@ def run_verification() -> dict:
         return accuracy
 
     try:
-        from .data import load_market_data
         md = load_market_data()
     except ImportError:
         md = {}
@@ -1312,11 +1311,6 @@ def run_verification() -> dict:
 
 
 def _send_verification_report(results, accuracy, today_acc, dir_acc=0):
-    try:
-        from .notify import _format_accuracy_display, send_message
-    except ImportError:
-        return
-
     judged    = [r for r in results if r["verdict"] != "unclear"]
     today_display = _format_accuracy_display(
         len([r for r in results if r["verdict"] == "confirmed"]),
@@ -1379,8 +1373,7 @@ def get_active_lessons(max_lessons: int = 8,
     [Updated] 3개 파일에서 교훈을 읽고 regime + severity 기반으로 우선순위 결정.
     라이브 시스템용: current_date 필터 없음 (모든 교훈이 과거).
     """
-    from .paths import LESSONS_FILE as _LF
-    _data_dir = _LF.parent
+    _data_dir = LESSONS_FILE.parent
 
     REGIME_SIM = {
         "위험선호": {"위험선호", "전환중", "혼조"},
@@ -1475,9 +1468,8 @@ def extract_dawn_lessons(today_analyses: list, actual_news: str):
         return
 
     try:
-        from .data import load_market_data
         market_data = load_market_data()
-    except ImportError:
+    except Exception:
         market_data = {}
 
     local_lessons = _local_lesson_check(today_analyses, market_data)
