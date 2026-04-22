@@ -1,3 +1,35 @@
+# External Review: 2026-04-22
+
+**Status**: Reference material only. NOT authoritative.
+
+이 문서는 외부 관점의 독립 분석 리포트다.
+다음 조건에서 읽어야 한다:
+
+1. Phase 5 맥락이 반영되지 않음
+   - PR 1-5 계약, Path B decision, dual-DB design 등 최근 작업 미반영
+   - 작성 시점에 이 맥락이 문서에 들어가지 않음
+
+2. Section 6 "Highest-Value Improvements" 의 투자 전략 제안은
+   **검증되지 않은 proposal** 이다
+   - regime-adaptive thresholds
+   - portfolio construction
+   - "do not trade" layer 등
+   - 적용 전 개별 backtest 필수
+   - 즉시 Backlog 로 옮기지 않는다
+
+3. 이 문서는 "할 일 목록" 이 아니라 "참고 자료" 다
+   - 기존 docs/orca_v2_backlog.md 가 실제 실행 대상
+   - 이 문서 제안을 Backlog 에 넣으려면 개별 판단 필요
+
+실제 진행 중인 작업 맥락은 다음 문서 참조:
+- docs/phase5/ 전체 (Phase 5 Path B)
+- docs/orca_v2_backlog.md (실행 대상 Backlog)
+- docs/jackal/current-signals.md (JACKAL 현재 신호)
+
+이 문서는 이하 원본 그대로 보존한다.
+
+---
+
 # O.R.C.A Repository Analysis Report
 
 - Date: 2026-04-22
