@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from .brand import JACKAL_NAME, ORCA_NAME
+from .dual_db_snapshot import collect_dual_db_state
 from .paths import REPORTS_DIR, STATE_DB_FILE, atomic_write_json, atomic_write_text
 from .state import (
     list_backtest_days,
@@ -291,6 +292,7 @@ def build_report() -> dict[str, Any]:
     report = {
         "generated_at": generated_at,
         "state_db": str(STATE_DB_FILE),
+        "dual_db_state": collect_dual_db_state(),
         "orca": orca_section,
         "jackal_backtest": {
             "latest": jackal_latest,
@@ -331,6 +333,7 @@ def render_markdown(report: dict[str, Any]) -> str:
     jackal = report["jackal_backtest"]
     shadow = report["jackal_shadow"]
     accuracy_view = report.get("jackal_accuracy_view", {})
+    dual_db_state = report.get("dual_db_state", {})
     warnings = report["warnings"]
 
     orca_summary = orca.get("summary", {})
@@ -339,12 +342,20 @@ def render_markdown(report: dict[str, Any]) -> str:
     latest_shadow = shadow.get("latest_batch") or {}
     rolling_10 = shadow.get("rolling_10") or {}
     accuracy_meta = accuracy_view.get("meta", {})
+    orca_db = dual_db_state.get("orca_state_db", {})
+    jackal_db = dual_db_state.get("jackal_state_db", {})
+    jackal_tables = jackal_db.get("tables") or {}
 
     lines = [
         f"# {ORCA_NAME} vs {JACKAL_NAME} Research Comparison",
         "",
         f"- Generated: `{report['generated_at']}`",
         f"- State DB: `{report['state_db']}`",
+        f"- ORCA DB snapshot: `{orca_db.get('path', 'n/a')}` "
+        f"(exists={orca_db.get('exists')}, size={orca_db.get('size_bytes')}, mtime={orca_db.get('mtime_iso')})",
+        f"- JACKAL DB snapshot: `{jackal_db.get('path', 'n/a')}` "
+        f"(exists={jackal_db.get('exists')}, size={jackal_db.get('size_bytes')}, mtime={jackal_db.get('mtime_iso')})",
+        f"- JACKAL table rows: `{json.dumps(jackal_tables, ensure_ascii=False, sort_keys=True)}`",
         "",
         "## Snapshot",
         "",

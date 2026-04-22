@@ -297,6 +297,16 @@ class TestPR4ReviewScoreWeights(unittest.TestCase):
 class TestPR5ExternalDataVisibility(unittest.TestCase):
     """PR 5: data_quality tiers and failed_sources visibility invariant."""
 
+    EXPECTED_JACKAL_TABLES = {
+        "jackal_shadow_signals",
+        "jackal_live_events",
+        "jackal_shadow_batches",
+        "jackal_weight_snapshots",
+        "jackal_recommendations",
+        "jackal_accuracy_projection",
+        "jackal_cooldowns",
+    }
+
     def test_external_data_visibility_contract_holds(self):
         scenarios = {
             "ok": _exercise_market_data_contract(yahoo_quality="ok", fear_greed=None),
@@ -338,18 +348,69 @@ class TestPR5ExternalDataVisibility(unittest.TestCase):
                     f"got {type(payload['failed_sources']).__name__}",
                 )
 
-        report_path = ROOT / "reports" / "2026-04-22_morning.json"
-        report = json.loads(report_path.read_text(encoding="utf-8"))
-        self.assertIn(
+        snapshot = {
+            "orca_state_db": {
+                "path": "data/orca_state.db",
+                "exists": True,
+                "size_bytes": 1024,
+                "mtime_iso": "2026-04-22T09:00:00+09:00",
+            },
+            "jackal_state_db": {
+                "path": "data/jackal_state.db",
+                "exists": True,
+                "size_bytes": 2048,
+                "mtime_iso": "2026-04-22T09:00:00+09:00",
+                "tables": {name: 0 for name in sorted(self.EXPECTED_JACKAL_TABLES)},
+            },
+        }
+        persist = _import_module("orca.persist")
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(
+            persist,
+            "REPORTS_DIR",
+            Path(tmpdir),
+        ), patch.object(
+            persist,
+            "collect_dual_db_state",
+            return_value=snapshot,
+        ):
+            report_path = persist.save_report(
+                {
+                    "analysis_date": "2026-04-22",
+                    "mode": "MORNING",
+                    "data_quality": "degraded",
+                    "failed_sources": ["fear_greed"],
+                }
+            )
+
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(
             report.get("data_quality"),
-            {"ok", "degraded", "poor"},
-            f"PR 5 drift: latest report data_quality is {report.get('data_quality')!r}",
+            "degraded",
+            "PR 5 drift: save_report changed the original data_quality field",
         )
-        self.assertIn("failed_sources", report, "PR 5 drift: latest report is missing failed_sources")
+        self.assertEqual(
+            report.get("failed_sources"),
+            ["fear_greed"],
+            "PR 5 drift: save_report changed the original failed_sources field",
+        )
+        self.assertIn("dual_db_state", report, "P1-3 drift: dual_db_state missing from saved report")
+        self.assertIn(
+            "exists",
+            report["dual_db_state"]["orca_state_db"],
+            "P1-3 drift: dual_db_state.orca_state_db.exists missing",
+        )
+        jackal_tables = report["dual_db_state"]["jackal_state_db"].get("tables")
         self.assertIsInstance(
-            report["failed_sources"],
-            list,
-            f"PR 5 drift: latest report failed_sources is {type(report['failed_sources']).__name__}, expected list",
+            jackal_tables,
+            dict,
+            "P1-3 drift: dual_db_state.jackal_state_db.tables must be a dict",
+        )
+        self.assertEqual(
+            set(jackal_tables),
+            self.EXPECTED_JACKAL_TABLES,
+            "P1-3 drift: dual_db_state.jackal_state_db.tables keys changed",
         )
 
 

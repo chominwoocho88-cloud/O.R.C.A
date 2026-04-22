@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from . import state as state_module
+from .dual_db_snapshot import collect_dual_db_state
 from .learning_policy import describe_policy
 from .paths import MEMORY_FILE, REPORTS_DIR, atomic_write_json
 from .state import record_report_predictions
@@ -67,6 +68,7 @@ def save_memory(memory: list, analysis: dict):
 
 def save_report(analysis: dict) -> Path:
     REPORTS_DIR.mkdir(exist_ok=True)
+    analysis["dual_db_state"] = collect_dual_db_state()
     date = analysis.get("analysis_date", datetime.now(KST).strftime("%Y-%m-%d"))
     mode = analysis.get("mode", "MORNING").lower()
     path = REPORTS_DIR / (date + "_" + mode + ".json")
