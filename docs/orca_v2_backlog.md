@@ -270,3 +270,31 @@
 
 귀속 PR:
 - `research artifact scope PR` (가칭)
+## Deferred Improvement: UTF-8 BOM 제거 (repo-wide)
+위치:
+- 레포 전체 .py 파일 22개에 BOM 존재
+- 대표 예: orca/analysis.py, orca/state.py
+
+내용:
+- Python .py 파일에 UTF-8 BOM (EF BB BF) 존재
+- py_compile, unittest 등 실행은 정상 (Python 이 BOM 관대 처리)
+- 하지만 AST 기반 도구 (linter, code analyzer, formatter) 일부는 실패
+- 예: ast.parse(content) 는 BOM 에서 SyntaxError
+
+배경:
+- Phase 5 이전부터 존재 (HEAD 도 BOM 포함)
+- accuracy debug 트랙과 무관
+- Windows 환경 / 과거 에디터가 저장 시 추가한 것으로 추정
+
+기존 repo hygiene 후보와 통합:
+- .pyc/__pycache__ ignore 확인
+- workflow 문자열 corruption
+- ARIA 잔재 정리
+- UTF-8 BOM 제거  ← 신규
+
+왜 지금 말고 나중인지:
+- 기능적 문제 없음 (Python 실행 OK)
+- 22개 파일 일괄 수정은 별도 hygiene PR 영역
+- accuracy debug commit 과 분리 유지
+
+귀속 PR: Phase 6 후보 중 "repo hygiene PR"
