@@ -1276,7 +1276,16 @@ def _stage4_full_analysis(top10: list, aria: dict) -> list:
                     else ""
                  ))
 
-        results.append({**item, "analyst": analyst, "devil": devil, "final": final})
+        results.append(
+            {
+                **item,
+                "analyst": analyst,
+                "devil": devil,
+                "final": final,
+                "signal_family": signal_family,
+                "raw_signal_family": raw_signal_family,
+            }
+        )
 
     results.sort(key=lambda x: x["final"]["final_score"], reverse=True)
     top5 = results[:ANALYZE_FINAL]
@@ -1626,9 +1635,9 @@ def run_hunt(force: bool = False) -> dict:
             "s2_score":          item.get("s2_score", 0),
             "orca_regime":       aria["regime"],
             "orca_inflows":      aria["key_inflows"],
-            "signal_family":     signal_family,
-            "signal_family_raw": raw_signal_family,
-            "signal_family_label": family_label(signal_family),
+            "signal_family":     item["signal_family"],
+            "signal_family_raw": item["raw_signal_family"],
+            "signal_family_label": family_label(item["signal_family"]),
             "analyst_score":     item["analyst"]["analyst_score"],
             "day1_score":        item["analyst"].get("day1_score", 50),
             "swing_score":       item["analyst"].get("swing_score", 50),
