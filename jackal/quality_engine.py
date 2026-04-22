@@ -1,8 +1,22 @@
 """Pure deterministic JACKAL signal-quality helpers extracted from scanner.py."""
 from __future__ import annotations
 
-ALERT_THRESHOLD = 65
-STRONG_THRESHOLD = 78
+from .thresholds import THRESHOLDS
+
+_QUALITY = THRESHOLDS["quality"]
+_QUALITY_PRE_RULE = _QUALITY["pre_rule"]
+_QUALITY_CORE = _QUALITY["core_scores"]
+_QUALITY_PCR = _QUALITY["pcr"]
+_QUALITY_MACRO = _QUALITY["macro_rebound"]
+_QUALITY_VETO = _QUALITY["regime_veto"]
+_QUALITY_FG = _QUALITY["fear_greed"]
+_QUALITY_TICKER = _QUALITY["ticker_accuracy"]
+_QUALITY_FAMILY = _QUALITY["family_skip"]
+_QUALITY_LABELS = _QUALITY["labels"]
+_QUALITY_FINAL = _QUALITY["final_judgment"]
+
+ALERT_THRESHOLD = _QUALITY["alert_threshold"]
+STRONG_THRESHOLD = _QUALITY["strong_threshold"]
 
 _CRASH_REBOUND_SIGNALS = frozenset({"sector_rebound", "volume_climax", "52w_low_zone", "vol_accumulation"})
 _MA_SUPPORT_SOLO = frozenset({"ma_support"})
@@ -12,16 +26,23 @@ _STRONG_SIGNALS = frozenset({"rsi_oversold", "bb_touch", "volume_climax", "secto
 def detect_pre_rule_signals(tech: dict) -> list[str]:
     """Detect deterministic pre-LLM signals using the existing scanner rules."""
     rules_pre = {
-        "rsi_oversold": lambda t: t["rsi"] < 32,
-        "bb_touch": lambda t: t["bb_pos"] < 15,
-        "volume_climax": lambda t: t["vol_ratio"] > 1.8 and t["change_1d"] < -1.0,
-        "momentum_dip": lambda t: t["change_5d"] < -4.0,
-        "sector_rebound": lambda t: t["rsi"] < 40 and t.get("change_3d", t.get("change_5d", 0)) < -2.0,
-        "rsi_divergence": lambda t: t.get("rsi_divergence", False) and t["rsi"] < 35,
-        "52w_low_zone": lambda t: t.get("52w_pos", 50) < 15,
+        "rsi_oversold": lambda t: t["rsi"] < _QUALITY_PRE_RULE["rsi_oversold"],
+        "bb_touch": lambda t: t["bb_pos"] < _QUALITY_PRE_RULE["bb_touch"],
+        "volume_climax": lambda t: (
+            t["vol_ratio"] > _QUALITY_PRE_RULE["volume_climax_ratio"]
+            and t["change_1d"] < _QUALITY_PRE_RULE["volume_climax_change_1d"]
+        ),
+        "momentum_dip": lambda t: t["change_5d"] < _QUALITY_PRE_RULE["momentum_dip_change_5d"],
+        "sector_rebound": lambda t: (
+            t["rsi"] < _QUALITY_PRE_RULE["sector_rebound_rsi"]
+            and t.get("change_3d", t.get("change_5d", 0)) < _QUALITY_PRE_RULE["sector_rebound_change"]
+        ),
+        "rsi_divergence": lambda t: t.get("rsi_divergence", False) and t["rsi"] < _QUALITY_PRE_RULE["rsi_divergence_rsi"],
+        "52w_low_zone": lambda t: t.get("52w_pos", 50) < _QUALITY_PRE_RULE["52w_low_zone"],
         "vol_accumulation": lambda t: t.get("vol_accumulation", False),
         "ma_support": lambda t: (
-            t["ma50"] is not None and abs(t["price"] - t["ma50"]) / t["ma50"] < 0.025
+            t["ma50"] is not None
+            and abs(t["price"] - t["ma50"]) / t["ma50"] < _QUALITY_PRE_RULE["ma_support_distance"]
         ),
     }
     signals_fired = [sig for sig, rule in rules_pre.items() if rule(tech)]
@@ -62,73 +83,73 @@ def _calc_signal_quality_core(
     reasons: list = []
 
     if "sector_rebound" in sig:
-        score += 20
+        score += _QUALITY_CORE["sector_rebound"]
         reasons.append("sector_rebound(93%)+20")
     if "volume_climax" in sig:
-        score += 15
+        score += _QUALITY_CORE["volume_climax"]
         reasons.append("volume_climax(80%)+15")
     if "bb_touch" in sig and "rsi_oversold" in sig:
-        score += 16
+        score += _QUALITY_CORE["bb_touch_with_rsi_oversold"]
         reasons.append("BB+RSI조합(97%+88%)+16")
     elif "bb_touch" in sig:
-        score += 12
+        score += _QUALITY_CORE["bb_touch"]
         reasons.append("BB하단(97%)+12")
     if "rsi_oversold" in sig and "sector_rebound" not in sig:
-        score += 9
+        score += _QUALITY_CORE["rsi_oversold"]
         reasons.append("RSI과매도(88%)+9")
     if "momentum_dip" in sig and len(sig) > 1:
-        score += 5
+        score += _QUALITY_CORE["momentum_dip_multi_signal"]
         reasons.append("급락+복수신호+5")
 
     if "rsi_divergence" in sig:
         if sig == {"rsi_divergence"} or sig == {"rsi_divergence", "ma_support"}:
-            score -= 20  # 단독 31.6% → skip 강제
+            score += _QUALITY_CORE["rsi_divergence_solo_penalty"]  # 단독 31.6% → skip 강제
             reasons.append("RSI다이버전스단독(31.6%)-20")
         elif "momentum_dip" in sig and "vol_accumulation" not in sig:
-            score -= 12  # momentum_dip+rsi_div = 40% 최악 조합
+            score += _QUALITY_CORE["rsi_divergence_momentum_penalty"]  # momentum_dip+rsi_div = 40% 최악 조합
             reasons.append("다이버전스+momentum_dip(40%)-12")
         elif "vol_accumulation" in sig:
-            score += 3  # vol_acc와 함께면 60% → 소폭 플러스
+            score += _QUALITY_CORE["rsi_divergence_vol_accumulation"]  # vol_acc와 함께면 60% → 소폭 플러스
             reasons.append("RSI다이버전스+매집+3")
         else:
             score += 0
     if "52w_low_zone" in sig:
-        score += 12  # 52주 저점 15% 이내 — 심리적 지지
+        score += _QUALITY_CORE["52w_low_zone"]  # 52주 저점 15% 이내 — 심리적 지지
         reasons.append("52주저점구간+12")
     if "vol_accumulation" in sig:
-        score += 12
+        score += _QUALITY_CORE["vol_accumulation"]
         reasons.append("하락중거래량증가(매집,84%)+12")
 
     if "vol_accumulation" in sig and "sector_rebound" in sig:
-        score += 8
+        score += _QUALITY_CORE["vol_accumulation_sector_rebound_combo"]
         reasons.append("매집+반등조합시너지+8")
     if "52w_low_zone" in sig and "rsi_oversold" in sig:
-        score += 6
+        score += _QUALITY_CORE["52w_low_zone_rsi_oversold_combo"]
         reasons.append("52주저점+RSI과매도조합+6")
     if "vol_accumulation" in sig and "momentum_dip" in sig:
-        score += 5
+        score += _QUALITY_CORE["vol_accumulation_momentum_combo"]
         reasons.append("매집+급락조합+5")
 
     if {"bb_touch", "sector_rebound", "rsi_oversold"}.issubset(sig):
-        score += 15
+        score += _QUALITY_CORE["bb_sector_rsi_combo"]
         reasons.append("3중combo(BB+반등+RSI,90%+)+15")
 
     if sig == _MA_SUPPORT_SOLO:
-        score -= 12
+        score += _QUALITY_CORE["ma_support_solo_penalty"]
         reasons.append("ma_support단독(61.8%)-12")
     elif sig == _MA_SUPPORT_WEAK:
-        score -= 5
+        score += _QUALITY_CORE["ma_support_weak_penalty"]
         reasons.append("ma+momentum약조합-5")
 
     if pcr_avg > 0:
-        if pcr_avg > 1.3 and _CRASH_REBOUND_SIGNALS & sig:
-            score += 10  # 극단공포(PCR>1.3) + 반등 신호 = 최강 조합
+        if pcr_avg > _QUALITY_PCR["extreme"] and _CRASH_REBOUND_SIGNALS & sig:
+            score += _QUALITY_PCR["extreme_bonus"]  # 극단공포(PCR>1.3) + 반등 신호 = 최강 조합
             reasons.append(f"PCR극단({pcr_avg:.2f})+반등=최강+10")
-        elif pcr_avg > 1.1 and ("bb_touch" in sig or "rsi_oversold" in sig):
-            score += 5
+        elif pcr_avg > _QUALITY_PCR["elevated"] and ("bb_touch" in sig or "rsi_oversold" in sig):
+            score += _QUALITY_PCR["elevated_bonus"]
             reasons.append(f"PCR고조({pcr_avg:.2f})+과매도+5")
-        elif pcr_avg < 0.8 and "volume_climax" in sig:
-            score -= 8  # 과도한 낙관(PCR<0.8)에서 volume_climax는 고점 경고
+        elif pcr_avg < _QUALITY_PCR["crowded_long"] and "volume_climax" in sig:
+            score += _QUALITY_PCR["crowded_long_penalty"]  # 과도한 낙관(PCR<0.8)에서 volume_climax는 고점 경고
             reasons.append(f"PCR낙관({pcr_avg:.2f})+volume=고점경고-8")
 
     vix = (
@@ -137,33 +158,39 @@ def _calc_signal_quality_core(
         or cached_vix
     )
 
-    vix_extreme = vix > 35
-    vix_high = vix > 25
-    real_panic = vix > 30 and hy_spread > 4.0  # 진짜 공황: VIX+HY 교차 확인
-    credit_stress = hy_spread > 3.5  # 크레딧 스트레스만
+    vix_extreme = vix > _QUALITY_MACRO["vix_extreme"]
+    vix_high = vix > _QUALITY_MACRO["vix_high"]
+    real_panic = (
+        vix > _QUALITY_MACRO["real_panic_vix"]
+        and hy_spread > _QUALITY_MACRO["real_panic_hy_spread"]
+    )  # 진짜 공황: VIX+HY 교차 확인
+    credit_stress = hy_spread > _QUALITY_MACRO["credit_stress_hy_spread"]  # 크레딧 스트레스만
 
     rebound_raw = 0
     chg5d = float(tech.get("change_5d") or 0)
 
     if "sector_rebound" in sig:
         if real_panic:  # VIX>30 + HY>4.0 교차 = 진짜 패닉 반등
-            rebound_raw += 10
+            rebound_raw += _QUALITY_MACRO["real_panic_bonus"]
             reasons.append(f"진짜패닉(VIX{vix:.0f}+HY{hy_spread:.1f})+반등+10")
         elif vix_extreme:  # VIX만 극단
-            rebound_raw += 6
+            rebound_raw += _QUALITY_MACRO["vix_extreme_bonus"]
             reasons.append(f"VIX극단({vix:.0f})게이팅+반등+6")
         elif credit_stress and vix_high:  # HY 스트레스 + VIX 고조
-            rebound_raw += 4
+            rebound_raw += _QUALITY_MACRO["credit_stress_bonus"]
             reasons.append(f"크레딧스트레스(HY{hy_spread:.1f})+반등+4")
 
-    if chg5d < -8 and "sector_rebound" in sig:
-        rebound_raw += 10
+    if chg5d < _QUALITY_MACRO["chg5_extreme_drop"] and "sector_rebound" in sig:
+        rebound_raw += _QUALITY_MACRO["chg5_extreme_bonus"]
         reasons.append(f"5일{chg5d:.0f}%급락+반등+10")
-    elif chg5d < -5 and len(sig) >= 2:
-        rebound_raw += 5
+    elif (
+        chg5d < _QUALITY_MACRO["chg5_drop"]
+        and len(sig) >= _QUALITY_MACRO["multi_signal_count_min"]
+    ):
+        rebound_raw += _QUALITY_MACRO["chg5_multi_signal_bonus"]
         reasons.append(f"5일{chg5d:.0f}%+복수신호+5")
 
-    rebound_cap = 12
+    rebound_cap = _QUALITY_CORE["rebound_cap"]
     rebound_capped = min(rebound_raw, rebound_cap)
     score += rebound_capped
     if rebound_raw > rebound_cap:
@@ -180,17 +207,17 @@ def _calc_signal_quality_core(
         negative_reasons.append(f"Thesis Killer({len(thesis_killers)}개)")
 
     if "전환중" in regime or regime.startswith("혼조"):
-        score -= 15
+        score += _QUALITY_VETO["mixed_penalty"]
         reasons.append("전환중/혼조레짐-15")
         has_negative_veto = True
         negative_reasons.append("레짐불확실")
     elif "위험회피" in regime:
         if "sector_rebound" in sig:
-            score += 5
+            score += _QUALITY_VETO["risk_off_sector_rebound_bonus"]
             reasons.append("위험회피+반등+5")
 
-    if chg5d > 15 and "bb_touch" not in sig:
-        score -= 8
+    if chg5d > _QUALITY_VETO["overheat_change_5d"] and "bb_touch" not in sig:
+        score += _QUALITY_VETO["overheat_penalty"]
         reasons.append(f"5일{chg5d:.0f}% 과열-8")
         has_negative_veto = True
         negative_reasons.append("단기과열")
@@ -222,23 +249,23 @@ def _calc_signal_quality_core(
     try:
         fg_score = int(str(fg_raw).split()[0])
     except Exception:
-        fg_score = 50
+        fg_score = _QUALITY_FG["default_score"]
 
     fg_available = fg_raw not in (None, "", "50", 50)
-    fg_fear_gate = fg_score <= 15 if fg_available else None
+    fg_fear_gate = fg_score <= _QUALITY_FG["fear_gate"] if fg_available else None
 
     gate_reason = None
 
-    if vix >= 40:
+    if vix >= _QUALITY_FG["vix_only_hard"]:
         gate_reason = "vix_only_hard"
         gate_strength = "hard"
-    elif vix >= 32 and fg_fear_gate is True:
+    elif vix >= _QUALITY_FG["vix_fg_hard"] and fg_fear_gate is True:
         gate_reason = "vix_fg_hard"
         gate_strength = "hard"
-    elif vix >= 32 and fg_fear_gate is None:
+    elif vix >= _QUALITY_FG["vix_fg_hard"] and fg_fear_gate is None:
         gate_reason = "vix_only_soft"  # FG 누락 보정
         gate_strength = "soft"
-    elif has_event_kw and vix >= 28:
+    elif has_event_kw and vix >= _QUALITY_FG["keyword_vix_soft"]:
         gate_reason = "keyword_vix_soft"
         gate_strength = "soft"
     else:
@@ -250,7 +277,7 @@ def _calc_signal_quality_core(
     micro_gate_active = False
     if not is_high_uncertainty:
         is_risk_off_regime = any(kw in regime for kw in ["위험회피", "하락추세", "bearish"])
-        if is_risk_off_regime and vix >= 22 and family not in ("crash_rebound",):
+        if is_risk_off_regime and vix >= _QUALITY_FG["micro_gate_vix"] and family not in ("crash_rebound",):
             micro_gate_active = True
             gate_reason = "regime_micro"
             gate_strength = "micro"
@@ -258,22 +285,22 @@ def _calc_signal_quality_core(
     fg_str = f"FG{fg_score}" if fg_available else "FG없음"
     if is_high_uncertainty and family != "crash_rebound":
         penalty_map = {
-            "vix_only_hard": 15,
-            "vix_fg_hard": 15,
-            "vix_only_soft": 8,
-            "keyword_vix_soft": 8,
-            "regime_micro": 5,
+            "vix_only_hard": _QUALITY_FG["hard_penalty"],
+            "vix_fg_hard": _QUALITY_FG["hard_penalty"],
+            "vix_only_soft": _QUALITY_FG["soft_penalty"],
+            "keyword_vix_soft": _QUALITY_FG["soft_penalty"],
+            "regime_micro": _QUALITY_FG["micro_penalty"],
         }
-        penalty = penalty_map.get(gate_reason, 8)
+        penalty = penalty_map.get(gate_reason, _QUALITY_FG["soft_penalty"])
         score -= penalty
         reasons.append(f"불확실게이트[{gate_reason}](VIX{vix:.0f}/{fg_str})-{penalty}")
 
-        if gate_strength == "hard" and vix >= 40:
+        if gate_strength == "hard" and vix >= _QUALITY_FG["vix_only_hard"]:
             score = 0  # skip_threshold 하회 강제
             reasons.append(f"🚫 ABSTAIN(VIX극단{vix:.0f}≥40+hard gate)")
 
     elif micro_gate_active and family != "crash_rebound":
-        score -= 5
+        score -= _QUALITY_FG["micro_penalty"]
         reasons.append(f"레짐microgate({regime[:6]}/VIX{vix:.0f})-5")
     elif is_high_uncertainty and family == "crash_rebound":
         reasons.append(f"고불확실→crash_rebound예외(VIX{vix:.0f},패널티없음)")
@@ -283,43 +310,63 @@ def _calc_signal_quality_core(
         acc_pct = tk_data.get("accuracy", 50)
         total = tk_data.get("total", 0)
 
-        if total >= 8:
-            acc_adj = (acc_pct - 50) * 0.20
-            acc_adj = max(-10, min(0, acc_adj))  # 상방 완전 0 (Doc3 수용)
+        if total >= _QUALITY_TICKER["strong_sample_min"]:
+            acc_adj = (acc_pct - 50) * _QUALITY_TICKER["strong_slope"]
+            acc_adj = max(
+                _QUALITY_TICKER["strong_floor"],
+                min(_QUALITY_TICKER["strong_cap"], acc_adj),
+            )  # 상방 완전 0 (Doc3 수용)
             score += acc_adj
-            if abs(acc_adj) >= 1:
+            if abs(acc_adj) >= _QUALITY_TICKER["strong_reason_min_abs"]:
                 reasons.append(f"종목정확도({acc_pct:.0f}%,n={total}){acc_adj:+.1f}")
-        elif total >= 3:
-            acc_adj = (acc_pct - 50) * 0.10
-            acc_adj = max(-5, min(0, acc_adj))  # 약한 하방만
+        elif total >= _QUALITY_TICKER["light_sample_min"]:
+            acc_adj = (acc_pct - 50) * _QUALITY_TICKER["light_slope"]
+            acc_adj = max(
+                _QUALITY_TICKER["light_floor"],
+                min(_QUALITY_TICKER["light_cap"], acc_adj),
+            )  # 약한 하방만
             score += acc_adj
-            if abs(acc_adj) >= 0.5:
+            if abs(acc_adj) >= _QUALITY_TICKER["light_reason_min_abs"]:
                 reasons.append(f"종목정확도약(n={total}){acc_adj:+.1f}")
 
     score = max(0, min(100, score))
 
     thresholds = {
-        "crash_rebound": 35,  # 3중 combo 가능 family → 임계값 추가 완화
-        "general": 45,  # 기본
-        "ma_support_weak": 47,
-        "ma_support_solo": 46,
+        "crash_rebound": _QUALITY_FAMILY["crash_rebound"],  # 3중 combo 가능 family → 임계값 추가 완화
+        "general": _QUALITY_FAMILY["general"],  # 기본
+        "ma_support_weak": _QUALITY_FAMILY["ma_support_weak"],
+        "ma_support_solo": _QUALITY_FAMILY["ma_support_solo"],
     }
-    skip_threshold = thresholds.get(family, 45)
+    skip_threshold = thresholds.get(family, _QUALITY_FAMILY["general"])
 
     if family == "crash_rebound":
-        if vix >= 30:
-            skip_threshold = max(33, skip_threshold - 5)  # 완화
-        elif vix < 18:
-            skip_threshold = min(46, skip_threshold + 3)  # 약간 엄격
+        if vix >= _QUALITY_FAMILY["crash_rebound_high_vix"]:
+            skip_threshold = max(
+                _QUALITY_FAMILY["crash_rebound_high_vix_floor"],
+                skip_threshold + _QUALITY_FAMILY["crash_rebound_high_vix_delta"],
+            )  # 완화
+        elif vix < _QUALITY_FAMILY["crash_rebound_low_vix"]:
+            skip_threshold = min(
+                _QUALITY_FAMILY["crash_rebound_low_vix_cap"],
+                skip_threshold + _QUALITY_FAMILY["crash_rebound_low_vix_delta"],
+            )  # 약간 엄격
     elif family == "general":
-        if vix < 18:
-            skip_threshold = min(50, skip_threshold + 5)  # 저변동성: 엄격
+        if vix < _QUALITY_FAMILY["general_low_vix"]:
+            skip_threshold = min(
+                _QUALITY_FAMILY["general_low_vix_cap"],
+                skip_threshold + _QUALITY_FAMILY["general_low_vix_delta"],
+            )  # 저변동성: 엄격
 
     skip = score < skip_threshold
-    label = "최강" if score >= 80 else "강" if score >= 65 else "보통" if score >= 50 else "약"
+    label = (
+        "최강" if score >= _QUALITY_LABELS["strong"]
+        else "강" if score >= _QUALITY_LABELS["good"]
+        else "보통" if score >= _QUALITY_LABELS["fair"]
+        else "약"
+    )
 
-    analyst_adj = +5 if score >= 75 else 0
-    final_adj = +5 if score >= 75 else 0
+    analyst_adj = +5 if score >= _QUALITY_LABELS["analyst_bonus_cutoff"] else 0
+    final_adj = +5 if score >= _QUALITY_LABELS["final_bonus_cutoff"] else 0
 
     return {
         "quality_score": score,
@@ -347,24 +394,30 @@ def _final_judgment(analyst: dict, devil: dict) -> dict:
 
     if tk_hit:
         return {
-            "final_score": 20,
+            "final_score": _QUALITY_FINAL["thesis_killer_score"],
             "is_entry": False,
             "signal_type": "매도주의",
             "reason": f"⛔ Thesis Killer: {devil.get('killer_detail', '무효화 조건 충족')}",
         }
 
-    weight_map = {"동의": 1.0, "부분동의": 0.75, "반대": 0.5}
-    weight = weight_map.get(verdict, 0.75)
+    weight_map = {
+        "동의": _QUALITY_FINAL["verdict_weights"]["agree"],
+        "부분동의": _QUALITY_FINAL["verdict_weights"]["partial"],
+        "반대": _QUALITY_FINAL["verdict_weights"]["oppose"],
+    }
+    weight = weight_map.get(verdict, _QUALITY_FINAL["verdict_weights"]["partial"])
 
-    devil_penalty = (d_score - 30) * 0.2  # devil_score 30 기준, 초과분의 20%
+    devil_penalty = (
+        d_score - _QUALITY_FINAL["devil_penalty_baseline"]
+    ) * _QUALITY_FINAL["devil_penalty_multiplier"]  # devil_score 30 기준, 초과분의 20%
     final = max(0, min(100, round(a_score * weight - devil_penalty, 1)))
 
     if final >= STRONG_THRESHOLD and verdict != "반대":
         sig_type = "강한매수"
     elif final >= ALERT_THRESHOLD and verdict != "반대":
         sig_type = "매수검토"
-    elif verdict == "반대" or final < 40:
-        sig_type = "매도주의" if final < 30 else "관망"
+    elif verdict == "반대" or final < _QUALITY_FINAL["watch_cutoff"]:
+        sig_type = "매도주의" if final < _QUALITY_FINAL["sell_cutoff"] else "관망"
     else:
         sig_type = "관망"
 

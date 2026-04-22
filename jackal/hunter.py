@@ -34,6 +34,7 @@ from orca.state import (
 )
 from .families import canonical_family_key, family_label
 from .probability import apply_probability_adjustment, load_probability_summary
+from .thresholds import THRESHOLDS
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 if hasattr(sys.stdout, "reconfigure"):
@@ -59,8 +60,17 @@ TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 MODEL_H          = os.environ.get("SUBAGENT_MODEL", "claude-haiku-4-5-20251001")
 
-ANALYZE_FINAL   = 5     # 최종 Analyst+Devil 실행 수
-HUNT_COOLDOWN_H = 6
+_HUNTER = THRESHOLDS["hunter"]
+_HUNTER_MACRO = _HUNTER["macro_gate"]
+_HUNTER_TECH = _HUNTER["technical_scoring"]
+_HUNTER_REASON = _HUNTER["reason_generation"]
+_HUNTER_CONTEXT = _HUNTER["context_boosts"]
+_HUNTER_SWING = _HUNTER["swing_type"]
+_HUNTER_VOLUME = _HUNTER["volume_interpretation"]
+_HUNTER_ENTRY = _HUNTER["entry_decision"]
+
+ANALYZE_FINAL   = _HUNTER["analyze_final"]     # 최종 Analyst+Devil 실행 수
+HUNT_COOLDOWN_H = _HUNTER["cooldown_hours"]
 
 # ── 기본 제외 포트폴리오 (portfolio.json 없을 때 fallback) ─────────────
 DEFAULT_PORTFOLIO_EXCLUSIONS = {
@@ -404,38 +414,44 @@ def _fetch_macro_gate(aria: dict) -> dict:
     reasons = []
 
     # VIX 기준
-    if vix >= 50:
-        penalty += 20
+    if vix >= _HUNTER_MACRO["vix_extreme"]:
+        penalty += _HUNTER_MACRO["vix_penalty_extreme"]
         reasons.append(f"VIX {vix:.0f}(극단공포)")
-    elif vix >= 35:
-        penalty += 10
+    elif vix >= _HUNTER_MACRO["vix_fear"]:
+        penalty += _HUNTER_MACRO["vix_penalty_fear"]
         reasons.append(f"VIX {vix:.0f}(공포)")
-    elif vix >= 28:
-        penalty += 5
+    elif vix >= _HUNTER_MACRO["vix_watch"]:
+        penalty += _HUNTER_MACRO["vix_penalty_watch"]
         reasons.append(f"VIX {vix:.0f}(경계)")
 
     # Yield Curve 역전
-    if curve < -0.5:
-        penalty += 8
+    if curve < _HUNTER_MACRO["yield_curve_deep_inversion"]:
+        penalty += _HUNTER_MACRO["yield_curve_penalty_deep"]
         reasons.append(f"YC역전{curve:+.2f}%")
-    elif curve < 0:
-        penalty += 3
+    elif curve < _HUNTER_MACRO["yield_curve_inversion"]:
+        penalty += _HUNTER_MACRO["yield_curve_penalty_shallow"]
         reasons.append(f"YC평탄{curve:+.2f}%")
 
     # HY 스트레스
-    if hy_chg5 < -2.0:
-        penalty += 7
+    if hy_chg5 < _HUNTER_MACRO["hy_chg5_stress"]:
+        penalty += _HUNTER_MACRO["hy_penalty_stress"]
         reasons.append(f"HY스프레드확대({hy_chg5:+.1f}%)")
-    elif hy_chg5 < -1.0:
-        penalty += 3
+    elif hy_chg5 < _HUNTER_MACRO["hy_chg5_watch"]:
+        penalty += _HUNTER_MACRO["hy_penalty_watch"]
         reasons.append(f"HY주의({hy_chg5:+.1f}%)")
 
     # ARIA 레짐
     if "회피" in regime:
-        penalty += 5
+        penalty += _HUNTER_MACRO["risk_off_regime_penalty"]
         reasons.append("ARIA위험회피")
 
-    level = "extreme" if penalty >= 25 else "elevated" if penalty >= 10 else "normal"
+    level = (
+        "extreme"
+        if penalty >= _HUNTER_MACRO["risk_level_extreme_cutoff"]
+        else "elevated"
+        if penalty >= _HUNTER_MACRO["risk_level_elevated_cutoff"]
+        else "normal"
+    )
 
     return {
         "risk_level":    level,
@@ -618,62 +634,92 @@ def _stage1_technical(universe: list, tech_map: dict,
         chg1  = tech["change_1d"]
 
         # ── RSI (최대 35점) ──────────────────────────────────
-        if rsi <= 25:    s += 35
-        elif rsi <= 30:  s += 28
-        elif rsi <= 35:  s += 18
-        elif rsi <= 40:  s +=  9
-        elif rsi <= 50:  s +=  3
-        elif rsi >= 75:  s -= 18
-        elif rsi >= 65:  s -=  8
+        if rsi <= _HUNTER_TECH["rsi"]["bonus_25"]["cutoff"]:    s += _HUNTER_TECH["rsi"]["bonus_25"]["score"]
+        elif rsi <= _HUNTER_TECH["rsi"]["bonus_30"]["cutoff"]:  s += _HUNTER_TECH["rsi"]["bonus_30"]["score"]
+        elif rsi <= _HUNTER_TECH["rsi"]["bonus_35"]["cutoff"]:  s += _HUNTER_TECH["rsi"]["bonus_35"]["score"]
+        elif rsi <= _HUNTER_TECH["rsi"]["bonus_40"]["cutoff"]:  s += _HUNTER_TECH["rsi"]["bonus_40"]["score"]
+        elif rsi <= _HUNTER_TECH["rsi"]["bonus_50"]["cutoff"]:  s += _HUNTER_TECH["rsi"]["bonus_50"]["score"]
+        elif rsi >= _HUNTER_TECH["rsi"]["penalty_75"]["cutoff"]:  s += _HUNTER_TECH["rsi"]["penalty_75"]["score"]
+        elif rsi >= _HUNTER_TECH["rsi"]["penalty_65"]["cutoff"]:  s += _HUNTER_TECH["rsi"]["penalty_65"]["score"]
 
         # ── 볼린저 하단 (최대 30점) ──────────────────────────
-        if bb <= 5:      s += 30
-        elif bb <= 10:   s += 24
-        elif bb <= 20:   s += 15
-        elif bb <= 30:   s +=  7
-        elif bb >= 90:   s -= 13
-        elif bb >= 80:   s -=  6
+        if bb <= _HUNTER_TECH["bb"]["bonus_5"]["cutoff"]:      s += _HUNTER_TECH["bb"]["bonus_5"]["score"]
+        elif bb <= _HUNTER_TECH["bb"]["bonus_10"]["cutoff"]:   s += _HUNTER_TECH["bb"]["bonus_10"]["score"]
+        elif bb <= _HUNTER_TECH["bb"]["bonus_20"]["cutoff"]:   s += _HUNTER_TECH["bb"]["bonus_20"]["score"]
+        elif bb <= _HUNTER_TECH["bb"]["bonus_30"]["cutoff"]:   s += _HUNTER_TECH["bb"]["bonus_30"]["score"]
+        elif bb >= _HUNTER_TECH["bb"]["penalty_90"]["cutoff"]: s += _HUNTER_TECH["bb"]["penalty_90"]["score"]
+        elif bb >= _HUNTER_TECH["bb"]["penalty_80"]["cutoff"]: s += _HUNTER_TECH["bb"]["penalty_80"]["score"]
 
         # ── 콤보 보너스: RSI+BB 동시 충족 (최대 25점) ────────
         # 두 조건이 함께 충족될 때 실제 스윙 기회
-        if rsi <= 30 and bb <= 15:   s += 25   # 강한 과매도
-        elif rsi <= 35 and bb <= 25: s += 15   # 과매도 + 하단근접
-        elif rsi <= 40 and bb <= 35: s +=  8   # 약한 신호
+        if (
+            rsi <= _HUNTER_TECH["combo"]["rsi_30_bb_15"]["rsi"]
+            and bb <= _HUNTER_TECH["combo"]["rsi_30_bb_15"]["bb"]
+        ):
+            s += _HUNTER_TECH["combo"]["rsi_30_bb_15"]["score"]
+        elif (
+            rsi <= _HUNTER_TECH["combo"]["rsi_35_bb_25"]["rsi"]
+            and bb <= _HUNTER_TECH["combo"]["rsi_35_bb_25"]["bb"]
+        ):
+            s += _HUNTER_TECH["combo"]["rsi_35_bb_25"]["score"]
+        elif (
+            rsi <= _HUNTER_TECH["combo"]["rsi_40_bb_35"]["rsi"]
+            and bb <= _HUNTER_TECH["combo"]["rsi_40_bb_35"]["bb"]
+        ):
+            s += _HUNTER_TECH["combo"]["rsi_40_bb_35"]["score"]
 
         # ── 5일 낙폭 (최대 20점) ─────────────────────────────
-        if chg5 <= -10:  s += 20
-        elif chg5 <= -7: s += 14
-        elif chg5 <= -5: s +=  9
-        elif chg5 <= -3: s +=  4
-        elif chg5 >= 15: s -= 14
-        elif chg5 >= 10: s -=  7
+        if chg5 <= _HUNTER_TECH["change_5d"]["bonus_10"]["cutoff"]:  s += _HUNTER_TECH["change_5d"]["bonus_10"]["score"]
+        elif chg5 <= _HUNTER_TECH["change_5d"]["bonus_7"]["cutoff"]: s += _HUNTER_TECH["change_5d"]["bonus_7"]["score"]
+        elif chg5 <= _HUNTER_TECH["change_5d"]["bonus_5"]["cutoff"]: s += _HUNTER_TECH["change_5d"]["bonus_5"]["score"]
+        elif chg5 <= _HUNTER_TECH["change_5d"]["bonus_3"]["cutoff"]: s += _HUNTER_TECH["change_5d"]["bonus_3"]["score"]
+        elif chg5 >= _HUNTER_TECH["change_5d"]["penalty_15"]["cutoff"]: s += _HUNTER_TECH["change_5d"]["penalty_15"]["score"]
+        elif chg5 >= _HUNTER_TECH["change_5d"]["penalty_10"]["cutoff"]: s += _HUNTER_TECH["change_5d"]["penalty_10"]["score"]
 
         # ── 거래량 투매 소진 (최대 15점) ─────────────────────
         # 낙폭 중 거래량 급증 = 투매 소진 신호
-        if vol >= 3.0 and chg1 < 0:   s += 15   # 급락+투매
-        elif vol >= 2.0 and chg1 < 0: s += 10
-        elif vol >= 3.0:               s +=  7
-        elif vol >= 2.0:               s +=  5
-        elif vol >= 1.5:               s +=  2
+        if (
+            vol >= _HUNTER_TECH["volume"]["bonus_drop_3x"]["vol_ratio"]
+            and chg1 < _HUNTER_TECH["volume"]["bonus_drop_3x"]["change_1d_max"]
+        ):
+            s += _HUNTER_TECH["volume"]["bonus_drop_3x"]["score"]   # 급락+투매
+        elif (
+            vol >= _HUNTER_TECH["volume"]["bonus_drop_2x"]["vol_ratio"]
+            and chg1 < _HUNTER_TECH["volume"]["bonus_drop_2x"]["change_1d_max"]
+        ):
+            s += _HUNTER_TECH["volume"]["bonus_drop_2x"]["score"]
+        elif vol >= _HUNTER_TECH["volume"]["bonus_3x"]["vol_ratio"]:
+            s += _HUNTER_TECH["volume"]["bonus_3x"]["score"]
+        elif vol >= _HUNTER_TECH["volume"]["bonus_2x"]["vol_ratio"]:
+            s += _HUNTER_TECH["volume"]["bonus_2x"]["score"]
+        elif vol >= _HUNTER_TECH["volume"]["bonus_1_5x"]["vol_ratio"]:
+            s += _HUNTER_TECH["volume"]["bonus_1_5x"]["score"]
 
         # ── MA 지지 확인 ──────────────────────────────────
         # 백테스트: ma_support 단독 64.7% (낮음) → 다른 신호 없이 단독이면 패널티
         ma50 = tech.get("ma50")
-        has_oversold_signal = (rsi <= 40 or bb <= 30 or chg5 <= -3)
-        if ma50 and abs(tech["price"] - ma50) / ma50 < 0.03:
+        has_oversold_signal = (
+            rsi <= _HUNTER_TECH["ma_support"]["rsi_oversold"]
+            or bb <= _HUNTER_TECH["ma_support"]["bb_oversold"]
+            or chg5 <= _HUNTER_TECH["ma_support"]["chg5_oversold"]
+        )
+        if (
+            ma50
+            and abs(tech["price"] - ma50) / ma50 < _HUNTER_TECH["ma_support"]["distance"]
+        ):
             if has_oversold_signal:
-                s += 5   # 과매도 + MA 지지 = 의미있는 신호
+                s += _HUNTER_TECH["ma_support"]["bonus_with_oversold"]   # 과매도 + MA 지지 = 의미있는 신호
             else:
-                s += 1   # MA 단독 = 약한 신호 (패널티 아니지만 낮게)
+                s += _HUNTER_TECH["ma_support"]["bonus_solo"]   # MA 단독 = 약한 신호 (패널티 아니지만 낮게)
 
         # ── 강세 RSI 다이버전스 (최대 15점) ──────────────────
         if tech.get("bullish_div"):
-            s += 15
+            s += _HUNTER_TECH["bullish_divergence_bonus"]
             log.debug(f"    {ticker}: 강세 다이버전스 감지 +15")
 
         # ── 오늘 양봉 (하락 후 반전 신호, 5점) ──────────────
-        if tech.get("bullish_candle") and chg5 < -3:
-            s += 5
+        if tech.get("bullish_candle") and chg5 < _HUNTER_TECH["bullish_candle_chg5_max"]:
+            s += _HUNTER_TECH["bullish_candle_bonus"]
 
         # ── 섹터 상대강도 (최대 12점) ────────────────────────
         # 섹터 ETF 대비 더 많이 빠진 종목 = 개별 과매도 = 반등 여지
@@ -687,9 +733,12 @@ def _stage1_technical(universe: list, tech_map: dict,
             er   = etf_returns.get(etf)
             if er is not None:
                 relative = chg5 - er   # 종목 - 섹터 (음수 = 섹터보다 더 빠짐)
-                if relative <= -5:     s += 12
-                elif relative <= -3:   s +=  8
-                elif relative <= -1:   s +=  4
+                if relative <= _HUNTER_TECH["sector_relative"]["bonus_5"]["cutoff"]:
+                    s += _HUNTER_TECH["sector_relative"]["bonus_5"]["score"]
+                elif relative <= _HUNTER_TECH["sector_relative"]["bonus_3"]["cutoff"]:
+                    s += _HUNTER_TECH["sector_relative"]["bonus_3"]["score"]
+                elif relative <= _HUNTER_TECH["sector_relative"]["bonus_1"]["cutoff"]:
+                    s += _HUNTER_TECH["sector_relative"]["bonus_1"]["score"]
 
         # ── 이유 자동생성 (Stage 3 Claude 판단 품질 향상) ────
         reason_parts = candidates_meta.get(ticker, {}).get("reason", "")
@@ -702,13 +751,13 @@ def _stage1_technical(universe: list, tech_map: dict,
                 )
                 if is_inflow:
                     parts.append(f"{ticker_sector} 섹터 유입")
-            if chg5 <= -7:
+            if chg5 <= _HUNTER_REASON["chg5_hard_drop"]:
                 parts.append(f"5일 {chg5:+.1f}% 급락")
-            elif chg5 <= -4:
+            elif chg5 <= _HUNTER_REASON["chg5_drop"]:
                 parts.append(f"5일 {chg5:+.1f}% 하락")
-            if rsi <= 30:
+            if rsi <= _HUNTER_REASON["rsi_extreme"]:
                 parts.append(f"RSI {rsi:.0f} 극단 과매도")
-            elif rsi <= 40:
+            elif rsi <= _HUNTER_REASON["rsi_oversold"]:
                 parts.append(f"RSI {rsi:.0f} 과매도")
             if tech.get("bullish_div"):
                 parts.append("강세 다이버전스")
@@ -754,9 +803,12 @@ def _stage2_orca_context(top50: list, aria: dict) -> list:
 
     # 레짐별 과매도 신뢰도
     regime_boost = 0
-    if "선호" in regime:   regime_boost =  8
-    elif "회피" in regime: regime_boost = -5
-    elif "혼조" in regime: regime_boost =  2
+    if "선호" in regime:
+        regime_boost = _HUNTER_CONTEXT["regime_preferred"]
+    elif "회피" in regime:
+        regime_boost = _HUNTER_CONTEXT["regime_risk_off"]
+    elif "혼조" in regime:
+        regime_boost = _HUNTER_CONTEXT["regime_mixed"]
 
     result = []
     for item in top50:
@@ -768,16 +820,16 @@ def _stage2_orca_context(top50: list, aria: dict) -> list:
             if ticker in tickers:
                 sector_lower = sector.lower()
                 if any(k in inflows for k in sector_lower.replace("/", " ").split()):
-                    boost += 10
+                    boost += _HUNTER_CONTEXT["sector_inflow"]
                 if any(k in outflows for k in sector_lower.replace("/", " ").split()):
-                    boost -= 8
+                    boost += _HUNTER_CONTEXT["sector_outflow"]
 
         # 레짐 보정
         boost += regime_boost
 
         # 한국 종목 + 위험회피 → 추가 패널티
         if ticker.endswith(".KS") and "회피" in regime:
-            boost -= 5
+            boost += _HUNTER_CONTEXT["kr_risk_off_penalty"]
 
         item["s2_score"] = round(item["s1_score"] + boost, 1)
         item["orca_boost"] = boost
@@ -915,24 +967,41 @@ def _classify_swing_type(tech: dict, hunt_reason: str,
 
     # 2순위: 섹터 로테이션 (89.5% 적중)
     if "섹터 유입" in hunt_reason or "유입" in hunt_reason:
-        if rsi <= 50 and chg5 <= -2:
+        if (
+            rsi <= _HUNTER_SWING["sector_rotation"]["rsi_max"]
+            and chg5 <= _HUNTER_SWING["sector_rotation"]["chg5_max"]
+        ):
             return "섹터로테이션"
 
     # 3순위: 패닉셀 반등 (위험회피 레짐 + 급락 + 투매)
     # 백테스트: 위험회피 레짐 84.1%
-    if rsi <= 35 and chg5 <= -5 and vol >= 1.5:
+    if (
+        rsi <= _HUNTER_SWING["panic_rebound"]["rsi_max"]
+        and chg5 <= _HUNTER_SWING["panic_rebound"]["chg5_max"]
+        and vol >= _HUNTER_SWING["panic_rebound"]["vol_ratio_min"]
+    ):
         return "패닉셀반등"
-    if "위험회피" in regime and rsi <= 40 and chg5 <= -4:
+    if (
+        "위험회피" in regime
+        and rsi <= _HUNTER_SWING["panic_rebound_risk_off"]["rsi_max"]
+        and chg5 <= _HUNTER_SWING["panic_rebound_risk_off"]["chg5_max"]
+    ):
         return "패닉셀반등"
 
     # 4순위: 모멘텀 눌림목 (momentum_dip 84%)
     # 섹터 전반 하락 후 개별 과매도
-    if chg5 <= -5 and rsi <= 45:
+    if (
+        chg5 <= _HUNTER_SWING["momentum_dip"]["chg5_max"]
+        and rsi <= _HUNTER_SWING["momentum_dip"]["rsi_max"]
+    ):
         return "모멘텀눌림목"
 
     # 5순위: MA 지지 (단독 64.7% → 다른 조건 없으면 낮은 신뢰)
-    if tech.get("ma50") and abs(tech["price"] - tech["ma50"]) / tech["ma50"] < 0.03:
-        if rsi <= 45:   # 추가 과매도 조건 필요
+    if (
+        tech.get("ma50")
+        and abs(tech["price"] - tech["ma50"]) / tech["ma50"] < _HUNTER_SWING["ma_support"]["distance"]
+    ):
+        if rsi <= _HUNTER_SWING["ma_support"]["rsi_max"]:   # 추가 과매도 조건 필요
             return "MA지지반등"
 
     return "기술적과매도"
@@ -1069,11 +1138,14 @@ def _devil_swing(ticker: str, tech: dict, analyst: dict, aria: dict, cur: str) -
     # 거래량 패턴 해석
     vol   = tech["vol_ratio"]
     chg1  = tech["change_1d"]
-    if vol >= 2.0 and chg1 < -1:
+    if (
+        vol >= _HUNTER_VOLUME["high_volume"]
+        and chg1 < _HUNTER_VOLUME["high_volume_down_change"]
+    ):
         vol_interp = f"하락일 거래량 {vol:.1f}x — 투매 가능성 (소진이면 반등, 지속이면 추가 하락)"
-    elif vol >= 2.0 and chg1 > 0:
+    elif vol >= _HUNTER_VOLUME["high_volume"] and chg1 > 0:
         vol_interp = f"상승일 거래량 {vol:.1f}x — 분산 매도 가능성 (반등 후 차익실현 우려)"
-    elif vol < 0.7:
+    elif vol < _HUNTER_VOLUME["low_volume"]:
         vol_interp = f"거래량 {vol:.1f}x 저조 — 관심 부족, 반등 모멘텀 약할 수 있음"
     else:
         vol_interp = f"거래량 {vol:.1f}x 보통"
@@ -1131,19 +1203,19 @@ BB: {tech['bb_pos']:.0f}% (하단 터치가 반등 보장 아님)
             messages=[{"role": "user", "content": prompt}],
         )
         r = _safe_parse_json(re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip())
-        r["devil_score"] = int(r.get("devil_score", 30))
+        r["devil_score"] = int(r.get("devil_score", _HUNTER_ENTRY["default_devil_score"]))
         r.setdefault("verdict", "부분동의"); r.setdefault("main_risk", "")
         r.setdefault("thesis_killer_hit", False); r.setdefault("is_dead_cat", False)
         r.setdefault("structural_decline", False); r.setdefault("volume_concern", "정상")
         return r
     except Exception as e:
         log.error(f"  Devil 실패 {ticker}: {e}")
-        return {"devil_score": 30, "verdict": "부분동의", "main_risk": "",
+        return {"devil_score": _HUNTER_ENTRY["default_devil_score"], "verdict": "부분동의", "main_risk": "",
                 "thesis_killer_hit": False, "is_dead_cat": False,
                 "structural_decline": False, "volume_concern": "정상"}
 
 
-ALERT_THRESHOLD = 55   # 재설계된 공식 기준 (이전 68은 사실상 통과 불가)
+ALERT_THRESHOLD = _HUNTER_ENTRY["alert_threshold"]   # 재설계된 공식 기준 (이전 68은 사실상 통과 불가)
 
 
 def _final(analyst: dict, devil: dict) -> dict:
@@ -1163,54 +1235,95 @@ def _final(analyst: dict, devil: dict) -> dict:
         return {"final_score": 20, "is_entry": False,
                 "label": "🚫 데드캣/TK", "mode": "차단",
                 "day1_score": 20, "swing_score": 20}
-    if devil.get("verdict") == "반대" and devil.get("devil_score", 30) >= 70:
+    if (
+        devil.get("verdict") == "반대"
+        and devil.get("devil_score", _HUNTER_ENTRY["default_devil_score"])
+        >= _HUNTER_ENTRY["devil_block_score"]
+    ):
         return {"final_score": 25, "is_entry": False,
                 "label": "❌ Devil 강반대", "mode": "차단",
                 "day1_score": 25, "swing_score": 25}
 
-    d1     = analyst.get("day1_score",    analyst.get("analyst_score", 50))
-    sw     = analyst.get("swing_score",   analyst.get("analyst_score", 50))
-    d_score = devil.get("devil_score", 30)
+    d1     = analyst.get("day1_score",    analyst.get("analyst_score", _HUNTER_ENTRY["default_day1_score"]))
+    sw     = analyst.get("swing_score",   analyst.get("analyst_score", _HUNTER_ENTRY["default_swing_score"]))
+    d_score = devil.get("devil_score", _HUNTER_ENTRY["default_devil_score"])
     setup   = analyst.get("swing_setup", "중립")
     stype   = analyst.get("swing_type",  "기술적과매도")
 
     # 스윙 타입별 가중치 (백테스트 결과 반영)
     # 섹터로테이션/패닉셀 → swing 중심, MA단독 → day1 중심
     w1, ws = {
-        "섹터로테이션":   (0.3, 0.7),   # 며칠 기다려야 수익
-        "패닉셀반등":     (0.5, 0.5),   # 내일도 중요, 스윙도 중요
-        "모멘텀눌림목":   (0.35, 0.65),
-        "강세다이버전스": (0.4, 0.6),
-        "MA지지반등":     (0.6, 0.4),   # 내일 확인이 더 중요
-        "기술적과매도":   (0.55, 0.45),
-    }.get(stype, (0.4, 0.6))
+        "섹터로테이션": (
+            _HUNTER_ENTRY["swing_weights"]["sector_rotation"]["day1"],
+            _HUNTER_ENTRY["swing_weights"]["sector_rotation"]["swing"],
+        ),   # 며칠 기다려야 수익
+        "패닉셀반등": (
+            _HUNTER_ENTRY["swing_weights"]["panic_rebound"]["day1"],
+            _HUNTER_ENTRY["swing_weights"]["panic_rebound"]["swing"],
+        ),   # 내일도 중요, 스윙도 중요
+        "모멘텀눌림목": (
+            _HUNTER_ENTRY["swing_weights"]["momentum_dip"]["day1"],
+            _HUNTER_ENTRY["swing_weights"]["momentum_dip"]["swing"],
+        ),
+        "강세다이버전스": (
+            _HUNTER_ENTRY["swing_weights"]["bullish_divergence"]["day1"],
+            _HUNTER_ENTRY["swing_weights"]["bullish_divergence"]["swing"],
+        ),
+        "MA지지반등": (
+            _HUNTER_ENTRY["swing_weights"]["ma_support"]["day1"],
+            _HUNTER_ENTRY["swing_weights"]["ma_support"]["swing"],
+        ),   # 내일 확인이 더 중요
+        "기술적과매도": (
+            _HUNTER_ENTRY["swing_weights"]["technical_oversold"]["day1"],
+            _HUNTER_ENTRY["swing_weights"]["technical_oversold"]["swing"],
+        ),
+    }.get(
+        stype,
+        (
+            _HUNTER_ENTRY["swing_weights"]["default"]["day1"],
+            _HUNTER_ENTRY["swing_weights"]["default"]["swing"],
+        ),
+    )
 
     # 가중 합산
     raw_score = d1 * w1 + sw * ws
     # Devil 패널티
-    penalty   = max(0, (d_score - 30) * 0.25)
+    penalty   = max(
+        0,
+        (d_score - _HUNTER_ENTRY["devil_penalty_baseline"])
+        * _HUNTER_ENTRY["devil_penalty_multiplier"],
+    )
     score     = round(max(0, min(100, raw_score - penalty)), 1)
 
     # 스윙 타입별 임계값
     threshold = {
-        "섹터로테이션":   48,
-        "패닉셀반등":     50,
-        "모멘텀눌림목":   50,
-        "강세다이버전스": 50,
-        "기술적과매도":   55,
-        "MA지지반등":     60,
+        "섹터로테이션": _HUNTER_ENTRY["entry_thresholds"]["sector_rotation"],
+        "패닉셀반등": _HUNTER_ENTRY["entry_thresholds"]["panic_rebound"],
+        "모멘텀눌림목": _HUNTER_ENTRY["entry_thresholds"]["momentum_dip"],
+        "강세다이버전스": _HUNTER_ENTRY["entry_thresholds"]["bullish_divergence"],
+        "기술적과매도": _HUNTER_ENTRY["entry_thresholds"]["technical_oversold"],
+        "MA지지반등": _HUNTER_ENTRY["entry_thresholds"]["ma_support"],
     }.get(stype, ALERT_THRESHOLD)
     if setup == "추가하락":
-        threshold = 99
+        threshold = _HUNTER_ENTRY["entry_thresholds"]["additional_decline_override"]
 
     is_entry = score >= threshold and setup not in ("추가하락", "중립")
 
     # 진입 모드 (알림 메시지에 표시)
-    if d1 >= 65 and sw >= 65:
+    if (
+        d1 >= _HUNTER_ENTRY["mode_thresholds"]["strong"]["day1_min"]
+        and sw >= _HUNTER_ENTRY["mode_thresholds"]["strong"]["swing_min"]
+    ):
         mode = "강타점"
-    elif d1 >= 60 and sw < 50:
+    elif (
+        d1 >= _HUNTER_ENTRY["mode_thresholds"]["scalp"]["day1_min"]
+        and sw < _HUNTER_ENTRY["mode_thresholds"]["scalp"]["swing_max"]
+    ):
         mode = "단기스캘핑"
-    elif d1 < 50 and sw >= 65:
+    elif (
+        d1 < _HUNTER_ENTRY["mode_thresholds"]["scale_in"]["day1_max"]
+        and sw >= _HUNTER_ENTRY["mode_thresholds"]["scale_in"]["swing_min"]
+    ):
         mode = "분할진입"
     else:
         mode = "일반"

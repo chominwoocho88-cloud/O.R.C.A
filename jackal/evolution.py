@@ -32,6 +32,7 @@ from orca.state import (
     sync_jackal_recommendations,
     sync_jackal_live_events,
 )
+from .thresholds import THRESHOLDS
 
 log = logging.getLogger("jackal_evolution")
 
@@ -48,12 +49,17 @@ LESSONS_DIR.mkdir(exist_ok=True)
 # [Bug Fix 1-B] 잘못된 모델명 수정
 MODEL_S = os.environ.get("ANTHROPIC_MODEL", os.environ.get("SUBAGENT_MODEL", "claude-sonnet-4-6"))
 
-OUTCOME_HOURS      = 4
-SUCCESS_PCT        = 0.5
-WEIGHT_ADJUST_UP   = 0.04
-WEIGHT_ADJUST_DOWN = 0.03
-WEIGHT_MIN         = 0.3
-WEIGHT_MAX         = 2.5
+_EVOLUTION = THRESHOLDS["evolution"]
+_EVOLUTION_CORE = _EVOLUTION["core"]
+_EVOLUTION_OUTCOMES = _EVOLUTION["outcomes"]
+_EVOLUTION_RECOMMENDATIONS = _EVOLUTION["recommendations"]
+
+OUTCOME_HOURS      = _EVOLUTION_CORE["outcome_hours"]
+SUCCESS_PCT        = _EVOLUTION_CORE["success_pct"]
+WEIGHT_ADJUST_UP   = _EVOLUTION_CORE["weight_adjust_up"]
+WEIGHT_ADJUST_DOWN = _EVOLUTION_CORE["weight_adjust_down"]
+WEIGHT_MIN         = _EVOLUTION_CORE["weight_min"]
+WEIGHT_MAX         = _EVOLUTION_CORE["weight_max"]
 
 DEFAULT_WEIGHTS = {
     # [Bug Fix 1-A] signal_weights 중복 키 제거 + 실운용 키 동기화
@@ -214,7 +220,7 @@ class JackalEvolution:
 
         # [Bug Fix] 타임존 통일: KST-aware cutoff으로 비교
         KST_TZ    = timezone(timedelta(hours=9))
-        cutoff_1d = datetime.now(KST_TZ) - timedelta(hours=28)
+        cutoff_1d = datetime.now(KST_TZ) - timedelta(hours=_EVOLUTION_OUTCOMES["cutoff_hours"])
 
         def _parse_ts_aware(ts_str: str) -> datetime:
             """타임존 포함/미포함 ISO 문자열을 KST-aware datetime으로 변환."""
@@ -266,13 +272,15 @@ class JackalEvolution:
                 returns = [(c - price_entry) / price_entry * 100 for c in closes]
 
                 d1_pct      = round(returns[0], 2) if returns else None
-                d1_correct  = (d1_pct > 0.3) if d1_pct is not None else None
+                d1_correct  = (
+                    d1_pct > _EVOLUTION_OUTCOMES["d1_correct_pct"]
+                ) if d1_pct is not None else None
 
                 sw_window  = returns[:7]
                 peak_pct   = round(max(sw_window), 2) if sw_window else 0.0
                 peak_day   = sw_window.index(max(sw_window)) + 1 if sw_window else 1
-                swing_hit  = peak_pct >= 1.0
-                swing_checked = len(sw_window) >= 3
+                swing_hit  = peak_pct >= _EVOLUTION_OUTCOMES["swing_hit_pct"]
+                swing_checked = len(sw_window) >= _EVOLUTION_OUTCOMES["swing_min_rows"]
 
                 entry["outcome_checked"]  = True
                 entry["price_1d_later"]   = round(float(future["Close"].iloc[0]), 4) if len(future) >= 1 else None
@@ -315,14 +323,14 @@ class JackalEvolution:
                 if swing_checked:
                     adj = WEIGHT_ADJUST_UP if swing_hit else -WEIGHT_ADJUST_DOWN
                     if d1_correct:
-                        adj += 0.01
+                        adj += _EVOLUTION_OUTCOMES["d1_bonus"]
                     sw_w = self.weights["signal_weights"]
                     for sig in entry.get("signals_fired", []):
                         if sig in sw_w:
                             old = sw_w[sig]
                             new = round(max(WEIGHT_MIN, min(WEIGHT_MAX, old + adj)), 4)
                             sw_w[sig] = new
-                            if abs(old - new) > 0.001:
+                            if abs(old - new) > _EVOLUTION_OUTCOMES["change_log_min_delta"]:
                                 changes.append(
                                     f"{sig}: {old:.3f}→{new:.3f} "
                                     f"[{ticker} 스윙D{peak_day} {peak_pct:+.1f}%]"
@@ -384,7 +392,7 @@ class JackalEvolution:
                     if not returns:
                         continue
                     swing_ret = max(returns[:7]) if len(returns) >= 1 else 0
-                    swing_ok  = swing_ret >= 1.0
+                    swing_ok  = swing_ret >= _EVOLUTION_OUTCOMES["swing_hit_pct"]
                     resolve_jackal_shadow_signal(
                         e["shadow_id"],
                         {
@@ -459,7 +467,7 @@ class JackalEvolution:
 
         # [Bug Fix] 타임존 통일: KST-aware cutoff
         KST_TZ  = timezone(timedelta(hours=9))
-        cutoff  = datetime.now(KST_TZ) - timedelta(hours=24)
+        cutoff  = datetime.now(KST_TZ) - timedelta(hours=_EVOLUTION_RECOMMENDATIONS["cutoff_hours"])
         pending = [
             e for e in logs
             if not e.get("outcome_checked")
@@ -488,7 +496,7 @@ class JackalEvolution:
 
                 price_next = float(hist["Close"].iloc[-1])
                 pct        = (price_next - price_rec) / price_rec * 100
-                correct    = pct >= 0.5
+                correct    = pct >= _EVOLUTION_RECOMMENDATIONS["success_pct"]
 
                 entry["outcome_checked"] = True
                 entry["price_next_day"]  = round(price_next, 4)

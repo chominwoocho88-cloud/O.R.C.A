@@ -48,6 +48,7 @@ from .quality_engine import (
     _get_signal_family_key,
     detect_pre_rule_signals,
 )
+from .thresholds import THRESHOLDS
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 if hasattr(sys.stdout, "reconfigure"):
@@ -74,6 +75,12 @@ PORTFOLIO_FILE = _DATA_DIR / "portfolio.json"
 TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 MODEL_H          = os.environ.get("SUBAGENT_MODEL", "claude-haiku-4-5-20251001")
+
+_SCANNER = THRESHOLDS["scanner"]
+_SCANNER_COOLDOWN = _SCANNER["cooldown"]
+_SCANNER_SCHD = _SCANNER["schd_regime"]
+_SCANNER_ANALYST_HINT = _SCANNER["analyst_hint"]
+_SCANNER_SIGNAL_RELABEL = _SCANNER["signal_relabel"]
 
 
 def _load_portfolio() -> dict:
@@ -242,7 +249,7 @@ def _save_watchlist_snapshot(watchlist: dict) -> None:
     }
     atomic_write_json(JACKAL_WATCHLIST, payload)
 
-COOLDOWN_HOURS  = 4
+COOLDOWN_HOURS  = _SCANNER_COOLDOWN["hours"]
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -446,13 +453,20 @@ def _load_schd_regime_signal() -> float:
     """
     try:
         import yfinance as _yf
-        df = _yf.Ticker("SCHD").history(period="10d", interval="1d")
-        if df.empty or len(df) < 5:
+        df = _yf.Ticker("SCHD").history(
+            period=f"{_SCANNER_SCHD['period_days']}d",
+            interval="1d",
+        )
+        if df.empty or len(df) < _SCANNER_SCHD["min_rows"]:
             return 0.0
-        change_5d = (float(df["Close"].iloc[-1]) - float(df["Close"].iloc[-5]))                     / float(df["Close"].iloc[-5]) * 100
-        if change_5d < -3.0:
+        change_5d = (
+            (float(df["Close"].iloc[-1]) - float(df["Close"].iloc[-_SCANNER_SCHD["lookback_index"]]))
+            / float(df["Close"].iloc[-_SCANNER_SCHD["lookback_index"]])
+            * 100
+        )
+        if change_5d < _SCANNER_SCHD["drop_threshold"]:
             log.info(f"  ⚠️ SCHD 5일 {change_5d:.1f}% 하락 → 레짐 지표 -5")
-            return -5.0
+            return _SCANNER_SCHD["confidence_penalty"]
         return 0.0
     except Exception:
         return 0.0
@@ -551,7 +565,7 @@ def agent_analyst(ticker: str, info: dict, tech: dict,
     if sig_acc:
         top = sorted(sig_acc.items(), key=lambda x: x[1].get("accuracy", 0), reverse=True)[:3]
         acc_hint = "\n[학습 정확도 높은 신호] " + " | ".join(
-            f"{k}:{v['accuracy']:.0f}%" for k, v in top if v.get("total", 0) >= 3
+            f"{k}:{v['accuracy']:.0f}%" for k, v in top if v.get("total", 0) >= _SCANNER_ANALYST_HINT["min_accuracy_samples"]
         )
 
     # 신호 품질 컨텍스트 (백테스트 기반 사전 평가)
@@ -747,12 +761,12 @@ def _is_on_cooldown(ticker: str, signals: list = None,
         key_fam = f"{ticker}:{fam}"
         if key_fam in cd:
             hrs = (datetime.now() - datetime.fromisoformat(cd[key_fam])).total_seconds() / 3600
-            if hrs < 48:
+            if hrs < _SCANNER_COOLDOWN["family_hours"]:
                 # override 조건 확인: 세 조건 동시 만족 시 쿨다운 무시
                 prev_quality = cd.get(f"{key_fam}:quality", 0)
-                quality_surge = (quality_score - prev_quality) >= 15
-                vol_spike     = vol_ratio > 2.5
-                is_declining  = change_1d < 0  # 상승 gap-up 차단
+                quality_surge = (quality_score - prev_quality) >= _SCANNER_COOLDOWN["quality_surge"]
+                vol_spike     = vol_ratio > _SCANNER_COOLDOWN["volume_spike"]
+                is_declining  = change_1d < _SCANNER_COOLDOWN["declining_change_max"]  # 상승 gap-up 차단
 
                 if quality_surge and vol_spike and is_declining:
                     # override 5거래일 1회 제한 (Doc2: 연속 override 방지)
@@ -761,7 +775,7 @@ def _is_on_cooldown(ticker: str, signals: list = None,
                         override_hrs = (
                             datetime.now() - datetime.fromisoformat(last_override)
                         ).total_seconds() / 3600
-                        if override_hrs < 120:   # 5거래일 = 120시간
+                        if override_hrs < _SCANNER_COOLDOWN["override_limit_hours"]:   # 5거래일 = 120시간
                             log.info(
                                 f"  ⛔ override 제한(5거래일 1회): {ticker} "
                                 f"마지막override {override_hrs:.0f}h 전"
@@ -1421,8 +1435,15 @@ def run_scan(force: bool = False) -> dict:
             entry_threshold=float(ALERT_THRESHOLD),
             blocked_verdict="반대",
         )
-        if final.get("verdict") == "반대" or final["final_score"] < 40:
-            final["signal_type"] = "매도주의" if final["final_score"] < 30 else "관망"
+        if (
+            final.get("verdict") == "반대"
+            or final["final_score"] < _SCANNER_SIGNAL_RELABEL["watch_cutoff"]
+        ):
+            final["signal_type"] = (
+                "매도주의"
+                if final["final_score"] < _SCANNER_SIGNAL_RELABEL["sell_cutoff"]
+                else "관망"
+            )
         elif final["final_score"] >= STRONG_THRESHOLD:
             final["signal_type"] = "강한매수"
         elif final["final_score"] >= ALERT_THRESHOLD:

@@ -50,6 +50,7 @@ from orca.state import (
     record_jackal_weight_snapshot,
     sync_jackal_live_events,
 )
+from .thresholds import THRESHOLDS
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 if hasattr(sys.stdout, "reconfigure"):
@@ -64,20 +65,24 @@ WEIGHTS_FILE  = _BASE / "jackal_weights.json"
 
 KST = timezone(timedelta(hours=9))
 
+_TRACKER = THRESHOLDS["tracker"]
+_TRACKER_OUTCOMES = _TRACKER["outcomes"]
+_TRACKER_WEIGHTS = _TRACKER["weights"]
+
 # ── 설정 ─────────────────────────────────────────────────────────
-MIN_ELAPSED_HOURS = 26    # 이 시간이 지난 항목만 처리 (장 마감 보장)
-SWING_DAYS        = 7     # 스윙 추적 최대 거래일
-SWING_HIT_PCT     = 1.0   # 스윙 성공 기준 (%)
-D1_HIT_PCT        = 0.5   # 1일 성공 기준 (%)
-MIN_SWING_ROWS    = 3     # 스윙 확정에 필요한 최소 거래일 데이터
-YFINANCE_DELAY    = 0.4   # 종목간 호출 딜레이 (Rate limit 방지)
+MIN_ELAPSED_HOURS = _TRACKER_OUTCOMES["min_elapsed_hours"]    # 이 시간이 지난 항목만 처리 (장 마감 보장)
+SWING_DAYS        = _TRACKER_OUTCOMES["swing_days"]           # 스윙 추적 최대 거래일
+SWING_HIT_PCT     = _TRACKER_OUTCOMES["swing_hit_pct"]        # 스윙 성공 기준 (%)
+D1_HIT_PCT        = _TRACKER_OUTCOMES["d1_hit_pct"]           # 1일 성공 기준 (%)
+MIN_SWING_ROWS    = _TRACKER_OUTCOMES["min_swing_rows"]       # 스윙 확정에 필요한 최소 거래일 데이터
+YFINANCE_DELAY    = _TRACKER_OUTCOMES["yfinance_delay"]       # 종목간 호출 딜레이 (Rate limit 방지)
 
 # 가중치 조정 범위
-WEIGHT_ADJ_UP   = 0.04
-WEIGHT_ADJ_DOWN = 0.03
-WEIGHT_MIN      = 0.3
-WEIGHT_MAX      = 2.5
-MIN_SAMPLES_ADJ = 5       # 가중치 조정 최소 샘플 수
+WEIGHT_ADJ_UP   = _TRACKER_WEIGHTS["adjust_up"]
+WEIGHT_ADJ_DOWN = _TRACKER_WEIGHTS["adjust_down"]
+WEIGHT_MIN      = _TRACKER_WEIGHTS["min"]
+WEIGHT_MAX      = _TRACKER_WEIGHTS["max"]
+MIN_SAMPLES_ADJ = _TRACKER_WEIGHTS["min_samples_adjust"]       # 가중치 조정 최소 샘플 수
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -261,12 +266,18 @@ def _update_weights(weights: dict, entry: dict) -> list[str]:
         # 가중치 조정 (alerted 신호 + 최소 샘플 이상)
         if alerted and n >= MIN_SAMPLES_ADJ and sig in sw:
             acc = rec["swing_correct"] / n
-            adj = WEIGHT_ADJ_UP if acc >= 0.70 else -WEIGHT_ADJ_DOWN if acc <= 0.40 else 0.0
+            adj = (
+                WEIGHT_ADJ_UP
+                if acc >= _TRACKER_WEIGHTS["high_accuracy_cutoff"]
+                else -WEIGHT_ADJ_DOWN
+                if acc <= _TRACKER_WEIGHTS["low_accuracy_cutoff"]
+                else 0.0
+            )
             if adj != 0.0:
                 old = sw[sig]
                 new = round(max(WEIGHT_MIN, min(WEIGHT_MAX, old + adj)), 4)
                 sw[sig] = new
-                if abs(old - new) > 0.001:
+                if abs(old - new) > _TRACKER_WEIGHTS["change_log_min_delta"]:
                     changes.append(
                         f"signal[{sig}]: {old:.3f}→{new:.3f} "
                         f"(acc={acc:.0%}, n={n}, "
