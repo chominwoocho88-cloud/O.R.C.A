@@ -279,9 +279,8 @@ class TestPR4ReviewScoreWeights(unittest.TestCase):
     }
 
     def test_review_score_weights_match_committed_contract(self):
-        module = _parse_module(ROOT / "orca" / "analysis.py")
-        assign = _find_assignment(module, "_REVIEW_SCORE_WEIGHTS")
-        actual = ast.literal_eval(assign.value)
+        analysis = importlib.import_module("orca.analysis")
+        actual = analysis._REVIEW_SCORE_WEIGHTS
 
         self.assertEqual(
             actual,
