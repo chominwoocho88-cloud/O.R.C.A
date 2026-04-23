@@ -1,0 +1,290 @@
+{
+  "analysis_date": "2026-04-23",
+  "analysis_time": "09:09 KST",
+  "mode": "MORNING",
+  "mode_label": "아침 풀분석",
+  "one_line_summary": "나스닥 24,657·코스피 6,418 역사적 고점 경신 지속, 개인 순매수 1.8조로 외국인 매도 압도하나 VIX 18.92·인플레 3.58% 노캐스팅이 연준 금리인상 재논의 불씨로 단기 급반전 리스크 상존",
+  "market_regime": "위험선호",
+  "trend_phase": "상승추세",
+  "trend_strategy": {
+    "recommended": "추세 추종 매수 유지, AI·반도체·금융주 핵심 보유 지속",
+    "caution": "나스닥 3일+ 연속 상승 후 블랙스완 충격 패턴(60거래일 중 6회) 경계, CPI 3.58% 노캐스팅·연준 인상 재논의 헤드라인 출현 시 즉시 포지션 축소",
+    "difficulty": "보통"
+  },
+  "confidence_overall": "보통",
+  "consensus_level": "보통",
+  "top_headlines": [
+    {
+      "headline": "나스닥 24,657·S&P500 7,137 역사적 고점 재경신, 6분기 연속 EPS 성장 +12.5% 확인",
+      "signal_tag": "강세",
+      "impact": "높음"
+    },
+    {
+      "headline": "TSMC Q1 순이익 +58% 어닝 쇼크, AI 반도체 수요 폭발 재확인",
+      "signal_tag": "강세",
+      "impact": "높음"
+    },
+    {
+      "headline": "클리블랜드 연준 인플레 노캐스팅 3.58%(2주새 +30bps), 연준 금리인상 재논의 가능성 부상",
+      "signal_tag": "경고",
+      "impact": "높음"
+    },
+    {
+      "headline": "엑슨모빌·셰브론 가이던스 각각 -$0.76/-$0.67 하향, 에너지 섹터 EPS -13.1% YoY",
+      "signal_tag": "약세(섹터)",
+      "impact": "보통"
+    },
+    {
+      "headline": "코스피 6,418 사상 최고가 경신, 개인 순매수 1조7798억원으로 외국인 -7520억원 압도",
+      "signal_tag": "강세(단기 과열 주의)",
+      "impact": "높음"
+    }
+  ],
+  "volatility_index": {
+    "vkospi": "데이터 미수신",
+    "vix": "18.92",
+    "fear_greed": "65 (Greed)",
+    "level": "중립~탐욕",
+    "interpretation": "VIX 18.92는 급락 공포 해소 후 중립 안정 구간. Fear&Greed 65로 탐욕 영역 진입 시사. 단 탐욕 구간에서 연속 상승 후 급반전 확률이 통계적으로 유의미하게 상승하므로 추격 매수보다 보유 관리가 적절."
+  },
+  "retail_reversal_signal": {
+    "retail_behavior": "코스피 4월 22일 개인 순매수 1조7798억원으로 외국인 매도(-7520억원)를 2.4배 압도. 4월 17일에도 개인 +1조4459억원 vs 외국인 -2조26억원 패턴 반복. 이틀 연속 개인 순매수 규모가 사상급 수준.",
+    "contrarian_implication": "개인 주도 급등 이후 외국인 복귀 전 되돌림 패턴 주의. 과거 개인 대규모 순매수 연속 발생 시 단기 과열 신호로 해석 가능. 다만 외국인 재유입 전환 시 추가 상승 동력도 잠재.",
+    "reliability": "보통"
+  },
+  "outflows": [
+    {
+      "zone": "에너지 섹터 (엑슨모빌·셰브론)",
+      "reason": "EXX 가이던스 $1.07 vs 예상 $1.83, CVX $1.24 vs $1.91. 섹터 EPS -13.1% YoY, 3월 31일 기준 +8.5% 예상에서 급격 하향.",
+      "severity": "높음",
+      "data_point": "Energy sector EPS -13.1% YoY vs +8.5% 예상; EXX/CVX 가이던스 각각 $0.76/$0.67 하향"
+    },
+    {
+      "zone": "코스피 외국인 자금",
+      "reason": "4월 17일 -2조26억원, 4월 22일 -7520억원. 3월 -35조원 이후 4월 1~10일 +5.25조원 소폭 복귀에 그침. 지정학 리스크 및 글로벌 매크로 불확실성 지속.",
+      "severity": "보통",
+      "data_point": "외국인 4월 17일 -2조26억원; 4월 22일 -7520억원; 3월 총 -35조원 대비 복귀 미흡"
+    },
+    {
+      "zone": "고금리 민감 장기 듀레이션 성장주",
+      "reason": "클리블랜드 연준 인플레 노캐스팅 3.58%(2주새 +30bps), PCE 2.7% 상향, CPI MoM +0.9%(2022년 이후 최대). 연준 금리인상 재논의 시 고밸류 멀티플 압축 위험.",
+      "severity": "보통",
+      "data_point": "CPI MoM +0.9%, 4월 인플레 전망 3.58%, 연준 인상 재논의 헤드라인"
+    }
+  ],
+  "inflows": [
+    {
+      "zone": "AI·반도체 섹터 (나스닥 핵심)",
+      "reason": "TSMC +58% 어닝 쇼크로 AI 반도체 수요 폭발 재확인. 금융섹터 +19.7% 서프라이즈. 6분기 연속 EPS 성장 +12.5% 유지.",
+      "momentum": "강함",
+      "data_point": "나스닥 24,657 역사적 고점; TSMC Q1 +58% YoY; S&P500 Q1 순이익률 13.2%"
+    },
+    {
+      "zone": "코스피 국내 개인 자금",
+      "reason": "외국인 매도 물량을 개인이 흡수하며 지수 사상 최고가 견인. 이틀 연속 1.4~1.8조원 순매수.",
+      "momentum": "강함(단기 과열 주의)",
+      "data_point": "개인 4월 22일 +1조7798억원; 4월 17일 +1조4459억원"
+    },
+    {
+      "zone": "금융 섹터",
+      "reason": "Q1 금융섹터 EPS 서프라이즈 +19.7%로 전체 S&P500 실적 시즌 기대감 상회.",
+      "momentum": "보통",
+      "data_point": "금융섹터 Q1 EPS 서프라이즈 +19.7%"
+    }
+  ],
+  "neutral_waiting": [
+    {
+      "zone": "에너지→기술 섹터 로테이션 수혜주",
+      "catalyst_needed": "에너지 EPS 쇼크 확정 후 기관 자금 이동 데이터 확인, 나스닥 추가 +1% 이상 지속"
+    },
+    {
+      "zone": "코스피 외국인 복귀",
+      "catalyst_needed": "달러 약세 전환 또는 연준 금리인상 우려 완화, 글로벌 매크로 리스크 해소"
+    }
+  ],
+  "hidden_signals": [
+    {
+      "signal": "Fear&Greed 65(탐욕) + 연속 상승 3일+ 동시 충족",
+      "implication": "60거래일 백테스트에서 위험선호 + 연속 상승 3일+ 조건 동시 충족 시 다음날 급반전 확률 약 12%(7/60일). 소수 확률이나 현재 정확히 해당 조건 충족 상태.",
+      "confidence": "보통"
+    },
+    {
+      "signal": "개인 순매수 이틀 연속 사상급(1.4조~1.8조원)으로 외국인 매도 흡수",
+      "implication": "단기 지지력은 강하나, 외국인 복귀 없는 개인 주도 상승은 지속성 한계. 외국인이 재매도 전환 시 되돌림 낙폭 확대 가능성.",
+      "confidence": "보통"
+    },
+    {
+      "signal": "CPI MoM +0.9%(2022년 이후 최대) + 클리블랜드 연준 노캐스팅 3.58%",
+      "implication": "시장이 현재 선반영했을 가능성도 있으나, 연준 금리인상 '재논의'가 실제 인상 신호로 격상되면 성장주 멀티플 급압축 트리거. 헤드라인 리스크로 관리 필요.",
+      "confidence": "보통"
+    }
+  ],
+  "thesis_killers": [
+    {
+      "event": "나스닥",
+      "timeframe": "당일 종가 기준",
+      "confirms_if": "나스닥 +1% 이상 종가 → 연고점 돌파 지속, 위험선호 유효",
+      "invalidates_if": "나스닥 -1.5% 이하 종가 → 연속 상승 후 블랙스완 충격 패턴 발동, 추격 매수 전면 중단",
+      "quality": "ok"
+    },
+    {
+      "event": "SK하이닉스",
+      "timeframe": "당일 장중·종가",
+      "confirms_if": "SK하이닉스 +2% 이상 → AI 반도체 강세 지속, 섹터 로테이션 유입 확인",
+      "invalidates_if": "SK하이닉스 -3% 이하 → 나스닥 -2% 환산 낙폭(베타 1.4x) 실현, 반도체 전반 위험 회피 전환",
+      "quality": "ok"
+    }
+  ],
+  "data_quality": "degraded",
+  "jackal_candidate_review": {
+    "analysis_date": "2026-04-23",
+    "market_bias": "risk_on",
+    "market_bias_label": "위험선호",
+    "reviewed_count": 0,
+    "aligned_count": 0,
+    "neutral_count": 0,
+    "opposed_count": 0,
+    "follow_count": 0,
+    "watch_count": 0,
+    "avoid_count": 0,
+    "review_verdict_breakdown": {
+      "strong_aligned": 0,
+      "aligned": 0,
+      "neutral": 0,
+      "opposed": 0,
+      "strong_opposed": 0
+    },
+    "average_review_confidence": "low",
+    "reason_code_frequency": {},
+    "highlights": []
+  },
+  "jackal_probability_summary": {
+    "window_days": 90,
+    "min_samples": 5,
+    "raw_rows": 0,
+    "deduped_rows": 0,
+    "duplicates_skipped": 0,
+    "overall": {
+      "wins": 0,
+      "losses": 0,
+      "total": 0,
+      "win_rate": 0.0,
+      "effective_win_rate": 0.0,
+      "qualified": false
+    },
+    "trusted_families": [],
+    "cautious_families": [],
+    "alignment_summary": {},
+    "best_aligned_families": [],
+    "best_opposed_families": []
+  },
+  "learning_policy": {
+    "version": "v1",
+    "policy_source": "orca/learning_policy.py",
+    "min_samples": 5,
+    "prior_wins": 2,
+    "prior_total": 4,
+    "trusted_threshold": 0.58,
+    "cautious_threshold": 0.46,
+    "weight_adjustment_ladder": [
+      {
+        "threshold": 0.7,
+        "delta": 0.05
+      },
+      {
+        "threshold": 0.4,
+        "delta": -0.05
+      }
+    ],
+    "probability_score_adjustment_ladder": [
+      {
+        "min_samples": 12,
+        "threshold": 0.68,
+        "delta": 4.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.62,
+        "delta": 2.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.58,
+        "delta": 1.0
+      },
+      {
+        "min_samples": 12,
+        "threshold": 0.38,
+        "delta": -5.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.43,
+        "delta": -3.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.46,
+        "delta": -1.5
+      }
+    ]
+  },
+  "health": {
+    "status": "degraded",
+    "degraded_reasons": [
+      "external_data_degraded"
+    ],
+    "counters": {
+      "warnings": 1,
+      "soft_fails": 1
+    },
+    "details": [
+      {
+        "code": "external_data_degraded",
+        "where": "orca/run_cycle.py::run_orca_cycle",
+        "exception_type": "",
+        "message": "partial data failure: PCR, KRX_API, KOREA_NEWS"
+      }
+    ]
+  },
+  "failed_sources": [
+    {
+      "source": "PCR",
+      "error": "unavailable",
+      "category": "primary"
+    },
+    {
+      "source": "KRX_API",
+      "error": "unavailable",
+      "category": "primary"
+    },
+    {
+      "source": "KOREA_NEWS",
+      "error": "no_headlines",
+      "category": "secondary"
+    }
+  ],
+  "dual_db_state": {
+    "orca_state_db": {
+      "path": "data/orca_state.db",
+      "exists": true,
+      "size_bytes": 1900544,
+      "mtime_iso": "2026-04-23T09:09:18.462589+09:00"
+    },
+    "jackal_state_db": {
+      "path": "data/jackal_state.db",
+      "exists": true,
+      "size_bytes": 118784,
+      "mtime_iso": "2026-04-23T09:06:20.814099+09:00",
+      "tables": {
+        "jackal_shadow_signals": 0,
+        "jackal_live_events": 0,
+        "jackal_shadow_batches": 0,
+        "jackal_weight_snapshots": 0,
+        "jackal_recommendations": 0,
+        "jackal_accuracy_projection": 0,
+        "jackal_cooldowns": 0
+      }
+    }
+  }
+}

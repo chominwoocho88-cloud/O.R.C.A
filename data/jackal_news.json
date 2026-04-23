@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-22 22:38 KST",
+  "collected_at": "2026-04-23 09:09 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,40 +12,64 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia maintains strong enterprise demand for its AI data center platforms with Blackwell and Vera Rubin systems already factored into guidance",
+      "headline": "NVIDIA reports $68.1 billion Q4 revenue with 73% year-over-year increase, solidifying AI and quantum computing leadership",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "NVIDIA expands Google Cloud collaboration, integrating Blackwell GPUs and custom infrastructure for enterprise AI workloads",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix began mass production of next-generation memory module; stock price increased 3.37% in past 24 hours",
+      "headline": "SK Hynix declares quarterly dividend of 265.76 billion won and benefits from strong AI memory demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics accelerating development of next-generation high-bandwidth memory; stock gained 2.10% in past 24 hours",
+      "headline": "Samsung Electronics quadruples monthly DRAM supply to Tesla, indicating strong semiconductor demand",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics Q1 2026 preliminary results show 133 trillion won revenue and 57 trillion won operating profit, up 42% and 185% sequentially",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom expanded AI chip partnerships with Meta, closing extension agreement through 2029 for custom AI accelerators",
+      "headline": "Broadcom expands collaboration with Google Cloud and announces extended Meta partnership for custom AI chips through 2029",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom stock up 4.3% on expanded Google Cloud collaboration announcement amid broad semiconductor rally",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp partners with OpenAI as part of Stargate initiative expansion in South Korea",
+      "headline": "Kakao Corp achieves record quarterly revenue driven by platform growth and AI initiatives with ChatGPT integration",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "Kakao aims for over 10% annual consolidated revenue growth and 10% operating profit margin in 2026",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "Shinhan SOL Shipbuilding TOP3 Plus ETF trading at 32,100 KRW with strong technical sell signals on daily indicators",
-      "impact": "bearish",
+      "headline": "Shinhan SOL Shipbuilding TOP3 Plus ETF tracking shipbuilding sector with limited recent market-moving developments",
+      "impact": "neutral",
       "source": "web_search"
     }
   ],
-  "total": 6
+  "total": 10
 }
