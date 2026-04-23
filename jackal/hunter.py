@@ -32,6 +32,7 @@ from orca.state import (
     record_jackal_weight_snapshot,
     sync_jackal_live_events,
 )
+from .explanation import build_hunter_explanation_lines
 from .families import canonical_family_key, family_label
 from .probability import apply_probability_adjustment, load_probability_summary
 from .thresholds import THRESHOLDS
@@ -1570,33 +1571,56 @@ def _build_hunter_devil_line(devil: dict) -> str:
 
 
 def _build_alert(item: dict, aria: dict) -> str:
-    ticker     = item["ticker"]; name = item["name"]
-    tech       = item["tech"];   cur  = item["currency"]
-    analyst    = item["analyst"]; devil = item["devil"]; final = item["final"]
+    ticker = item["ticker"]
+    name = item["name"]
+    tech = item["tech"]
+    cur = item["currency"]
+    analyst = item["analyst"]
+    devil = item["devil"]
+    final = item["final"]
     swing_type = analyst.get("swing_type", item.get("swing_type", "기술적과매도"))
     now_str = datetime.now(KST).strftime("%m/%d %H:%M")
     price_str = f"{tech['price']:,.2f}" if cur == "$" else f"{tech['price']:,.0f}"
     devil_line = _build_hunter_devil_line(devil)
-    return (
-        f"🎯 <b>Jackal Hunter — 스윙 타점</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"<b>{name} ({ticker})</b>\n"
-        f"💰 {cur}{price_str}  1일:{tech['change_1d']:+.1f}%  5일:{tech['change_5d']:+.1f}%\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"🤖 <b>{final['final_score']:.0f}/100</b>  {final['label']}  [{final.get('mode','일반')}]\n"
-        f"⚡ 1일: {final.get('day1_score',50)}점  📈 스윙: {final.get('swing_score',50)}점\n"
-        f"📊 RSI {tech['rsi']} | BB {tech['bb_pos']:.0f}% | 거래량 {tech['vol_ratio']:.1f}x\n"
-        f"💡 {item.get('hunt_reason','')[:55]}\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"🐂 {analyst.get('bull_case','')[:55]}\n"
-        f"{devil_line}\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"🎯 진입:{analyst.get('entry_zone','')}  "
-        f"📈 목표:{analyst.get('target_5d','')}  "
-        f"🛑 손절:{analyst.get('stop_loss','')}\n"
-        f"📅 권장보유: {analyst.get('expected_days',3)}일 [{swing_type}]\n"
-        f"⏰ {now_str} KST | Jackal Hunter"
+    explanation_lines = build_hunter_explanation_lines(
+        signal_family=item.get("signal_family"),
+        signals_fired=analyst.get("signals_fired", []),
+        day1_score=final.get("day1_score", 50),
+        swing_score=final.get("swing_score", 50),
+        aria=aria,
+        hint=item.get("hunt_reason", ""),
     )
+
+    lines = [
+        f"🎯 <b>Jackal Hunter — 스윙 타점</b>",
+        "━━━━━━━━━━━━━━━━━━━━",
+        f"<b>{name} ({ticker})</b>",
+        f"💰 {cur}{price_str}  1일:{tech['change_1d']:+.1f}%  5일:{tech['change_5d']:+.1f}%",
+        "━━━━━━━━━━━━━━━━━━━━",
+        f"🤖 <b>{final['final_score']:.0f}/100</b>  {final['label']}  [{final.get('mode','일반')}]",
+        f"⚡ 1일: {final.get('day1_score',50)}점  📈 스윙: {final.get('swing_score',50)}점",
+        f"📊 RSI {tech['rsi']} | BB {tech['bb_pos']:.0f}% | 거래량 {tech['vol_ratio']:.1f}x",
+    ]
+    lines.extend(explanation_lines)
+    lines.append("━━━━━━━━━━━━━━━━━━━━")
+
+    bull_case = (analyst.get("bull_case") or "").strip()
+    if bull_case:
+        lines.append(f"🐂 {bull_case[:100]}")
+    if devil_line:
+        lines.append(devil_line)
+
+    lines.extend(
+        [
+            "━━━━━━━━━━━━━━━━━━━━",
+            f"🎯 진입:{analyst.get('entry_zone','')}  "
+            f"📈 목표:{analyst.get('target_5d','')}  "
+            f"🛑 손절:{analyst.get('stop_loss','')}",
+            f"📅 권장보유: {analyst.get('expected_days',3)}일 [{swing_type}]",
+            f"⏰ {now_str} KST | Jackal Hunter",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def _build_summary(top5: list, aria: dict) -> str:

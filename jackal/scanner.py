@@ -36,6 +36,12 @@ from orca.state import (
     sync_jackal_live_events,
     sync_jackal_recommendations,
 )
+from .explanation import (
+    build_scanner_explanation_lines,
+    build_scanner_peak_line,
+    build_scanner_reason_payload,
+    select_scanner_swing_info,
+)
 from .families import canonical_family_key, family_label
 from .market_data import fetch_all, fetch_technicals
 from .probability import apply_probability_adjustment, load_probability_summary
@@ -964,100 +970,63 @@ def _build_scanner_devil_line(devil: dict) -> str | None:
     return None
 
 
-def _build_alert_message(ticker: str, info: dict, tech: dict,
-                          analyst: dict, devil: dict, final: dict,
-                          aria: dict) -> str:
-    now_str   = datetime.now(KST).strftime("%m/%d %H:%M")
-    cur       = info["currency"]
-    strong    = final["signal_type"] == "강한매수"
-    score     = final["final_score"]
+def _build_alert_message(
+    ticker: str,
+    info: dict,
+    tech: dict,
+    analyst: dict,
+    devil: dict,
+    final: dict,
+    quality: dict,
+    canonical_signal_family: str,
+    aria: dict,
+) -> str:
+    now_str = datetime.now(KST).strftime("%m/%d %H:%M")
+    cur = info["currency"]
+    strong = final["signal_type"] == "강한매수"
+    score = final["final_score"]
     price_str = f"{tech['price']:,.2f}" if info["market"] == "US" else f"{tech['price']:,.0f}"
 
-    # 헤더
-    icon  = "🔥" if strong else "🎯"
+    icon = "🔥" if strong else "🎯"
     label = "강한 매수 타점" if strong else "스윙 타점"
-
-    # 점수 색상
     score_icon = "🟢" if score >= STRONG_THRESHOLD else "🟡"
 
-    # PnL (포트폴리오 미국 주식만)
     pnl_str = ""
     if info.get("avg_cost") and info["market"] == "US":
-        pnl     = (tech["price"] - info["avg_cost"]) / info["avg_cost"] * 100
+        pnl = (tech["price"] - info["avg_cost"]) / info["avg_cost"] * 100
         pnl_str = f"  ({'📈' if pnl >= 0 else '📉'}{pnl:+.1f}%)"
 
     devil_line = _build_scanner_devil_line(devil)
-
-    # 진입 / 손절 (None 이면 줄 생략)
     entry = final.get("entry_price")
-    stop  = final.get("stop_loss")
+    stop = final.get("stop_loss")
+    fired_sigs = final.get("signals_fired", []) or analyst.get("signals_fired", [])
 
-    # ── MAE/스윙 정보: jackal_weights.json에서 읽기 (동적) ──────────
-    # jackal_weights.json에 mae_avg 필드 없으면 하드코딩 fallback
-    # 백테스트가 자동으로 채우면 알림 코드 수정 없이 동적 반영
-    _SWING_DEFAULTS = {
-        # 하드코딩 fallback — 백테스트 60일 기준 추정
-        # jackal_weights.json의 mae_avg, peak_day, swing_acc가 있으면 거기서 읽음
-        "sector_rebound":  {"peak_day": "D4~5", "swing_acc": "93%", "mae_avg": "-2.1%"},
-        "bb_touch":        {"peak_day": "D4~5", "swing_acc": "97%", "mae_avg": "-3.8%"},
-        "rsi_oversold":    {"peak_day": "D4~5", "swing_acc": "88%", "mae_avg": "-2.9%"},
-        "vol_accumulation":{"peak_day": "D5",   "swing_acc": "84%", "mae_avg": "-3.2%"},
-        "volume_climax":   {"peak_day": "D4~5", "swing_acc": "80%", "mae_avg": "-4.5%"},
-        "momentum_dip":    {"peak_day": "D4~5", "swing_acc": "78%", "mae_avg": "-4.1%"},
-        "ma_support":      {"peak_day": "D3~4", "swing_acc": "67%", "mae_avg": "-1.8%"},
-        "rsi_divergence":  {"peak_day": "D4",   "swing_acc": "52%", "mae_avg": "-2.3%"},
-    }
-    # weights에서 동적 로드 시도
-    _sig_weights = weights or {}
-    def _get_swing_info(sig: str) -> dict:
-        w = _sig_weights.get("signal_details", {}).get(sig, {})
-        default = _SWING_DEFAULTS.get(sig, {"peak_day":"D4~5","swing_acc":"74%","mae_avg":"-3.5%"})
-        return {
-            "peak_day":  w.get("peak_day",  default["peak_day"]),
-            "swing_acc": w.get("swing_acc", default["swing_acc"]),
-            "mae_avg":   w.get("mae_avg",   default["mae_avg"]),
-        }
-
-    fired_sigs = final.get("signals_fired", [])
-
-    # Doc7 부분 수용: 같은 family 안 모든 신호명 표시 (집계는 family 기준 유지)
-    # 단일 신호명만 보이던 것 → "bb_touch + rsi_oversold (crash_rebound)" 형태로
     def _format_signals_display(sigs: list) -> str:
         if not sigs:
             return "없음"
         if len(sigs) == 1:
             return sigs[0]
-        # 강신호 앞으로 정렬
-        priority = ["sector_rebound","volume_climax","bb_touch","rsi_oversold",
-                    "vol_accumulation","momentum_dip","ma_support","rsi_divergence"]
+        priority = [
+            "sector_rebound",
+            "volume_climax",
+            "bb_touch",
+            "rsi_oversold",
+            "vol_accumulation",
+            "momentum_dip",
+            "ma_support",
+            "rsi_divergence",
+        ]
         sorted_sigs = sorted(sigs, key=lambda s: priority.index(s) if s in priority else 99)
         return " + ".join(sorted_sigs)
 
     signals_display = _format_signals_display(fired_sigs)
-
-    best_info = _get_swing_info("bb_touch")  # 기본값
-    for s in ["sector_rebound","bb_touch","rsi_oversold","vol_accumulation"]:
-        if s in fired_sigs:
-            best_info = _get_swing_info(s)
-            break
-
-    # Peak + MAE 동시 표시 (버티는 동안 얼마나 아팠는지 인지 가능)
-    mae_source = "자동계산" if _sig_weights.get("signal_details") else "백테스트추정"
-    # median MAE도 표시 (표준편차 언급으로 불확실성 인지)
-    mae_display = best_info.get("mae_avg", "-3.5%")
-    mae_median  = best_info.get("mae_median", "")
-    if isinstance(mae_display, (int, float)):
-        mae_display = f"{mae_display:.1f}%"
-    if isinstance(mae_median, (int, float)):
-        mae_median = f"{mae_median:.1f}%"
-
-    mae_str = f"{mae_display}"
-    if mae_median and mae_median != mae_display:
-        mae_str += f"(중앙값:{mae_median})"
-
-    swing_peak_str = (
-        f"📈 스윙: Peak {best_info['peak_day']} ({best_info['swing_acc']}) "
-        f"| MAE avg {mae_str} [{mae_source}]"
+    best_info = select_scanner_swing_info(fired_sigs, weights)
+    explanation_lines = build_scanner_explanation_lines(
+        signal_family=canonical_signal_family,
+        signals_fired=fired_sigs,
+        quality_reasons=quality.get("reasons", []),
+        best_info=best_info,
+        aria=aria,
     )
 
     lines = [
@@ -1067,31 +1036,26 @@ def _build_alert_message(ticker: str, info: dict, tech: dict,
         f"💰 {cur}{price_str}  1일:{tech['change_1d']:+.1f}%  5일:{tech['change_5d']:+.1f}%{pnl_str}",
         "━━━━━━━━━━━━━━━━━━━━",
         f"{score_icon} <b>{score:.0f}/100</b>  {final['signal_type']}  [{analyst.get('confidence','')}]",
-        swing_peak_str,  # ← 스윙 타겟 강조 (1일보다 스윙 정확도가 훨씬 높음)
+        build_scanner_peak_line(best_info),
         f"⚡ Analyst {analyst['analyst_score']}  →  Devil {devil['devil_score']}  →  Final {score:.0f}",
         f"📊 신호: {signals_display}",
         f"   RSI {tech['rsi']} | BB {tech['bb_pos']}% | 거래량 {tech['vol_ratio']:.1f}x",
     ]
+    lines.extend(explanation_lines)
 
-    # Analyst 근거
     bull = (analyst.get("bull_case") or "").strip()
     if bull:
         lines.append(f"🐂 {bull[:80]}")
-
-    # Devil 반박 상태
     if devil_line:
         lines.append(devil_line)
 
     lines.append("━━━━━━━━━━━━━━━━━━━━")
-
-    # 진입 / 손절
     if entry:
         lines.append(f"🎯 진입: {cur}{entry}{'  🛑 손절: ' + cur + str(stop) if stop else ''}")
     elif stop:
         lines.append(f"🛑 손절: {cur}{stop}")
 
     lines.append(f"⏰ {now_str} KST | Jackal Hunter")
-
     return "\n".join(lines)
 
 
@@ -1349,6 +1313,16 @@ def _build_scan_log_entry(
     canonical_signal_family: str,
 ) -> dict:
     devil_status = _resolve_scanner_devil_status(devil)
+    fired_sigs = analyst.get("signals_fired", []) or final.get("signals_fired", [])
+    best_info = select_scanner_swing_info(fired_sigs, weights)
+    reason_detail, reason_components = build_scanner_reason_payload(
+        signal_family=canonical_signal_family,
+        signals_fired=fired_sigs,
+        quality_reasons=quality.get("reasons", []),
+        best_info=best_info,
+        aria=aria,
+        devil=devil,
+    )
     return {
         "timestamp":        now_kst.isoformat(),
         "ticker":           ticker,
@@ -1367,9 +1341,12 @@ def _build_scan_log_entry(
         "signal_family":    canonical_signal_family,
         "signal_family_raw": quality.get("signal_family", ""),
         "signal_family_label": family_label(canonical_signal_family),
+        "quality_score":    quality.get("quality_score"),
+        "quality_label":    quality.get("quality_label", ""),
+        "quality_reasons":  quality.get("reasons", []),
         "analyst_score":    analyst["analyst_score"],
         "analyst_confidence": analyst.get("confidence",""),
-        "signals_fired":    analyst.get("signals_fired", []),
+        "signals_fired":    fired_sigs,
         "bull_case":        analyst.get("bull_case",""),
         "devil_score":      devil["devil_score"],
         "devil_verdict":    devil.get("verdict",""),
@@ -1385,6 +1362,8 @@ def _build_scan_log_entry(
         "signal_type":      final["signal_type"],
         "is_entry":         final["is_entry"],
         "reason":           final.get("reason",""),
+        "reason_detail":    reason_detail,
+        "reason_components": reason_components,
         "probability_adjustment": final.get("probability_adjustment", 0),
         "probability_samples": final.get("probability_samples", 0),
         "probability_win_rate": final.get("probability_win_rate"),
@@ -1689,7 +1668,17 @@ def run_scan(force: bool = False) -> dict:
 
         # ── 알림 발송 ─────────────────────────────────────────────
         if final["is_entry"] and final["final_score"] >= ALERT_THRESHOLD:
-            msg = _build_alert_message(ticker, info, tech, analyst, devil, final, aria)
+            msg = _build_alert_message(
+                ticker,
+                info,
+                tech,
+                analyst,
+                devil,
+                final,
+                quality,
+                canonical_signal_family,
+                aria,
+            )
             ok  = _send_telegram(msg)
             if ok:
                 _set_cooldown(ticker,
