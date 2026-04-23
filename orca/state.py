@@ -1,4 +1,4 @@
-﻿"""SQLite-backed state spine for ORCA runs, predictions, and outcomes."""
+"""SQLite-backed state spine for ORCA runs, predictions, and outcomes."""
 from __future__ import annotations
 
 # NOTE (Phase 5 Path B):
@@ -2362,6 +2362,11 @@ def _sync_candidate_outcomes(
     )
     price_reference = _candidate_reference_price(entry)
     latest: dict[str, Any] | None = None
+    common_payload = {
+        key: entry.get(key)
+        for key in ("origin", "analysis_date", "tracking_days")
+        if entry.get(key) is not None
+    }
 
     price_1d = _to_float(entry.get("price_1d_later"))
     pct_1d = _to_float(entry.get("outcome_1d_pct"))
@@ -2372,7 +2377,8 @@ def _sync_candidate_outcomes(
             "outcome_1d_pct": pct_1d,
             "outcome_1d_hit": hit_1d,
         }
-        _upsert_candidate_outcome(
+        payload.update(common_payload)
+        outcome_id = _upsert_candidate_outcome(
             conn,
             candidate_id=candidate_id,
             horizon_label="d1",
@@ -2385,6 +2391,7 @@ def _sync_candidate_outcomes(
             payload=payload,
         )
         latest = {
+            "outcome_id": outcome_id,
             "horizon": "d1",
             "status": "observed",
             "observed_at": observed_at,
@@ -2403,6 +2410,7 @@ def _sync_candidate_outcomes(
             "peak_pct": peak_pct,
             "outcome_swing_hit": swing_hit,
         }
+        swing_payload.update(common_payload)
     elif entry.get("shadow_swing_pct") is not None or entry.get("shadow_swing_ok") is not None:
         peak_pct = _to_float(entry.get("shadow_swing_pct"))
         swing_hit = entry.get("shadow_swing_ok")
@@ -2410,8 +2418,9 @@ def _sync_candidate_outcomes(
             "shadow_swing_pct": peak_pct,
             "shadow_swing_ok": swing_hit,
         }
+        swing_payload.update(common_payload)
     if swing_payload:
-        _upsert_candidate_outcome(
+        outcome_id = _upsert_candidate_outcome(
             conn,
             candidate_id=candidate_id,
             horizon_label="swing",
@@ -2424,6 +2433,7 @@ def _sync_candidate_outcomes(
             payload=swing_payload,
         )
         latest = {
+            "outcome_id": outcome_id,
             "horizon": "swing",
             "status": "confirmed",
             "observed_at": observed_at,
@@ -2440,7 +2450,8 @@ def _sync_candidate_outcomes(
             "outcome_pct": pct_5d,
             "outcome_correct": hit_5d,
         }
-        _upsert_candidate_outcome(
+        payload.update(common_payload)
+        outcome_id = _upsert_candidate_outcome(
             conn,
             candidate_id=candidate_id,
             horizon_label="d5",
@@ -2453,6 +2464,7 @@ def _sync_candidate_outcomes(
             payload=payload,
         )
         latest = {
+            "outcome_id": outcome_id,
             "horizon": "d5",
             "status": "confirmed" if entry.get("outcome_checked") else "observed",
             "observed_at": observed_at,
@@ -2461,6 +2473,36 @@ def _sync_candidate_outcomes(
         }
 
     return latest
+
+
+def _update_candidate_latest_outcome(
+    conn: sqlite3.Connection,
+    *,
+    candidate_id: str,
+    latest_outcome: dict[str, Any] | None,
+) -> None:
+    if not latest_outcome:
+        return
+    resolved_status = "resolved" if latest_outcome["status"] == "confirmed" else "tracking"
+    conn.execute(
+        """
+        UPDATE candidate_registry
+           SET status = ?,
+               latest_outcome_horizon = ?,
+               latest_outcome_at = ?,
+               latest_outcome_json = ?,
+               updated_at = ?
+         WHERE candidate_id = ?
+        """,
+        (
+            resolved_status,
+            latest_outcome["horizon"],
+            latest_outcome["observed_at"],
+            _json(latest_outcome) or "{}",
+            _now_iso(),
+            candidate_id,
+        ),
+    )
 
 
 def _latest_candidate_review(
@@ -2699,29 +2741,38 @@ def record_candidate(
             ),
         )
         latest_outcome = _sync_candidate_outcomes(conn, candidate_id, payload)
-        if latest_outcome:
-            resolved_status = "resolved" if latest_outcome["status"] == "confirmed" else "tracking"
-            conn.execute(
-                """
-                UPDATE candidate_registry
-                   SET status = ?,
-                       latest_outcome_horizon = ?,
-                       latest_outcome_at = ?,
-                       latest_outcome_json = ?,
-                       updated_at = ?
-                 WHERE candidate_id = ?
-                """,
-                (
-                    resolved_status,
-                    latest_outcome["horizon"],
-                    latest_outcome["observed_at"],
-                    _json(latest_outcome) or "{}",
-                    _now_iso(),
-                    candidate_id,
-                ),
-            )
+        _update_candidate_latest_outcome(conn, candidate_id=candidate_id, latest_outcome=latest_outcome)
         _sync_candidate_probability_lesson(conn, candidate_id)
     return candidate_id
+
+
+def record_backtest_candidate(
+    entry: dict[str, Any],
+    *,
+    source_event_id: str | None = None,
+    source_external_key: str | None = None,
+    source_session_id: str | None = None,
+) -> str:
+    payload = deepcopy(entry)
+    payload["origin"] = "backtest"
+    return record_candidate(
+        payload,
+        source_system="jackal",
+        source_event_type="backtest",
+        source_event_id=source_event_id,
+        source_external_key=source_external_key,
+        source_session_id=source_session_id,
+    )
+
+
+def record_backtest_outcome(candidate_id: str, entry: dict[str, Any]) -> dict[str, Any] | None:
+    init_state_db()
+    payload = deepcopy(entry)
+    payload["origin"] = "backtest"
+    with _connect_orca() as conn:
+        latest_outcome = _sync_candidate_outcomes(conn, candidate_id, payload)
+        _update_candidate_latest_outcome(conn, candidate_id=candidate_id, latest_outcome=latest_outcome)
+    return latest_outcome
 
 
 def list_candidates(
@@ -2915,29 +2966,36 @@ def summarize_candidate_probabilities(
     *,
     days: int = 90,
     min_samples: int = 5,
+    source_event_types: list[str] | tuple[str, ...] | set[str] | None = None,
 ) -> dict[str, Any]:
     init_state_db()
-    cutoff = (_now() - timedelta(days=days)).isoformat()
+    cutoff = (_now() - timedelta(days=days)).date().isoformat()
+    query = """
+        SELECT c.candidate_id,
+               c.ticker,
+               c.analysis_date,
+               c.signal_family,
+               c.source_event_type,
+               l.lesson_type,
+               l.lesson_value,
+               l.lesson_json,
+               l.lesson_timestamp
+          FROM candidate_lessons l
+          JOIN candidate_registry c
+            ON c.candidate_id = l.candidate_id
+         WHERE COALESCE(c.analysis_date, substr(l.lesson_timestamp, 1, 10)) >= ?
+    """
+    params: list[Any] = [cutoff]
+    if source_event_types:
+        normalized_sources = [str(item).strip() for item in source_event_types if str(item).strip()]
+        if normalized_sources:
+            query += " AND c.source_event_type IN ({placeholders})".format(
+                placeholders=", ".join("?" for _ in normalized_sources)
+            )
+            params.extend(normalized_sources)
+    query += " ORDER BY COALESCE(c.analysis_date, substr(l.lesson_timestamp, 1, 10)) DESC, l.lesson_timestamp DESC"
     with _connect_orca() as conn:
-        rows = conn.execute(
-            """
-            SELECT c.candidate_id,
-                   c.ticker,
-                   c.analysis_date,
-                   c.signal_family,
-                   c.source_event_type,
-                   l.lesson_type,
-                   l.lesson_value,
-                   l.lesson_json,
-                   l.lesson_timestamp
-              FROM candidate_lessons l
-              JOIN candidate_registry c
-                ON c.candidate_id = l.candidate_id
-             WHERE l.lesson_timestamp >= ?
-             ORDER BY l.lesson_timestamp DESC
-            """,
-            (cutoff,),
-        ).fetchall()
+        rows = conn.execute(query, params).fetchall()
 
     overall = {"wins": 0, "losses": 0, "total": 0}
     by_signal_family: dict[str, dict[str, Any]] = {}
@@ -3043,6 +3101,7 @@ def summarize_candidate_probabilities(
     return {
         "window_days": days,
         "min_samples": min_samples,
+        "source_event_types": sorted(str(item) for item in source_event_types) if source_event_types else [],
         "raw_rows": raw_rows,
         "deduped_rows": len(seen_sample_keys),
         "duplicates_skipped": raw_rows - len(seen_sample_keys),
@@ -3242,6 +3301,53 @@ def record_candidate_lesson(
                 lesson_value,
                 _now_iso(),
                 _json(lesson or {}) or "{}",
+            ),
+        )
+    return lesson_id
+
+
+def record_backtest_lesson(
+    candidate_id: str,
+    *,
+    lesson_type: str,
+    label: str | None = None,
+    lesson_value: float | None = None,
+    lesson: dict[str, Any] | None = None,
+    outcome_id: str | None = None,
+    lesson_timestamp: str | None = None,
+) -> str | None:
+    init_state_db()
+    if not lesson_type:
+        return None
+
+    lesson_id = f"lesson_{uuid4().hex}"
+    payload = deepcopy(lesson or {})
+    payload["origin"] = "backtest"
+    with _connect_orca() as conn:
+        conn.execute(
+            """
+            DELETE FROM candidate_lessons
+             WHERE candidate_id = ?
+               AND lesson_type LIKE 'backtest_%'
+            """,
+            (candidate_id,),
+        )
+        conn.execute(
+            """
+            INSERT INTO candidate_lessons (
+                lesson_id, candidate_id, outcome_id, lesson_type,
+                label, lesson_value, lesson_timestamp, lesson_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                lesson_id,
+                candidate_id,
+                outcome_id,
+                lesson_type,
+                label,
+                lesson_value,
+                lesson_timestamp or str(payload.get("analysis_date") or _now_iso()),
+                _json(payload) or "{}",
             ),
         )
     return lesson_id

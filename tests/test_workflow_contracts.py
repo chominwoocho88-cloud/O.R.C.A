@@ -58,6 +58,7 @@ class TestWorkflowConcurrencyContracts(unittest.TestCase):
         "orca_jackal.yml",
         "jackal_tracker.yml",
         "jackal_scanner.yml",
+        "jackal_backtest_learning.yml",
         "orca_reset.yml",
     )
 
@@ -81,6 +82,7 @@ class TestWorkflowCheckpointContracts(unittest.TestCase):
         "orca_jackal.yml",
         "jackal_tracker.yml",
         "jackal_scanner.yml",
+        "jackal_backtest_learning.yml",
     )
 
     def test_stateful_workflows_call_checkpoint_jackal_db(self):
@@ -103,6 +105,7 @@ class TestWorkflowJackalStateContracts(unittest.TestCase):
         "orca_jackal.yml",
         "jackal_tracker.yml",
         "jackal_scanner.yml",
+        "jackal_backtest_learning.yml",
     )
 
     def test_stateful_workflows_include_jackal_state_db(self):
@@ -124,6 +127,7 @@ class TestWorkflowOrcaStateContracts(unittest.TestCase):
         "orca_jackal.yml",
         "jackal_tracker.yml",
         "jackal_scanner.yml",
+        "jackal_backtest_learning.yml",
     )
 
     def test_stateful_workflows_preserve_orca_state_db_handling(self):
@@ -145,6 +149,7 @@ class TestWorkflowPresenceContracts(unittest.TestCase):
         "orca_jackal.yml",
         "jackal_tracker.yml",
         "jackal_scanner.yml",
+        "jackal_backtest_learning.yml",
         "orca_backtest.yml",
         "orca_reset.yml",
         "pages_dashboard.yml",
@@ -184,6 +189,21 @@ class TestResearchWorkflowNonCommitContracts(unittest.TestCase):
                     text,
                     f"Research workflow drift in {workflow_name}: found forbidden 'git push'",
                 )
+
+
+class TestBacktestWorkflowContracts(unittest.TestCase):
+    def test_orca_backtest_uses_13_month_buffer(self):
+        text = _read_text(_workflow_path("orca_backtest.yml"))
+        self.assertIn(
+            "python -m orca.backtest --months 13 --walk-forward --fail-on-empty-dynamic-fetch",
+            text,
+        )
+
+    def test_learning_workflow_runs_incremental_and_full_modes(self):
+        text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
+        self.assertIn('cron: "10 0 * * 1-5"', text)
+        self.assertIn('cron: "30 1 1 * *"', text)
+        self.assertIn('python -m jackal.backtest --mode "${BACKTEST_MODE}"', text)
 
 
 if __name__ == "__main__":

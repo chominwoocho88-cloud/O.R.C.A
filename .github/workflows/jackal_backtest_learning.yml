@@ -1,0 +1,105 @@
+name: JACKAL Backtest Learning
+
+concurrency:
+  group: orca-repo-state
+  cancel-in-progress: false
+
+on:
+  schedule:
+    - cron: "10 0 * * 1-5"
+    - cron: "30 1 1 * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "incremental / full"
+        required: false
+        default: "incremental"
+
+jobs:
+  learn:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Resolve mode
+        shell: bash
+        run: |
+          MODE="incremental"
+          RUN_ORCA_REFRESH="false"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MODE="${{ github.event.inputs.mode || 'incremental' }}"
+          elif [ "${{ github.event.schedule }}" = "30 1 1 * *" ]; then
+            MODE="full"
+          fi
+          if [ "$MODE" = "full" ]; then
+            RUN_ORCA_REFRESH="true"
+          fi
+          echo "BACKTEST_MODE=$MODE" >> "$GITHUB_ENV"
+          echo "RUN_ORCA_REFRESH=$RUN_ORCA_REFRESH" >> "$GITHUB_ENV"
+
+      - name: Refresh ORCA research session
+        if: env.RUN_ORCA_REFRESH == 'true'
+        env:
+          PYTHONIOENCODING: utf-8
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
+          FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
+        run: |
+          python -m orca.backtest --months 13 --walk-forward --fail-on-empty-dynamic-fetch
+
+      - name: Run JACKAL backtest learning
+        env:
+          PYTHONIOENCODING: utf-8
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
+          FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
+        run: |
+          python -m jackal.backtest --mode "${BACKTEST_MODE}"
+
+      - name: Save learning state
+        run: |
+          git config user.name "JACKAL Learning"
+          git config user.email "jackal-learning@orca-agent"
+
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          db = Path("data/orca_state.db")
+          if db.exists():
+              conn = sqlite3.connect(db)
+              conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+              conn.close()
+          PY
+
+          python - <<'PY'
+          from orca.state import checkpoint_jackal_db
+          checkpoint_jackal_db()
+          PY
+
+          git add -f data/orca_state.db 2>/dev/null || true
+          git add -f data/jackal_state.db 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+
+          git commit -m "JACKAL learning: $(date +'%Y-%m-%d %H:%M') [${BACKTEST_MODE}] [skip ci]"
+
+          git push || {
+            git pull --rebase origin main || git rebase --abort
+            git push
+          }

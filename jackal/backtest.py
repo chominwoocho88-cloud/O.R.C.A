@@ -1,4 +1,4 @@
-﻿"""
+"""
 JACKAL backtest module.
 Jackal research backtest runner (v2).
 
@@ -22,12 +22,12 @@ Jackal research backtest runner (v2).
   수정: _JACKAL_DIR / _REPO_ROOT 분리로 경로를 명확히 구분
 """
 
-import sys
+import argparse
+import functools
 import json
 import os
+import sys
 import time
-import functools
-from datetime import datetime, timedelta
 from pathlib import Path
 from collections import defaultdict
 
@@ -40,10 +40,17 @@ import pandas as pd
 from orca.state import (
     finish_backtest_session,
     get_latest_backtest_session,
+    load_backtest_state,
     list_backtest_days,
     record_backtest_day,
     record_backtest_pick_results,
+    save_backtest_state,
     start_backtest_session,
+)
+from .backtest_materialization import (
+    materialize_backtest_day,
+    merge_reports_by_analysis_date,
+    select_backtest_reports,
 )
 
 # ── 경로 (Bug Fix) ────────────────────────────────────────────────
@@ -54,8 +61,12 @@ MEMORY_FILE = _REPO_ROOT / "data" / "memory.json"          # fallback source
 
 _JACKAL_SESSION_ID: str | None = None
 
-BACKTEST_DAYS = 60
+BACKTEST_DAYS = 252
 TRACKING_DAYS = 10
+BACKTEST_MODE_FULL = "full"
+BACKTEST_MODE_INCREMENTAL = "incremental"
+BACKTEST_CURSOR_STATE_KEY = "jackal_materialization_cursor"
+YF_HISTORY_PERIOD = "2y"
 
 # ── 실운용 상수 import (Universe 정의) ────────────────────────────
 from .hunter import SECTOR_POOLS, get_portfolio_exclusions
@@ -231,27 +242,44 @@ def track_outcome(df: pd.DataFrame, signal_date: str,
     future = df[df.index > cutoff].iloc[:tracking_days].copy()
 
     if future.empty:
-        return {"peak_day": None, "peak_pct": None, "final_pct": None,
-                "d1_pct": None, "d1_hit": None, "swing_hit": None}
+        return {
+            "entry_price": None,
+            "price_1d_later": None,
+            "price_peak": None,
+            "peak_day": None,
+            "peak_pct": None,
+            "final_pct": None,
+            "d1_pct": None,
+            "d1_hit": None,
+            "swing_hit": None,
+            "tracked_bars": 0,
+        }
 
     entry   = float(df[df.index <= cutoff]["Close"].iloc[-1])
-    returns = [(float(r) - entry) / entry * 100 for r in future["Close"]]
+    closes  = [float(r) for r in future["Close"]]
+    returns = [(price - entry) / entry * 100 for price in closes]
 
+    d1_price = round(closes[0], 2) if closes else None
     d1_pct   = round(returns[0], 2) if returns else None
     d1_hit   = (d1_pct > 0.3) if d1_pct is not None else None
 
     sw_window = returns[:7]
     peak_pct  = round(max(sw_window), 2) if sw_window else 0.0
     peak_idx  = sw_window.index(max(sw_window)) if sw_window else 0
+    peak_price = round(closes[peak_idx], 2) if closes and sw_window else None
     swing_hit = peak_pct >= 1.0
 
     return {
+        "entry_price": round(entry, 2),
+        "price_1d_later": d1_price,
+        "price_peak": peak_price,
         "peak_day":  peak_idx + 1,
         "peak_pct":  peak_pct,
         "final_pct": round(returns[-1], 2) if returns else None,
         "d1_pct":    d1_pct,
         "d1_hit":    d1_hit,
         "swing_hit": swing_hit,
+        "tracked_bars": len(closes),
     }
 
 
@@ -267,9 +295,10 @@ def parse_orca_context(report: dict) -> dict:
 # 데이터 로딩
 # ══════════════════════════════════════════════════════════════════
 
-def load_memory() -> tuple[list, dict]:
+def _load_all_morning_reports() -> tuple[list[dict], dict]:
     source_info = {"source": "production_memory", "session_id": None, "phase_label": None}
-    all_morning: list[dict] = []
+    orca_reports: list[dict] = []
+    memory_reports: list[dict] = []
 
     for label in ("walk_forward", "backtest"):
         orca_session = get_latest_backtest_session("orca", label=label)
@@ -284,7 +313,7 @@ def load_memory() -> tuple[list, dict]:
                 and row.get("analysis", {}).get("mode") == "MORNING"
             ]
             if reports:
-                all_morning = sorted(reports, key=lambda r: r.get("analysis_date", ""))
+                orca_reports = sorted(reports, key=lambda r: r.get("analysis_date", ""))
                 source_info = {
                     "source": "orca_research_session",
                     "orca_session_id": orca_session["session_id"],
@@ -297,42 +326,84 @@ def load_memory() -> tuple[list, dict]:
                     f"({orca_session['label']}/{phase_label})"
                 )
                 break
-        if all_morning:
+        if orca_reports:
             break
 
-    if not all_morning:
-        if not MEMORY_FILE.exists():
-            print(f"❌ memory.json 없음: {MEMORY_FILE}")
-            sys.exit(1)
-
+    if MEMORY_FILE.exists():
         mem = json.loads(MEMORY_FILE.read_text(encoding="utf-8"))
-        all_morning = sorted(
+        memory_reports = sorted(
             [r for r in mem if r.get("mode") == "MORNING"],
             key=lambda r: r.get("analysis_date", ""),
         )
-        print(f"   memory.json fallback 사용 | MORNING 전체: {len(all_morning)}개")
+        if memory_reports:
+            print(f"   memory.json fallback 확인 | MORNING 전체: {len(memory_reports)}개")
 
-    cutoff  = (datetime.now() - timedelta(days=BACKTEST_DAYS + TRACKING_DAYS)).strftime("%Y-%m-%d")
-    morning = [r for r in all_morning if r.get("analysis_date", "") >= cutoff]
-    if not morning:
-        print(f"⚠️  cutoff({cutoff}) 이후 없음 → 전체 사용")
-        morning = all_morning
+    merged = merge_reports_by_analysis_date(orca_reports, memory_reports)
+    source_info["orca_report_count"] = len(orca_reports)
+    source_info["memory_report_count"] = len(memory_reports)
+    source_info["merged_report_count"] = len(merged)
+    return merged, source_info
 
-    if not morning:
+
+def _load_incremental_cursor() -> str | None:
+    latest = get_latest_backtest_session("jackal", label="backtest")
+    if not latest:
+        return None
+
+    summary = latest.get("summary", {}) if isinstance(latest, dict) else {}
+    if isinstance(summary, dict):
+        cursor = str(summary.get("last_materialized_analysis_date") or "").strip()
+        if cursor:
+            return cursor
+
+    session_id = latest.get("session_id") if isinstance(latest, dict) else None
+    if not session_id:
+        return None
+    state = load_backtest_state(session_id, BACKTEST_CURSOR_STATE_KEY, {})
+    if not isinstance(state, dict):
+        return None
+    cursor = str(state.get("last_materialized_analysis_date") or "").strip()
+    return cursor or None
+
+
+def load_memory(*, mode: str = BACKTEST_MODE_FULL) -> tuple[list, dict]:
+    all_morning, source_info = _load_all_morning_reports()
+    if not all_morning:
         print("❌ Jackal backtest 입력용 MORNING 레코드 없음")
         sys.exit(1)
 
-    print(f"✅ 백테스트 대상: {len(morning)}개 | "
-          f"{morning[0]['analysis_date']} ~ {morning[-1]['analysis_date']}")
+    after_analysis_date = _load_incremental_cursor() if mode == BACKTEST_MODE_INCREMENTAL else None
+    morning = select_backtest_reports(
+        all_morning,
+        backtest_days=BACKTEST_DAYS,
+        tracking_days=TRACKING_DAYS,
+        after_analysis_date=after_analysis_date,
+    )
+    source_info["selection_mode"] = mode
+    source_info["incremental_from_analysis_date"] = after_analysis_date
+    source_info["eligible_report_count"] = max(len(all_morning) - TRACKING_DAYS, 0)
+
+    if not morning and mode == BACKTEST_MODE_INCREMENTAL:
+        print("ℹ️  incremental 대상 신규 거래일 없음")
+        return [], source_info
+
+    if not morning:
+        print("❌ Jackal backtest 대상 거래일 없음")
+        sys.exit(1)
+
+    print(
+        f"✅ 백테스트 대상: {len(morning)}개 | "
+        f"{morning[0]['analysis_date']} ~ {morning[-1]['analysis_date']}"
+    )
     return morning, source_info
 
 
 @functools.lru_cache(maxsize=128)
 def _fetch_yf_cached(ticker: str):
-    """yfinance 1년 일봉 캐싱 — 중복 호출 방지."""
+    """yfinance 2년 일봉 캐싱 — 중복 호출 방지."""
     for attempt in range(3):
         try:
-            df = yf.Ticker(ticker).history(period="1y", interval="1d")
+            df = yf.Ticker(ticker).history(period=YF_HISTORY_PERIOD, interval="1d")
             if not df.empty:
                 df.index = pd.to_datetime(df.index).tz_localize(None)
                 return df
@@ -346,33 +417,57 @@ def _fetch_yf_cached(ticker: str):
 # 메인 백테스트
 # ══════════════════════════════════════════════════════════════════
 
-def run_backtest():
+def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
     global _JACKAL_SESSION_ID
 
     print("\n" + "=" * 62)
     print("  🦊 Jackal Backtest v2 — research spine 연동")
     print("  파이프라인: Universe→Stage1(50)→Stage2(25)→Stage3(10)→Stage4(5)")
-    print(f"  대상: 최근 {BACKTEST_DAYS}거래일 | Peak 추적: {TRACKING_DAYS}일")
+    print(f"  대상: 최근 {BACKTEST_DAYS}거래일 | Peak 추적: {TRACKING_DAYS}일 | mode={mode}")
     print("=" * 62)
 
-    memory, source_info = load_memory()
+    memory, source_info = load_memory(mode=mode)
     _JACKAL_SESSION_ID = start_backtest_session(
         "jackal",
         "backtest",
         config={
             "backtest_days": BACKTEST_DAYS,
             "tracking_days": TRACKING_DAYS,
+            "mode": mode,
+            "yfinance_period": YF_HISTORY_PERIOD,
             "source": source_info,
         },
     )
     print(f"\n🗃️ Jackal research session: {_JACKAL_SESSION_ID}")
     try:
+        if not memory:
+            summary = {
+                "mode": "jackal_backtest",
+                "selection_mode": mode,
+                "source": source_info,
+                "backtest_version": "v3_learning_loop",
+                "backtest_days": 0,
+                "total_tracked": 0,
+                "materialized_candidates": 0,
+                "materialized_outcomes": 0,
+                "materialized_lessons": 0,
+                "last_materialized_analysis_date": source_info.get("incremental_from_analysis_date"),
+            }
+            save_backtest_state(
+                _JACKAL_SESSION_ID,
+                BACKTEST_CURSOR_STATE_KEY,
+                {"last_materialized_analysis_date": source_info.get("incremental_from_analysis_date")},
+            )
+            finish_backtest_session(_JACKAL_SESSION_ID, "completed", summary=summary)
+            print("\nℹ️  신규 incremental 대상이 없어 세션만 기록했습니다.")
+            return summary
+
         universe = _build_universe()
         excluded = get_portfolio_exclusions()
         print(f"\n🌐 Universe: {len(universe)}종목 (SECTOR_POOLS, portfolio exclusions 제외)")
         print(f"   제외: {', '.join(sorted(excluded))}")
 
-        print(f"\n📥 yfinance 다운로드 ({len(universe)}종목)...")
+        print(f"\n📥 yfinance 다운로드 ({len(universe)}종목, period={YF_HISTORY_PERIOD})...")
         hist: dict = {}
         batch = []
         for i, ticker in enumerate(universe):
@@ -397,6 +492,8 @@ def run_backtest():
             "s4_top5": 0,
             "tracked": 0,
         }
+        materialization_totals = {"candidates": 0, "outcomes": 0, "lessons": 0}
+        last_materialized_analysis_date: str | None = None
 
         print("=" * 62)
         print("  📅 날짜별 파이프라인 실행")
@@ -404,9 +501,9 @@ def run_backtest():
 
         for report in memory:
             date_str = report.get("analysis_date", "")
-            orca     = parse_orca_context(report)
-            inflows  = " ".join(orca["key_inflows"]).lower()
-            regime   = orca["regime"]
+            orca = parse_orca_context(report)
+            inflows = " ".join(orca["key_inflows"]).lower()
+            regime = orca["regime"]
 
             scored = []
             for ticker in universe:
@@ -442,25 +539,39 @@ def run_backtest():
             daily_tracked = 0
             for rank, item in enumerate(top5, start=1):
                 ticker = item["ticker"]
-                df     = hist.get(ticker)
+                df = hist.get(ticker)
                 outcome = track_outcome(df, date_str, TRACKING_DAYS) if df is not None else {
+                    "entry_price": None,
+                    "price_1d_later": None,
+                    "price_peak": None,
                     "peak_day": None,
                     "peak_pct": None,
                     "final_pct": None,
                     "d1_pct": None,
-                    "d1_hit": False,
-                    "swing_hit": False,
+                    "d1_hit": None,
+                    "swing_hit": None,
+                    "tracked_bars": 0,
                 }
+
+                sector_inflow_match = False
+                for sec, tickers in SECTOR_POOLS.items():
+                    if ticker in tickers:
+                        kws = sec.lower().replace("/", " ").split()
+                        sector_inflow_match = any(k in inflows for k in kws)
+                        break
 
                 pick_entry = {
                     "rank_index": rank,
                     "ticker": ticker,
                     "regime": regime,
+                    "sector_inflow_match": sector_inflow_match,
                     "scores": {
                         "s1_score": item.get("s1_score"),
                         "s2_score": item.get("s2_score"),
                     },
                     "indicators": {
+                        "price": item["tech"].get("price"),
+                        "ma50": item["tech"].get("ma50"),
                         "rsi": item["tech"].get("rsi"),
                         "bb_pos": item["tech"].get("bb_pos"),
                         "change_5d": item["tech"].get("change_5d"),
@@ -475,15 +586,15 @@ def run_backtest():
                     continue
 
                 all_results.append({
-                    "date":       date_str,
-                    "ticker":     ticker,
-                    "regime":     regime,
-                    "s1_score":   item["s1_score"],
-                    "s2_score":   item["s2_score"],
-                    "rsi":        item["tech"]["rsi"],
-                    "bb_pos":     item["tech"]["bb_pos"],
-                    "change_5d":  item["tech"]["change_5d"],
-                    "vol_ratio":  item["tech"]["vol_ratio"],
+                    "date": date_str,
+                    "ticker": ticker,
+                    "regime": regime,
+                    "s1_score": item["s1_score"],
+                    "s2_score": item["s2_score"],
+                    "rsi": item["tech"]["rsi"],
+                    "bb_pos": item["tech"]["bb_pos"],
+                    "change_5d": item["tech"]["change_5d"],
+                    "vol_ratio": item["tech"]["vol_ratio"],
                     "bullish_div": item["tech"]["bullish_div"],
                     **outcome,
                 })
@@ -498,6 +609,28 @@ def run_backtest():
                 daily_picks,
                 source_session_id=source_info.get("orca_session_id") or source_info.get("session_id"),
             )
+            materialized = materialize_backtest_day(
+                session_id=_JACKAL_SESSION_ID,
+                source_session_id=source_info.get("orca_session_id") or source_info.get("session_id"),
+                analysis_date=date_str,
+                regime=regime,
+                inflows=orca["key_inflows"],
+                outflows=orca["key_outflows"],
+                inflows_text=inflows,
+                market_note=report.get("one_line_summary", ""),
+                daily_picks=daily_picks,
+                tracking_days=TRACKING_DAYS,
+            )
+            for key in materialization_totals:
+                materialization_totals[key] += int(materialized.get(key, 0))
+            if materialized.get("candidates"):
+                last_materialized_analysis_date = date_str
+                save_backtest_state(
+                    _JACKAL_SESSION_ID,
+                    BACKTEST_CURSOR_STATE_KEY,
+                    {"last_materialized_analysis_date": last_materialized_analysis_date},
+                )
+
             record_backtest_day(
                 _JACKAL_SESSION_ID,
                 date_str,
@@ -521,30 +654,46 @@ def run_backtest():
                         "s4_top5": len(top5),
                         "tracked": daily_tracked,
                     },
+                    "materialized": materialized,
                 },
             )
 
-            print(f"  {date_str} [{regime[:6]:6}] "
-                  f"S1:{len(top50):2} S2:{len(top25):2} S3:{len(top10):2} "
-                  f"S4:{len(top5)} 추적:{funnel_totals['tracked']}")
+            print(
+                f"  {date_str} [{regime[:6]:6}] "
+                f"S1:{len(top50):2} S2:{len(top25):2} S3:{len(top10):2} "
+                f"S4:{len(top5)} 추적:{funnel_totals['tracked']} "
+                f"| feed C:{materialized['candidates']} O:{materialized['outcomes']} L:{materialized['lessons']}"
+            )
 
         print("\n" + "=" * 62)
         print("  📊 파이프라인 퍼널 요약")
         print("=" * 62)
-        print(f"  Universe   : {funnel_totals['universe']:,}")
+        print(f"  Universe    : {funnel_totals['universe']:,}")
         print(f"  Stage1 Top50: {funnel_totals['s1_top50']:,}")
         print(f"  Stage2 Top25: {funnel_totals['s2_top25']:,}")
         print(f"  Stage3 Top10: {funnel_totals['s3_top10']:,}")
         print(f"  Stage4 Top5 : {funnel_totals['s4_top5']:,}")
-        print(f"  추적 완료   : {funnel_totals['tracked']:,}")
+        print(f"  추적 완료    : {funnel_totals['tracked']:,}")
+        print(
+            f"  Feed         : C {materialization_totals['candidates']:,} | "
+            f"O {materialization_totals['outcomes']:,} | "
+            f"L {materialization_totals['lessons']:,}"
+        )
 
         total = len(all_results)
         if total == 0:
             summary = {
                 "mode": "jackal_backtest",
+                "selection_mode": mode,
                 "source": source_info,
+                "backtest_version": "v3_learning_loop",
+                "backtest_days": len(memory),
                 "total_tracked": 0,
                 "funnel_totals": funnel_totals,
+                "materialized_candidates": materialization_totals["candidates"],
+                "materialized_outcomes": materialization_totals["outcomes"],
+                "materialized_lessons": materialization_totals["lessons"],
+                "last_materialized_analysis_date": last_materialized_analysis_date,
             }
             finish_backtest_session(_JACKAL_SESSION_ID, "completed", summary=summary)
             print("\n⚠️  추적 가능한 결과 없음 (데이터 부족 또는 최근 날짜 전용)")
@@ -554,10 +703,10 @@ def run_backtest():
         sw_hit = sum(1 for r in all_results if r.get("swing_hit"))
         d1_hit = sum(1 for r in all_results if r.get("d1_hit"))
         div_ok = sum(1 for r in all_results if r.get("bullish_div") and r.get("swing_hit"))
-        div_n  = sum(1 for r in all_results if r.get("bullish_div"))
+        div_n = sum(1 for r in all_results if r.get("bullish_div"))
 
-        sw_acc  = sw_hit / total * 100
-        d1_acc  = d1_hit / total * 100
+        sw_acc = sw_hit / total * 100
+        d1_acc = d1_hit / total * 100
         div_acc = div_ok / div_n * 100 if div_n else 0.0
 
         print(f"\n  1일 정확도 : {d1_acc:.1f}% ({d1_hit}/{total})")
@@ -566,33 +715,33 @@ def run_backtest():
 
         print("\n  📊 레짐별 스윙 정확도:")
         regime_acc: dict = defaultdict(lambda: {"total": 0, "swing_correct": 0})
-        for r in all_results:
-            rg = r["regime"]
+        for result in all_results:
+            rg = result["regime"]
             regime_acc[rg]["total"] += 1
-            regime_acc[rg]["swing_correct"] += int(r.get("swing_hit", False))
+            regime_acc[rg]["swing_correct"] += int(result.get("swing_hit", False))
         regime_stats = {}
-        for rg, v in regime_acc.items():
-            acc_pct = v["swing_correct"] / v["total"] * 100 if v["total"] else 0
+        for rg, values in regime_acc.items():
+            acc_pct = values["swing_correct"] / values["total"] * 100 if values["total"] else 0
             regime_stats[rg] = {
-                "total": v["total"],
-                "swing_correct": v["swing_correct"],
+                "total": values["total"],
+                "swing_correct": values["swing_correct"],
                 "swing_accuracy": round(acc_pct, 1),
             }
-            print(f"    {rg[:10]:10} {acc_pct:5.1f}% ({v['swing_correct']}/{v['total']})")
+            print(f"    {rg[:10]:10} {acc_pct:5.1f}% ({values['swing_correct']}/{values['total']})")
 
         print("\n  📊 티커별 스윙 정확도 (3건 이상):")
         ticker_acc: dict = defaultdict(list)
-        for r in all_results:
-            ticker_acc[r["ticker"]].append(r)
+        for result in all_results:
+            ticker_acc[result["ticker"]].append(result)
         ticker_stats = {}
         for tk, entries in sorted(ticker_acc.items(), key=lambda x: len(x[1]), reverse=True):
             if len(entries) < 3:
                 continue
-            ok = sum(1 for e in entries if e.get("swing_hit"))
-            pk_days = [e["peak_day"] for e in entries if e.get("peak_day")]
+            ok = sum(1 for entry in entries if entry.get("swing_hit"))
+            pk_days = [entry["peak_day"] for entry in entries if entry.get("peak_day")]
             avg_d = round(sum(pk_days) / len(pk_days), 1) if pk_days else 5.0
             avg_pk = round(
-                sum(e["peak_pct"] for e in entries if e.get("peak_pct") is not None) / len(entries),
+                sum(entry["peak_pct"] for entry in entries if entry.get("peak_pct") is not None) / len(entries),
                 2,
             )
             swa = ok / len(entries) * 100
@@ -603,13 +752,13 @@ def run_backtest():
                 "avg_peak_day": avg_d,
                 "avg_peak_pct": avg_pk,
             }
-            print(f"    {tk:<14} {len(entries):3}건 | 스윙 {swa:5.1f}% | "
-                  f"Peak D{avg_d:.1f} ({avg_pk:+.2f}%)")
+            print(f"    {tk:<14} {len(entries):3}건 | 스윙 {swa:5.1f}% | Peak D{avg_d:.1f} ({avg_pk:+.2f}%)")
 
         summary = {
             "mode": "jackal_backtest",
+            "selection_mode": mode,
             "source": source_info,
-            "backtest_version": "v2_pipeline",
+            "backtest_version": "v3_learning_loop",
             "pipeline": "Universe→Stage1(50)→Stage2(25)→Stage3(10)→Stage4(5)",
             "backtest_days": len(memory),
             "total_tracked": total,
@@ -619,12 +768,19 @@ def run_backtest():
             "regime_accuracy": regime_stats,
             "ticker_accuracy": ticker_stats,
             "funnel_totals": funnel_totals,
+            "materialized_candidates": materialization_totals["candidates"],
+            "materialized_outcomes": materialization_totals["outcomes"],
+            "materialized_lessons": materialization_totals["lessons"],
+            "last_materialized_analysis_date": last_materialized_analysis_date,
         }
         finish_backtest_session(_JACKAL_SESSION_ID, "completed", summary=summary)
 
         print("\n" + "=" * 62)
         print(f"  ✅ SQLite 저장 완료: {_JACKAL_SESSION_ID}")
-        print(f"     스윙 {sw_acc:.1f}% | 1일 {d1_acc:.1f}% | 다이버전스 {div_acc:.1f}%")
+        print(
+            f"     스윙 {sw_acc:.1f}% | 1일 {d1_acc:.1f}% | 다이버전스 {div_acc:.1f}% "
+            f"| feed L:{materialization_totals['lessons']}"
+        )
         print("=" * 62 + "\n")
 
         return summary
@@ -634,14 +790,23 @@ def run_backtest():
                 finish_backtest_session(
                     _JACKAL_SESSION_ID,
                     "failed",
-                    summary={"error": str(e), "source": source_info},
+                    summary={"error": str(e), "mode": mode, "source": source_info},
                 )
             except Exception:
                 pass
         raise
 
+
 def main() -> None:
-    run_backtest()
+    parser = argparse.ArgumentParser(description="JACKAL backtest")
+    parser.add_argument(
+        "--mode",
+        choices=(BACKTEST_MODE_FULL, BACKTEST_MODE_INCREMENTAL),
+        default=BACKTEST_MODE_FULL,
+        help="full=최근 252 거래일 전체 재생, incremental=마지막 materialized 날짜 이후 delta만 반영",
+    )
+    args = parser.parse_args()
+    run_backtest(mode=args.mode)
 
 
 if __name__ == "__main__":

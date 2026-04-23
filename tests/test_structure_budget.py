@@ -30,6 +30,8 @@ FILE_SIZE_BUDGET = {
     "jackal/scanner.py": 1900,
     "jackal/hunter.py": 2050,
     "jackal/evolution.py": 1250,
+    "jackal/backtest.py": 1000,
+    "jackal/backtest_materialization.py": 400,
     # post-refactor budgets
     "orca/analysis.py": 300,
     "orca/analysis_market.py": 520,

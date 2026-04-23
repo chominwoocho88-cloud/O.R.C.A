@@ -8,9 +8,22 @@ from orca.learning_policy import MIN_SAMPLES, suggest_probability_adjustment
 from orca.state import summarize_candidate_probabilities
 
 
-def load_probability_summary(*, days: int = 90, min_samples: int = MIN_SAMPLES) -> dict[str, Any] | None:
+BACKTEST_PROBABILITY_WINDOW_DAYS = 400
+BACKTEST_PROBABILITY_SOURCE_EVENT_TYPES = ("backtest",)
+
+
+def load_probability_summary(
+    *,
+    days: int = BACKTEST_PROBABILITY_WINDOW_DAYS,
+    min_samples: int = MIN_SAMPLES,
+    source_event_types: tuple[str, ...] = BACKTEST_PROBABILITY_SOURCE_EVENT_TYPES,
+) -> dict[str, Any] | None:
     try:
-        return summarize_candidate_probabilities(days=days, min_samples=MIN_SAMPLES)
+        return summarize_candidate_probabilities(
+            days=days,
+            min_samples=min_samples,
+            source_event_types=source_event_types,
+        )
     except Exception:
         return None
 

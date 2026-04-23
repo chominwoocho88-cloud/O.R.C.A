@@ -1511,7 +1511,7 @@ def run_scan(force: bool = False) -> dict:
     scanned = 0
     alerted = 0
     results: list = []
-    lesson_summary = load_probability_summary(days=90)
+    lesson_summary = load_probability_summary()
 
     for ticker, info in watchlist.items():
         market = info["market"]
