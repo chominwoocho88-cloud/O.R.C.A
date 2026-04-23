@@ -709,6 +709,7 @@ VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
   "bear_case": "매수 반대 근거 1~2줄"
 }}"""
 
+    raw = ""
     try:
         resp = Anthropic().messages.create(
             model=MODEL_H, max_tokens=400,
@@ -717,15 +718,119 @@ VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
         raw  = re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip()
         m    = re.search(r"\{[\s\S]*\}", raw)
         if not m:
-            return {"devil_score": 30, "verdict": "부분동의",
-                    "objections": [], "thesis_killer_hit": False}
+            return _with_scanner_devil_metadata(
+                {
+                    "devil_score": 30,
+                    "verdict": "부분동의",
+                    "objections": [],
+                    "thesis_killer_hit": False,
+                    "killer_detail": "",
+                    "bear_case": "",
+                },
+                called=True,
+                parse_ok=False,
+                status="parse_failed",
+                raw_excerpt=raw,
+            )
         result = json.loads(m.group())
-        result["devil_score"] = int(result.get("devil_score", 30))
-        return result
+        return _with_scanner_devil_metadata(
+            result,
+            called=True,
+            parse_ok=True,
+            status="ok_with_objection" if _first_scanner_objection(result) else "no_material_objection",
+        )
+    except json.JSONDecodeError:
+        return _with_scanner_devil_metadata(
+            {
+                "devil_score": 30,
+                "verdict": "부분동의",
+                "objections": [],
+                "thesis_killer_hit": False,
+                "killer_detail": "",
+                "bear_case": "",
+            },
+            called=True,
+            parse_ok=False,
+            status="parse_failed",
+            raw_excerpt=raw,
+        )
     except Exception as e:
         log.error(f"  Devil 실패: {e}")
-        return {"devil_score": 30, "verdict": "부분동의",
-                "objections": [], "thesis_killer_hit": False}
+        return _with_scanner_devil_metadata(
+            {
+                "devil_score": 30,
+                "verdict": "부분동의",
+                "objections": [],
+                "thesis_killer_hit": False,
+                "killer_detail": "",
+                "bear_case": "",
+            },
+            called=True,
+            parse_ok=False,
+            status="api_error",
+            raw_excerpt=raw,
+        )
+
+
+def _trim_devil_raw_excerpt(text: str | None, limit: int = 200) -> str | None:
+    if not text:
+        return None
+    cleaned = re.sub(r"\s+", " ", str(text)).strip()
+    if not cleaned:
+        return None
+    return cleaned[:limit]
+
+
+def _first_scanner_objection(devil: dict) -> str:
+    for objection in devil.get("objections", []) or []:
+        text = str(objection or "").strip()
+        if text:
+            return text
+    return ""
+
+
+def _resolve_scanner_devil_status(devil: dict) -> str:
+    status = str(devil.get("devil_status", "") or "").strip()
+    if status:
+        return status
+    if devil.get("devil_called") is False:
+        return "skipped_quality_gate"
+    if _first_scanner_objection(devil):
+        return "ok_with_objection"
+    if devil:
+        return "no_material_objection"
+    return "unknown"
+
+
+def _scanner_devil_render_mode(status: str) -> str:
+    if status == "ok_with_objection":
+        return "full"
+    if status == "skipped_quality_gate":
+        return "hidden"
+    return "label_only"
+
+
+def _with_scanner_devil_metadata(
+    devil: dict,
+    *,
+    called: bool,
+    parse_ok: bool,
+    status: str,
+    raw_excerpt: str | None = None,
+) -> dict:
+    result = dict(devil)
+    result["devil_score"] = int(result.get("devil_score", 30))
+    result.setdefault("verdict", "부분동의")
+    result.setdefault("objections", [])
+    result.setdefault("thesis_killer_hit", False)
+    result.setdefault("killer_detail", "")
+    result.setdefault("bear_case", "")
+    result["devil_called"] = called
+    result["devil_parse_ok"] = parse_ok
+    result["devil_status"] = status
+    result["devil_raw_excerpt"] = _trim_devil_raw_excerpt(raw_excerpt)
+    result["devil_render_mode"] = _scanner_devil_render_mode(status)
+    return result
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -844,6 +949,21 @@ def _send_telegram(text: str) -> bool:
         return False
 
 
+def _build_scanner_devil_line(devil: dict) -> str | None:
+    status = _resolve_scanner_devil_status(devil)
+    verdict = str(devil.get("verdict", "부분동의") or "부분동의").strip()
+    objection = _first_scanner_objection(devil)
+    if status == "ok_with_objection":
+        return f"🔴 Devil ⚠️ {verdict}: {objection[:55]}"
+    if status == "no_material_objection":
+        return "🔴 Devil: 반박 없음"
+    if status == "api_error":
+        return "🔴 Devil: 응답 실패"
+    if status == "parse_failed":
+        return "🔴 Devil: 응답 파싱 실패"
+    return None
+
+
 def _build_alert_message(ticker: str, info: dict, tech: dict,
                           analyst: dict, devil: dict, final: dict,
                           aria: dict) -> str:
@@ -866,11 +986,7 @@ def _build_alert_message(ticker: str, info: dict, tech: dict,
         pnl     = (tech["price"] - info["avg_cost"]) / info["avg_cost"] * 100
         pnl_str = f"  ({'📈' if pnl >= 0 else '📉'}{pnl:+.1f}%)"
 
-    # Devil 판정 — 내용 없으면 줄 자체 생략
-    d_verdicts = {"동의": "✅ 동의", "부분동의": "⚠️ 부분동의", "반대": "❌ 반대"}
-    d_label    = d_verdicts.get(devil.get("verdict", ""), "")
-    d_objs     = devil.get("objections", [])
-    d_comment  = (d_objs[0][:55] if d_objs else "").strip()
+    devil_line = _build_scanner_devil_line(devil)
 
     # 진입 / 손절 (None 이면 줄 생략)
     entry = final.get("entry_price")
@@ -962,11 +1078,9 @@ def _build_alert_message(ticker: str, info: dict, tech: dict,
     if bull:
         lines.append(f"🐂 {bull[:80]}")
 
-    # Devil 반박 (있을 때만)
-    if d_comment:
-        lines.append(f"🔴 Devil {d_label}: {d_comment}")
-    elif d_label:
-        lines.append(f"🔴 Devil {d_label}")
+    # Devil 반박 상태
+    if devil_line:
+        lines.append(devil_line)
 
     lines.append("━━━━━━━━━━━━━━━━━━━━")
 
@@ -1146,6 +1260,140 @@ def _build_summary_message(results: list, macro: dict, aria: dict) -> str:
         lines.append(f"🌐 {aria['regime'][:35]}")
     lines.append(f"⏰ {now_str} KST | JACKAL Scanner")
     return "\n".join(lines)
+
+
+def _build_shadow_log_entry(
+    *,
+    now_kst: datetime,
+    ticker: str,
+    info: dict,
+    tech: dict,
+    macro: dict,
+    aria: dict,
+    signals_fired_pre: list,
+    quality: dict,
+) -> dict:
+    return {
+        "timestamp":        now_kst.isoformat(),
+        "ticker":           ticker,
+        "name":             info["name"],
+        "market":           info["market"],
+        "price_at_scan":    tech["price"],
+        "rsi":              tech["rsi"],
+        "bb_pos":           tech["bb_pos"],
+        "vol_ratio":        tech["vol_ratio"],
+        "vix":              macro["fred"].get("vix"),
+        "hy_spread":        macro["fred"].get("hy_spread"),
+        "yield_curve":      macro["fred"].get("yield_curve"),
+        "orca_regime":      aria["regime"],
+        "orca_sentiment":   aria["sentiment_score"],
+        "orca_trend":       aria["trend"],
+        "analyst_score":    None,
+        "analyst_confidence": None,
+        "signals_fired":    signals_fired_pre,
+        "bull_case":        None,
+        "devil_score":      None,
+        "devil_verdict":    None,
+        "devil_objections": [],
+        "thesis_killer_hit": False,
+        "killer_detail":    "",
+        "devil_called":     False,
+        "devil_parse_ok":   False,
+        "devil_status":     "skipped_quality_gate",
+        "devil_raw_excerpt": None,
+        "devil_render_mode": "hidden",
+        "final_score":      quality["quality_score"],
+        "signal_type":      "관망",
+        "signal_family":    canonical_family_key(
+            signal_family=quality["signal_family"],
+            signals_fired=signals_fired_pre,
+        ),
+        "signal_family_raw": quality["signal_family"],
+        "signal_family_label": family_label(
+            canonical_family_key(
+                signal_family=quality["signal_family"],
+                signals_fired=signals_fired_pre,
+            )
+        ),
+        "is_entry":         False,
+        "reason":           f"신호품질미달({quality['quality_score']}점)",
+        "quality_score":    quality["quality_score"],
+        "quality_label":    quality["quality_label"],
+        "quality_reasons":  quality["reasons"],
+        "skip_threshold":   quality["skip_threshold"],
+        "rebound_bonus":    quality.get("rebound_bonus", 0),
+        "vix_used":         quality.get("vix_used", 0),
+        "shadow_record":    True,
+        "shadow_storage":   "sqlite",
+        "alerted":          False,
+        "outcome_checked":  False,
+        "outcome_price":    None,
+        "outcome_pct":      None,
+        "outcome_correct":  None,
+    }
+
+
+def _build_scan_log_entry(
+    *,
+    now_kst: datetime,
+    ticker: str,
+    market: str,
+    info: dict,
+    tech: dict,
+    macro: dict,
+    aria: dict,
+    quality: dict,
+    analyst: dict,
+    devil: dict,
+    final: dict,
+    canonical_signal_family: str,
+) -> dict:
+    devil_status = _resolve_scanner_devil_status(devil)
+    return {
+        "timestamp":        now_kst.isoformat(),
+        "ticker":           ticker,
+        "name":             info["name"],
+        "market":           market,
+        "price_at_scan":    tech["price"],
+        "rsi":              tech["rsi"],
+        "bb_pos":           tech["bb_pos"],
+        "vol_ratio":        tech["vol_ratio"],
+        "vix":              macro["fred"].get("vix"),
+        "hy_spread":        macro["fred"].get("hy_spread"),
+        "yield_curve":      macro["fred"].get("yield_curve"),
+        "orca_regime":      aria["regime"],
+        "orca_sentiment":   aria["sentiment_score"],
+        "orca_trend":       aria["trend"],
+        "signal_family":    canonical_signal_family,
+        "signal_family_raw": quality.get("signal_family", ""),
+        "signal_family_label": family_label(canonical_signal_family),
+        "analyst_score":    analyst["analyst_score"],
+        "analyst_confidence": analyst.get("confidence",""),
+        "signals_fired":    analyst.get("signals_fired", []),
+        "bull_case":        analyst.get("bull_case",""),
+        "devil_score":      devil["devil_score"],
+        "devil_verdict":    devil.get("verdict",""),
+        "devil_objections": devil.get("objections", []),
+        "thesis_killer_hit": devil.get("thesis_killer_hit", False),
+        "killer_detail":    devil.get("killer_detail",""),
+        "devil_called":     devil.get("devil_called", True),
+        "devil_parse_ok":   devil.get("devil_parse_ok", False),
+        "devil_status":     devil.get("devil_status", devil_status),
+        "devil_raw_excerpt": devil.get("devil_raw_excerpt"),
+        "devil_render_mode": devil.get("devil_render_mode", _scanner_devil_render_mode(devil_status)),
+        "final_score":      final["final_score"],
+        "signal_type":      final["signal_type"],
+        "is_entry":         final["is_entry"],
+        "reason":           final.get("reason",""),
+        "probability_adjustment": final.get("probability_adjustment", 0),
+        "probability_samples": final.get("probability_samples", 0),
+        "probability_win_rate": final.get("probability_win_rate"),
+        "alerted":          final["is_entry"] and final["final_score"] >= ALERT_THRESHOLD,
+        "outcome_checked":  False,
+        "outcome_price":    None,
+        "outcome_pct":      None,
+        "outcome_correct":  None,
+    }
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -1358,60 +1606,18 @@ def run_scan(force: bool = False) -> dict:
                 "quality_label": quality["quality_label"],
             })
             # shadow_record: 별도 파일 저장 (Doc3: ARIA accuracy/scan_log와 완전 분리)
-            _save_shadow_log({
-                "timestamp":        now_kst.isoformat(),
-                "ticker":           ticker,
-                "name":             info["name"],
-                "market":           info["market"],
-                "price_at_scan":    tech["price"],
-                "rsi":              tech["rsi"],
-                "bb_pos":           tech["bb_pos"],
-                "vol_ratio":        tech["vol_ratio"],
-                "vix":              macro["fred"].get("vix"),
-                "hy_spread":        macro["fred"].get("hy_spread"),
-                "yield_curve":      macro["fred"].get("yield_curve"),
-                "orca_regime":      aria["regime"],
-                "orca_sentiment":   aria["sentiment_score"],
-                "orca_trend":       aria["trend"],
-                # shadow: Claude 미호출, 품질 미달
-                "analyst_score":    None,
-                "analyst_confidence": None,
-                "signals_fired":    signals_fired_pre,
-                "bull_case":        None,
-                "devil_score":      None,
-                "devil_verdict":    None,
-                "devil_objections": [],
-                "thesis_killer_hit": False,
-                "killer_detail":    "",
-                "final_score":      quality["quality_score"],
-                "signal_type":      "관망",
-                "signal_family":    canonical_family_key(
-                    signal_family=quality["signal_family"],
-                    signals_fired=signals_fired_pre,
-                ),
-                "signal_family_raw": quality["signal_family"],
-                "signal_family_label": family_label(
-                    canonical_family_key(
-                        signal_family=quality["signal_family"],
-                        signals_fired=signals_fired_pre,
-                    )
-                ),
-                "is_entry":         False,
-                "reason":           f"신호품질미달({quality['quality_score']}점)",
-                "quality_score":    quality["quality_score"],
-                "quality_label":    quality["quality_label"],
-                "quality_reasons":  quality["reasons"],
-                "skip_threshold":   quality["skip_threshold"],
-                "rebound_bonus":    quality.get("rebound_bonus", 0),
-                "vix_used":         quality.get("vix_used", 0),
-                "shadow_record":    True,     # Evolution이 이 필드로 구분 (scan_log와 분리)
-                "shadow_storage":   "sqlite",
-                "alerted":          False,
-                "outcome_checked":  False,
-                "outcome_price":    None,
-                "outcome_pct":      None,
-                "outcome_correct":  None,
-            })
+            _save_shadow_log(
+                _build_shadow_log_entry(
+                    now_kst=now_kst,
+                    ticker=ticker,
+                    info=info,
+                    tech=tech,
+                    macro=macro,
+                    aria=aria,
+                    signals_fired_pre=signals_fired_pre,
+                    quality=quality,
+                )
+            )
             continue
 
         # ── Agent 1: Analyst ─────────────────────────────────────
@@ -1493,53 +1699,22 @@ def run_scan(force: bool = False) -> dict:
                 log.info(f"    ✅ 텔레그램 발송 완료")
 
         # ── 로그 저장 (Evolution 학습용) ──────────────────────────
-        _save_log({
-            "timestamp":        now_kst.isoformat(),
-            "ticker":           ticker,
-            "name":             info["name"],
-            "market":           market,
-            # 기술 지표
-            "price_at_scan":    tech["price"],
-            "rsi":              tech["rsi"],
-            "bb_pos":           tech["bb_pos"],
-            "vol_ratio":        tech["vol_ratio"],
-            # 매크로
-            "vix":              macro["fred"].get("vix"),
-            "hy_spread":        macro["fred"].get("hy_spread"),
-            "yield_curve":      macro["fred"].get("yield_curve"),
-            # ARIA 컨텍스트
-            "orca_regime":      aria["regime"],
-            "orca_sentiment":   aria["sentiment_score"],
-            "orca_trend":       aria["trend"],
-            "signal_family":    canonical_signal_family,
-            "signal_family_raw": quality.get("signal_family", ""),
-            "signal_family_label": family_label(canonical_signal_family),
-            # Analyst
-            "analyst_score":    analyst["analyst_score"],
-            "analyst_confidence": analyst.get("confidence",""),
-            "signals_fired":    analyst.get("signals_fired", []),
-            "bull_case":        analyst.get("bull_case",""),
-            # Devil
-            "devil_score":      devil["devil_score"],
-            "devil_verdict":    devil.get("verdict",""),
-            "devil_objections": devil.get("objections", []),
-            "thesis_killer_hit": devil.get("thesis_killer_hit", False),
-            "killer_detail":    devil.get("killer_detail",""),
-            # Final
-            "final_score":      final["final_score"],
-            "signal_type":      final["signal_type"],
-            "is_entry":         final["is_entry"],
-            "reason":           final.get("reason",""),
-            "probability_adjustment": final.get("probability_adjustment", 0),
-            "probability_samples": final.get("probability_samples", 0),
-            "probability_win_rate": final.get("probability_win_rate"),
-            # 결과 (Evolution이 4시간 후 채움)
-            "alerted":          final["is_entry"] and final["final_score"] >= ALERT_THRESHOLD,
-            "outcome_checked":  False,
-            "outcome_price":    None,
-            "outcome_pct":      None,
-            "outcome_correct":  None,
-        })
+        _save_log(
+            _build_scan_log_entry(
+                now_kst=now_kst,
+                ticker=ticker,
+                market=market,
+                info=info,
+                tech=tech,
+                macro=macro,
+                aria=aria,
+                quality=quality,
+                analyst=analyst,
+                devil=devil,
+                final=final,
+                canonical_signal_family=canonical_signal_family,
+            )
+        )
 
     log.info(f"📡 완료 | 분석 {scanned}종목 | 알림 {alerted}건")
 

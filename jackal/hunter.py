@@ -947,6 +947,53 @@ def _safe_parse_json(text: str) -> dict:
         return {}
 
 
+def _trim_devil_raw_excerpt(text: str | None, limit: int = 200) -> str | None:
+    if not text:
+        return None
+    cleaned = re.sub(r"\s+", " ", str(text)).strip()
+    if not cleaned:
+        return None
+    return cleaned[:limit]
+
+
+def _resolve_hunter_devil_status(devil: dict) -> str:
+    status = str(devil.get("devil_status", "") or "").strip()
+    if status:
+        return status
+    if devil.get("devil_called") is False:
+        return "skipped_quality_gate"
+    if str(devil.get("main_risk", "") or "").strip():
+        return "ok_with_objection"
+    if devil:
+        return "no_material_objection"
+    return "unknown"
+
+
+def _hunter_devil_render_mode(status: str) -> str:
+    if status == "ok_with_objection":
+        return "full"
+    if status == "skipped_quality_gate":
+        return "hidden"
+    return "label_only"
+
+
+def _with_hunter_devil_metadata(
+    devil: dict,
+    *,
+    called: bool,
+    parse_ok: bool,
+    status: str,
+    raw_excerpt: str | None = None,
+) -> dict:
+    result = dict(devil)
+    result["devil_called"] = called
+    result["devil_parse_ok"] = parse_ok
+    result["devil_status"] = status
+    result["devil_raw_excerpt"] = _trim_devil_raw_excerpt(raw_excerpt)
+    result["devil_render_mode"] = _hunter_devil_render_mode(status)
+    return result
+
+
 def _classify_swing_type(tech: dict, hunt_reason: str,
                           aria: dict = None) -> str:
     """
@@ -1197,22 +1244,60 @@ BB: {tech['bb_pos']:.0f}% (하단 터치가 반등 보장 아님)
   "thesis_killer_hit": true/false,
   "volume_concern": "투매소진 또는 분산매도 또는 무기력 또는 정상"}}"""
 
+    raw = ""
     try:
         resp = Anthropic().messages.create(
             model=MODEL_H, max_tokens=300,
             messages=[{"role": "user", "content": prompt}],
         )
-        r = _safe_parse_json(re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip())
+        raw = re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip()
+        r = _safe_parse_json(raw)
+        if not r:
+            return _with_hunter_devil_metadata(
+                {
+                    "devil_score": _HUNTER_ENTRY["default_devil_score"],
+                    "verdict": "부분동의",
+                    "main_risk": "",
+                    "thesis_killer_hit": False,
+                    "is_dead_cat": False,
+                    "structural_decline": False,
+                    "volume_concern": "정상",
+                },
+                called=True,
+                parse_ok=False,
+                status="parse_failed",
+                raw_excerpt=raw,
+            )
         r["devil_score"] = int(r.get("devil_score", _HUNTER_ENTRY["default_devil_score"]))
-        r.setdefault("verdict", "부분동의"); r.setdefault("main_risk", "")
-        r.setdefault("thesis_killer_hit", False); r.setdefault("is_dead_cat", False)
-        r.setdefault("structural_decline", False); r.setdefault("volume_concern", "정상")
-        return r
+        r.setdefault("verdict", "부분동의")
+        r.setdefault("main_risk", "")
+        r.setdefault("thesis_killer_hit", False)
+        r.setdefault("is_dead_cat", False)
+        r.setdefault("structural_decline", False)
+        r.setdefault("volume_concern", "정상")
+        return _with_hunter_devil_metadata(
+            r,
+            called=True,
+            parse_ok=True,
+            status="ok_with_objection" if str(r.get("main_risk", "") or "").strip() else "no_material_objection",
+        )
     except Exception as e:
         log.error(f"  Devil 실패 {ticker}: {e}")
-        return {"devil_score": _HUNTER_ENTRY["default_devil_score"], "verdict": "부분동의", "main_risk": "",
-                "thesis_killer_hit": False, "is_dead_cat": False,
-                "structural_decline": False, "volume_concern": "정상"}
+        return _with_hunter_devil_metadata(
+            {
+                "devil_score": _HUNTER_ENTRY["default_devil_score"],
+                "verdict": "부분동의",
+                "main_risk": "",
+                "thesis_killer_hit": False,
+                "is_dead_cat": False,
+                "structural_decline": False,
+                "volume_concern": "정상",
+            },
+            called=True,
+            parse_ok=False,
+            status="api_error",
+            raw_excerpt=raw,
+        )
 
 
 ALERT_THRESHOLD = _HUNTER_ENTRY["alert_threshold"]   # 재설계된 공식 기준 (이전 68은 사실상 통과 불가)
@@ -1469,6 +1554,21 @@ def _send_telegram(text: str) -> bool:
         log.error(f"텔레그램 오류: {e}"); return False
 
 
+def _build_hunter_devil_line(devil: dict) -> str:
+    status = _resolve_hunter_devil_status(devil)
+    verdict = str(devil.get("verdict", "부분동의") or "부분동의").strip()
+    main_risk = str(devil.get("main_risk", "") or "").strip()
+    if status == "ok_with_objection":
+        return f"🔴 Devil ⚠️ {verdict}: {main_risk[:45]}"
+    if status == "no_material_objection":
+        return "🔴 Devil: 반박 없음"
+    if status == "api_error":
+        return "🔴 Devil: 응답 실패"
+    if status == "parse_failed":
+        return "🔴 Devil: 응답 파싱 실패"
+    return ""
+
+
 def _build_alert(item: dict, aria: dict) -> str:
     ticker     = item["ticker"]; name = item["name"]
     tech       = item["tech"];   cur  = item["currency"]
@@ -1476,7 +1576,7 @@ def _build_alert(item: dict, aria: dict) -> str:
     swing_type = analyst.get("swing_type", item.get("swing_type", "기술적과매도"))
     now_str = datetime.now(KST).strftime("%m/%d %H:%M")
     price_str = f"{tech['price']:,.2f}" if cur == "$" else f"{tech['price']:,.0f}"
-    dv_icon = {"동의":"✅","부분동의":"⚠️","반대":"❌"}.get(devil.get("verdict",""), "")
+    devil_line = _build_hunter_devil_line(devil)
     return (
         f"🎯 <b>Jackal Hunter — 스윙 타점</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
@@ -1489,7 +1589,7 @@ def _build_alert(item: dict, aria: dict) -> str:
         f"💡 {item.get('hunt_reason','')[:55]}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"🐂 {analyst.get('bull_case','')[:55]}\n"
-        f"🔴 Devil {dv_icon}: {devil.get('main_risk','')[:45]}\n"
+        f"{devil_line}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"🎯 진입:{analyst.get('entry_zone','')}  "
         f"📈 목표:{analyst.get('target_5d','')}  "
@@ -1594,6 +1694,57 @@ def _save_log(entry: dict):
     retained_logs = new_logs[-500:]
     atomic_write_json(HUNT_LOG_FILE, retained_logs)
     sync_jackal_live_events("hunt", retained_logs)
+
+
+def _build_hunt_log_entry(item: dict, aria: dict) -> dict:
+    final = item["final"]
+    devil = item["devil"]
+    devil_status = _resolve_hunter_devil_status(devil)
+    return {
+        "timestamp":         datetime.now(KST).isoformat(),
+        "ticker":            item["ticker"],
+        "name":              item["name"],
+        "price_at_hunt":     item["tech"]["price"],
+        "rsi":               item["tech"]["rsi"],
+        "bb_pos":            item["tech"]["bb_pos"],
+        "change_5d":         item["tech"]["change_5d"],
+        "vol_ratio":         item["tech"]["vol_ratio"],
+        "s1_score":          item.get("s1_score", 0),
+        "s2_score":          item.get("s2_score", 0),
+        "orca_regime":       aria["regime"],
+        "orca_inflows":      aria["key_inflows"],
+        "signal_family":     item["signal_family"],
+        "signal_family_raw": item["raw_signal_family"],
+        "signal_family_label": family_label(item["signal_family"]),
+        "analyst_score":     item["analyst"]["analyst_score"],
+        "day1_score":        item["analyst"].get("day1_score", 50),
+        "swing_score":       item["analyst"].get("swing_score", 50),
+        "entry_mode":        final.get("mode", "일반"),
+        "swing_setup":       item["analyst"].get("swing_setup",""),
+        "signals_fired":     item["analyst"].get("signals_fired",[]),
+        "devil_verdict":     devil.get("verdict",""),
+        "devil_score":       devil["devil_score"],
+        "thesis_killer_hit": devil.get("thesis_killer_hit",False),
+        "devil_called":      devil.get("devil_called", True),
+        "devil_parse_ok":    devil.get("devil_parse_ok", False),
+        "devil_status":      devil.get("devil_status", devil_status),
+        "devil_raw_excerpt": devil.get("devil_raw_excerpt"),
+        "devil_render_mode": devil.get("devil_render_mode", _hunter_devil_render_mode(devil_status)),
+        "final_score":       final["final_score"],
+        "probability_adjustment": final.get("probability_adjustment", 0),
+        "probability_samples": final.get("probability_samples", 0),
+        "probability_win_rate": final.get("probability_win_rate"),
+        "is_entry":          final["is_entry"],
+        "alerted":           final["is_entry"],
+        "outcome_checked":   False,
+        "price_1d_later":    None,
+        "outcome_1d_pct":    None,
+        "outcome_1d_hit":    None,
+        "price_peak":        None,
+        "peak_day":          None,
+        "peak_pct":          None,
+        "outcome_swing_hit": None,
+    }
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -1735,48 +1886,7 @@ def run_hunt(force: bool = False) -> dict:
             _set_cooldown(ticker, hours=HUNT_COOLDOWN_H / 2)
             log.info(f"  ⏸  {ticker}: 미발송 → {HUNT_COOLDOWN_H / 2:.0f}h 쿨다운")
 
-        _save_log({
-            "timestamp":         now_kst.isoformat(),
-            "ticker":            item["ticker"],
-            "name":              item["name"],
-            "price_at_hunt":     item["tech"]["price"],
-            "rsi":               item["tech"]["rsi"],
-            "bb_pos":            item["tech"]["bb_pos"],
-            "change_5d":         item["tech"]["change_5d"],
-            "vol_ratio":         item["tech"]["vol_ratio"],
-            "s1_score":          item.get("s1_score", 0),
-            "s2_score":          item.get("s2_score", 0),
-            "orca_regime":       aria["regime"],
-            "orca_inflows":      aria["key_inflows"],
-            "signal_family":     item["signal_family"],
-            "signal_family_raw": item["raw_signal_family"],
-            "signal_family_label": family_label(item["signal_family"]),
-            "analyst_score":     item["analyst"]["analyst_score"],
-            "day1_score":        item["analyst"].get("day1_score", 50),
-            "swing_score":       item["analyst"].get("swing_score", 50),
-            "entry_mode":        final.get("mode", "일반"),
-            "swing_setup":       item["analyst"].get("swing_setup",""),
-            "signals_fired":     item["analyst"].get("signals_fired",[]),
-            "devil_verdict":     item["devil"].get("verdict",""),
-            "devil_score":       item["devil"]["devil_score"],
-            "thesis_killer_hit": item["devil"].get("thesis_killer_hit",False),
-            "final_score":       final["final_score"],
-            "probability_adjustment": final.get("probability_adjustment", 0),
-            "probability_samples": final.get("probability_samples", 0),
-            "probability_win_rate": final.get("probability_win_rate"),
-            "is_entry":          final["is_entry"],
-            "alerted":           final["is_entry"],
-            "outcome_checked":   False,
-            # 1일 추적 (진입 타이밍 정확도)
-            "price_1d_later":    None,
-            "outcome_1d_pct":    None,
-            "outcome_1d_hit":    None,
-            # 스윙 추적 (3~7일 Peak)
-            "price_peak":        None,
-            "peak_day":          None,
-            "peak_pct":          None,
-            "outcome_swing_hit": None,   # +1% 이상이면 True
-        })
+        _save_log(_build_hunt_log_entry(item, aria))
 
     # 요약 메시지: 타점 없어도 항상 발송
     if alerted == 0:

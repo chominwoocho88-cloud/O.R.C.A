@@ -1,1797 +1,1631 @@
-﻿# Phase 6 Feature Enhancement Investigation
-## Section 0: Meta
-- [검증됨] 작성 시점 기준 조사 대상 날짜는 `2026-04-22`로 고정한다.
-- [검증됨] 실제 repo inspection 은 `2026-04-23 KST`에 수행했다.
-- [검증됨] 본 문서 목적은 `Phase 6 feature enhancement` 관련 사용자 요청의 구현 전 조사다.
-- [검증됨] 본 문서는 구현 문서가 아니다.
-- [검증됨] 본 문서는 승인 전 판단 재료를 제공하는 조사 문서다.
-- [검증됨] 본 세션 범위는 신규 문서 1개 생성뿐이다.
-- [검증됨] 기존 코드 수정은 없다.
-- [검증됨] 기존 docs 수정은 없다.
-- [검증됨] 기존 tests 수정은 없다.
-- [검증됨] 새 파일 경로는 `docs/phase6/feature-enhancement-investigation.md`다.
-- [검증됨] 요청 범위는 아래 네 묶음이다.
-- [검증됨] Request 1 원 요청: 상승장 momentum continuation + candle pattern 반영.
-- [검증됨] Request 1 확장: candle pattern 대신 검토할 alternative signals.
-- [검증됨] Request 2: 추천 이유 설명 확대.
-- [검증됨] Request 3: Devil 이 조용한 이유 조사.
-- [검증됨] 사용자는 구현이 아니라 조사를 요구했다.
-- [검증됨] 따라서 본 문서는 설계 대안, 리스크, 구현 범위, 우선순위, 도입 전 조건을 정리한다.
-- [검증됨] 실제 코드 변경안은 별도 세션에서 다뤄야 한다.
-- [검증됨] 본 문서의 표기 규칙은 다음과 같다.
-- [검증됨] `[검증됨]` 은 현재 코드 또는 로컬 산출물로 직접 확인된 사실이다.
-- [검증됨] `[조사 필요]` 는 현 코드만으로 확정할 수 없거나 추가 데이터가 필요한 지점이다.
-- [검증됨] `[의견]` 은 조사 결과를 바탕으로 한 우선순위 또는 권고 해석이다.
-- [검증됨] 투자 관련 확률 표현은 특별히 엄격하게 다뤄야 한다.
-- [검증됨] 점수와 확률은 동일하지 않다.
-- [검증됨] 백테스트 보정 없는 LLM score 는 calibrated probability 로 간주하면 안 된다.
-- [검증됨] 단기 예측은 특히 노이즈가 크다.
-- [검증됨] 따라서 본 문서는 구현 아이디어를 다루더라도 성과 확정 표현을 사용하지 않는다.
-- [검증됨] 코드 조사 우선 파일은 다음과 같다.
-- [검증됨] `docs/jackal/current-signals.md`
-- [검증됨] `jackal/families.py`
-- [검증됨] `jackal/quality_engine.py`
-- [검증됨] `jackal/market_data.py`
-- [검증됨] `jackal/hunter.py`
-- [검증됨] `jackal/scanner.py`
-- [검증됨] `jackal/backtest.py`
-- [검증됨] `jackal/probability.py`
-- [검증됨] `orca/agents.py`
-- [검증됨] `orca/state.py`
-- [검증됨] `orca/analysis_review.py`
-- [검증됨] `reports/2026-04-*.json`
-- [검증됨] `jackal/hunt_log.json`
-- [검증됨] `docs/orca_v2_backlog.md`
-- [검증됨] 외부 학문 참고는 최소한으로, 그리고 근거가 비교적 알려진 항목만 사용했다.
-- [검증됨] 본 조사에서 직접 참조한 외부 문헌은 아래 셋이다.
-- [검증됨] Jegadeesh & Titman (1993), `Returns to Buying Winners and Selling Losers`, The Journal of Finance.
-- [검증됨] George & Hwang (2004), `The 52-Week High and Momentum Investing`, The Journal of Finance.
-- [검증됨] Marshall, Young, Rose (2007/2008 SSRN version), `Market Timing with Candlestick Technical Analysis`.
-- [검증됨] 외부 문헌 링크는 본문 섹션 2, 3에서 다시 적는다.
-- [검증됨] Candle pattern 은 문헌 평가가 혼재되어 있으므로 과장 없이 보수적으로 정리한다.
-- [검증됨] Volume Profile, Squeeze, Accumulation 은 practitioner 채택과 academic validation 의 강도가 다르므로 분리해 적는다.
-- [검증됨] 본 문서가 답해야 할 핵심 질문은 네 가지다.
-- [검증됨] 지금 JACKAL 이 이미 무엇을 하고 있는가.
-- [검증됨] 사용자 요청이 현재 기능과 얼마나 겹치는가.
-- [검증됨] 추가할 경우 구현 범위와 위험은 무엇인가.
-- [검증됨] 다음 세션에서 무엇부터 하는 것이 합리적인가.
-- [의견] 결론을 먼저 요약하면 아래 방향이 가장 안전하다.
-- [의견] Candle pattern 단독 도입은 보류가 낫다.
-- [의견] Relative Strength 와 52주 신고가 근접은 대안 후보 중 우선순위가 높다.
-- [의견] 추천 이유 상세화는 기존 데이터 재구성만으로도 빠르게 개선 가능하다.
-- [의견] Devil silent 문제는 우선 `반박 없음` 과 `실패/미실행` 을 로그/메시지에서 분리해야 한다.
-- Ref:
-- `jackal/families.py:7-15`
-- `jackal/families.py:33-109`
-- `jackal/quality_engine.py:26-53`
-- `jackal/market_data.py:320-423`
-- `jackal/hunter.py:1074-1084`
-- `jackal/hunter.py:1188-1215`
-- `jackal/scanner.py:583-621`
-- `jackal/scanner.py:676-727`
-- `jackal/probability.py:11-59`
-- `orca/state.py:2914-2998`
-- External:
-- Jegadeesh & Titman (1993), DOI `10.1111/j.1540-6261.1993.tb04702.x`
-- George & Hwang (2004), DOI `10.1111/j.1540-6261.2004.00695.x`
-- Marshall et al. (2007), SSRN `https://ssrn.com/abstract=980583`
-## Section 1: 현재 JACKAL 능력 baseline
-### 1.1 Signal taxonomy baseline
-- [검증됨] 현재 canonical family label 은 `7개`다.
-- [검증됨] `rotation`
-- [검증됨] `panic_rebound`
-- [검증됨] `momentum_pullback`
-- [검증됨] `ma_reclaim`
-- [검증됨] `divergence`
-- [검증됨] `oversold_rebound`
-- [검증됨] `general_rebound`
-- [검증됨] 이 label 은 Hunter, Scanner, ORCA 가 공유하는 canonical taxonomy 로 설계되어 있다.
-- [검증됨] 구현 위치는 `jackal/families.py` 다.
-- [검증됨] label → 한글 표현 매핑도 동일 파일에 있다.
-- [검증됨] Hunter 의 swing_type 는 별도 텍스트지만 canonical family 로 다시 매핑된다.
-- [검증됨] `강세다이버전스` → `divergence`
-- [검증됨] `섹터로테이션` → `rotation`
-- [검증됨] `패닉셀반등` → `panic_rebound`
-- [검증됨] `모멘텀눌림목` → `momentum_pullback`
-- [검증됨] `MA지지반등` → `ma_reclaim`
-- [검증됨] `기술적과매도` → `oversold_rebound`
-- [검증됨] 즉, JACKAL 은 이미 “무작위 신호 나열”이 아니라 family 중심 평가 구조를 가지고 있다.
-- [검증됨] 새 signal 을 넣을 때도 결국 family 에 귀속시키거나 새로운 family 를 만들어야 한다.
-- [검증됨] Request 1 의 “상승장 지속 확률” 아이디어도 family 설계와 score calibration 문제로 귀결된다.
-- Ref:
-- `jackal/families.py:7-24`
-- `jackal/families.py:33-57`
-### 1.2 Deterministic scanner family baseline
-- [검증됨] Scanner deterministic quality engine 이 직접 다루는 raw family bucket 은 사실상 `4개`뿐이다.
-- [검증됨] `crash_rebound`
-- [검증됨] `ma_support_solo`
-- [검증됨] `ma_support_weak`
-- [검증됨] `general`
-- [검증됨] `_get_signal_family()` 는 pre-rule signal 조합을 보고 위 네 raw family 중 하나를 반환한다.
-- [검증됨] `crash_rebound` 는 `sector_rebound`, `volume_climax`, `52w_low_zone`, `vol_accumulation` 중 하나라도 있으면 배정된다.
-- [검증됨] `ma_support_solo` 는 signal 집합이 정확히 `{"ma_support"}` 일 때다.
-- [검증됨] `ma_support_weak` 는 정확히 `{"ma_support", "momentum_dip"}` 일 때다.
-- [검증됨] 그 외는 `general` 이다.
-- [검증됨] 이 raw family 는 이후 canonical family 로 다시 해석된다.
-- [검증됨] 예를 들어 raw `crash_rebound` 안에서도 signal 조합에 따라 `rotation`, `panic_rebound`, `momentum_pullback`, `oversold_rebound`, `general_rebound` 로 갈린다.
-- [검증됨] 따라서 현 시스템은 “family 있음/없음” 보다 “raw bucket + canonical remap” 의 2단 구조다.
-- [검증됨] 사용자 요청이 새 family 를 요구하는지 판단하려면 두 레벨 모두 봐야 한다.
-- [검증됨] 단순히 signal 1개 추가로 해결될 수 있는지.
-- [검증됨] 아니면 확률 학습 단위인 canonical family 까지 확장해야 하는지.
-- Ref:
-- `jackal/quality_engine.py:21-24`
-- `jackal/quality_engine.py:54-63`
-- `jackal/families.py:66-109`
-- `docs/jackal/current-signals.md:592-606`
-- `docs/jackal/current-signals.md:632-638`
-### 1.3 현재 deterministic pre-rule signals
-- [검증됨] 현재 quality engine pre-rule signal 목록은 `9개`다.
-- [검증됨] `rsi_oversold`
-- [검증됨] `bb_touch`
-- [검증됨] `volume_climax`
-- [검증됨] `momentum_dip`
-- [검증됨] `sector_rebound`
-- [검증됨] `rsi_divergence`
-- [검증됨] `52w_low_zone`
-- [검증됨] `vol_accumulation`
-- [검증됨] `ma_support`
-- [검증됨] 이 목록에는 candle pattern 계열이 없다.
-- [검증됨] 이 목록에는 benchmark-relative strength 가 없다.
-- [검증됨] 이 목록에는 52주 신고가 근접 signal 이 없다.
-- [검증됨] 이 목록에는 volume profile / OBV / accumulation-distribution line 이 없다.
-- [검증됨] 이 목록에는 squeeze flag 가 없다.
-- [검증됨] 현재 pre-rule 기준은 mostly mean-reversion / rebound / support 성격이다.
-- [검증됨] 즉, 지금 JACKAL deterministic layer 는 “불타는 장에서 강한 종목이 계속 갈 확률”보다 “과매도/되돌림/리스크 완화 후 반등” 쪽에 훨씬 가깝다.
-- [검증됨] threshold 값도 이 성향을 뒷받침한다.
-- [검증됨] `rsi_oversold < 32`
-- [검증됨] `bb_touch < 15`
-- [검증됨] `momentum_dip_change_5d < -4`
-- [검증됨] `52w_low_zone < 15`
-- [검증됨] `ma_support_distance < 2.5%`
-- [검증됨] 이 기준은 continuation 이 아니라 pullback/rebound 탐지에 가깝다.
-- Ref:
-- `jackal/quality_engine.py:26-53`
-- `jackal/thresholds.py:148-162`
-### 1.4 Quality engine scoring baseline
-- [검증됨] quality score base 값은 `50`에서 시작한다.
-- [검증됨] strong rebound signal 이면 가점을 받고,
-- [검증됨] 단독 다이버전스 같은 저신뢰 조합은 감점을 받는다.
-- [검증됨] 결과적으로 quality engine 은 `quality_score`, `quality_label`, `reasons`, `skip`, `skip_threshold`, `signal_family` 등을 반환한다.
-- [검증됨] 대표 가점 예시는 아래와 같다.
-- [검증됨] `sector_rebound` +20
-- [검증됨] `volume_climax` +15
-- [검증됨] `bb_touch + rsi_oversold` 조합 +16
-- [검증됨] `bb_touch` 단독 +12
-- [검증됨] `rsi_oversold` +9
-- [검증됨] `momentum_dip` 은 복수 신호일 때만 +5
-- [검증됨] 대표 감점 예시는 아래와 같다.
-- [검증됨] `rsi_divergence` 단독은 -20
-- [검증됨] `rsi_divergence + momentum_dip` 은 -12
-- [검증됨] 즉 현 엔진은 다이버전스나 눌림목도 “아무 때나 낙관”하지 않는다.
-- [검증됨] 현재 reasons 리스트는 이미 존재한다.
-- [검증됨] 예: `sector_rebound(93%)+20`
-- [검증됨] 예: `BB+RSI조합(97%+88%)+16`
-- [검증됨] 예: `RSI다이버전스단독(31.6%)-20`
-- [검증됨] 이 구조는 Request 2 의 “왜 추천했는지 더 길게” 설명에 바로 재사용 가능하다.
-- [검증됨] 즉 explanation 강화는 새 데이터 없이도 일부 가능하다.
-- Ref:
-- `jackal/quality_engine.py:65-170`
-- `jackal/quality_engine.py:320-383`
-### 1.5 Family skip threshold baseline
-- [검증됨] raw family 별 skip threshold 도 이미 다르다.
-- [검증됨] `crash_rebound: 35`
-- [검증됨] `general: 45`
-- [검증됨] `ma_support_weak: 47`
-- [검증됨] `ma_support_solo: 46`
-- [검증됨] 고변동(`high_vix`)에서는 `crash_rebound` threshold 를 더 낮춘다.
-- [검증됨] 저변동(`low_vix`)에서는 `crash_rebound` 와 `general` threshold 를 높인다.
-- [검증됨] 즉 family 별로 동일 점수라도 진입 여부가 달라질 수 있다.
-- [검증됨] 이 구조는 새 family 추가 시 calibration 부담이 있다는 뜻이다.
-- [검증됨] 예를 들어 `momentum_continuation` family 를 만든다면,
-- [검증됨] 단순히 signal detection 함수만 추가하는 것으로 끝나지 않는다.
-- [검증됨] family skip,
-- [검증됨] quality label 해석,
-- [검증됨] probability summary bucket,
-- [검증됨] live threshold 조정까지 연동해야 한다.
-- Ref:
-- `jackal/thresholds.py:235-249`
-- `docs/jackal/current-signals.md:597-606`
-### 1.6 Market data baseline
-- [검증됨] JACKAL market data 는 `yfinance` 1년 일봉(`period="1y", interval="1d"`)을 가져와 계산한다.
-- [검증됨] 계산 루틴은 `jackal/market_data.py` 의 `_compute_technicals_from_history()` 다.
-- [검증됨] 현재 함수는 `Close` 와 `Volume` 을 핵심 입력으로 사용한다.
-- [검증됨] `Open`, `High`, `Low` 는 현재 feature 계산에 쓰지 않는다.
-- [검증됨] 현재 계산되는 주요 feature 는 아래와 같다.
-- [검증됨] `change_1d`
-- [검증됨] `change_3d`
-- [검증됨] `change_5d`
-- [검증됨] `rsi`
-- [검증됨] `ma20`
-- [검증됨] `ma50`
-- [검증됨] `bb_pos`
-- [검증됨] `vol_ratio`
-- [검증됨] `rsi_divergence`
-- [검증됨] `52w_pos`
-- [검증됨] `bb_width`
-- [검증됨] `bb_expanding`
-- [검증됨] `vol_trend_5d`
-- [검증됨] `vol_accumulation`
-- [검증됨] `ma_alignment`
-- [검증됨] Candle pattern 구현에 필요한 전제는 이미 절반 충족됐다.
-- [검증됨] yfinance history 자체는 OHLCV 를 포함한다.
-- [검증됨] 그러나 현 계산 함수는 OHLC 를 읽지 않으므로 실제 도입 시 함수 확장이 필요하다.
-- [검증됨] 이 점 때문에 candle pattern 은 “완전 신규 데이터 fetch” 가 아니라 “기존 fetch 결과에서 OHLC 사용 범위 확장” 문제다.
-- [검증됨] Squeeze 도입은 상대적으로 쉽다.
-- [검증됨] `bb_width` 와 `bb_expanding` 이 이미 계산되기 때문이다.
-- [검증됨] 반면 Volume Profile 은 주의가 필요하다.
-- [검증됨] 현재 데이터는 일봉 총 거래량뿐이다.
-- [검증됨] 즉 진짜 intraday volume-at-price profile 은 없다.
-- [검증됨] 일봉 기반 approximation 만 가능하다.
-- Ref:
-- `jackal/market_data.py:320-423`
-- `jackal/market_data.py:431-471`
-### 1.7 Hunter pipeline baseline
-- [검증됨] Hunter 는 multi-stage 구조다.
-- [검증됨] 대략 `macro gate → Stage1 technical score → Stage2 context → Stage3 LLM shortlist → Stage4 Analyst/Devil/Final` 흐름이다.
-- [검증됨] Stage4 에서 Analyst 와 Devil 이 모두 호출된다.
-- [검증됨] Stage4 결과는 canonical family 로 변환된 뒤 probability adjustment 가 적용될 수 있다.
-- [검증됨] Hunter 의 swing_type 분류 우선순위는 다음과 같다.
-- [검증됨] 1순위 `강세다이버전스`
-- [검증됨] 2순위 `섹터로테이션`
-- [검증됨] 3순위 `패닉셀반등`
-- [검증됨] 4순위 `모멘텀눌림목`
-- [검증됨] 5순위 `MA지지반등`
-- [검증됨] 기본값 `기술적과매도`
-- [검증됨] 여기서 `모멘텀눌림목` 은 이미 존재한다.
-- [검증됨] 하지만 정의는 `5일 낙폭 + RSI 조건` 기반 pullback 이다.
-- [검증됨] 강세장 continuation 을 긍정적으로 선별하는 breakout/momentum leadership signal 과는 다르다.
-- [검증됨] Hunter prompt 는 이미 `day1_score` 와 `swing_score` 를 JSON field 로 요구한다.
-- [검증됨] prompt 상 설명은 각각 확률처럼 적혀 있다.
-- [검증됨] `day1_score`: 내일 방향이 맞을 확률.
-- [검증됨] `swing_score`: 3~7일 내 +1% 달성 확률.
-- [검증됨] 그러나 이 값은 LLM output 으로, 현재 calibrated probability mapping 이 확인되지 않는다.
-- [검증됨] 이 지점은 Request 2 와 직접 연결된다.
-- Ref:
-- `jackal/hunter.py:950-1003`
-- `jackal/hunter.py:1074-1084`
-- `jackal/hunter.py:1349-1399`
-### 1.8 Scanner pipeline baseline
-- [검증됨] Scanner 도 Analyst 와 Devil prompt 를 가진다.
-- [검증됨] Scanner Analyst 는 `analyst_score`, `confidence`, `signals_fired`, `bull_case`, `entry_price`, `stop_loss` 만 출력한다.
-- [검증됨] Scanner Devil 은 `devil_score`, `verdict`, `objections`, `thesis_killer_hit`, `killer_detail`, `bear_case` 를 출력한다.
-- [검증됨] Scanner message 는 아래 정보를 포함한다.
-- [검증됨] final score
-- [검증됨] signal type
-- [검증됨] confidence
-- [검증됨] swing default info
-- [검증됨] Analyst score / Devil score / Final score
-- [검증됨] fired signals
-- [검증됨] RSI / BB / volume
-- [검증됨] bull_case 일부
-- [검증됨] Devil objection 첫 줄 또는 verdict label
-- [검증됨] 진입가 / 손절가 / thesis killer 등 일부
-- [검증됨] Scanner 는 Hunter 보다 message 가 더 구조화되어 있다.
-- [검증됨] 다만 긴 explanation 보다는 요약 위주다.
-- [검증됨] and “왜 스윙에 좋은지”를 길게 푸는 서술형 템플릿은 아직 없다.
-- Ref:
-- `jackal/scanner.py:583-621`
-- `jackal/scanner.py:676-727`
-- `jackal/scanner.py:869-969`
-### 1.9 report.json baseline
-- [검증됨] 최근 report 파일에는 `jackal_candidate_review` 와 `jackal_probability_summary` 섹션이 존재한다.
-- [검증됨] 다만 샘플로 본 `reports/2026-04-22_morning.json` 에서는 `reviewed_count = 0` 이다.
-- [검증됨] 동일 파일에서 `jackal_probability_summary.raw_rows = 0`, `deduped_rows = 0` 이다.
-- [검증됨] 즉 ORCA candidate review 와 probability summary 는 구조는 있으나 현재 샘플 시점에는 데이터가 쌓여 있지 않다.
-- [검증됨] 따라서 Request 2 에서 “이 종목이 왜 스윙에 좋은지”를 report 기반으로 설명하려면,
-- [검증됨] 구조는 일부 준비되어 있으나,
-- [검증됨] 현재 live 데이터 적재량이 낮아 바로 활용할 수 있는 historical probability 증거는 부족하다.
-- Ref:
-- `reports/2026-04-22_morning.json:126-166`
-- `jackal/probability.py:11-59`
-- `orca/state.py:2914-2998`
-### 1.10 Hunt log baseline
-- [검증됨] `jackal/hunt_log.json` 에는 Hunter 결과 로그가 누적된다.
-- [검증됨] 샘플 entry 에는 `ticker`, `analyst_score`, `day1_score`, `swing_score`, `signals_fired`, `devil_verdict`, `devil_score`, `final_score`, `entry_mode`, `outcome_*` 등이 저장된다.
-- [검증됨] 그러나 `devil.main_risk` 는 저장되지 않는다.
-- [검증됨] 따라서 Devil 이 실제로 뭐라고 반박했는지, 혹은 아예 빈 문자열이었는지는 hunt log 만으로 복원할 수 없다.
-- [검증됨] 로컬 집계 결과 샘플 10건 중 `devil_verdict = 부분동의` 가 8건, `반대` 가 2건이었다.
-- [검증됨] 샘플 10건 중 `devil_score = 30` 이 8건이었다.
-- [검증됨] 이 값 `30` 은 Hunter/Scanner fallback default 와 동일하다.
-- [검증됨] 따라서 silent 현상에는 “실제 반박 없음” 외에 “default fallback” 가능성이 충분히 있다.
-- [검증됨] 다만 현재 로그 스키마만으로는 둘을 분리할 수 없다.
-- Ref:
-- `jackal/hunt_log.json:1-80`
-- Runtime spot-check on `2026-04-23 KST`
-- `jackal/hunter.py:1206-1215`
-- `jackal/scanner.py:719-727`
-### 1.11 current-signals 문서와 backlog baseline
-- [검증됨] 기존 문서도 이미 몇 가지 결손을 명시하고 있다.
-- [검증됨] `squeeze 감지 코드: 없음`
-- [검증됨] `chart pattern recognition: 없음`
-- [검증됨] `volume profile / Wyckoff / VSA: 없음`
-- [검증됨] `market benchmark relative strength line: 없음`
-- [검증됨] 즉 Request 1 확장 아이디어 일부는 완전 신규가 아니라,
-- [검증됨] 이미 backlog 또는 summary map 에서 “아직 없음”으로 인지된 항목이다.
-- [검증됨] backlog 는 `Relative strength vs market` 를 `P2` 로,
-- [검증됨] `Squeeze + breakout direction` 을 `P3` 로 적어 두었다.
-- [검증됨] 이는 repo 내부 판단도 사용자 확장 요청과 같은 방향을 이미 일부 바라보고 있었다는 의미다.
-- Ref:
-- `docs/jackal/current-signals.md:1028-1054`
-- `docs/jackal/current-signals.md:1090-1097`
-- `docs/orca_v2_backlog.md:116-156`
-### 1.12 Baseline summary
-- [검증됨] 현재 JACKAL 은 rebound-first 구조다.
-- [검증됨] 과매도, 밴드 하단, 거래량 climax, 섹터 반등, 52주 저점권, MA 지지, 다이버전스에 강하다.
-- [검증됨] 그러나 리더십 continuation, benchmark-relative strength, 52주 신고가 돌파, candle pattern, volume profile, true accumulation/OBV 는 없다.
-- [검증됨] 따라서 Request 1 원 요청은 현 구조와 부분적으로만 맞닿아 있다.
-- [검증됨] 반대로 Request 2 는 현재 데이터만으로도 상당 부분 개선 가능하다.
-- [검증됨] Request 3 는 “LLM이 조용해서”가 아니라 코드 경로/로깅/포맷 문제와 섞여 있을 가능성이 높다.
-- [의견] baseline 을 한 문장으로 요약하면,
-- [의견] JACKAL 은 “약해진 종목의 되돌림을 뽑는 엔진”에 가깝고,
-- [의견] “강한 종목의 지속 상승 확률” 엔진은 아직 아니다.
-## Section 2: Request 1 - Momentum + Candle Pattern
-### 2.1 현재 상태 분석
-- [검증됨] 사용자 요청 핵심은 두 문장으로 분해된다.
-- [검증됨] 첫째, “현재 불타는 상승장에서 내일도 계속 상승할 가능성이 높은 종목”을 보고 싶다.
-- [검증됨] 둘째, “그래프 생긴 것, 특히 망치형/별형/도지 같은 캔들 패턴”을 점수에 반영하고 싶다.
-- [검증됨] 현재 JACKAL 의 중심은 continuation 보다는 rebound 이다.
-- [검증됨] existing pre-rule signals 가 전부 pullback/rebound 쪽에 쏠려 있다.
-- [검증됨] Hunter 의 swing type 도 `모멘텀눌림목` 까지는 있지만,
-- [검증됨] 이것은 최근 하락 이후 눌림 조건을 보는 것이다.
-- [검증됨] “이미 강한 종목이 시장보다 더 강하게 가는가”를 직접 보지 않는다.
-- [검증됨] 따라서 사용자 요청 1은 현 JACKAL 철학과 완전히 반대는 아니지만,
-- [검증됨] 중심축을 `mean reversion / rebound` 에서 `continuation / leadership` 쪽으로 일부 넓히는 요청이다.
-- Ref:
-- `jackal/quality_engine.py:26-53`
-- `jackal/hunter.py:950-1003`
-- `docs/jackal/current-signals.md:1052-1054`
-### 2.2 기존 signal 과의 중복 여부
-- [검증됨] 중복 가능성이 가장 높은 기존 signal 은 `momentum_dip` 이다.
-- [검증됨] 그러나 이 signal 은 `change_5d < -4` 일 때 발동한다.
-- [검증됨] 이름만 momentum 이지,
-- [검증됨] 실제로는 recent drop 기반 dip-buying signal 이다.
-- [검증됨] continuation signal 과는 반대편에 있다.
-- [검증됨] `vol_accumulation` 도 일부 중복처럼 보일 수 있다.
-- [검증됨] 하지만 현재 정의는 `change_5d < -2.0 and vol_trend_5d > 15` 이다.
-- [검증됨] 이것도 눌림 구간에서 거래량이 붙는 rebound/accumulation 해석에 가깝다.
-- [검증됨] 상승장 내 leader continuation 을 직접 고르는 로직은 아니다.
-- [검증됨] Hunter stage1 에 sector inflow context 보정은 있다.
-- [검증됨] 하지만 이 역시 시장 benchmark RS line 이 아니라,
-- [검증됨] 섹터 유입/유출 키워드에 대한 보정이다.
-- [검증됨] 즉 `SPY`, `QQQ`, `KOSPI` 대비 상대강도와는 다르다.
-- [검증됨] 결론적으로,
-- [검증됨] “상승장 momentum continuation” 은 현 JACKAL 에 부분 유사 feature 는 있으나 직접 대응 signal 은 없다.
-- [검증됨] 기존 signal 재해석만으로는 충분하지 않다.
-- [검증됨] 새로운 component 또는 family 가 필요할 가능성이 높다.
-- Ref:
-- `jackal/quality_engine.py:35`
-- `jackal/quality_engine.py:42`
-- `jackal/market_data.py:389-395`
-- `jackal/hunter.py:991-997`
-- `docs/orca_v2_backlog.md:123-125`
-### 2.3 “상승장 momentum continuation” 기능 정의
-- [검증됨] 구현 전에 먼저 기능 정의를 좁혀야 한다.
-- [검증됨] 현재 사용자 문장은 적어도 세 가지 다른 문제를 섞고 있다.
-- [검증됨] 문제 A: 시장 자체가 상승장인가.
-- [검증됨] 문제 B: 종목이 시장보다 강한가.
-- [검증됨] 문제 C: 차트 구조가 continuation 에 유리한가.
-- [검증됨] A 는 이미 ORCA/Hunter 가 일부 다룬다.
-- [검증됨] 시장 regime, sentiment, inflow/outflow, VIX, HY spread 등을 보고 있다.
-- [검증됨] B 는 현재 부족하다.
-- [검증됨] benchmark-relative strength 가 없다.
-- [검증됨] C 도 현재 부족하다.
-- [검증됨] candle pattern 과 squeeze/volume profile 류가 없다.
-- [의견] 따라서 Request 1 을 그대로 구현하려면 하나의 signal 추가가 아니라,
-- [의견] `market regime filter + relative leadership + pattern/structure filter + score fusion` 세트가 필요하다.
-- [의견] 이 때문에 원 요청을 그대로 구현하는 것보다,
-- [의견] 확장안 A/B 처럼 factor 를 분해해서 단계적으로 넣는 편이 안전하다.
-### 2.4 Candle pattern 현재 부재 확인
-- [검증됨] 현재 summary doc 는 `Chart Pattern Recognition` 을 `없음`으로 기록한다.
-- [검증됨] head-and-shoulders, triangle, flag 인식 코드가 없다고 명시한다.
-- [검증됨] support/resistance 자동 탐지도 없다고 적는다.
-- [검증됨] `ma_support` 는 이동평균 근접 rule 이지 패턴 인식 루틴이 아니라고 설명한다.
-- [검증됨] 현재 코드 검색 기준으로 hammer, morning star, doji, engulfing 같은 candle pattern detection 함수는 발견되지 않았다.
-- [검증됨] `jackal/market_data.py` 는 OHLC 를 fetch 하지만 현재 계산에서 사용하지 않는다.
-- [검증됨] `jackal/backtest.py` 는 `bullish_candle` 정도만 단순히 `Open < Close` 로 본다.
-- [검증됨] 이건 hammer/doji/star 계열과는 다른 매우 단순한 양봉 체크다.
-- [검증됨] 즉 candle pattern 은 현 JACKAL 에 없다.
-- [검증됨] 엄밀히는 `bullish_candle` 이라는 최소형식은 백테스트 유틸에 있으나,
-- [검증됨] production JACKAL signal taxonomy 또는 quality engine 에는 통합되어 있지 않다.
-- Ref:
-- `docs/jackal/current-signals.md:1031-1036`
-- `jackal/market_data.py:320-326`
-- `jackal/backtest.py:141-160`
-### 2.5 Candle pattern 구현 시 필요한 기술 요소
-- [검증됨] 일봉 기반 candle pattern 도입에 필요한 최소 기술 요소는 아래와 같다.
-- [검증됨] `Open`, `High`, `Low`, `Close` 접근
-- [검증됨] 1봉 패턴 함수
-- [검증됨] 2봉/3봉 패턴 함수
-- [검증됨] signal normalization
-- [검증됨] quality engine score fusion
-- [검증됨] family 반영 여부 결정
-- [검증됨] backtest path 연결
-- [검증됨] 구현 후보 파일은 사용자 제안과 거의 일치한다.
-- [검증됨] `jackal/candle_patterns.py` 신규
-- [검증됨] `jackal/market_data.py` 확장
-- [검증됨] `jackal/quality_engine.py` score 통합
-- [검증됨] `jackal/hunter.py` prompt / alert 연결
-- [검증됨] `jackal/families.py` 새 family 또는 remap
-- [검증됨] 필요 시 `jackal/backtest.py` 확장
-- [검증됨] 예상 구현량 `300~500 lines` 는 과장되지는 않는다.
-- [검증됨] 단, “도입만” 기준이면 그 정도다.
-- [검증됨] `calibration`, `ablation`, `backtest reporting` 까지 포함하면 더 커질 수 있다.
-- [검증됨] 패턴 함수 예시는 아래 같은 형태가 될 가능성이 높다.
-- [검증됨] `is_hammer(last_bar)`
-- [검증됨] `is_doji(last_bar)`
-- [검증됨] `is_morning_star(last_3_bars)`
-- [검증됨] `is_bullish_engulfing(last_2_bars)`
-- [검증됨] 하지만 pattern detection 자체가 어려운 일은 아니다.
-- [검증됨] 어려운 부분은 “그 패턴에 몇 점을 줄 것인가”와 “어떤 맥락에서만 유효한가”다.
-- [검증됨] 즉 구현 complexity 보다 research/calibration complexity 가 더 크다.
-- Ref:
-- `jackal/market_data.py:431-471`
-- `jackal/quality_engine.py:26-53`
-- `jackal/families.py:33-109`
-### 2.6 Candle pattern 후보와 맥락 의존성
-- [검증됨] 사용자 예시로 든 패턴은 `망치형`, `별`, `도지` 다.
-- [검증됨] 실무 구현에서는 보통 아래 후보들이 함께 고려된다.
-- [검증됨] Hammer
-- [검증됨] Inverted Hammer
-- [검증됨] Doji
-- [검증됨] Morning Star
-- [검증됨] Bullish Engulfing
-- [검증됨] Piercing Pattern
-- [검증됨] 이들 패턴의 공통 문제는 맥락 의존성이다.
-- [검증됨] 같은 Hammer 도 추세 상단에서 나오면 reversal 이 아닐 수 있다.
-- [검증됨] 같은 Doji 도 변동성 축소의 일부일 수 있다.
-- [검증됨] Morning Star 도 거래량과 이전 낙폭 정도를 함께 봐야 할 때가 많다.
-- [의견] 따라서 pattern 추가 시 score rule 은 최소한 아래 맥락을 같이 조건으로 걸어야 한다.
-- [의견] 직전 n일 낙폭
-- [의견] RSI 위치
-- [의견] Bollinger 하단/중단 위치
-- [의견] 거래량 증가 여부
-- [의견] 시장 regime
-- [의견] 즉 “망치모양이면 점수 +X” 같은 단일 규칙은 false positive 가 많을 가능성이 높다.
-### 2.7 학문적 주의: candle pattern 예측력 논란
-- [검증됨] Candle pattern 의 실무 사용은 매우 넓다.
-- [검증됨] 그러나 academic literature 에서도 단독 예측력이 강하다고 합의된 상태는 아니다.
-- [검증됨] 본 조사에서 찾은 `Marshall, Young, Rose` 논문 abstract 는,
-- [검증됨] U.S. equity market 에서 candlestick technical analysis 전략이 일반적으로 수익성이 높지 않다고 요약한다.
-- [검증됨] 같은 abstract 는 “단독 의사결정 수단으로는 합리적이지 않다”는 방향을 제시하면서,
-- [검증됨] 다른 market timing technique 와 결합 가능성은 완전히 배제하지 않는다.
-- [검증됨] 이 결과는 사용자 요청의 “망치/별이면 점수 가산” 접근과 직접 연결된다.
-- [검증됨] 즉 단독 alpha source 로 쓰기보다,
-- [검증됨] 기존 RSI/BB/volume context 의 보조 factor 로 제한하는 편이 문헌 해석과도 더 맞다.
-- [검증됨] 현재 JACKAL 도 본질적으로 combination scoring 구조다.
-- [검증됨] 그러므로 candle pattern 을 넣더라도 단독 entry trigger 보다는,
-- [검증됨] composite score bonus 또는 explanation-only flag 가 더 현실적이다.
-- [의견] 본 조사 기준 candle pattern 에 대해 과도하게 낙관적 결론을 내리면 안 된다.
-- [의견] “흥미로운 보조 지표”
-- [의견] “설명력 보강”
-- [의견] “사용자 만족도 개선”
-- [의견] 정도는 가능하다.
-- [의견] 그러나 “학문적으로 검증된 강한 단기 예측 도구”라고 적기는 어렵다.
-- External reference:
-- Marshall, Young, Rose (2007), SSRN abstract, `https://ssrn.com/abstract=980583`
-- 요약 포인트:
-- “not generally profitable”
-- “solely on these techniques does not seem sensible”
-- “may compliment some other market timing techniques”
-### 2.8 학문적 주의: “내일도 상승할 확률” 문제
-- [검증됨] 사용자 요청은 사실상 short-horizon momentum forecasting 문제다.
-- [검증됨] 중기 momentum factor 문헌은 존재한다.
-- [검증됨] 대표적으로 `Jegadeesh & Titman (1993)` 는 과거 winner 와 loser 를 활용한 전략이 `3~12개월` 보유 구간에서 유의한 양(+)의 수익을 낼 수 있음을 보였다.
-- [검증됨] 그러나 이 논문은 “내일 하루 상승 확률”을 검증한 연구가 아니다.
-- [검증됨] horizon 이 다르다.
-- [검증됨] 즉 literature 가 뒷받침하는 것은 “momentum factor 가 존재할 수 있다”는 쪽이지,
-- [검증됨] “내일 계속 오를 확률을 점수 하나로 안정적으로 추정 가능하다”는 쪽이 아니다.
-- [검증됨] JACKAL 현재 구조도 단기 next-day probability 를 calibration 한 엔진이 아니다.
-- [검증됨] Hunter prompt 는 `day1_score` 와 `swing_score` 를 확률처럼 서술하지만,
-- [검증됨] 실제 live probability summary 는 최근 샘플 report 에서 raw row 가 `0` 이다.
-- [검증됨] 즉 실제 empirical calibration layer 가 비어 있다.
-- [의견] 따라서 Request 1 을 구현하더라도,
-- [의견] “확률 73%” 같은 숫자를 곧바로 사용자에게 노출하는 것은 금지에 가깝다.
-- [의견] 최소한 backtest 또는 family-level live sample 이 쌓인 뒤에만 비율 표현을 검토해야 한다.
-- External reference:
-- Jegadeesh & Titman (1993), `https://afajof.org/issue/volume-48-issue-1/`
-- DOI `10.1111/j.1540-6261.1993.tb04702.x`
-- Abstract summary from journal page:
-- 과거 winner/loser 기반 전략이 `3~12개월` 보유에서 유의한 positive returns 를 보였다고 설명한다.
-- Ref:
-- `jackal/hunter.py:1075-1083`
-- `reports/2026-04-22_morning.json:148-166`
-- `jackal/probability.py:33-59`
-### 2.9 현재 JACKAL 에서 candle pattern 이 explanation 용으로는 가능한가
-- [검증됨] 사용자 요청을 엄격한 signal 도입이 아니라 “설명 보강”으로 낮추면 진입장벽이 낮아진다.
-- [검증됨] 예를 들어 alert 에서
-- [검증됨] `Hammer-like reversal candle detected`
-- [검증됨] `Doji after expansion`
-- [검증됨] `Morning-star-like 3-bar structure`
-- [검증됨] 같은 보조 서술만 추가할 수도 있다.
-- [검증됨] explanation-only 라면,
-- [검증됨] 잘못된 점수 가중보다 위험이 낮다.
-- [검증됨] user-facing 만족도는 개선될 수 있다.
-- [검증됨] 다만 이 경우에도 false identification 위험은 남는다.
-- [의견] 본 조사 범위에서는 candle pattern 을 “점수 엔진의 핵심 factor” 로 넣는 것보다,
-- [의견] “설명용 부가 레이블” 로 먼저 붙이는 방안이 더 보수적이다.
-- [의견] 하지만 사용자가 지금 원하는 것은 명시적으로 점수 반영이므로,
-- [의견] 최종 권고에서는 여전히 보류 쪽이 맞다.
-### 2.10 구현 범위 if 승인
-- [검증됨] 승인 시 실제 수정 후보는 아래다.
-- [검증됨] `jackal/candle_patterns.py`
-- [검증됨] OHLC 기반 패턴 판별 함수 모음
-- [검증됨] `jackal/market_data.py`
-- [검증됨] history 에서 OHLC 사용 확장
-- [검증됨] `jackal/quality_engine.py`
-- [검증됨] pattern bonus / veto / combo rule
-- [검증됨] `jackal/hunter.py`
-- [검증됨] Analyst prompt 에 pattern context 주입
-- [검증됨] alert explanation 반영
-- [검증됨] `jackal/families.py`
-- [검증됨] 새 family 도입 또는 기존 family remap 로직 확장
-- [검증됨] `jackal/backtest.py`
-- [검증됨] pattern feature replay 및 ablation
-- [검증됨] 예상 공수는 세 덩어리로 나뉜다.
-- [검증됨] detection 함수 작성: 낮음
-- [검증됨] scoring / family integration: 중간
-- [검증됨] backtest / calibration: 중간~높음
-- [검증됨] 총량 추정은 아래와 같다.
-- [검증됨] detection only: 약 `120~180 lines`
-- [검증됨] integration: 약 `120~180 lines`
-- [검증됨] tests / backtest hook / formatting: 약 `80~150 lines`
-- [검증됨] 합계: 대략 `300~500 lines`
-- [의견] “함수 추가는 쉬운데 진짜 어려운 건 검증”이라는 전형적 feature 다.
-### 2.11 Backtest 요구사항
-- [검증됨] 현재 JACKAL backtest 는 60일, 10일 tracking 구조를 제공한다.
-- [검증됨] universe 는 `SECTOR_POOLS` 기반이다.
-- [검증됨] 미래 데이터 참조 없이 `as_of` 이전 데이터만 사용한다.
-- [검증됨] `d1_hit` 와 `swing_hit` 를 계산한다.
-- [검증됨] regime/ticker accuracy summary 도 만든다.
-- [검증됨] 따라서 candle pattern 도입 시 최소 검증 질문은 아래와 같다.
-- [검증됨] pattern 단독 vs 기존 신호 조합의 d1 hit 변화
-- [검증됨] swing hit 변화
-- [검증됨] MAE / peak day 변화
-- [검증됨] family 별 효과 차이
-- [검증됨] market regime 별 효과 차이
-- [검증됨] 특히 아래 ablation 이 필요하다.
-- [검증됨] baseline without candle
-- [검증됨] candle flag only
-- [검증됨] candle + RSI/BB filter
-- [검증됨] candle + volume filter
-- [검증됨] candle + RS filter
-- [의견] backtest 없이 candle pattern score 를 production 에 넣는 것은 false signal 리스크가 크다.
-- Ref:
-- `jackal/backtest.py:57-81`
-- `jackal/backtest.py:88-161`
-- `jackal/backtest.py:228-255`
-- `jackal/backtest.py:531-623`
-### 2.12 Request 1 tentative recommendation
-- [검증됨] 현 코드 기준으로 Request 1 원문은 “불가능”이 아니라 “구현은 가능하나 검증 난도가 높은 요청”이다.
-- [검증됨] candle detection 자체는 어렵지 않다.
-- [검증됨] 하지만 empirical edge 는 약하다.
-- [검증됨] current JACKAL 철학과도 100% 자연스럽게 맞물리지는 않는다.
-- [의견] 본 조사 기준 tentative recommendation 은 아래와 같다.
-- [의견] `Candle pattern 점수 반영`은 보류 또는 매우 후순위가 맞다.
-- [의견] 만약 사용자 만족도 차원에서 반영하고 싶다면,
-- [의견] 우선은 explanation-only 또는 아주 작은 bonus 로 제한해야 한다.
-- [의견] 그리고 반드시 backtest 를 동반해야 한다.
-- [의견] 더 직접적으로 말하면,
-- [의견] Request 1 의 사용자 의도는 타당하지만,
-- [의견] 그 의도를 구현하는 첫 번째 선택지로 candle pattern 을 고르는 것은 좋은 우선순위가 아니다.
-- [의견] 다음 섹션의 alternative signals 가 더 합리적이다.
-## Section 3: Request 1 Extension - Alternative Signals
-### 3.1 왜 alternative signal 조사가 필요한가
-- [검증됨] 사용자는 원 요청에서 candle pattern 을 제안했다.
-- [검증됨] 그러나 candle pattern 은 문헌 근거가 상대적으로 약하다.
-- [검증됨] 동시에 repo backlog 에는 이미 RS 와 squeeze 가 후보로 적혀 있다.
-- [검증됨] 따라서 같은 사용자 니즈를 더 튼튼한 신호로 해결할 수 있는지 보는 것이 합리적이다.
-- [검증됨] 사용자 니즈를 다시 추상화하면 아래와 같다.
-- [검증됨] 상승장에서 더 강한 종목을 잡고 싶다.
-- [검증됨] continuation 가능성이 높은 구조를 보고 싶다.
-- [검증됨] 설명 가능한 신호를 원한다.
-- [검증됨] 현재 JACKAL 과 너무 동떨어진 것은 피하고 싶다.
-- [의견] 이 기준으로 보면,
-- [의견] RS 와 52주 신고가 근접은 높은 적합성을 가진다.
-- [의견] Squeeze 는 구조적 보조 신호로 쓸 수 있다.
-- [의견] Volume Profile 은 설명력은 좋지만 데이터 한계가 있다.
-- [의견] Accumulation 은 개념은 매력적이지만 정의가 어렵다.
-### 3.2 평가 기준
-- [검증됨] 각 대안 signal 은 아래 4축으로 평가한다.
-- [검증됨] 학문적 근거 강도
-- [검증됨] 구현 복잡도
-- [검증됨] 기존 signal 과 중복 정도
-- [검증됨] JACKAL 철학과 적합도
-- [검증됨] 추가로 실무 판단을 위해 아래 3축도 함께 본다.
-- [검증됨] 데이터 추가 요구량
-- [검증됨] 설명 가능성
-- [검증됨] backtest 설계 난도
-### 3.3 3.1 RS (Relative Strength)
-- [검증됨] 개념은 시장 index 대비 종목 강도다.
-- [검증됨] 예를 들어 `SPY`, `QQQ`, `KOSPI`, `KOSDAQ`, `KS200 ETF` 등 benchmark 대비 상대 수익률을 본다.
-- [검증됨] 가장 단순한 버전은 `stock_return - benchmark_return` 이다.
-- [검증됨] ratio 버전은 `stock_price / benchmark_price` 의 추세를 본다.
-- [검증됨] IBD/CanSlim 스타일은 percentile rank 류로 가공하기도 한다.
-- [검증됨] 현 JACKAL 에 benchmark-relative strength 는 없다.
-- [검증됨] existing summary doc 도 market benchmark RS line 부재를 명시한다.
-- [검증됨] backlog 는 RS 를 `P2` 로 이미 적어 두었다.
-- [검증됨] backlog 설명은 `KOSPI / S&P500 대비 누적 초과수익률 계산` 과 `RS percentile >= 80` 반영을 제안한다.
-- [검증됨] Hunter 에 sector inflow 보정은 있으나,
-- [검증됨] 이는 benchmark RS 가 아니라 context bonus 다.
-- [검증됨] 따라서 중복은 낮다.
-- [검증됨] “비슷해 보이지만 실제로는 다른 계층의 신호”라고 보는 편이 맞다.
-- [검증됨] 학문적 근거는 대안들 중 가장 강한 편이다.
-- [검증됨] `Jegadeesh & Titman (1993)` 는 past winners/losers 기반 intermediate-horizon momentum evidence 를 제시한다.
-- [검증됨] 이것이 곧 RS line 논문은 아니지만,
-- [검증됨] benchmark-relative strength 를 정당화하는 momentum literature 의 핵심 축으로 널리 인용된다.
-- [검증됨] 구현 난이도는 낮다.
-- [검증됨] 이유는 현재 `yfinance` fetch 루틴이 이미 있고,
-- [검증됨] benchmark ticker 1개만 추가 fetch 하면 되기 때문이다.
-- [검증됨] 계산도 어렵지 않다.
-- [검증됨] 20일, 60일, 120일 초과수익률 중 하나만 정해도 MVP 는 가능하다.
-- [검증됨] 다만 데이터 요구는 조금 늘어난다.
-- [검증됨] 미국 종목이면 `SPY` 또는 `QQQ` 를,
-- [검증됨] 한국 종목이면 `^KS11`, `^KQ11`, 혹은 ETF benchmark 를 정해야 한다.
-- [조사 필요] JACKAL universe 가 시장별로 섞여 있다면 benchmark mapping policy 를 먼저 정해야 한다.
-- [조사 필요] 동일 종목군에 대해 sector benchmark 도 같이 볼지 여부도 결정이 필요하다.
-- [검증됨] score 통합 위치는 두 군데가 자연스럽다.
-- [검증됨] `quality_engine` core score bonus
-- [검증됨] 또는 새 raw/canonical family
-- [검증됨] backlog 는 scanner 반영을 우선 상정한다.
-- [의견] RS 는 새 family 없이도 시작 가능하다.
-- [의견] 예를 들어 existing family score 에 RS bonus 를 얹을 수 있다.
-- [의견] 다만 장기적으로는 `continuation/leadership` family 도 고려할 수 있다.
-- [검증됨] 설명력도 좋다.
-- [검증됨] “이 종목은 같은 기간 시장보다 X% 더 강했다”
-- [검증됨] 같은 문장은 사용자에게 이해가 쉽다.
-- [검증됨] Request 2 와도 잘 맞는다.
-- [검증됨] backtest 설계도 straightforward 하다.
-- [검증됨] RS 상위 종목 vs baseline JACKAL 비교
-- [검증됨] 기존 rebound family 와 AND 조건 비교
-- [검증됨] regime 별 성능 비교
-- [의견] 대안 중 1순위 후보가 맞다.
-- Ref:
-- `docs/jackal/current-signals.md:1052-1054`
-- `docs/jackal/current-signals.md:1095-1096`
-- `docs/orca_v2_backlog.md:116-133`
-- External:
-- Jegadeesh & Titman (1993), `https://afajof.org/issue/volume-48-issue-1/`
-### 3.4 3.2 52주 신고가 근접
-- [검증됨] 개념은 현재가가 최근 52주 최고가에 얼마나 가까운지를 본다.
-- [검증됨] formula 는 매우 단순하게도 만들 수 있다.
-- [검증됨] 예: `current_price / 52w_high`
-- [검증됨] 예: `distance_to_high = 1 - current_price / 52w_high`
-- [검증됨] 현 JACKAL 은 이미 `52w_pos` 를 계산한다.
-- [검증됨] 다만 이 값은 52주 high-low range 안에서의 상대 위치다.
-- [검증됨] 그리고 현재는 `52w_low_zone` 에만 사용한다.
-- [검증됨] 즉 52주 고점 쪽 information 을 계산은 거의 다 해놓고 활용하지 않는 상태다.
-- [검증됨] `high_52w` 와 `low_52w` 계산은 이미 `market_data.py` 에 있다.
-- [검증됨] 따라서 52주 신고가 근접 signal 은 구현 난이도가 매우 낮다.
-- [검증됨] 신규 데이터 fetch 가 필요 없다.
-- [검증됨] 새로 필요한 것은 threshold 설계뿐이다.
-- [검증됨] 학문적 근거는 강한 편이다.
-- [검증됨] `George & Hwang (2004)` 는 52주 최고가 근접성이 momentum profits 의 상당 부분을 설명한다고 요약된다.
-- [검증됨] abstract 요약은 “52-week high nearness 가 past returns 보다 미래 수익 예측력에서 우세하며 개선한다”고 설명한다.
-- [검증됨] 이는 breakout / leadership 해석과 잘 맞는다.
-- [검증됨] 기존 signal 과 중복은 부분적이다.
-- [검증됨] `52w_low_zone` 는 저점권 mean reversion 쪽이다.
-- [검증됨] `52w_high_nearness` 는 고점권 continuation 쪽이다.
-- [검증됨] 계산 원천은 같지만 방향성이 반대다.
-- [검증됨] 따라서 구조적 중복은 낮다.
-- [검증됨] score 통합 방식도 단순하다.
-- [검증됨] threshold rule 예시:
-- [검증됨] `current / 52w_high >= 0.95`
-- [검증됨] `>= 0.98`
-- [검증됨] 혹은 `new 20d high within 52w_high proximity`
-- [검증됨] 다만 구체 threshold 는 backtest 로 정해야 한다.
-- [검증됨] 설명력도 매우 높다.
-- [검증됨] “52주 최고가 대비 97% 위치”
-- [검증됨] 같은 문장은 직관적이다.
-- [검증됨] 사용자 니즈인 “계속 강할 가능성”과 연결도 쉽다.
-- [검증됨] backtest 도 간단하다.
-- [검증됨] `52w_high_near` 단독 성능
-- [검증됨] RS 와 결합 성능
-- [검증됨] 기존 rebound-only JACKAL 과의 상보성
-- [의견] RS 다음 2순위, 혹은 구현 편의만 보면 사실상 공동 1순위다.
-- [의견] 다만 “학문적 서사”와 “시장 대비 강도” 측면에서 RS 가 조금 더 넓은 개념이라 먼저 두는 편이 자연스럽다.
-- Ref:
-- `jackal/market_data.py:397-415`
-- `jackal/quality_engine.py:41`
-- External:
-- George & Hwang (2004), `https://afajof.org/issue/volume-59-issue-5/`
-- DOI `10.1111/j.1540-6261.2004.00695.x`
-### 3.5 3.3 Volume Profile (매물대)
-- [검증됨] 개념은 가격대별 누적 거래량이다.
-- [검증됨] 보통 POC(Point of Control), high-volume node, low-volume node, value area 를 본다.
-- [검증됨] 실무에서는 지지/저항과 breakout retest 설명에 자주 쓰인다.
-- [검증됨] 현 JACKAL 에 volume profile 은 없다.
-- [검증됨] existing doc 도 volume profile / Wyckoff / VSA 부재를 명시한다.
-- [검증됨] 현재 volume 관련 정보는 `vol_ratio`, `vol_trend_5d`, `vol_accumulation`, `volume_climax` 정도다.
-- [검증됨] 즉 거래량 “크기” 와 “증감”은 보지만,
-- [검증됨] 거래량의 가격대 분포는 보지 않는다.
-- [검증됨] academic 근거는 중간 이하로 보는 것이 안전하다.
-- [검증됨] price-volume relation 과 market microstructure 연구는 넓게 존재한다.
-- [검증됨] 하지만 JACKAL 에 넣을 형태의 “daily volume profile derived alpha”가 강하게 정착된 대표 표준은 본 조사 범위에서 확인하지 못했다.
-- [조사 필요] intraday order-flow 기반 literature 까지 넓히면 더 찾을 수 있으나,
-- [조사 필요] 일봉 기반 swing scanner 에 직접 옮겨 쓸 논문 연결은 별도 조사 주제다.
-- [검증됨] 구현 복잡도는 중간이다.
-- [검증됨] 표면상으로는 OHLCV 만 있으면 된다.
-- [검증됨] 하지만 현재 데이터는 일봉 총 거래량뿐이다.
-- [검증됨] intraday tick/1m volume-at-price 가 없다.
-- [검증됨] 따라서 true volume profile 이 아니라 approximation 을 만들어야 한다.
-- [검증됨] approximation 방식 후보는 아래와 같다.
-- [검증됨] 일봉 high-low range 에 거래량을 균등 분배
-- [검증됨] body 중심 가중 배분
-- [검증됨] typical price 중심 가중 배분
-- [검증됨] candle body/wick 비중 차등 배분
-- [검증됨] 이 approximation 자체가 설계 선택을 요구한다.
-- [검증됨] 즉 단순 RS/52w high 보다 research burden 이 크다.
-- [검증됨] 기존 `ma_support` 와는 일부 유사하다.
-- [검증됨] 둘 다 “어디서 지지를 받는가”를 본다.
-- [검증됨] 하지만 `ma_support` 는 moving average anchor 다.
-- [검증됨] volume profile 은 거래량 체결 분포 anchor 다.
-- [검증됨] 개념은 다르지만 사용자에게는 비슷하게 보일 수 있다.
-- [검증됨] explanation value 는 높다.
-- [검증됨] “현재가 아래에 거래량 집중 매물대가 있어 하방 지지가 예상된다”
-- [검증됨] 같은 문장은 직관적이다.
-- [검증됨] Request 2 설명 강화에도 잘 맞는다.
-- [의견] 다만 JACKAL 의 다음 우선순위로는 조금 무겁다.
-- [의견] 이유는 데이터 fidelity 한계 때문이다.
-- [의견] 실제 intraday profile 없이 만들면 정밀도보다 설명용 feature 가 될 가능성이 높다.
-- Ref:
-- `docs/jackal/current-signals.md:1046-1050`
-- `jackal/market_data.py:361-395`
-### 3.6 3.4 Volatility Contraction (Squeeze)
-- [검증됨] 개념은 변동성 수축 후 확장이다.
-- [검증됨] Bollinger width 가 좁아진 뒤 방향성이 붙는 상황을 찾는다.
-- [검증됨] 실무에서는 breakout 임박 구간 탐지 패턴으로 널리 쓰인다.
-- [검증됨] 현 JACKAL 은 squeeze 완성형은 없지만,
-- [검증됨] prerequisite 의 상당 부분이 이미 있다.
-- [검증됨] `bb_width` 계산이 있다.
-- [검증됨] `bb_expanding` 계산이 있다.
-- [검증됨] backlog 에도 squeeze 항목이 적혀 있다.
-- [검증됨] 따라서 구현 난이도는 낮다.
-- [검증됨] 예를 들어 최근 20일 `bb_width` percentile 하위 10% 조건을 추가하면 1차 버전은 가능하다.
-- [검증됨] breakout direction 은 기존 신호와 AND 로 결합하면 된다.
-- [검증됨] 학문적 근거는 강하다고 보기 어렵다.
-- [검증됨] practitioner 채택은 매우 넓다.
-- [검증됨] 하지만 본 조사 범위에서 momentum 또는 52w high 만큼 대표적 academic support 를 확인하진 못했다.
-- [검증됨] 따라서 평가 강도는 `약함~중간 사이`보다는 `약함` 쪽이 안전하다.
-- [검증됨] 기존 signal 과 중복은 부분적이다.
-- [검증됨] BB 계열 계산이 이미 있다는 점에서 중복 기반이 있다.
-- [검증됨] 하지만 현재 BB 사용은 oversold / band position 중심이다.
-- [검증됨] squeeze 는 width/contraction 중심이라 목적이 다르다.
-- [검증됨] 설명력은 괜찮다.
-- [검증됨] “변동성 수축 후 방향성 대기 구간”
-- [검증됨] 같은 문장은 사용자가 차트 이미지로 이해하기 쉽다.
-- [의견] RS, 52w high 뒤에 붙이는 보조 구조 신호로는 좋은 후보다.
-- [의견] 단독 우선 feature 로 밀기에는 academic defensibility 가 약하다.
-- Ref:
-- `jackal/market_data.py:380-387`
-- `docs/jackal/current-signals.md:1028-1029`
-- `docs/orca_v2_backlog.md:139-156`
-### 3.7 3.5 Accumulation (장기 매집 감지)
-- [검증됨] 개념은 OBV, A/D line, volume-price persistence 등을 통해 조용한 매집 구간을 찾는 것이다.
-- [검증됨] 실무에서는 Wyckoff, accumulation/distribution 해석과 많이 연결된다.
-- [검증됨] 현재 JACKAL 에는 순수 OBV 나 A/D line 이 없다.
-- [검증됨] 대신 `vol_accumulation` 이라는 간단한 heuristic 은 있다.
-- [검증됨] 하지만 정의는 `5일 하락 + 최근 5일 평균 거래량 증가` 수준이다.
-- [검증됨] 장기 매집 단계의 풍부한 정의와는 거리가 있다.
-- [검증됨] academic 근거는 중간 정도로 보는 것이 안전하다.
-- [검증됨] OBV 자체는 오래된 classic indicator 다.
-- [검증됨] 그러나 “매집 단계 종료 직전”을 정량적으로 잘 포착하는 표준은 모호하다.
-- [검증됨] 즉 지표 정의보다 operationalization 이 어렵다.
-- [검증됨] 구현 복잡도는 높다.
-- [검증됨] OBV 계산 자체는 쉽다.
-- [검증됨] 하지만 “매집 중”의 정의가 어렵다.
-- [검증됨] 저변동 + 완만 상승 + volume persistence + 고점 미돌파 + 하락 흡수 등 여러 조건을 정해야 한다.
-- [검증됨] 결국 heuristic bundle 이 된다.
-- [검증됨] 기존 signal 과 중복은 부분적이다.
-- [검증됨] `vol_accumulation` 이 이미 있으므로 완전 신규는 아니다.
-- [검증됨] 그러나 그 정의가 너무 얕아서,
-- [검증됨] 만약 장기 accumulation signal 을 추가하면 사실상 별도 feature 로 봐야 한다.
-- [검증됨] explanation 측면에서는 좋다.
-- [검증됨] “매집 후 분출” 서사는 사용자 친화적이다.
-- [검증됨] 하지만 정량 기준이 약하면 오히려 설명이 과장될 수 있다.
-- [의견] 현 단계 우선순위는 낮다.
-- [의견] কারণ 구현보다 정의 문제가 더 크기 때문이다.
-- Ref:
-- `jackal/market_data.py:389-395`
-- `jackal/quality_engine.py:42`
-- `docs/jackal/current-signals.md:1046-1050`
-### 3.8 대안별 구현 위치 정리
-- [검증됨] RS 구현 위치 후보
-- [검증됨] `jackal/market_data.py` benchmark fetch
-- [검증됨] `jackal/quality_engine.py` score bonus
-- [검증됨] `jackal/hunter.py` explanation injection
-- [검증됨] 필요 시 `jackal/families.py`
-- [검증됨] 52주 신고가 구현 위치 후보
-- [검증됨] `jackal/market_data.py` existing high_52w 활용
-- [검증됨] `jackal/quality_engine.py` threshold/bonus
-- [검증됨] `jackal/hunter.py` explanation
-- [검증됨] Volume Profile 구현 위치 후보
-- [검증됨] `jackal/market_data.py` price-bin histogram approximation
-- [검증됨] `jackal/quality_engine.py` support/resistance score
-- [검증됨] `jackal/hunter.py` explanation
-- [검증됨] Squeeze 구현 위치 후보
-- [검증됨] `jackal/market_data.py` percentile / contraction flag
-- [검증됨] `jackal/quality_engine.py` AND-condition bonus
-- [검증됨] `jackal/hunter.py` explanation
-- [검증됨] Accumulation 구현 위치 후보
-- [검증됨] `jackal/market_data.py` OBV/A-D line
-- [검증됨] `jackal/quality_engine.py` heuristic score
-- [검증됨] `jackal/hunter.py` explanation
-### 3.9 각 대안의 데이터 요구량
-- [검증됨] RS
-- [검증됨] 추가 benchmark ticker history 필요
-- [검증됨] 같은 기간 close series 필요
-- [검증됨] 52주 신고가
-- [검증됨] 현재 data 로 충분
-- [검증됨] 추가 fetch 불필요
-- [검증됨] Volume Profile
-- [검증됨] 일봉 OHLCV 로 approximation 가능
-- [검증됨] intraday volume-at-price 는 없음
-- [검증됨] Squeeze
-- [검증됨] 현재 bb_width series 로 충분
-- [검증됨] 추가 fetch 불필요
-- [검증됨] Accumulation
-- [검증됨] current OHLCV 로 OBV/A-D 계산 가능
-- [검증됨] 그러나 장기 phase 정의엔 더 긴 history 또는 추가 heuristic 필요 가능
-### 3.10 각 대안의 explanation 친화도
-- [검증됨] RS explanation 친화도는 매우 높다.
-- [검증됨] 상대강도는 문장화가 쉽다.
-- [검증됨] 52주 신고가 explanation 친화도도 매우 높다.
-- [검증됨] 최고가 근처라는 표현은 누구나 직관적으로 이해한다.
-- [검증됨] Volume Profile explanation 친화도는 높다.
-- [검증됨] 다만 approximation 기반이면 설명이 실제 측정처럼 들리지 않게 주의해야 한다.
-- [검증됨] Squeeze explanation 친화도는 중간~높다.
-- [검증됨] 차트 이미지와 연결이 쉬워 사용자 만족도가 높을 수 있다.
-- [검증됨] Accumulation explanation 친화도는 높지만,
-- [검증됨] 잘못 쓰면 narrative overfit 위험이 있다.
-### 3.11 각 대안의 backtest 난도
-- [검증됨] RS
-- [검증됨] 난도 낮음
-- [검증됨] benchmark series 만 확보하면 된다.
-- [검증됨] 52주 신고가
-- [검증됨] 난도 매우 낮음
-- [검증됨] existing high_52w 기반이므로 feature replay 가 쉽다.
-- [검증됨] Volume Profile
-- [검증됨] 난도 중간
-- [검증됨] approximation 선택마다 결과가 달라질 수 있다.
-- [검증됨] Squeeze
-- [검증됨] 난도 낮음
-- [검증됨] percentile window 와 breakout direction condition 만 정하면 된다.
-- [검증됨] Accumulation
-- [검증됨] 난도 높음
-- [검증됨] 어떤 정의를 검증할 것인지부터 정해야 한다.
-### 3.12 3.6 비교표
-| 접근 | 학문적 근거 | 구현 복잡도 | 기존 signal 과 중복 | 우선순위 (tentative) |
+# Phase 6 Feature Enhancement Investigation
+작성 시점:
+2026-04-23
+상태:
+analysis only
+범위:
+새 investigation 문서 1개 작성
+범위 밖:
+기존 코드 수정 0
+범위 밖:
+기존 docs 수정 0
+범위 밖:
+기존 tests 수정 0
+목적:
+사용자 요청 4개 묶음을
+현재 JACKAL 코드 기준으로 조사하고,
+다음 구현 세션의 우선순위와 진입점을 정리한다.
+핵심 전제:
+새 signal 도입 전에는 backtest가 필요하다.
+핵심 전제:
+점수와 확률은 다르다.
+핵심 전제:
+qualified probability summary 또는 backtest 근거가 없으면
+`상승 확률` 같은 제품 문구는 쓰지 않는 편이 안전하다.
+표기 규칙:
+`[검증됨]`은 repo 코드 또는 샘플 산출물에서 직접 확인한 사실이다.
+표기 규칙:
+`[조사 필요]`는 이번 세션에서 더 좁혀야 하는 항목이다.
+표기 규칙:
+`[의견]`은 우선순위 또는 제품 운영 관점의 권고다.
+빠른 결론 1:
+현재 JACKAL은 rebound-first baseline이다.
+빠른 결론 2:
+Request 1 원요청의 candle pattern은 보류가 합리적이다.
+빠른 결론 3:
+Request 1 Extension에서는 RS와 52주 신고가 근접이 가장 유력하다.
+빠른 결론 4:
+Request 2의 설명 상세화는 새 데이터 없이도 즉시 개선 가능하다.
+빠른 결론 5:
+Request 3의 Devil silent는
+`반박 없음`
+하나로 해석하면 안 된다.
+빠른 결론 6:
+다음 구현 세션의 가장 자연스러운 순서는
+Request 2
+→ Request 3
+→ RS
+→ 52주 신고가 근접
+순이다.
+목차:
+Section 0 Meta
+Section 1 현재 JACKAL 능력 baseline
+Section 2 Request 1 - Momentum + Candle Pattern
+Section 3 Request 1 Extension - Alternative Signals
+Section 4 Request 2 - 추천 이유 상세화
+Section 5 Request 3 - Devil Silent 조사
+Section 6 우선 순위 및 의존
+Section 7 각 요청의 도입 전 조건
+Section 8 Backtest 인프라 현황
+Section 9 결론 및 다음 세션 진입점
+Appendix A 코드 근거 인덱스
+Appendix B 학문 참고 문헌 메모
+Appendix C 출력/설명 필드 인벤토리
+Appendix D Devil silent 증거 맵
+Appendix E 요청별 체크리스트
+# Section 0: Meta
+## 0.1 문서 목적
+이 문서는 구현 문서가 아니다.
+이 문서는 조사 문서다.
+이 문서는 설계 결정을 강제하지 않는다.
+이 문서는 다음 세션에서
+무엇을 먼저 구현하면 좋은지,
+무엇은 보류하는 편이 정직한지,
+무엇은 backtest가 선행돼야 하는지를
+정리하기 위한 메모다.
+## 0.2 조사 대상 파일
+주요 조사 파일:
+`jackal/families.py`
+주요 조사 파일:
+`jackal/quality_engine.py`
+주요 조사 파일:
+`jackal/hunter.py`
+주요 조사 파일:
+`jackal/scanner.py`
+주요 조사 파일:
+`jackal/market_data.py`
+주요 조사 파일:
+`jackal/backtest.py`
+주요 조사 파일:
+`jackal/probability.py`
+주요 조사 파일:
+`jackal/core.py`
+주요 조사 파일:
+`orca/agents.py`
+주요 조사 파일:
+`orca/postprocess.py`
+주요 조사 파일:
+`orca/analysis_review.py`
+주요 조사 파일:
+`orca/run_cycle.py`
+보조 문서:
+`docs/jackal/current-signals.md`
+보조 문서:
+`docs/orca_v2_backlog.md`
+샘플 산출물:
+`reports/2026-04-22_morning.json`
+샘플 로그:
+`jackal/hunt_log.json`
+## 0.3 조사 방법
+정적 코드 읽기
+파일:line 기준 근거 정리
+기능 존재 여부에 대한 문자열 검색
+샘플 report와 log 구조 확인
+학문 참고문헌 PDF 확인
+## 0.4 조사 결과를 읽는 법
+`[검증됨]`은
+현재 repo 코드와 샘플 산출물에서 직접 확인한 사실이다.
+`[조사 필요]`는
+이번 세션에서 단정하기 어려운 부분이다.
+`[의견]`은
+우선순위나 도입 순서에 대한 권고다.
+## 0.5 선행 주의사항
+첫째,
+차트 패턴은 실무 사용은 넓지만 학문적으로는 논란이 많다.
+둘째,
+momentum factor 문헌은 존재하지만,
+그 사실이 자동으로
+`내일 상승 확률`
+문구를 정당화해 주지는 않는다.
+셋째,
+현재 JACKAL의 내부 점수는 확률과 동일하지 않다.
+넷째,
+qualified sample이 없는 probability summary는
+마케팅성 확률 문구의 근거로 쓰면 안 된다.
+다섯째,
+Devil silent는 현재 로그 구조상 원인을 완전 복원하기 어렵다.
+## 0.6 현재 운영 흐름 메모
+[검증됨]
+`jackal/core.py`는
+Shield
+→ Hunter
+→ Compact
+→ Evolution 흐름을 가진다.
+Ref:
+`jackal/core.py:55-90`
+[검증됨]
+`README.md`와 workflow 기준의 user-visible session은
+Hunter
+→ Scanner 흐름이다.
+Ref:
+`README.md:79-85`
+`README.md:97-101`
+`.github/workflows/orca_jackal.yml:1-18`
+`.github/workflows/orca_jackal.yml:62-97`
+## 0.7 문서 사용 순서 권장
+먼저 읽을 곳:
+Section 1
+두 번째로 읽을 곳:
+Section 3.6 비교표
+세 번째로 읽을 곳:
+Section 6 우선 순위 및 의존
+네 번째로 읽을 곳:
+Section 9 결론 및 다음 세션 진입점
+## 0.8 이번 문서의 최상위 권장
+[의견]
+Request 2는 가장 먼저 구현해도 되는 항목이다.
+[의견]
+Request 3은 가장 빨리 원인 분해가 가능한 항목이다.
+[의견]
+새 signal 후보 중에서는
+RS가 가장 방어 가능하다.
+[의견]
+그 다음은
+52주 신고가 근접이다.
+[의견]
+candle pattern은 맨 뒤로 미루는 편이 좋다.
+# Section 1: 현재 JACKAL 능력 baseline
+## 1.1 baseline 한 줄 정의
+[검증됨]
+현재 JACKAL은
+`rebound-first baseline`
+이라고 요약할 수 있다.
+의미:
+과매도,
+급락,
+지지 회복,
+공포 완화,
+눌림목 해석이 중심이다.
+비의미:
+이미 강한 종목이 더 강하게 가는
+continuation leader engine은 아니다.
+## 1.2 core 역할과 실행 관점
+[검증됨]
+`jackal/core.py` 상단 docstring은
+JACKAL core를
+`새 스윙 기회 탐색 엔진`
+이라고 정의한다.
+Ref:
+`jackal/core.py:1-11`
+[검증됨]
+core는 Hunter를 실행하지만
+Scanner를 직접 실행하지 않는다.
+Ref:
+`jackal/core.py:67-80`
+[검증됨]
+다만 실제 workflow는
+Hunter 후에 Scanner를 실행한다.
+Ref:
+`.github/workflows/orca_jackal.yml:62-97`
+이 차이는 중요하다.
+이유:
+사용자가 체감하는 Telegram 출력은
+Hunter와 Scanner 둘 다 포함할 수 있기 때문이다.
+## 1.3 현재 family taxonomy
+### 1.3.1 canonical family 목록
+[검증됨]
+공유 canonical family는 총 7개다.
+Ref:
+`jackal/families.py:7-15`
+`rotation`
+`panic_rebound`
+`momentum_pullback`
+`ma_reclaim`
+`divergence`
+`oversold_rebound`
+`general_rebound`
+### 1.3.2 mapping 구조
+[검증됨]
+`canonical_family_key()`는
+Hunter swing type,
+Scanner raw family,
+signals_fired를 종합해
+위 7개 family로 매핑한다.
+Ref:
+`jackal/families.py:33-109`
+### 1.3.3 각 family의 현재 의미
+[검증됨]
+`rotation`은
+섹터 유입 + sector-rebound 성격이다.
+Ref:
+`jackal/families.py:66-69`
+`jackal/families.py:94-97`
+[검증됨]
+`panic_rebound`는
+volume climax와 급락 후 반등 성격이다.
+Ref:
+`jackal/families.py:69-70`
+`jackal/families.py:98-101`
+[검증됨]
+`momentum_pullback`은
+이름은 momentum이지만,
+실제론 눌림목 / 조정 후 반등 해석에 더 가깝다.
+Ref:
+`jackal/families.py:71-72`
+`jackal/families.py:102-103`
+[검증됨]
+`ma_reclaim`은
+이동평균선 지지 / 재탈환 구간이다.
+Ref:
+`jackal/families.py:77-78`
+`jackal/families.py:104-105`
+[검증됨]
+`divergence`는
+RSI divergence 또는 bullish_div 기반이다.
+Ref:
+`jackal/families.py:81-82`
+`jackal/families.py:90-93`
+[검증됨]
+`oversold_rebound`는
+RSI 과매도,
+BB touch,
+52주 저점권을 묶는 전형적 과매도 반등이다.
+Ref:
+`jackal/families.py:73-74`
+`jackal/families.py:85-86`
+`jackal/families.py:106-107`
+[검증됨]
+taxonomy 전체를 보면
+continuation보다 rebound에 가깝다.
+## 1.4 Hunter 기준 기술지표 baseline
+[검증됨]
+Hunter technical snapshot은
+price,
+change_1d,
+change_3d,
+change_5d,
+RSI,
+MA20,
+MA50,
+BB 위치,
+거래량 배수,
+bullish divergence,
+bullish candle을 계산한다.
+Ref:
+`jackal/hunter.py:540-600`
+### 1.4.1 bullish candle의 현재 정의
+[검증됨]
+`bullish_candle`은
+캔들 패턴이 아니라
+그날 종가가 시가보다 높은지 여부만 본다.
+Ref:
+`jackal/hunter.py:585-590`
+[검증됨]
+따라서 Hammer,
+Doji,
+Morning Star,
+Engulfing 같은 shape 인식은 현재 없다.
+### 1.4.2 Stage 1 scoring 방향
+[검증됨]
+낮은 RSI에 가점,
+높은 RSI에 벌점을 준다.
+Ref:
+`jackal/hunter.py:635-642`
+[검증됨]
+BB 하단 근접에 가점,
+상단 과열에 벌점을 준다.
+Ref:
+`jackal/hunter.py:644-650`
+[검증됨]
+최근 5일 낙폭에 가점,
+최근 5일 급등에 벌점을 준다.
+Ref:
+`jackal/hunter.py:670-676`
+[검증됨]
+거래량 급등 + 하락은 capitulation 성격으로 점수화한다.
+Ref:
+`jackal/hunter.py:678-695`
+[검증됨]
+MA50 근접은 보조 신호다.
+Ref:
+`jackal/hunter.py:697-711`
+[검증됨]
+bullish divergence와
+bullish candle after drawdown에 가점을 준다.
+Ref:
+`jackal/hunter.py:713-720`
+[검증됨]
+섹터 ETF 대비 더 많이 빠진 종목에 가점을 준다.
+Ref:
+`jackal/hunter.py:722-740`
+### 1.4.3 Stage 1 방향성 결론
+[검증됨]
+Hunter Stage 1은
+`이미 강한 추세의 지속`
+보다
+`조정 후 반등`
+을 선호한다.
+## 1.5 Hunter swing type 분류
+[검증됨]
+Hunter의 `_classify_swing_type()`은 다음 유형을 반환한다.
+Ref:
+`jackal/hunter.py:946-1003`
+`강세다이버전스`
+`섹터로테이션`
+`패닉셀반등`
+`모멘텀눌림목`
+`MA지지반등`
+`기술적과매도`
+### 1.5.1 momentum_pullback의 실제 의미
+[검증됨]
+`모멘텀눌림목`은
+최근 5일 수익률이 음수 쪽이고
+RSI도 낮아진 장면을 본다.
+Ref:
+`jackal/hunter.py:987-993`
+[검증됨]
+따라서 continuation leader와는 다르다.
+## 1.6 Scanner deterministic baseline
+[검증됨]
+Scanner pre-rule signal은 아래와 같다.
+Ref:
+`jackal/quality_engine.py:26-53`
+`rsi_oversold`
+`bb_touch`
+`volume_climax`
+`momentum_dip`
+`sector_rebound`
+`rsi_divergence`
+`52w_low_zone`
+`vol_accumulation`
+`ma_support`
+### 1.6.1 raw family baseline
+[검증됨]
+Scanner raw family는 아래 4개다.
+Ref:
+`jackal/quality_engine.py:54-63`
+`crash_rebound`
+`ma_support_solo`
+`ma_support_weak`
+`general`
+### 1.6.2 quality score baseline
+[검증됨]
+quality score는 base 50에서 시작한다.
+Ref:
+`jackal/quality_engine.py:80-83`
+[검증됨]
+`reasons` 배열은 이미 설명 재료가 풍부하다.
+Ref:
+`jackal/quality_engine.py:83-130`
+예시:
+`sector_rebound(93%)+20`
+예시:
+`BB+RSI조합(97%+88%)+16`
+예시:
+`52주저점구간+12`
+예시:
+`하락중거래량증가(매집,84%)+12`
+### 1.6.3 negative veto와 과열 처리
+[검증됨]
+quality engine은
+Thesis Killer,
+혼조/전환중 레짐,
+최근 5일 과열,
+고불확실성 gate를 별도로 본다.
+Ref:
+`jackal/quality_engine.py:200-230`
+`jackal/quality_engine.py:257-306`
+[검증됨]
+최근 5일 과열은 negative veto 방향이다.
+Ref:
+`jackal/quality_engine.py:217-227`
+이는 continuation 전략과 결이 다르다.
+## 1.7 market_data baseline
+[검증됨]
+`jackal/market_data.py`는 1년 daily history를 fetch한다.
+Ref:
+`jackal/market_data.py:431-471`
+[검증됨]
+snapshot에는 아래 값이 있다.
+Ref:
+`jackal/market_data.py:343-418`
+RSI
+MA20
+MA50
+BB 위치
+volume ratio
+RSI divergence
+MA alignment
+BB width
+BB expanding
+volume trend 5d
+vol_accumulation
+52주 위치 값
+### 1.7.1 Extension 조사에 중요한 현재 보유 지표
+[검증됨]
+Squeeze 관련 원재료로
+`bb_width`
+와
+`bb_expanding`
+이 이미 있다.
+Ref:
+`jackal/market_data.py:380-387`
+[검증됨]
+52주 관련 원재료로
+`high_52w`,
+`low_52w`,
+`52w_pos`
+가 이미 있다.
+Ref:
+`jackal/market_data.py:397-415`
+[검증됨]
+volume 관련 원재료로
+`vol_trend_5d`,
+`vol_accumulation`
+이 이미 있다.
+Ref:
+`jackal/market_data.py:389-395`
+[검증됨]
+market benchmark RS line은 없다.
+[검증됨]
+Volume Profile / POC는 없다.
+[검증됨]
+OBV / A-D line도 없다.
+## 1.8 Alert / report baseline
+### 1.8.1 Hunter alert 구조
+[검증됨]
+Hunter `_build_alert()`는
+종목,
+가격,
+1일/5일 변화,
+final score,
+day1/swing score,
+RSI/BB/거래량,
+hunt reason,
+bull case,
+Devil main risk,
+entry/target/stop,
+expected days,
+swing type를 보여 준다.
+Ref:
+`jackal/hunter.py:1472-1493`
+[검증됨]
+설명량은 짧다.
+이유:
+`hunt_reason`
+짧게 잘림
+이유:
+`bull_case`
+짧게 잘림
+이유:
+`main_risk`
+짧게 잘림
+### 1.8.2 Scanner alert 구조
+[검증됨]
+Scanner alert는 Hunter보다 풍부하지만,
+여전히 점수 카드형이다.
+Ref:
+`jackal/scanner.py:847-972`
+포함 항목:
+score / signal_type / confidence
+포함 항목:
+peak day / swing_acc / MAE
+포함 항목:
+Analyst / Devil / Final 점수
+포함 항목:
+signals display
+포함 항목:
+짧은 bull_case
+포함 항목:
+Devil 첫 objection 또는 verdict
+### 1.8.3 report.json baseline
+[검증됨]
+ORCA run cycle은
+`jackal_candidate_review`
+와
+`jackal_probability_summary`
+를 report에 붙인다.
+Ref:
+`orca/run_cycle.py:352-372`
+`orca/postprocess.py:96-155`
+[검증됨]
+`jackal_candidate_review`는
+후보별 장문 설명 저장소가 아니라
+summary object다.
+Ref:
+`orca/analysis_review.py:344-525`
+[검증됨]
+샘플 report에서는
+candidate review가 비어 있는 경우가 있다.
+Ref:
+`reports/2026-04-22_morning.json:126-146`
+[검증됨]
+샘플 report에서는
+probability summary도 비어 있다.
+Ref:
+`reports/2026-04-22_morning.json:148-166`
+## 1.9 Devil baseline
+### 1.9.1 ORCA Devil
+[검증됨]
+ORCA Devil prompt는
+시장 레벨 counter-argument agent다.
+Ref:
+`orca/agents.py:371-440`
+### 1.9.2 Hunter Devil
+[검증됨]
+Hunter Devil은
+`main_risk` 중심 반박을 반환한다.
+Ref:
+`jackal/hunter.py:1188-1194`
+[검증됨]
+parse/fallback에서
+`main_risk` 기본값은 빈 문자열이다.
+Ref:
+`jackal/hunter.py:1201-1211`
+### 1.9.3 Scanner Devil
+[검증됨]
+Scanner Devil은
+`objections` 배열 중심 반박을 반환한다.
+Ref:
+`jackal/scanner.py:703-710`
+[검증됨]
+fallback 경로는
+`objections: []`
+를 반환한다.
+Ref:
+`jackal/scanner.py:719-728`
+## 1.10 baseline 결론
+[검증됨]
+현재 JACKAL은 rebound-first baseline이다.
+[검증됨]
+현재 JACKAL에는 candle pattern recognition이 없다.
+[검증됨]
+현재 JACKAL에는 market benchmark RS가 없다.
+[검증됨]
+현재 JACKAL은 52주 low 쪽은 쓰지만,
+52주 high continuation은 쓰지 않는다.
+[검증됨]
+현재 JACKAL은 BB width를 계산하지만 squeeze signal은 없다.
+[검증됨]
+현재 JACKAL은 단순 volume accumulation heuristic은 있지만,
+고급 장기 매집 모델은 없다.
+[검증됨]
+현재 JACKAL은 설명 재료는 충분하지만,
+표현 surface가 짧다.
+[검증됨]
+현재 JACKAL은 Devil silent 상태를 명시적으로 구분하지 않는다.
+# Section 2: Request 1 - Momentum + Candle Pattern
+## 2.1 사용자 요청을 시스템 요구로 번역
+사용자 원문은 사실상 아래 세 요구가 섞여 있다.
+요구 A:
+상승장 안에서
+내일도 더 갈 가능성이 높은 종목을 찾기
+요구 B:
+그래프 생김새를 같이 분석하기
+요구 C:
+망치형,
+별형,
+도지 같은 candle pattern에 가점을 주기
+이 세 요구는 비슷해 보이지만,
+실제로는 구현 경로가 다르다.
+요구 A는
+continuation / momentum 문제다.
+요구 B는
+broad chart structure 문제다.
+요구 C는
+candlestick pattern recognition 문제다.
+## 2.2 현재 signal과의 중복 여부
+### 2.2.1 가장 가까운 기존 family
+[검증됨]
+가장 가까운 canonical family는
+`momentum_pullback`
+이다.
+Ref:
+`jackal/families.py:10`
+`jackal/families.py:71-72`
+`jackal/families.py:102-103`
+[검증됨]
+하지만 이 family는
+상승 지속이라기보다
+눌림목 / 조정 후 반등 해석이다.
+증거:
+Hunter의 `모멘텀눌림목` 분류는
+5일 수익률이 음수 쪽이고
+RSI도 낮아진 장면을 본다.
+Ref:
+`jackal/hunter.py:987-993`
+결론:
+부분 중복은 있으나
+직접 대체는 아니다.
+### 2.2.2 상승 가속류 signal 존재 여부
+[검증됨]
+현재 코드에는
+다음 성격의 deterministic signal이 없다.
+시장 benchmark 대비 leader 선별
+신고가 돌파 지속
+trend continuation after breakout
+candlestick continuation confirmation
+momentum acceleration scoring
+근거:
+quality_engine pre-rule에 없다.
+Ref:
+`jackal/quality_engine.py:26-53`
+근거:
+family taxonomy에도 없다.
+Ref:
+`jackal/families.py:7-109`
+근거:
+현재 baseline은
+최근 급등과 과열에 불리하다.
+Ref:
+`jackal/hunter.py:640-642`
+`jackal/hunter.py:670-676`
+`jackal/quality_engine.py:217-227`
+결론:
+원 요청을 정면으로 수용하려면
+새 scoring 축 또는 새 family가 필요할 가능성이 높다.
+## 2.3 candle pattern 현재 상태
+### 2.3.1 현재 있는 것
+[검증됨]
+OHLCV fetch는 이미 있다.
+Ref:
+`jackal/market_data.py:431-471`
+[검증됨]
+simple bullish candle 판단은 있다.
+Ref:
+`jackal/hunter.py:585-590`
+[검증됨]
+backtest도 historical OHLC를 읽는 구조가 있다.
+Ref:
+`jackal/backtest.py:88-161`
+### 2.3.2 현재 없는 것
+[검증됨]
+Hammer 계산 없음
+[검증됨]
+Doji 계산 없음
+[검증됨]
+Morning Star 계산 없음
+[검증됨]
+Engulfing 계산 없음
+[검증됨]
+body / shadow 비율 helper 없음
+[검증됨]
+다중 봉 조합 pattern helper 없음
+근거:
+repo 검색에서
+`hammer`
+`doji`
+`morning star`
+`candlestick`
+`망치`
+`도지`
+`샛별`
+직접 구현 흔적을 찾지 못했다.
+실행일:
+2026-04-23
+### 2.3.3 quality_engine와의 연결 여부
+[검증됨]
+quality_engine는
+candlestick pattern input을 받지 않는다.
+Ref:
+`jackal/quality_engine.py:26-53`
+[검증됨]
+따라서 pattern을 넣으려면
+pattern detection 함수뿐 아니라
+score integration도 새로 필요하다.
+## 2.4 학문적 주의
+### 2.4.1 차트 패턴 예측력 논란
+[검증됨]
+Japanese candlestick charting은
+실무 문화에서 널리 쓰이지만,
+학문적으로는 일관된 alpha 근거가 약하다.
+[검증됨]
+이번 조사에서 직접 확인한 참고문헌 중
+Marshall et al. 2007
+`The profitability of Japanese candlestick charting in the U.S. equities market`
+은
+candlestick rule의 통계적/경제적 유의성이 약하다는 방향의 근거로 자주 인용된다.
+[의견]
+따라서 candle pattern은
+핵심 signal보다
+보조 annotation 또는 tie-breaker로 취급하는 편이 정직하다.
+### 2.4.2 momentum factor와의 구분
+[검증됨]
+원 요청의
+`상승 지속 확률`
+은 본질적으로 momentum factor 문제다.
+[검증됨]
+Jegadeesh & Titman 1993은
+momentum 문헌의 대표 출발점이다.
+[검증됨]
+그러나 이 문헌은 주로
+수개월 단위 winner/loser 지속성의 근거이지,
+`내일 상승 확률`
+을 직접 보장하는 문헌은 아니다.
+### 2.4.3 short horizon 주의
+[의견]
+일 단위 continuation 예측은
+noise,
+event shock,
+regime shift 영향이 훨씬 크다.
+[의견]
+따라서
+`내일도 상승할 가능성이 높은 종목`
+이라는 문구는
+backtest 없이 쓰기 위험하다.
+### 2.4.4 결론
+[검증됨]
+원 요청 전체에서
+상대적으로 학문 근거가 강한 부분은 momentum이다.
+[검증됨]
+원 요청 전체에서
+가장 약한 부분은 candle pattern이다.
+## 2.5 구현 필요 단위
+원 요청을 실제 기능으로 만들려면
+아래 단위가 필요하다.
+시장 상승장 정의
+종목 continuation 정의
+pattern detection 함수
+score 통합 규칙
+alert 설명 문구
+backtest 비교 레이어
+## 2.6 현재 코드와의 거리
+### 2.6.1 가까운 점
+OHLCV는 이미 있다.
+historical backtest 기반도 있다.
+alert 생성 위치도 명확하다.
+### 2.6.2 먼 점
+continuation 친화적 family가 없다.
+candle pattern recognition이 없다.
+quality_engine 입력 구조에 pattern slot이 없다.
+현재 점수 구조는 과열 continuation에 우호적이지 않다.
+## 2.7 예상 구현 범위 메모
+[의견]
+if 승인 시 예상 터치포인트는 아래다.
+`jackal/candle_patterns.py`
+`jackal/quality_engine.py`
+`jackal/market_data.py`
+`jackal/hunter.py`
+`jackal/families.py`
+`jackal/backtest.py`
+[의견]
+사용자 제시치인
+300-500 lines는
+pattern 종류를 적게 잡으면 가능할 수 있다.
+[의견]
+다만 검증까지 포함하면
+실제 작업량은 그보다 커질 가능성이 높다.
+## 2.8 backtest 요구사항
+도입 전 최소 확인 항목:
+Day1 hit
+7일 peak hit
+MAE
+regime slice별 성능
+기존 신호 대비 incremental value
+[검증됨]
+현재 backtest outcome 정의는 이미 있다.
+Ref:
+`jackal/backtest.py:228-255`
+`d1_hit` 기준:
+다음날 수익률 > 0.3%
+`swing_hit` 기준:
+첫 7일 peak >= 1.0%
+## 2.9 tentative 권장
+[의견]
+원 요청의 candle pattern은
+현재 시점에서는 보류가 합리적이다.
+보류 사유 1:
+baseline과 결이 다르다.
+보류 사유 2:
+학문 근거가 약하다.
+보류 사유 3:
+RS와 52주 신고가라는 더 강한 대안이 있다.
+보류 사유 4:
+Request 2와 Request 3이 더 빠른 사용자 가치가 있다.
+# Section 3: Request 1 Extension - Alternative Signals
+## 3.1 RS (Relative Strength)
+### 3.1.1 개념
+RS는
+개별 종목이
+benchmark 또는 peer보다 얼마나 강한지 보는 신호다.
+이번 요청 맥락에서는
+`상승장 안에서도 더 강한 종목을 추려 내는 필터`
+역할을 한다.
+### 3.1.2 현재 JACKAL에 있는 유사 요소
+[검증됨]
+Hunter에는
+sector ETF 대비 상대 낙폭 계산이 있다.
+Ref:
+`jackal/hunter.py:722-740`
+[검증됨]
+이 로직은
+sector보다 더 많이 빠진 종목을 반등 후보로 보는 쪽이다.
+[검증됨]
+즉,
+market benchmark relative strength와는 다르다.
+### 3.1.3 현재 JACKAL에 없는 것
+[검증됨]
+SPY / QQQ / KOSPI 대비 종목 RS line이 없다.
+[검증됨]
+RS percentile도 없다.
+[검증됨]
+benchmark-relative continuation family도 없다.
+### 3.1.4 데이터 요구
+[검증됨]
+필요한 추가 데이터는 benchmark 가격 시계열 정도다.
+미국주 후보 benchmark:
+`SPY` 또는 `QQQ`
+한국주 후보 benchmark:
+`^KS11` 또는 KOSPI proxy
+[검증됨]
+현재 1년 daily history fetch 구조와 잘 맞는다.
+Ref:
+`jackal/market_data.py:431-471`
+### 3.1.5 구현 난이도
+[의견]
+낮음~중간이다.
+단순 버전:
+최근 N일 종목 수익률 - benchmark 수익률
+조금 더 나은 버전:
+가격 / benchmark 비율선의 기울기
+고급 버전:
+multi-window percentile
+### 3.1.6 학문적 근거
+[검증됨]
+RS는 이번 후보 중 가장 강한 근거를 가진다.
+대표 문헌:
+Jegadeesh & Titman 1993
+주의:
+이 문헌은 장기 momentum 근거이지,
+1일 continuation 보증은 아니다.
+그럼에도
+candle pattern보다 학문적으로 훨씬 방어 가능하다.
+### 3.1.7 기존 signal과의 중복
+[검증됨]
+중복은 부분적이다.
+중복되는 부분:
+sector-relative underperformance
+중복되지 않는 부분:
+market benchmark relative strength
+중복되지 않는 부분:
+leader selection logic
+### 3.1.8 quality score나 family에 넣는 방식
+방식 A:
+새 family 추가
+장점:
+continuation identity가 분명하다.
+단점:
+family 수가 늘고 probability summary도 새 family를 학습해야 한다.
+방식 B:
+quality component 추가
+장점:
+기존 구조에 잘 들어간다.
+단점:
+leader 전략의 정체성이 약해질 수 있다.
+방식 C:
+filter + boost만 적용
+장점:
+보수적 도입이 쉽다.
+단점:
+사용자 체감이 작을 수 있다.
+### 3.1.9 tentative 권장
+[의견]
+RS는 Extension 후보 중 1순위다.
+## 3.2 52주 신고가 근접
+### 3.2.1 개념
+현재가가 52주 high에 얼마나 가까운지 보고,
+breakout 직전 또는 강세 지속 가능성을 보는 접근이다.
+### 3.2.2 현재 JACKAL overlap
+[검증됨]
+52주 high / low 기반 위치 값은 이미 계산된다.
+Ref:
+`jackal/market_data.py:397-415`
+[검증됨]
+현재 점수화되는 것은
+`52w_low_zone`
+뿐이다.
+Ref:
+`jackal/quality_engine.py:41`
+`jackal/quality_engine.py:115-127`
+[검증됨]
+즉,
+현재는 52주 저점권 반등은 보지만,
+52주 고점권 continuation은 보지 않는다.
+### 3.2.3 구현 난이도
+[의견]
+매우 낮다.
+이유:
+기초 데이터가 이미 있다.
+이유:
+threshold 설계만으로 1차 버전이 가능하다.
+예시:
+`52w_pos >= 90`
+예시:
+`52w_pos >= 95 and volume support`
+### 3.2.4 학문적 근거
+[검증됨]
+George & Hwang 2004
+`The 52-Week High and Momentum Investing`
+은
+이번 후보 중 매우 강한 근거를 제공한다.
+### 3.2.5 기존 signal과의 중복
+[검증됨]
+완전 중복은 아니다.
+부분 overlap은 있다.
+이미 있는 것:
+`52w_pos`
+이미 있는 것:
+`52w_low_zone`
+새로 추가되는 것:
+high-side proximity or breakout persistence
+### 3.2.6 tentative 권장
+[의견]
+52주 신고가 근접은 RS 다음 2순위다.
+## 3.3 Volume Profile (매물대)
+### 3.3.1 개념
+가격대별 누적 거래량을 쌓아
+지지/저항 성격이 강한 가격대를 찾는 접근이다.
+### 3.3.2 현재 JACKAL overlap
+[검증됨]
+현재 JACKAL에는 Volume Profile / POC가 없다.
+[검증됨]
+하지만 유사한 기초는 있다.
+`ma_support`
+`vol_ratio`
+`vol_trend_5d`
+`vol_accumulation`
+Ref:
+`jackal/market_data.py:361-395`
+`jackal/quality_engine.py:118-130`
+### 3.3.3 구현 난이도
+[의견]
+중간이다.
+이유:
+계산보다 signal 정의가 어렵다.
+결정할 것:
+window 길이
+결정할 것:
+bucket 크기
+결정할 것:
+POC와 현재가 관계를 점수로 바꾸는 규칙
+결정할 것:
+MA support와의 차별 설명
+### 3.3.4 학문적 근거
+[검증됨]
+직접적인 Volume Profile alpha 근거는
+이번 조사에서 강하게 확보하지 못했다.
+[의견]
+실무 근거는 있으나,
+RS/52주 신고가보다 학문 방어력은 약하다.
+### 3.3.5 tentative 권장
+[의견]
+우선순위는 중간이다.
+## 3.4 Volatility Contraction (Squeeze)
+### 3.4.1 개념
+변동성이 수축했다가 확장되는 구간을 보고
+breakout 준비 상태를 추정하는 접근이다.
+### 3.4.2 현재 JACKAL overlap
+[검증됨]
+`bb_width`가 이미 있다.
+Ref:
+`jackal/market_data.py:380`
+[검증됨]
+`bb_expanding`도 이미 있다.
+Ref:
+`jackal/market_data.py:381-387`
+[검증됨]
+Scanner prompt에도 `bb_width`가 노출된다.
+Ref:
+`jackal/scanner.py:593-596`
+[검증됨]
+그러나 explicit squeeze flag는 없다.
+Ref:
+`docs/orca_v2_backlog.md:136-160`
+### 3.4.3 구현 난이도
+[의견]
+낮다.
+이유:
+핵심 원재료가 이미 있다.
+남는 일:
+compression threshold 정의
+남는 일:
+expansion 확인 기간 정의
+남는 일:
+방향성 결합 규칙 설계
+### 3.4.4 학문적 근거
+[의견]
+실무 사용은 넓지만,
+정량 근거는 RS/52주 신고가보다 약하다.
+### 3.4.5 기존 signal과의 중복
+[검증됨]
+BB 계열과의 중복이 크다.
+### 3.4.6 tentative 권장
+[의견]
+우선순위는 중간 이하다.
+## 3.5 Accumulation (장기 매집)
+### 3.5.1 개념
+OBV,
+A/D line,
+누적적 volume-price 흐름을 통해
+조용한 매집 구간을 찾는 접근이다.
+### 3.5.2 현재 JACKAL overlap
+[검증됨]
+현재 `vol_accumulation` heuristic은 이미 있다.
+Ref:
+`jackal/market_data.py:389-395`
+[검증됨]
+하지만 이 값은
+장기 매집 모델이 아니라,
+`하락 + 거래량 증가`
+에 가까운 간단한 rule이다.
+[검증됨]
+quality_engine도 이 heuristic을 적극 사용한다.
+Ref:
+`jackal/quality_engine.py:42`
+`jackal/quality_engine.py:118-130`
+### 3.5.3 현재 없는 것
+OBV 없음
+A/D line 없음
+장기 매집 종료 감지 없음
+분출 직전 판단 로직 없음
+### 3.5.4 구현 난이도
+[의견]
+중간~높음이다.
+이유:
+OBV 계산은 쉽지만,
+`매집 중`
+과
+`매집 완료`
+를 구분하기 어렵다.
+### 3.5.5 학문적 근거
+[의견]
+거래량 관련 문헌은 존재하지만,
+장기 매집 종료 후 분출 timing을 강하게 뒷받침하는 직접 근거는 이번 조사 범위에서 제한적이었다.
+### 3.5.6 tentative 권장
+[의견]
+우선순위는 낮다.
+## 3.6 비교표
+| 접근 | 학문적 근거 | 구현 복잡도 | 기존 signal과 중복 | 우선순위 (tentative) |
 |---|---|---|---|---|
-| 차트 패턴 (원 요청) | 약함. 단독 alpha 근거는 약하고 혼재. 조합 보조지표 정도가 안전 | 중간 | 없음에 가깝다. `bullish_candle` 단편은 있으나 production integration 없음 | 낮음 |
-| RS | 강함. momentum literature 축과 가장 잘 연결 | 낮음 | 낮음. sector inflow 보정과는 다름 | 높음 |
-| 52주 신고가 근접 | 강함. 52-week high literature 직접 존재 | 매우 낮음 | 부분 중복. `52w_pos` 계산은 이미 있으나 high-side 활용은 없음 | 높음 |
-| Volume Profile | 중간. practitioner 강하고 direct alpha literature 는 제한적 | 중간 | 부분 중복. `ma_support`, volume heuristics 와 설명 영역이 겹침 | 중간 |
-| Squeeze | 약함. practitioner 채택 넓지만 academic defensibility 는 제한적 | 낮음 | 부분 중복. `bb_width`/`bb_expanding` 기반이 이미 있음 | 중간 |
-| 매집 감지 | 중간. OBV 같은 classic indicator 는 있으나 operational definition 이 모호 | 높음 | 부분 중복. `vol_accumulation` 은 있으나 훨씬 단순함 | 낮음 |
-- [검증됨] 표 해석 요약
-- [검증됨] `근거 강도`만 보면 RS, 52주 신고가가 가장 낫다.
-- [검증됨] `구현 난이도`만 보면 52주 신고가, Squeeze 가 가볍다.
-- [검증됨] `사용자 의도 적합도`까지 포함하면 RS + 52주 신고가 조합이 가장 균형이 좋다.
-- [검증됨] Candle pattern 은 흥미롭지만 우선순위는 낮다.
-### 3.13 3.7 추천 로드맵 (tentative)
-- [의견] `Phase 6a`
-- [의견] RS
-- [의견] 이유:
-- [의견] 학문적 근거가 가장 튼튼하다.
-- [의견] benchmark leadership 이라는 사용자 니즈와 정확히 맞는다.
-- [의견] explanation 강화에도 유리하다.
-- [의견] `Phase 6b`
-- [의견] 52주 신고가 근접
-- [의견] 이유:
-- [의견] 구현이 가장 쉽다.
-- [의견] 현재 `52w_pos` 계산 자산을 재활용할 수 있다.
-- [의견] breakout/leadership 설명에 좋다.
-- [의견] `Phase 6c`
-- [의견] Squeeze 또는 Volume Profile
-- [의견] 선택 기준:
-- [의견] 빠른 MVP 를 원하면 Squeeze
-- [의견] 설명력 높은 지지/저항 구조를 원하면 Volume Profile
-- [의견] `Phase 6d`
-- [의견] Accumulation
-- [의견] 조건:
-- [의견] 정의를 명확히 정한 뒤
-- [의견] backtest schema 가 준비되어야 한다.
-- [의견] `보류`
-- [의견] Candle pattern 점수 반영
-- [의견] 조건:
-- [의견] 명시적 사용자 선호가 매우 강하고,
-- [의견] false positive 리스크를 감수할 때만 별도 검토
-### 3.14 원 요청 vs 대안 요청 정리
-- [검증됨] 사용자의 진짜 니즈는 “상승장 지속 가능성이 높은 종목 발굴”이다.
-- [검증됨] candle pattern 은 그 니즈를 달성하는 여러 방법 중 하나일 뿐이다.
-- [검증됨] 그리고 현재 조사 결과상 더 나은 first step 은 RS 와 52주 신고가다.
-- [의견] 따라서 다음 세션에서 구현 지시를 내린다면,
-- [의견] “candle pattern 넣어줘”보다
-- [의견] “RS + 52주 신고가를 먼저 넣고, candle pattern 은 후속으로 재평가”가 더 합리적이다.
-### 3.15 Section 3 interim conclusion
-- [검증됨] RS: strongest candidate.
-- [검증됨] 52주 신고가: easiest strong candidate.
-- [검증됨] Volume Profile: useful but approximation caveat.
-- [검증됨] Squeeze: light add-on, but evidence weaker.
-- [검증됨] Accumulation: conceptually appealing, definition-heavy.
-- [검증됨] Candle pattern: lowest priority among user-requested solutions.
-## Section 4: Request 2 - 추천 이유 상세화
-### 4.1 현재 message/report 분석
-- [검증됨] Request 2 의 요지는 아래 셋이다.
-- [검증됨] 왜 이 종목을 추천했는지 더 길게 알고 싶다.
-- [검증됨] 왜 스윙에 좋은지 알고 싶다.
-- [검증됨] 가능성이 얼마나 되는지도 알고 싶다.
-- [검증됨] 현재 Hunter `_build_alert()` 는 매우 압축된 텔레그램 메시지를 만든다.
-- [검증됨] 포함 항목은 아래와 같다.
-- [검증됨] 종목명 / 가격 / 1일 / 5일 변화
-- [검증됨] final score / label / mode
-- [검증됨] day1 score / swing score
-- [검증됨] RSI / BB / 거래량
-- [검증됨] `hunt_reason` 55자
-- [검증됨] `bull_case` 55자
-- [검증됨] `Devil main_risk` 45자
-- [검증됨] entry zone / target / stop / expected_days / swing_type
-- [검증됨] 즉 Hunter alert 는 필요한 조각은 이미 많다.
-- [검증됨] 하지만 각 조각이 지나치게 짧게 잘린다.
-- [검증됨] 그리고 왜 스윙에 좋은지에 대한 구조화된 breakdown 은 없다.
-- [검증됨] Scanner 텔레그램 메시지는 Hunter 보다 조금 더 풍부하다.
-- [검증됨] 포함 항목은 아래와 같다.
-- [검증됨] score / signal type / confidence
-- [검증됨] swing default info (`peak_day`, `swing_acc`, `mae_avg`)
-- [검증됨] Analyst / Devil / Final score chain
-- [검증됨] fired signals display
-- [검증됨] RSI / BB / volume
-- [검증됨] `bull_case` 일부
-- [검증됨] Devil objection 첫 줄 또는 verdict label
-- [검증됨] Scanner 는 explanation-friendly 요소를 일부 이미 가지고 있다.
-- [검증됨] 특히 `swing_acc`, `peak_day`, `mae_avg` 같은 historical-sounding field 를 보여준다.
-- [검증됨] 다만 이는 현재 message 안에서 하나의 압축 라인으로 소비된다.
-- [검증됨] `왜 스윙에 좋은가`를 사용자 언어로 풀어주는 narrative template 는 없다.
-- Ref:
-- `jackal/hunter.py:1472-1498`
-- `jackal/scanner.py:879-969`
-### 4.2 Hunter alert 의 현재 한계
-- [검증됨] Hunter alert 는 길이 제한 때문에 “핵심 이유 목록”을 직접 보여주지 않는다.
-- [검증됨] `hunt_reason` 는 55자로 잘린다.
-- [검증됨] `bull_case` 도 55자로 잘린다.
-- [검증됨] Devil `main_risk` 도 45자로 잘린다.
-- [검증됨] 이 구조에서는 아래 정보가 사실상 손실된다.
-- [검증됨] 어떤 신호 조합이 작동했는지
-- [검증됨] 어떤 family 로 분류됐는지
-- [검증됨] quality engine 이유 리스트가 무엇인지
-- [검증됨] 시장 regime 와 sector context 가 어떤지
-- [검증됨] stop/target 의 논리가 무엇인지
-- [검증됨] 즉 현재 Hunter message 는 “알림”에는 적합하지만,
-- [검증됨] “설명 문서” 또는 “납득 가능한 추천서”에는 부족하다.
-### 4.3 Scanner message 의 현재 한계
-- [검증됨] Scanner message 는 Hunter 보다 낫지만,
-- [검증됨] 여전히 한 줄 요약 중심이다.
-- [검증됨] fired signals 는 보여주지만 weight 가 얼마였는지 안 보인다.
-- [검증됨] `signal_family` 는 일부 저장되지만 message 전면에 드러나지 않는다.
-- [검증됨] `quality_reasons` 는 저장되지만 recommendation log 나 alert 에 직접 장문 서술로 노출되지 않는다.
-- [검증됨] Devil objection 도 첫 번째 항목만 보여준다.
-- [검증됨] 즉 정보는 일부 이미 계산되고 있으나,
-- [검증됨] formatting layer 에서 충분히 풀어 쓰지 못하고 있다.
-### 4.4 report.json / recommendation log 의 현재 설명 필드
-- [검증됨] `jackal/scanner.py` 의 `_save_recommendation()` 은 `reason` 필드를 저장한다.
-- [검증됨] 또한 watchlist details 에도 `{name, reason}` 형태만 넣는다.
-- [검증됨] 즉 추천 저장 포맷은 현재 한 줄 reason 중심이다.
-- [검증됨] `reports/2026-04-22_morning.json` 에는 `jackal_candidate_review` 와 `jackal_probability_summary` 가 있으나,
-- [검증됨] reviewed_count 가 `0` 이라 candidate별 why narrative 가 실제로 채워져 있지 않다.
-- [검증됨] probability summary 도 raw row 가 `0` 이다.
-- [검증됨] ORCA 쪽에는 richer rationale 를 만들 구조가 있다.
-- [검증됨] `orca/analysis_review.py` 는 bias reason,
-- [검증됨] signal family history,
-- [검증됨] inflow match,
-- [검증됨] outflow match,
-- [검증됨] Devil verdict,
-- [검증됨] thesis killer 를 모아 `why` string 을 만든다.
-- [검증됨] 그러나 지금은 upstream candidate review data 가 없어 이 장점이 살아나지 않는다.
-- Ref:
-- `jackal/scanner.py:1001-1023`
-- `reports/2026-04-22_morning.json:126-166`
-- `orca/analysis_review.py:446-513`
-### 4.5 현재 explanation 에 이미 쓸 수 있는 데이터
-- [검증됨] 현재 코드만으로도 재구성 가능한 설명 재료는 생각보다 많다.
-- [검증됨] `signals_fired`
-- [검증됨] `signal_family`
-- [검증됨] `quality_score`
-- [검증됨] `quality_reasons`
-- [검증됨] `final_score`
-- [검증됨] `day1_score`
-- [검증됨] `swing_score`
-- [검증됨] `bull_case`
-- [검증됨] `devil_verdict`
-- [검증됨] `main_risk` 또는 `objections`
-- [검증됨] `entry_zone`
-- [검증됨] `stop_loss`
-- [검증됨] `expected_days`
-- [검증됨] `swing_type`
-- [검증됨] RSI / BB / vol_ratio / ma20 / ma50 / 52w_pos / bb_width
-- [검증됨] ORCA regime / inflows / outflows / sentiment
-- [검증됨] 즉 “설명 부족”은 primarily data absence 문제가 아니라 formatting/recomposition 문제다.
-- [검증됨] 이 점이 Request 2 의 장점이다.
-- [검증됨] 가장 빠르게 체감 개선을 낼 수 있다.
-### 4.6 즉시 개선 가능 영역 1: signal breakdown
-- [검증됨] quality engine 은 이미 reasons 리스트를 반환한다.
-- [검증됨] example style:
-- [검증됨] `sector_rebound(93%)+20`
-- [검증됨] `BB+RSI조합(97%+88%)+16`
-- [검증됨] `RSI과매도(88%)+9`
-- [검증됨] `다이버전스+momentum_dip(40%)-12`
-- [검증됨] 따라서 message/report 를 아래 형식으로 풀어 쓰는 것은 기존 데이터만으로 가능하다.
-- [검증됨] “이번 추천의 핵심은 RSI 과매도 + BB 하단 + 거래량 구조다.”
-- [검증됨] “가장 큰 가점은 sector_rebound, BB+RSI 조합, volume_climax 였다.”
-- [검증됨] “반대로 다이버전스 단독 같은 구조는 아니라서 감점이 상대적으로 적었다.”
-- [의견] 이건 난이도 `쉬움` 이다.
-- [의견] 새 feature 계산이 아니라 템플릿 재구성 문제이기 때문이다.
-- Ref:
-- `jackal/quality_engine.py:82-170`
-- `jackal/quality_engine.py:371-383`
-### 4.7 즉시 개선 가능 영역 2: family 기반 설명
-- [검증됨] 현재 JACKAL 은 이미 signal family 를 계산한다.
-- [검증됨] canonical family label 도 있다.
-- [검증됨] Hunter swing_type 도 있다.
-- [검증됨] 이는 “왜 스윙에 좋은지”를 설명하기에 좋은 상위 분류다.
-- [검증됨] 예를 들어 아래처럼 설명 템플릿화할 수 있다.
-- [검증됨] `rotation`: 시장 강세 테마와 같은 방향의 종목이라 continuation 가능성 서술
-- [검증됨] `panic_rebound`: 급락/투매 후 반등이라 기술적 리바운드 서술
-- [검증됨] `momentum_pullback`: 추세 내 눌림이라 리스크/보상 구조 서술
-- [검증됨] `ma_reclaim`: MA 지지/회복 기반이라 손절 명확성 서술
-- [검증됨] `divergence`: 추세 전환 초기 가능성 서술
-- [검증됨] `oversold_rebound`: mean-reversion 성격 강조
-- [검증됨] 이 방식은 사용자 질문의 “왜 스윙에 좋은지”에 직접 답한다.
-- [검증됨] 숫자 확률이 없어도 설득력 있는 explanation 이 가능하다.
-- Ref:
-- `jackal/families.py:7-15`
-- `jackal/families.py:33-109`
-- `jackal/hunter.py:950-1003`
-### 4.8 즉시 개선 가능 영역 3: 시장 regime 맥락 추가
-- [검증됨] 현재 prompts 와 logs 에 ORCA regime, sentiment, inflows, outflows 가 이미 들어간다.
-- [검증됨] 그러나 최종 사용자 메시지에는 일부만 드러난다.
-- [검증됨] 따라서 추천 이유를 아래처럼 확장할 수 있다.
-- [검증됨] “이 종목 자체가 강해서”가 아니라,
-- [검증됨] “현재 시장이 위험선호/혼조/위험회피 중 어느 구간인지”
-- [검증됨] “이 종목이 그 regime 와 정렬되는지”
-- [검증됨] “역풍 섹터인지 순풍 섹터인지”
-- [검증됨] 를 같이 설명할 수 있다.
-- [검증됨] 이 방식은 Request 3 의 Devil counterargument 와도 연결된다.
-- [검증됨] 추천 이유와 반대 이유를 한 쌍으로 보여줄 수 있기 때문이다.
-- Ref:
-- `jackal/scanner.py:598-609`
-- `jackal/scanner.py:691-694`
-- `jackal/scanner.py:1008-1010`
-- `orca/analysis_review.py:453-460`
-### 4.9 즉시 개선 가능 영역 4: 스윙 적합성 설명
-- [검증됨] Hunter 는 `day1_score` 와 `swing_score` 를 따로 가진다.
-- [검증됨] Scanner 는 `peak_day`, `swing_acc`, `mae_avg` 기본값 구조를 가진다.
-- [검증됨] 즉 시스템은 이미 “내일용”과 “스윙용”을 분리해 생각하고 있다.
-- [검증됨] 이를 설명 템플릿에 그대로 활용할 수 있다.
-- [검증됨] 예시:
-- [검증됨] “내일 바로 튀는 타입보다 3~5일 눌림 회복형에 가깝다.”
-- [검증됨] “즉시 급등 확률보다 1주 내 기술적 반등 적합성이 더 높은 구조다.”
-- [검증됨] “swing_score 가 day1_score 보다 높기 때문에 추격매수보다 분할 접근이 자연스럽다.”
-- [검증됨] 이런 설명은 추가 데이터 없이 가능하다.
-- [검증됨] 단지 현재는 score 의미를 문장으로 번역하는 layer 가 얇다.
-- Ref:
-- `jackal/hunter.py:1075-1083`
-- `jackal/scanner.py:882-903`
-- `jackal/scanner.py:942-955`
-### 4.10 즉시 개선 가능 영역 5: Devil 반박 포함 설명
-- [검증됨] 추천 이유를 길게 만들수록,
-- [검증됨] 같이 봐야 할 것은 반대 근거다.
-- [검증됨] 현재 Devil verdict 와 objection/main_risk 는 이미 존재한다.
-- [검증됨] 다만 message 에서는 매우 짧게 보여준다.
-- [검증됨] 설명 강화의 안전한 방향은 아래와 같다.
-- [검증됨] “왜 추천하는가”
-- [검증됨] “무엇이 가장 큰 리스크인가”
-- [검증됨] “이 리스크가 현실화되면 thesis 가 어떻게 무너지는가”
-- [검증됨] 이 구조는 투자 조언의 과도한 단선성을 줄여 준다.
-- [검증됨] 사용자도 “무조건 사라”가 아니라 “이 조건이면 유효”로 이해할 수 있다.
-- [의견] Request 2 와 Request 3 은 분리 과제가 아니라 묶어서 해결하는 편이 더 좋다.
-### 4.11 추가 데이터 필요 영역 1: historical similarity
-- [검증됨] “유사한 과거 패턴에서 몇 번 중 몇 번 반등했는가” 류 설명은 사용자에게 매우 매력적이다.
-- [검증됨] 그러나 현 구조에서는 바로 어렵다.
-- [검증됨] 이유는 candidate review / probability summary 에 usable row 가 거의 없기 때문이다.
-- [검증됨] theoretically 는 `signal_family`, `quality_score`, `alignment`, `swing_hit` 등을 묶어 similar cases 를 찾을 수 있다.
-- [검증됨] 하지만 지금 report 샘플은 `raw_rows = 0`, `reviewed_count = 0` 이다.
-- [검증됨] 즉 설명 가능한 sample base 가 아직 충분하지 않다.
-- [의견] 이 영역은 난이도 `어려움` 이다.
-- [의견] 단순 UI 개선이 아니라 data accumulation 문제이기 때문이다.
-- Ref:
-- `reports/2026-04-22_morning.json:126-166`
-- `jackal/probability.py:36-59`
-- `orca/state.py:2922-2998`
-### 4.12 추가 데이터 필요 영역 2: sector 비교
-- [검증됨] “같은 섹터 내에서 왜 이 종목을 선택했는가”도 설명 가치가 높다.
-- [검증됨] 그러나 현재는 sector ETF inflow text 정도만 있고,
-- [검증됨] 동일 섹터 peer ranking 을 직접 계산해 저장하진 않는다.
-- [조사 필요] sector peer score table 을 별도로 만들면 가능하다.
-- [조사 필요] 그러나 이는 현재 조사 범위를 넘는다.
-- [의견] RS 구현과 함께 sector-relative ranking 을 붙이면 Request 2 품질도 같이 올라갈 수 있다.
-### 4.13 추가 데이터 필요 영역 3: benchmark-relative 수치
-- [검증됨] 현재 explanation 에 가장 아쉬운 숫자 중 하나는 시장 대비 강도다.
-- [검증됨] 예:
-- [검증됨] “최근 20일 SPY 대비 +6.2% 아웃퍼폼”
-- [검증됨] “KOSPI 대비 상대강도 상위 15%”
-- [검증됨] 이 수치는 현재 없다.
-- [검증됨] 따라서 Request 2 의 explanation 개선과 Request 1 확장 A 는 상호보완적이다.
-### 4.14 추가 데이터 필요 영역 4: 52주 신고가 거리
-- [검증됨] 현재 `52w_pos` 는 range position 이다.
-- [검증됨] 하지만 사용자 설명에는 `52w_high 대비 몇 % 아래인지`가 더 직관적일 수 있다.
-- [검증됨] 이는 current market_data 계산으로 거의 바로 추가 가능하다.
-- [검증됨] 다만 현재 return payload 에 `high_52w` 자체를 내보내지 않으므로,
-- [검증됨] explanation 용으로는 경미한 데이터 확장이 필요하다.
-### 4.15 추가 데이터 필요 영역 5: 이동평균 거리 수치
-- [검증됨] `ma20`, `ma50` 값은 이미 있다.
-- [검증됨] 따라서 현 시점에서도 `price-to-ma20`, `price-to-ma50` 거리를 계산해 설명할 수 있다.
-- [검증됨] strict meaning 에서는 추가 데이터가 필요 없다.
-- [검증됨] 다만 현재 output formatting 에 그 숫자를 쓰지 않을 뿐이다.
-- [의견] 이 항목은 사실 “추가 데이터”보다는 “기존 데이터 재활용” 쪽에 더 가깝다.
-### 4.16 “스윙 적합성” 설명을 현재 코드에 맞게 번역하면
-- [검증됨] 현재 코드 기준 스윙 적합성은 아래 조합의 함수다.
-- [검증됨] signal family
-- [검증됨] day1_score vs swing_score 관계
-- [검증됨] quality score
-- [검증됨] regime alignment
-- [검증됨] swing defaults (`peak_day`, `swing_acc`, `mae_avg`) 또는 Hunter expected_days
-- [검증됨] 이를 사용자 문장으로 바꾸면 아래와 같은 구조가 가능하다.
-- [검증됨] “이 종목은 당일 급등 추격보다 3~7일 구간의 회복형 스윙에 적합합니다.”
-- [검증됨] “이유는 과매도 해소/MA 회복/섹터 순풍 같은 중기 반등 요인이 단기 급등 요인보다 더 뚜렷하기 때문입니다.”
-- [검증됨] “반대로 즉시 추세추종형은 아니므로 day1 기대를 과하게 두면 안 됩니다.”
-- [의견] 이 템플릿은 사용자 기대 관리에도 유리하다.
-### 4.17 “가능성 몇 %” 제공 가능성
-- [검증됨] 가장 중요한 경고 지점이다.
-- [검증됨] 현재 Hunter prompt 는 score field 이름을 확률처럼 설명한다.
-- [검증됨] 그러나 이것은 calibrated probability 가 아니다.
-- [검증됨] current report probability summary 는 raw row 가 `0` 인 샘플이 확인된다.
-- [검증됨] `jackal/probability.py` 는 family stats 가 있고 `qualified` 일 때만 probability adjustment 를 적용한다.
-- [검증됨] 즉 시스템 내부도 “sample 부족 시 확률형 보정 금지” 철학을 이미 가지고 있다.
-- [검증됨] 따라서 아래는 하면 안 된다.
-- [검증됨] `score 68 → 상승확률 68%`
-- [검증됨] `swing_score 74 → 74% 확률`
-- [검증됨] `현재 추천이 80% 확률`
-- [검증됨] 아래는 조건부로 가능하다.
-- [검증됨] `[검증됨] 최근 n건 family sample 에서 win_rate xx.x%`
-- [검증됨] `[검증됨] effective_win_rate xx.x%`
-- [검증됨] `[검증됨] sample size n`
-- [검증됨] `[의견] 현재 점수는 상대적 우선순위 판단용`
-- [검증됨] user-facing 라벨을 쓰려면 차라리 이런 방식이 낫다.
-- [검증됨] “가능성 높음 / 보통 / 낮음”
-- [검증됨] “백테스트 기반 family 평균은 있으나 sample 이 아직 작음”
-- [검증됨] “현재 점수는 내부 우선순위 점수이지, 확률 보장은 아님”
-- [의견] Request 2 에서 확률 퍼센트는 후순위다.
-- [의견] 먼저 explanation quality 를 높이고,
-- [의견] 확률은 backtest / live sample 축적 뒤에 붙여야 한다.
-- Ref:
-- `jackal/hunter.py:1075-1083`
-- `jackal/probability.py:33-59`
-- `orca/state.py:2979-2995`
-- `reports/2026-04-22_morning.json:148-166`
-### 4.18 구현 난이도 분류
-- [검증됨] 쉬움
-- [검증됨] signal breakdown 문장화
-- [검증됨] family 기반 설명
-- [검증됨] regime context 1~2줄 추가
-- [검증됨] MA 거리 수치 추가
-- [검증됨] Devil 반박 1줄 분명히 표기
-- [검증됨] 중간
-- [검증됨] quality_score 구성 요소를 UI/메시지에서 구조적으로 보여주기
-- [검증됨] swing suitability narrative template 설계
-- [검증됨] 52주 위치/MA 거리/BB width 등 숫자형 보조 설명 추가
-- [검증됨] 어려움
-- [검증됨] historical similarity lookup
-- [검증됨] family 별 calibrated probability %
-- [검증됨] sector peer ranking
-- [검증됨] benchmark-relative outperformance narrative
-### 4.19 Request 2 tentative recommendation
-- [의견] 1순위는 explanation template 개선이다.
-- [의견] 이유는 이미 데이터가 있기 때문이다.
-- [의견] 구현 속도 대비 체감이 가장 좋다.
-- [의견] 권장 구성은 아래와 같다.
-- [의견] `추천 이유 3줄`
-- [의견] `스윙 적합성 2줄`
-- [의견] `Devil 반박 1~2줄`
-- [의견] `주의: score는 확률이 아님`
-- [의견] 확률 퍼센트는 보류다.
-- [의견] 만약 꼭 보여주고 싶다면,
-- [의견] family sample 이 qualified 일 때만 `[검증됨]` 배지와 함께 보여줘야 한다.
-- [의견] 한 줄로 요약하면,
-- [의견] Request 2 는 “즉시 구현 가치가 높고 리스크가 낮은 과제”다.
-## Section 5: Request 3 - Devil Silent 조사
-### 5.1 현재 Devil 구현
-- [검증됨] Devil 은 두 층에서 존재한다.
-- [검증됨] ORCA 의 system-level Devil prompt
-- [검증됨] JACKAL Hunter/Scanner 의 runtime Devil agent call
-- [검증됨] ORCA `DEVIL_SYSTEM` prompt 는 강한 counter-argument 역할을 명시한다.
-- [검증됨] thesis killer 는 모호한 거시 표현이 아니라,
-- [검증됨] stock/index level 의 확인 가능한 조건이어야 한다고 지시한다.
-- [검증됨] 또한 vague phrase 를 금지한다.
-- [검증됨] Hunter Devil prompt 는 아래 JSON schema 를 요구한다.
-- [검증됨] `devil_score`
-- [검증됨] `verdict`
-- [검증됨] `main_risk`
-- [검증됨] `structural_decline`
-- [검증됨] `is_dead_cat`
-- [검증됨] `thesis_killer_hit`
-- [검증됨] `volume_concern`
-- [검증됨] Scanner Devil prompt 는 아래 JSON schema 를 요구한다.
-- [검증됨] `devil_score`
-- [검증됨] `verdict`
-- [검증됨] `objections`
-- [검증됨] `thesis_killer_hit`
-- [검증됨] `killer_detail`
-- [검증됨] `bear_case`
-- [검증됨] 즉 Devil 이 “할 말이 없는 설계”는 아니다.
-- [검증됨] 오히려 prompt 상으로는 반박을 분명히 내도록 설계되어 있다.
-- Ref:
-- `orca/agents.py:372-408`
-- `orca/agents.py:411-440`
-- `jackal/hunter.py:1192-1198`
-- `jackal/scanner.py:676-710`
-### 5.2 Silent 원인 분류 개요
-- [검증됨] 사용자 질문의 “Devil 이 말이 없는 경우”는 단일 현상이 아니다.
-- [검증됨] 코드상 최소 다섯 경로로 갈라진다.
-- [검증됨] (a) Devil 이 실제로 강한 반박을 못 찾아서 내용이 비는 경우
-- [검증됨] (b) Devil 호출 실패로 fallback default 가 들어간 경우
-- [검증됨] (c) Devil 응답 parsing 실패 또는 soft-parse default 인 경우
-- [검증됨] (d) Telegram formatting layer 에서 필드가 생략되거나 빈 문자열처럼 보이는 경우
-- [검증됨] (e) 애초에 Devil 단계가 실행되지 않은 경우
-- [검증됨] 이 다섯 원인은 현재 사용자 화면에서 분리 표시되지 않는다.
-- [검증됨] 그래서 사용자는 모두 “Devil 이 조용했다”로 체감한다.
-### 5.3 (a) 실제 반박 없음 가능성
-- [검증됨] 이 가능성은 완전히 배제할 수 없다.
-- [검증됨] 특히 quality 가 높고 시장/섹터 정렬이 좋으며 thesis killer 가 없는 경우,
-- [검증됨] Devil 이 강한 objection 을 만들지 못할 수 있다.
-- [검증됨] Scanner message builder 는 objection list 가 비어도 verdict label 만 있으면 `🔴 Devil ⚠️ 부분동의` 같은 줄을 출력할 수 있다.
-- [검증됨] Hunter builder 는 verdict icon 과 함께 `main_risk` 를 출력한다.
-- [검증됨] 만약 실제로 반박이 빈 문자열이면 Hunter 에서는 `🔴 Devil ⚠️:` 같은 체감이 생길 수 있다.
-- [검증됨] 다만 이 경우를 “건강한 무음”으로 인정하려면,
-- [검증됨] 적어도 로그에 `no_material_objection` 같은 상태가 남아야 한다.
-- [검증됨] 현재는 그런 상태 구분이 없다.
-- Ref:
-- `jackal/hunter.py:1491-1493`
-- `jackal/scanner.py:965-969`
-### 5.4 (b) Devil 호출 실패 가능성
-- [검증됨] Hunter Devil 은 예외 발생 시 즉시 default dict 를 반환한다.
-- [검증됨] default 는 `devil_score = default_devil_score`, `verdict = 부분동의`, `main_risk = ""` 다.
-- [검증됨] 이 경우 텔레그램에는 반박 내용이 비어 있을 수 있다.
-- [검증됨] Scanner Devil 도 예외 발생 시 default dict 를 반환한다.
-- [검증됨] default 는 `devil_score = 30`, `verdict = 부분동의`, `objections = []`, `thesis_killer_hit = False` 다.
-- [검증됨] 이 경우 message 에서는 objection line 이 약하게 보이거나 label-only 가 된다.
-- [검증됨] 즉 API error, timeout, Anthropic 응답 이상 등은 충분히 silent 체감으로 이어질 수 있다.
-- Ref:
-- `jackal/hunter.py:1200-1215`
-- `jackal/scanner.py:712-727`
-### 5.5 (c) Parsing 실패 또는 soft-default 가능성
-- [검증됨] Hunter 는 `_safe_parse_json()` 을 쓴다.
-- [검증됨] 이 함수는 JSON regex 매치가 없으면 `{}` 를 반환한다.
-- [검증됨] JSON decode 에 실패해도 마지막에 `{}` 를 반환한다.
-- [검증됨] 중요한 점은 이 경로가 예외를 던지지 않을 수 있다는 것이다.
-- [검증됨] 이후 Hunter Devil call 은 `{}` 에 대해 `setdefault("verdict","부분동의")`, `setdefault("main_risk","")` 를 넣는다.
-- [검증됨] 즉 parse-soft-failure 가 “정상 반박 없음”처럼 보일 수 있다.
-- [검증됨] 사용자 입장에서는 Devil 이 조용했다고 느끼지만,
-- [검증됨] 실제론 LLM 응답이 JSON 으로 parse 되지 않았을 가능성도 크다.
-- [검증됨] Scanner 는 regex 로 `{...}` 를 찾는다.
-- [검증됨] 못 찾으면 바로 default fallback 을 반환한다.
-- [검증됨] Scanner 도 parse failure 와 “실제 objection 없음”이 화면상 거의 구분되지 않는다.
-- [검증됨] 이 경로는 Request 3 에서 매우 중요하다.
-- [검증됨] 왜냐하면 “Devil 이 따로 반박할 게 없어서 그런가?”에 대해,
-- [검증됨] 현재 코드상 가장 큰 반론이 바로 이 soft-default path 이기 때문이다.
-- Ref:
-- `jackal/hunter.py:928-947`
-- `jackal/hunter.py:1205-1209`
-- `jackal/scanner.py:717-724`
-### 5.6 (d) Telegram formatting 누락/축약 가능성
-- [검증됨] Hunter alert 는 Devil 줄을 무조건 넣는다.
-- [검증됨] 그러나 `main_risk` 가 빈 문자열이면 내용 없는 줄처럼 보인다.
-- [검증됨] 즉 Hunter 의 silent 체감은 “줄은 있는데 비어 있음” 형태다.
-- [검증됨] Scanner alert 는 comment 가 없으면 줄 자체를 생략하거나 label-only 로 줄인다.
-- [검증됨] 코드 주석도 “내용 없으면 줄 자체 생략”이라고 적는다.
-- [검증됨] `d_comment` 가 있으면 `Devil {label}: {comment}`.
-- [검증됨] `d_comment` 가 없고 `d_label` 만 있으면 `Devil {label}`.
-- [검증됨] 둘 다 없으면 아무 줄도 없다.
-- [검증됨] 따라서 동일한 Devil 결과라도,
-- [검증됨] Hunter 에서는 빈 문장,
-- [검증됨] Scanner 에서는 아예 미표시,
-- [검증됨] Scanner 에서는 label-only
-- [검증됨] 처럼 다르게 체감될 수 있다.
-- Ref:
-- `jackal/hunter.py:1491-1493`
-- `jackal/scanner.py:869-873`
-- `jackal/scanner.py:965-969`
-### 5.7 (e) Devil 미실행 가능성
-- [검증됨] Scanner 는 quality precheck 에서 탈락하면 Devil 단계가 실행되지 않을 수 있다.
-- [검증됨] 이 경로에서는 저장 payload 에 `devil_score = None`, `devil_verdict = None`, `devil_objections = []` 가 들어간다.
-- [검증됨] reason 은 `신호품질미달(xx점)` 으로 저장된다.
-- [검증됨] 이 경우 사용자 입장에서는 “Devil이 말이 없다”가 아니라,
-- [검증됨] 사실상 “Devil 이 호출되지 않았다”가 정확한 설명이다.
-- [검증됨] 하지만 현재 출력은 이 차이를 명시하지 않는다.
-- Ref:
-- `jackal/scanner.py:1379-1403`
-### 5.8 과거 로그 흔적
-- [검증됨] `jackal/hunt_log.json` 샘플 10건을 spot-check 했다.
-- [검증됨] `devil_verdict = 부분동의` 8건
-- [검증됨] `devil_verdict = 반대` 2건
-- [검증됨] `devil_score = 30` 8건
-- [검증됨] `signals_fired` 빈 리스트 3건
-- [검증됨] `30` 은 Scanner fallback default 와 동일하다.
-- [검증됨] Hunter default score 도 비슷한 fallback 구조를 가진다.
-- [검증됨] 따라서 샘플만 보면 “상당수 Devil 결과가 default-ish 하다”는 의심은 가능하다.
-- [검증됨] 그러나 확정은 못 한다.
-- [검증됨] 현재 hunt log 는 `main_risk` 를 저장하지 않기 때문이다.
-- [검증됨] 또한 `devil_called`, `devil_parse_ok`, `devil_error` 같은 상태 flag 도 없다.
-- [검증됨] `reports/2026-04-22_morning.json` 의 candidate review 는 `reviewed_count = 0` 이다.
-- [검증됨] probability summary 도 raw row 가 `0` 이다.
-- [검증됨] 따라서 report 기반으로 Devil quality 를 과거 회고 분석하는 것도 현재는 거의 불가능하다.
-- Ref:
-- `jackal/hunt_log.json:1-80`
-- `reports/2026-04-22_morning.json:126-166`
-- Runtime spot-check on `2026-04-23 KST`
-### 5.9 Silent 상태의 의미 구분
-- [검증됨] 현재 사용자 화면의 “silent”는 아래 셋이 섞여 있다.
-- [검증됨] 진짜 반박 없음
-- [검증됨] parse/fallback 문제
-- [검증됨] message formatting 생략
-- [검증됨] 기술적으로는 여기에 하나가 더 있다.
-- [검증됨] quality precheck 탈락으로 Devil 미실행
-- [검증됨] 따라서 사용자 질문에 대한 직접 답은 아래가 더 정확하다.
-- [검증됨] “항상 Devil 이 반박할 게 없어서 조용한 것은 아니다.”
-- [검증됨] “코드상으로는 실패, soft-parse default, 미실행, 포맷 생략이 모두 섞여 있을 수 있다.”
-### 5.10 원인별 검증 방법
-- [검증됨] 원인별로 필요한 instrumentation 은 비교적 명확하다.
-- [검증됨] (a) 실제 반박 없음 검증
-- [검증됨] `devil_status = no_material_objection`
-- [검증됨] `devil_called = true`
-- [검증됨] `devil_parse_ok = true`
-- [검증됨] `devil_content_empty = true`
-- [검증됨] (b) 호출 실패 검증
-- [검증됨] `devil_status = api_error`
-- [검증됨] `devil_error_message`
-- [검증됨] `devil_called = true`
-- [검증됨] `devil_parse_ok = false`
-- [검증됨] (c) parsing 실패 검증
-- [검증됨] `devil_status = parse_failed`
-- [검증됨] `devil_raw_excerpt`
-- [검증됨] `devil_called = true`
-- [검증됨] `devil_parse_ok = false`
-- [검증됨] (d) formatting 생략 검증
-- [검증됨] `devil_render_mode = full / label_only / hidden / blank`
-- [검증됨] 이 값만 있어도 사용자 체감과 내부 상태를 연결할 수 있다.
-- [검증됨] (e) 미실행 검증
-- [검증됨] `devil_status = skipped_quality_gate`
-- [검증됨] `devil_called = false`
-- [의견] Request 3 의 가장 실용적인 첫 fix 는 prompt 변경이 아니다.
-- [의견] 상태 구분 로깅과 렌더링 문구 분리다.
-### 5.11 Telegram 에서 구분되어야 할 문구 예시
-- [의견] `Devil: 반박 없음`
-- [의견] 의미:
-- [의견] 호출/파싱 성공
-- [의견] 그러나 material objection 없음
-- [의견] `Devil: 응답 실패`
-- [의견] 의미:
-- [의견] API error 또는 exception fallback
-- [의견] `Devil: 응답 파싱 실패`
-- [의견] 의미:
-- [의견] 호출은 되었으나 JSON 추출 실패
-- [의견] `Devil: 미실행(신호품질 미달)`
-- [의견] 의미:
-- [의견] precheck skip
-- [의견] `Devil: ⚠️ 부분동의 - [실제 objection 텍스트]`
-- [의견] 의미:
-- [의견] 정상 rebuttal
-- [의견] 이 구분만 되어도 사용자 오해가 크게 줄어든다.
-### 5.12 Prompt 개선의 필요성과 한계
-- [검증됨] Scanner prompt 는 이미 “당신은 반드시 반박해야 합니다”라고 적는다.
-- [검증됨] Hunter prompt 도 `main_risk` 를 요구한다.
-- [검증됨] 즉 prompt 가 너무 느슨해서만 silent 가 생긴다고 단정할 수 없다.
-- [검증됨] 오히려 현재는 parse/default/render 문제가 더 직접적이다.
-- [검증됨] prompt 를 더 공격적으로 바꾸면 억지 반박을 유도할 위험이 있다.
-- [검증됨] 이는 quality 저하로 이어질 수 있다.
-- [의견] 따라서 prompt 개선은 2차 과제다.
-- [의견] 1차는 상태 구분과 로깅,
-- [의견] 2차는 parse robustness,
-- [의견] 3차가 prompt refinement 가 더 자연스럽다.
-### 5.13 가장 가능성 높은 원인 평가
-- [검증됨] Hunter path 에서는 `soft-parse default + empty main_risk` 가 매우 설득력 있는 원인이다.
-- [검증됨] 이유:
-- [검증됨] `_safe_parse_json()` 가 `{}` 를 반환할 수 있고,
-- [검증됨] 이후 defaults 로 조용히 채워지며,
-- [검증됨] alert 는 빈 `main_risk` 를 그대로 출력한다.
-- [검증됨] Scanner path 에서는 `objections empty + formatting suppression` 이 직접적인 원인이다.
-- [검증됨] 추가로 regex no-match fallback 도 same symptom 을 만든다.
-- [검증됨] Hunt log 샘플에서 `devil_score = 30` 이 많은 점도 fallback/default 가능성을 뒷받침한다.
-- [검증됨] 다만 로그 스키마 부족으로 확정은 못 한다.
-- [의견] 따라서 가장 가능성 높은 설명은 아래 조합이다.
-- [의견] “일부는 실제 반박 없음”
-- [의견] “그러나 상당수는 default/fallback/formatting 문제와 섞여 있음”
-- [의견] “현재 상태로는 둘을 구분할 수 없음”
-### 5.14 Request 3 tentative recommendation
-- [의견] 1순위
-- [의견] Devil 상태를 `반박 없음 / 실패 / 파싱 실패 / 미실행`으로 명시 분리
-- [의견] 2순위
-- [의견] Hunter/Scanner 공통 로깅 필드 추가
-- [의견] `devil_called`
-- [의견] `devil_parse_ok`
-- [의견] `devil_status`
-- [의견] `devil_raw_excerpt`
-- [의견] `devil_render_mode`
-- [의견] 3순위
-- [의견] Telegram wording 개선
-- [의견] 빈 문자열 대신 명시 상태 문구 출력
-- [의견] 4순위
-- [의견] 필요 시 prompt strengthening
-- [의견] 단, 억지 반박 유도는 피할 것
-- [의견] 한 줄 결론:
-- [의견] “Devil 이 조용한 건 꼭 반박할 게 없어서만은 아니다.”
-## Section 6: 우선 순위 및 의존
-### 6.1 요청 간 관계
-- [검증됨] Request 2 는 비교적 독립적이다.
-- [검증됨] explanation template 개선은 현재 데이터 재구성만으로도 상당 부분 가능하다.
-- [검증됨] Request 3 는 quality-of-life fix 성격이지만,
-- [검증됨] 신뢰도 측면에서 중요하다.
-- [검증됨] 추천 이유를 길게 쓰더라도 Devil 상태가 모호하면 사용자 신뢰가 떨어질 수 있다.
-- [검증됨] Request 1 원 요청과 확장 요청은 서로 경쟁 관계다.
-- [검증됨] 같은 문제를 다른 신호로 해결하는 선택지이기 때문이다.
-- [검증됨] Candle pattern 을 먼저 할지,
-- [검증됨] RS/52w high 를 먼저 할지 선택해야 한다.
-- [검증됨] Request 1 전반은 backtest 의존도가 높다.
-- [검증됨] 특히 “확률” 언어를 쓰려면 더 그렇다.
-### 6.2 우선순위 판단 기준
-- [검증됨] 본 조사에서 우선순위를 정할 때 본 기준은 아래다.
-- [검증됨] 사용자 체감 개선 속도
-- [검증됨] 학문적 defensibility
-- [검증됨] 현 코드와의 정합성
-- [검증됨] false signal / misleading risk
-- [검증됨] backtest burden
-### 6.3 권장 순서
-- [의견] `즉시`
-- [의견] Request 2 의 쉬운 개선
-- [의견] 이유:
-- [의견] 데이터는 이미 있다.
-- [의견] 문장 템플릿 개선만으로 체감 향상이 크다.
-- [의견] `즉시`
-- [의견] Request 3 fix
-- [의견] 이유:
-- [의견] 사용자 신뢰 문제다.
-- [의견] instrumentation 먼저 깔아야 이후 Devil 품질도 판단할 수 있다.
-- [의견] `중기`
-- [의견] Request 1 Extension A: RS
-- [의견] 이유:
-- [의견] 가장 학문적으로 방어 가능하고 explanation 에도 좋다.
-- [의견] `중기`
-- [의견] Request 1 Extension B: 52주 신고가 근접
-- [의견] 이유:
-- [의견] 가장 구현이 가볍다.
-- [의견] RS 와 결합도 잘 된다.
-- [의견] `장기`
-- [의견] Volume Profile / Squeeze / Accumulation
-- [의견] 이유:
-- [의견] utility 는 있지만 설계/검증 부담이 각기 다르다.
-- [의견] `보류`
-- [의견] Candle pattern 점수 반영
-- [의견] 이유:
-- [의견] 근거가 가장 약하고 false signal 리스크가 높다.
-### 6.4 Request 2 와 Request 1 확장의 결합 시너지
-- [검증됨] RS 를 도입하면 explanation 이 좋아진다.
-- [검증됨] 52주 신고가를 도입하면 explanation 이 좋아진다.
-- [검증됨] 즉 Request 1 확장 구현은 Request 2 품질도 동시에 끌어올린다.
-- [의견] 그래서 “설명부터”와 “신호부터”가 완전히 별개는 아니다.
-- [의견] 다만 설명 템플릿은 신호 추가 전에 먼저 시작할 수 있다는 점이 중요하다.
-### 6.5 Request 3 가 선행되어야 하는 이유
-- [검증됨] Devil 상태가 모호하면,
-- [검증됨] 추천 이유를 아무리 길게 써도 마지막 반박 파트가 신뢰를 깎을 수 있다.
-- [검증됨] 또한 나중에 prompt 개선이 필요한지 판단도 못 한다.
-- [의견] 따라서 Request 3 는 작아 보여도 조사 후 첫 fix 후보가 될 수 있다.
-## Section 7: 각 요청의 "도입 전 조건"
-### 7.1 Request 1 (candle) 도입 전 필요
-- [검증됨] 최소 조건
-- [검증됨] 패턴 정의 명세
-- [검증됨] OHLC 기반 detection 함수
-- [검증됨] quality integration 정책
-- [검증됨] family 연동 여부 결정
-- [검증됨] 검증 조건
-- [검증됨] 최소 1년 이상 데이터 기준 backtest
-- [검증됨] baseline 대비 d1/swing hit 변화 확인
-- [검증됨] win rate 만 아니라 expectancy/MAE 도 확인
-- [검증됨] regime 별 분리 확인
-- [검증됨] existing signals 대비 증분 효과 확인
-- [검증됨] 사용자 커뮤니케이션 조건
-- [검증됨] pattern 은 보조 지표라는 점 명시
-- [검증됨] 확률 숫자 과장 금지
-### 7.2 Request 1 Extension - RS 도입 전 필요
-- [검증됨] benchmark mapping 정책
-- [검증됨] US 종목용 benchmark
-- [검증됨] KR 종목용 benchmark
-- [검증됨] possibly sector benchmark 여부
-- [검증됨] calculation window 결정
-- [검증됨] 20d / 60d / 120d 중 무엇을 쓸지
-- [검증됨] single window vs blended window
-- [검증됨] score 방식 결정
-- [검증됨] bonus 형태
-- [검증됨] gate 형태
-- [검증됨] 새로운 family 여부
-- [검증됨] backtest 조건
-- [검증됨] RS 단독
-- [검증됨] RS + existing JACKAL
-- [검증됨] regime 별 차이
-### 7.3 Request 1 Extension - 52주 신고가 도입 전 필요
-- [검증됨] `current / 52w_high` 또는 distance metric 정의
-- [검증됨] threshold 후보 정의
-- [검증됨] range position 과의 중복 해석 방지
-- [검증됨] backtest 조건
-- [검증됨] 95% / 97% / 99% 등 후보 threshold 비교
-- [검증됨] RS 와 결합 여부 비교
-- [검증됨] explanation 조건
-- [검증됨] “신고가 근접 = 무조건 좋음”처럼 보이지 않게 위험 문구 필요
-### 7.4 Request 1 Extension - Volume Profile 도입 전 필요
-- [검증됨] approximation 방식 명세
-- [검증됨] price bin granularity
-- [검증됨] 일봉 volume allocation 규칙
-- [검증됨] POC/support extraction 방식
-- [검증됨] “true profile 아님” caveat
-- [검증됨] data fidelity 한계 문서화
-- [검증됨] backtest 조건
-- [검증됨] support score 로 쓸지
-- [검증됨] breakout filter 로 쓸지
-- [검증됨] MA_support 대비 증분 효과 확인
-### 7.5 Request 1 Extension - Squeeze 도입 전 필요
-- [검증됨] percentile window 정의
-- [검증됨] contraction threshold 정의
-- [검증됨] breakout direction 조건 정의
-- [검증됨] 단독 entry 금지 원칙 권장
-- [검증됨] existing signal 과 AND 결합 원칙 권장
-- [검증됨] backtest 조건
-- [검증됨] squeeze 단독
-- [검증됨] squeeze + RSI/BB
-- [검증됨] squeeze + RS
-### 7.6 Request 1 Extension - Accumulation 도입 전 필요
-- [검증됨] “매집” 정의 정량화
-- [검증됨] OBV/A-D line 선택
-- [검증됨] 기간 설정
-- [검증됨] phase 종료 조건
-- [검증됨] narrative 오버핏 방지
-- [검증됨] “매집”이라는 단어를 쓰려면 정량 기준이 먼저 필요
-- [검증됨] backtest 조건
-- [검증됨] heuristic bundle 별 ablation
-### 7.7 Request 2 도입 전 필요
-- [검증됨] 쉬운 부분은 아래만 있으면 된다.
-- [검증됨] 템플릿 설계
-- [검증됨] 필드 선택
-- [검증됨] 텔레그램 길이 제한 검토
-- [검증됨] user wording review
-- [검증됨] 확률 부분은 추가 조건이 있다.
-- [검증됨] backtest infra or live sample 축적
-- [검증됨] qualified family sample
-- [검증됨] score/probability 구분 명시
-### 7.8 Request 3 도입 전 필요
-- [검증됨] 원인 확정용 instrumentation
-- [검증됨] 렌더링 상태 구분
-- [검증됨] 로그 필드 확장
-- [검증됨] 그 뒤에야 fix 종류를 정할 수 있다.
-- [검증됨] parse robustness fix
-- [검증됨] prompt fix
-- [검증됨] message wording fix
-## Section 8: Backtest 인프라 현황
-### 8.1 jackal/backtest.py 현황
-- [검증됨] JACKAL 전용 backtest 스크립트는 이미 존재한다.
-- [검증됨] 기본 상수는 `BACKTEST_DAYS = 60`, `TRACKING_DAYS = 10` 이다.
-- [검증됨] universe 는 `SECTOR_POOLS` 에서 portfolio exclusions 를 제외해 구성한다.
-- [검증됨] 기술지표 계산은 `as_of` 이전 데이터만 사용해 lookahead 를 피한다.
-- [검증됨] 현재 historical 지표에는 아래가 있다.
-- [검증됨] RSI
-- [검증됨] BB position
-- [검증됨] volume ratio
-- [검증됨] bullish_div
-- [검증됨] bullish_candle
-- [검증됨] change_1d / 3d / 5d
-- [검증됨] ma20 / ma50
-- [검증됨] outcome tracking 은 아래를 계산한다.
-- [검증됨] `d1_pct`
-- [검증됨] `d1_hit`
-- [검증됨] `peak_day`
-- [검증됨] `peak_pct`
-- [검증됨] `swing_hit`
-- [검증됨] summary 는 아래를 낸다.
-- [검증됨] overall `d1_accuracy`
-- [검증됨] overall `swing_accuracy`
-- [검증됨] `bullish_div_accuracy`
-- [검증됨] regime accuracy
-- [검증됨] ticker accuracy
-- Ref:
-- `jackal/backtest.py:57-81`
-- `jackal/backtest.py:88-161`
-- `jackal/backtest.py:228-255`
-- `jackal/backtest.py:531-623`
-### 8.2 orca/state.py + probability layer 현황
-- [검증됨] JACKAL 은 live 후보 학습을 ORCA state DB 와 연결한다.
-- [검증됨] `summarize_candidate_probabilities()` 는 recent candidate lessons 를 읽어,
-- [검증됨] signal family 별 wins/losses/total/win_rate/effective_win_rate/qualified 를 계산한다.
-- [검증됨] `jackal/probability.py` 는 이 summary 를 읽어 final score adjustment 를 적용할 수 있다.
-- [검증됨] 단, family stats 가 있고 `qualified` 여야 한다.
-- [검증됨] 샘플이 없으면 그대로 통과한다.
-- [검증됨] 철학적으로 보면,
-- [검증됨] 시스템은 이미 “확률 비슷한 보정은 충분한 표본이 있을 때만”이라는 방향을 가지고 있다.
-- [검증됨] 이 점은 Request 2, Request 1 모두에 중요하다.
-- Ref:
-- `jackal/probability.py:11-59`
-- `orca/state.py:2914-2998`
-### 8.3 현재 sample 부족 상태
-- [검증됨] `reports/2026-04-22_morning.json` 샘플에서,
-- [검증됨] `jackal_candidate_review.reviewed_count = 0`
-- [검증됨] `jackal_probability_summary.raw_rows = 0`
-- [검증됨] `deduped_rows = 0`
-- [검증됨] 즉 인프라는 있지만 data flywheel 이 충분히 돌고 있지 않다.
-- [검증됨] 이 상태에서는 확률 표기를 공격적으로 도입하면 안 된다.
-- Ref:
-- `reports/2026-04-22_morning.json:126-166`
-### 8.4 Signal 단독 성능 검증 가능 범위
-- [검증됨] 현재 backtest infra 로도 아래는 가능하다.
-- [검증됨] signal 단독 성능 비교
-- [검증됨] signal 조합 성능 비교
-- [검증됨] 기간별 d1/swing hit 확인
-- [검증됨] regime 별 성능 분해
-- [검증됨] ticker 별 성능 분해
-- [검증됨] 즉 RS / 52주 신고가 / squeeze / candle bonus 같은 신호도,
-- [검증됨] feature 를 historical replay 가능하게만 만들면 검증은 가능하다.
-### 8.5 RS backtest 가능 여부
-- [검증됨] 가능하다.
-- [검증됨] 필요한 것은 benchmark history 를 same-as-of 방식으로 공급하는 것뿐이다.
-- [검증됨] historical replay 구조와 충돌하지 않는다.
-- [검증됨] 난도는 낮다.
-### 8.6 52주 신고가 backtest 가능 여부
-- [검증됨] 가능하다.
-- [검증됨] existing close history 만으로 historical 52w high 계산이 가능하다.
-- [검증됨] 난도는 매우 낮다.
-### 8.7 Volume Profile backtest 가능 여부
-- [검증됨] 가능은 하다.
-- [검증됨] 다만 approximation choice 가 결과에 영향을 준다.
-- [검증됨] 따라서 backtest 는 “signal validity” 뿐 아니라 “profile approximation validity”도 동시에 테스트하는 셈이다.
-### 8.8 Squeeze backtest 가능 여부
-- [검증됨] 가능하다.
-- [검증됨] existing bb_width historical series 만 계산하면 된다.
-- [검증됨] contraction threshold 를 여러 개 시험할 수 있다.
-### 8.9 Accumulation backtest 가능 여부
-- [검증됨] 가능은 하다.
-- [검증됨] 하지만 무엇을 accumulation 으로 정의할지부터 정해야 한다.
-- [검증됨] 정의가 흔들리면 backtest 도 흔들린다.
-### 8.10 Candle pattern backtest 가능 여부
-- [검증됨] 가능하다.
-- [검증됨] OHLC history 만 있으면 pattern replay 자체는 어렵지 않다.
-- [검증됨] 다만 연구 질문이 더 까다롭다.
-- [검증됨] pattern 단독, 조합, regime 별, lookback 별로 전부 나눠 봐야 한다.
-### 8.11 Backtest 인프라에 대한 종합 판단
-- [검증됨] 인프라는 “없음”이 아니다.
-- [검증됨] 이미 상당 부분 있다.
-- [검증됨] 그러나 live probability data 는 아직 얇다.
-- [검증됨] 그리고 새 signal 의 calibration 작업량은 feature 별로 크게 다르다.
-- [의견] 그래서 `RS` 와 `52w high` 처럼 simple/defensible 한 feature 가 먼저다.
-- [의견] 검증 cost 가 낮고 설명 가치가 높기 때문이다.
-## Section 9: 결론 및 다음 세션 진입점
-### 9.1 각 요청 status 요약
-- [검증됨] Request 1 원 요청: 조사 완료, 구현 보류 권고
-- [검증됨] Request 1 확장: 조사 완료, RS/52주 신고가 우선 후보
-- [검증됨] Request 2: 조사 완료, 즉시 구현 세션 가치 높음
-- [검증됨] Request 3: 조사 완료, 원인 구분 instrumentation 우선
-### 9.2 각 요청별 tentative recommendation
-- [의견] Request 1 원 요청
-- [의견] Candle pattern 점수 반영은 후순위
-- [의견] explanation-only 또는 micro-bonus 도입이 그나마 안전
-- [의견] backtest 없이 production scoring 금지
-- [의견] Request 1 확장
-- [의견] 1순위 RS
-- [의견] 2순위 52주 신고가 근접
-- [의견] 3순위 Squeeze 또는 Volume Profile
-- [의견] Accumulation 은 정의 정리 뒤
-- [의견] Request 2
-- [의견] 먼저 긴 설명 템플릿
-- [의견] 다음으로 score breakdown
-- [의견] 마지막에만 probability %
-- [의견] Request 3
-- [의견] 먼저 status/logging/render 분리
-- [의견] 그 다음 parse robustness
-- [의견] 마지막으로 prompt 개선
-### 9.3 다음 세션 진입점 제안
-- [의견] 다음 세션 후보 A
-- [의견] “추천 이유 상세화만 구현”
-- [의견] 범위:
-- [의견] 텔레그램/alert/report explanation template 개선
-- [의견] 확률 숫자 노출은 제외
-- [의견] 다음 세션 후보 B
-- [의견] “Devil silent 원인 분리 fix”
-- [의견] 범위:
-- [의견] `devil_status`
-- [의견] `devil_called`
-- [의견] `devil_parse_ok`
-- [의견] Telegram wording 개선
-- [의견] 다음 세션 후보 C
-- [의견] “RS feature MVP”
-- [의견] 범위:
-- [의견] benchmark fetch
-- [의견] RS 계산
-- [의견] quality bonus
-- [의견] explanation field
-- [의견] backtest hook
-- [의견] 다음 세션 후보 D
-- [의견] “52주 신고가 근접 feature MVP”
-- [의견] 범위:
-- [의견] existing 52w calc 재사용
-- [의견] threshold 추가
-- [의견] explanation field
-- [의견] backtest hook
-### 9.4 개인적 우선 추천
-- [의견] 가장 합리적인 순서는 아래다.
-- [의견] 1. Request 2 explanation 개선
-- [의견] 2. Request 3 Devil 상태 구분
-- [의견] 3. RS MVP
-- [의견] 4. 52주 신고가 MVP
-- [의견] 5. squeeze 또는 volume profile 재평가
-- [의견] 6. candle pattern 재평가
-### 9.5 왜 이 순서가 나은가
-- [검증됨] 사용자 체감은 Request 2 가 가장 빠르다.
-- [검증됨] 신뢰 회복은 Request 3 가 중요하다.
-- [검증됨] 학문 근거와 구현 난이도의 균형은 RS/52주 신고가가 가장 좋다.
-- [검증됨] Candle pattern 은 가장 나중에 해도 사용자 핵심 니즈를 놓치지 않는다.
-### 9.6 본 조사 문서의 최종 결론
-- [검증됨] JACKAL 은 현재 rebound-first 시스템이다.
-- [검증됨] 사용자 요청은 continuation/leadership 방향으로의 확장을 요구한다.
-- [검증됨] 그 요구를 가장 잘 만족시키는 첫 번째 후보는 candle pattern 이 아니라 RS 와 52주 신고가다.
-- [검증됨] 설명 강화는 새 신호 없이도 바로 할 수 있다.
-- [검증됨] Devil silent 는 현재 “반박 없음”으로만 해석하면 안 된다.
-- [의견] 따라서 다음 구현 세션의 최적 출발점은 아래 둘 중 하나다.
-- [의견] `설명 강화`
-- [의견] 또는
-- [의견] `Devil 상태 분리`
-- [의견] 신호 확장 세션으로 바로 들어가야 한다면,
-- [의견] `RS` 가 첫 후보,
-- [의견] `52주 신고가`가 둘째 후보다.
-### 9.7 Appendix-style reference map
-- [검증됨] Family taxonomy
-- `jackal/families.py:7-15`
-- `jackal/families.py:17-24`
-- `jackal/families.py:33-109`
-- [검증됨] Quality engine
-- `jackal/quality_engine.py:21-24`
-- `jackal/quality_engine.py:26-53`
-- `jackal/quality_engine.py:65-170`
-- `jackal/quality_engine.py:371-383`
-- [검증됨] Thresholds
-- `jackal/thresholds.py:148-162`
-- `jackal/thresholds.py:235-249`
-- [검증됨] Market data
-- `jackal/market_data.py:320-423`
-- `jackal/market_data.py:431-471`
-- [검증됨] Hunter
-- `jackal/hunter.py:950-1003`
-- `jackal/hunter.py:1074-1084`
-- `jackal/hunter.py:1188-1215`
-- `jackal/hunter.py:1349-1399`
-- `jackal/hunter.py:1472-1498`
-- [검증됨] Scanner
-- `jackal/scanner.py:583-621`
-- `jackal/scanner.py:676-727`
-- `jackal/scanner.py:869-969`
-- `jackal/scanner.py:1001-1023`
-- `jackal/scanner.py:1379-1403`
-- `jackal/scanner.py:1522-1535`
-- [검증됨] Docs/backlog
-- `docs/jackal/current-signals.md:592-606`
-- `docs/jackal/current-signals.md:632-638`
-- `docs/jackal/current-signals.md:1028-1054`
-- `docs/jackal/current-signals.md:1090-1097`
-- `docs/orca_v2_backlog.md:116-156`
-- [검증됨] Reports/logs
-- `reports/2026-04-22_morning.json:126-166`
-- `jackal/hunt_log.json:1-80`
-- [검증됨] Probability/review infra
-- `jackal/probability.py:11-59`
-- `orca/state.py:2914-2998`
-- `orca/analysis_review.py:446-513`
-- [검증됨] External literature
-- Jegadeesh & Titman (1993), The Journal of Finance, DOI `10.1111/j.1540-6261.1993.tb04702.x`
-- George & Hwang (2004), The Journal of Finance, DOI `10.1111/j.1540-6261.2004.00695.x`
-- Marshall, Young, Rose (2007), SSRN `https://ssrn.com/abstract=980583`
+| 차트 패턴 (원 요청) | 약함 | 중간 | 부분 중복 (`bullish_candle`만 존재) | 낮음 / 보류 |
+| RS | 강함 | 낮음~중간 | 부분 중복 (sector-relative만 존재) | 매우 높음 |
+| 52주 신고가 근접 | 강함 | 매우 낮음 | 부분 중복 (`52w_pos`, `52w_low_zone`) | 매우 높음 |
+| Volume Profile | 중간 이하 | 중간 | 부분 중복 (`ma_support`, volume 계열) | 중간 |
+| Squeeze | 약함 | 낮음 | 중복 큼 (`bb_width`, `bb_expanding`) | 중간 이하 |
+| 매집 감지 | 중간 이하 | 중간~높음 | 부분 중복 (`vol_accumulation`) | 낮음 |
+## 3.7 추천 로드맵 (tentative)
+[의견]
+가장 자연스러운 순서는 아래다.
+1.
+RS
+2.
+52주 신고가 근접
+3.
+Volume Profile 또는 Squeeze
+4.
+Accumulation
+5.
+candle pattern
+[의견]
+원 요청의 직관은 유지하되,
+실제 구현은 candle보다 RS/52w 쪽에서 시작하는 것이 더 낫다.
+# Section 4: Request 2 - 추천 이유 상세화
+## 4.1 현재 message/report 분석
+### 4.1.1 Hunter message
+[검증됨]
+Hunter alert는
+설명 조각이 짧다.
+Ref:
+`jackal/hunter.py:1472-1493`
+핵심 조각:
+`hunt_reason`
+핵심 조각:
+`bull_case`
+핵심 조각:
+`main_risk`
+[검증됨]
+즉,
+왜 추천했는지 길게 읽히는 구조는 아니다.
+### 4.1.2 Scanner message
+[검증됨]
+Scanner alert는 Hunter보다 풍부하지만,
+여전히 점수 카드형이다.
+Ref:
+`jackal/scanner.py:847-972`
+보여 주는 것:
+score / signal_type / confidence
+보여 주는 것:
+peak day / swing_acc / MAE
+보여 주는 것:
+signals display
+보여 주는 것:
+짧은 bull_case
+보여 주는 것:
+Devil 한 줄
+### 4.1.3 report.json
+[검증됨]
+`jackal_candidate_review`는
+후보별 장문 설명을 쌓는 객체가 아니라
+집계와 하이라이트 요약이다.
+Ref:
+`orca/analysis_review.py:344-365`
+`orca/analysis_review.py:499-513`
+[검증됨]
+샘플 report에서 reviewed_count가 0이면
+설명도 사실상 비어 있다.
+Ref:
+`reports/2026-04-22_morning.json:126-146`
+## 4.2 즉시 개선 가능 영역
+[검증됨]
+새 데이터 없이도 아래는 바로 개선 가능하다.
+`signals_fired` 나열
+`quality.reasons` 상위 3개 서술
+canonical family 설명
+regime / trend 맥락 연결
+Devil 반론 분리 노출
+peak day / MAE를 이용한 스윙 적합성 설명
+근거:
+`jackal/quality_engine.py:83-130`
+`jackal/scanner.py:879-945`
+`jackal/scanner.py:1500-1535`
+## 4.3 추가 데이터가 필요한 영역
+유사 과거 패턴 검색
+benchmark 대비 RS 문구
+historical similarity 기반 추천 이유
+섹터 percentile 비교
+family별 regime-sliced 성능의 실시간 설명
+## 4.4 스윙 적합성 설명에 이미 있는 재료
+[검증됨]
+Hunter는 `day1_score`와 `swing_score`를 분리한다.
+Ref:
+`jackal/hunter.py:1221-1227`
+[검증됨]
+Scanner는 signal별 peak day / swing_acc / MAE 기본값을 보여 준다.
+Ref:
+`jackal/scanner.py:882-945`
+[의견]
+따라서
+`왜 스윙에 좋은지`
+는 새 모델 없이도 꽤 괜찮게 설명할 수 있다.
+## 4.5 확률 제공 주의사항
+[검증됨]
+현재 코드에서 확률처럼 보이는 숫자는 두 종류다.
+종류 A:
+Hunter의 `day1_score`, `swing_score`
+종류 B:
+probability summary의 `probability_win_rate`
+[검증됨]
+A는 모델 점수 성격이 강하다.
+Ref:
+`jackal/hunter.py:1221-1227`
+[검증됨]
+B는 qualified sample이 있을 때만 의미가 있다.
+Ref:
+`jackal/probability.py:36-51`
+[검증됨]
+sample report에서는
+qualified sample이 0인 경우가 있다.
+Ref:
+`reports/2026-04-22_morning.json:148-166`
+[의견]
+따라서 제품 문구는
+`검증된 확률`
+과
+`내부 점수 기반 의견`
+을 분리해야 한다.
+## 4.6 구현 난이도 분류
+쉬움:
+템플릿 개선
+쉬움:
+reasons 재배열
+쉬움:
+Devil 한 줄 분리
+중간:
+quality breakdown UI
+중간:
+regime/MAE/swing suitability 설명 강화
+어려움:
+historical similarity
+어려움:
+검증된 확률 수치 노출
+## 4.7 tentative 권장
+[의견]
+Request 2는 즉시 구현 세션으로 가져가도 된다.
+[의견]
+새 signal 추가보다 먼저 해도 사용자 만족이 높을 가능성이 크다.
+# Section 5: Request 3 - Devil Silent 조사
+## 5.1 현재 Devil 구현
+### 5.1.1 ORCA Devil
+[검증됨]
+ORCA Devil prompt는
+시장 레벨 counter-argument agent다.
+Ref:
+`orca/agents.py:371-440`
+### 5.1.2 Hunter Devil
+[검증됨]
+Hunter Devil prompt는
+`main_risk`를 핵심 텍스트 필드로 요구한다.
+Ref:
+`jackal/hunter.py:1188-1194`
+[검증됨]
+parse 성공 후에도 `main_risk` 기본값은 빈 문자열이다.
+Ref:
+`jackal/hunter.py:1201-1205`
+[검증됨]
+예외 fallback에서도 `main_risk`는 빈 문자열이다.
+Ref:
+`jackal/hunter.py:1207-1211`
+### 5.1.3 Scanner Devil
+[검증됨]
+Scanner Devil prompt는
+`objections` 배열을 요구한다.
+Ref:
+`jackal/scanner.py:703-710`
+[검증됨]
+no JSON block fallback은 `objections: []`를 반환한다.
+Ref:
+`jackal/scanner.py:719-724`
+[검증됨]
+예외 fallback도 `objections: []`를 반환한다.
+Ref:
+`jackal/scanner.py:725-728`
+## 5.2 Silent 원인 분류 (a-e)
+(a)
+Devil이 실제로 강한 반박이 없었다.
+(b)
+Devil 호출이 실패했다.
+(c)
+Devil 응답은 있었지만 parsing이 실패했다.
+(d)
+응답은 있었지만 Telegram 포맷에서 생략됐다.
+(e)
+prompt 또는 schema가 `반박 없음` 상태를 명확히 요구하지 않는다.
+## 5.3 현재 코드 기준 실제 경로 분석
+### 5.3.1 Hunter 경로
+[검증됨]
+Hunter alert는 Devil line을 항상 출력한다.
+Ref:
+`jackal/hunter.py:1485-1487`
+[검증됨]
+그런데 `main_risk`가 빈 문자열일 수 있다.
+Ref:
+`jackal/hunter.py:1201-1211`
+따라서 Hunter에서는
+보이는 형태가
+`줄은 있는데 내용이 비어 보임`
+일 수 있다.
+### 5.3.2 Scanner 경로
+[검증됨]
+Scanner는 첫 objection이 없으면
+Devil 설명을 생략하거나 verdict만 보여 준다.
+Ref:
+`jackal/scanner.py:869-873`
+`jackal/scanner.py:965-969`
+따라서 Scanner에서 사용자가 느끼는 silent는
+실제 반박 없음,
+fallback,
+render 생략이 모두 섞여 있을 수 있다.
+## 5.4 과거 로그 흔적
+[검증됨]
+`jackal/hunt_log.json` 표본에서
+`부분동의, 30`이 8건,
+`반대, 78`이 2건이었다.
+실행일:
+2026-04-23
+[검증됨]
+하지만 hunt log는 `main_risk`를 저장하지 않는다.
+Ref:
+`jackal/hunter.py:1748-1760`
+[검증됨]
+즉,
+현재 로그만으로
+(a) 실제 반박 없음
+과
+(b)/(c) fallback성 빈 값
+을 구분할 수 없다.
+## 5.5 silent 상태의 의미 구분
+[의견]
+현재 사용자가 보는 `Devil이 조용함`은
+아래 중 무엇인지 알 수 없다는 점이 핵심 문제다.
+의미 1:
+건강한 무반박
+의미 2:
+파싱 실패
+의미 3:
+API 실패
+의미 4:
+render suppress
+의미 5:
+약한 반박이 있었지만 짧게 잘림
+## 5.6 원인별 검증 방법
+원인 a 확인:
+no_objection 상태 필드 저장
+원인 b 확인:
+API exception 카운트 저장
+원인 c 확인:
+parse_ok 불리언 저장
+원인 d 확인:
+rendered_comment_length 또는 display_status 저장
+원인 e 확인:
+prompt에서 명시 상태 강제
+## 5.7 tentative 권장
+[의견]
+가장 먼저 필요한 것은
+silent state taxonomy와 logging이다.
+[의견]
+그 다음이 Telegram 문구 분리다.
+예:
+`Devil: 반박 없음`
+예:
+`Devil: 응답 실패`
+예:
+`Devil: 파싱 실패`
+예:
+`Devil: 약한 반박만 존재`
+# Section 6: 우선 순위 및 의존
+## 6.1 요청 간 관계
+[검증됨]
+Request 2는 새 signal 없이도 진행 가능하다.
+[검증됨]
+Request 3도 새 alpha 개발과 별개로 진행 가능하다.
+[검증됨]
+Request 1 계열은 backtest 의존도가 가장 높다.
+## 6.2 권장 순서
+[의견]
+즉시:
+Request 2 설명 상세화
+[의견]
+즉시:
+Request 3 Devil silent 구분
+[의견]
+중기:
+Request 1 Extension A RS
+[의견]
+중기:
+Request 1 Extension B 52주 신고가 근접
+[의견]
+장기:
+Volume Profile / Squeeze / Accumulation
+[의견]
+보류:
+Request 1 원 요청의 candle pattern
+## 6.3 왜 이 순서가 좋은가
+이 순서는
+사용자 체감 가치,
+구현 난이도,
+학문 근거,
+검증 가능성을 함께 만족한다.
+# Section 7: 각 요청의 도입 전 조건
+## 7.1 Request 1 (candle) 도입 전 필요
+pattern 정의 명문화
+pattern 단독 성능 검증
+기존 signal 대비 비교
+1년 이상 backtest
+win rate + expectancy + MAE 확인
+## 7.2 Request 1 Extension 도입 전 필요
+RS:
+benchmark 규칙 확정
+RS:
+market별 benchmark 매핑 확정
+52주 신고가:
+threshold 확정
+52주 신고가:
+volume filter 동반 여부 결정
+Volume Profile:
+window / bucket / POC 규칙 설계
+Squeeze:
+compression과 expansion 정의 설계
+Accumulation:
+OBV/A-D 도입 여부와 기존 heuristic 관계 확정
+## 7.3 Request 2 도입 전 필요
+쉬운 부분:
+템플릿 설계와 리뷰
+어려운 부분:
+확률 문구의 기준 확정
+## 7.4 Request 3 도입 전 필요
+silent taxonomy 확정
+로그 저장 필드 확정
+사용자-facing 상태 문구 확정
+# Section 8: Backtest 인프라 현황
+## 8.1 JACKAL backtest
+[검증됨]
+`jackal/backtest.py`는 historical indicator 계산을 이미 제공한다.
+Ref:
+`jackal/backtest.py:88-161`
+[검증됨]
+결과 추적 기준도 이미 있다.
+Ref:
+`jackal/backtest.py:228-255`
+Day1 hit 기준:
+다음날 수익률 > 0.3%
+Swing hit 기준:
+첫 7일 peak >= 1.0%
+## 8.2 probability summary 인프라
+[검증됨]
+ORCA run cycle은 probability summary를 report에 붙인다.
+Ref:
+`orca/run_cycle.py:352-372`
+[검증됨]
+qualified sample이 있어야 probability adjustment가 의미를 가진다.
+Ref:
+`jackal/probability.py:36-51`
+## 8.3 새 signal별 backtest 가능 여부
+RS:
+가능
+52주 신고가:
+가능
+Volume Profile:
+가능하나 정의 설계 필요
+Squeeze:
+가능
+Accumulation:
+가능하나 라벨링과 정의가 어려움
+Candle pattern:
+가능하나 학문적 보수성이 필요
+# Section 9: 결론 및 다음 세션 진입점
+## 9.1 요청별 상태 요약
+Request 2 쉬운 부분:
+즉시 구현 가능
+Request 3:
+즉시 조사 기반 fix 세션 가능
+Request 1 원 요청:
+보류 권장
+Request 1 Extension A RS:
+다음 구현 세션 우선 후보
+Request 1 Extension B 52주 신고가:
+그 다음 후보
+## 9.2 최종 권장
+[의견]
+가장 좋은 순서는 아래다.
+1.
+설명 강화
+2.
+Devil silent 상태 구분
+3.
+RS
+4.
+52주 신고가 근접
+5.
+Volume Profile 또는 Squeeze
+6.
+Accumulation
+7.
+candle pattern
+## 9.3 다음 세션 진입점
+세션 A:
+Telegram 설명 템플릿 개선
+세션 B:
+Devil 상태 로깅 및 표시 개선
+세션 C:
+RS signal 설계 + backtest 범위 정의
+세션 D:
+52주 신고가 proximity 설계
+# Appendix A: 코드 근거 인덱스
+- core 역할: `jackal/core.py:1-11`
+- core 실행 흐름: `jackal/core.py:55-90`
+- README session 설명: `README.md:79-85`
+- git 부재 caveat: `README.md:97-101`
+- workflow overview: `.github/workflows/orca_jackal.yml:1-18`
+- workflow Hunter step: `.github/workflows/orca_jackal.yml:62-83`
+- workflow Scanner step: `.github/workflows/orca_jackal.yml:84-97`
+- canonical families: `jackal/families.py:7-15`
+- canonical mapping: `jackal/families.py:33-109`
+- Hunter technical snapshot: `jackal/hunter.py:540-600`
+- Hunter stage1 scoring: `jackal/hunter.py:609-744`
+- Hunter swing type: `jackal/hunter.py:946-1003`
+- Hunter Devil prompt: `jackal/hunter.py:1124-1211`
+- Hunter day1/swing note: `jackal/hunter.py:1221-1227`
+- Hunter alert: `jackal/hunter.py:1472-1493`
+- Hunter persisted devil fields: `jackal/hunter.py:1748-1760`
+- Scanner pre-rule signals: `jackal/quality_engine.py:26-53`
+- Scanner raw family: `jackal/quality_engine.py:54-63`
+- quality reasons core: `jackal/quality_engine.py:83-130`
+- quality veto: `jackal/quality_engine.py:200-230`
+- uncertainty gate: `jackal/quality_engine.py:257-306`
+- family skip thresholds: `jackal/quality_engine.py:334-383`
+- final judgment: `jackal/quality_engine.py:385-437`
+- market_data technicals: `jackal/market_data.py:343-418`
+- technical fetch: `jackal/market_data.py:431-471`
+- Scanner Devil: `jackal/scanner.py:651-728`
+- Scanner alert: `jackal/scanner.py:847-972`
+- Scanner persisted payload: `jackal/scanner.py:1500-1535`
+- backtest module overview: `jackal/backtest.py:1-23`
+- backtest indicators: `jackal/backtest.py:88-161`
+- backtest outcome tracking: `jackal/backtest.py:228-255`
+- probability helper: `jackal/probability.py:18-59`
+- ORCA Devil system: `orca/agents.py:371-440`
+- candidate review summary: `orca/analysis_review.py:344-525`
+- candidate review attach: `orca/postprocess.py:96-155`
+- probability summary attach: `orca/run_cycle.py:352-372`
+- sample report candidate review empty: `reports/2026-04-22_morning.json:126-146`
+- sample report probability summary empty: `reports/2026-04-22_morning.json:148-166`
+- backlog RS note: `docs/orca_v2_backlog.md:115-134`
+- backlog squeeze note: `docs/orca_v2_backlog.md:136-160`
+- current-signals baseline map: `docs/jackal/current-signals.md:1065-1093`
+# Appendix B: 학문 참고 문헌 메모
+- Jegadeesh & Titman (1993)
+- 메모: momentum factor의 대표 고전이다.
+- 메모: 다만 주로 중기 horizon 근거로 읽어야 한다.
+- 메모: 1일 continuation 보증 문헌으로 읽으면 안 된다.
+- George & Hwang (2004)
+- 메모: 52주 신고가 근접이 momentum 설명에 유의미하다는 대표 문헌이다.
+- 메모: 이번 후보 중 52주 신고가 근접의 학문 근거를 가장 직접적으로 뒷받침한다.
+- Marshall et al. (2007)
+- 메모: 일본식 candlestick charting의 U.S. equities 수익성에 회의적 근거로 자주 인용된다.
+- 메모: candle pattern을 핵심 alpha로 도입하기 전에 보수적으로 보게 만드는 문헌이다.
+- Lo & MacKinlay (1988)
+- 메모: random walk를 단순하게 이해하면 안 된다는 점을 환기한다.
+- 메모: 하지만 짧은 horizon pattern 예측을 쉽게 만들어 주지는 않는다.
+# Appendix C: 출력/설명 필드 인벤토리
+- Hunter alert 필드: ticker/name/price/change/final_score/day1_score/swing_score/RSI/BB/vol_ratio/hunt_reason/bull_case/main_risk/entry/target/stop/expected_days/swing_type
+- Scanner alert 필드: score/signal_type/confidence/peak_day/swing_acc/MAE/Analyst/Devil/Final/signals_display/bull_case/Devil objection
+- Persisted scanner payload 필드: signal_family/signal_family_raw/signal_family_label/analyst_score/analyst_confidence/signals_fired/bull_case/devil_score/devil_verdict/devil_objections/thesis_killer_hit/killer_detail/final_score/signal_type/is_entry/reason/probability_adjustment/probability_samples/probability_win_rate
+- Request 2 재활용 가능 필드: signals_fired
+- Request 2 재활용 가능 필드: quality.reasons
+- Request 2 재활용 가능 필드: signal_family / signal_family_label
+- Request 2 재활용 가능 필드: orca_regime / orca_trend
+- Request 2 재활용 가능 필드: peak_day / swing_acc / MAE
+- Request 2 재활용 가능 필드: devil_objections
+- Request 2 재활용 가능 필드: probability_samples / probability_win_rate
+# Appendix D: Devil silent 증거 맵
+- 증거 1: Hunter는 parse 후 main_risk 기본값이 빈 문자열이다. Ref: `jackal/hunter.py:1201-1205`
+- 증거 2: Hunter는 예외 fallback에서도 main_risk가 빈 문자열이다. Ref: `jackal/hunter.py:1207-1211`
+- 증거 3: Hunter alert는 Devil line을 항상 출력한다. Ref: `jackal/hunter.py:1485-1487`
+- 증거 4: Scanner는 첫 objection이 없으면 Devil 설명을 생략하거나 verdict만 보여 준다. Ref: `jackal/scanner.py:869-873`, `jackal/scanner.py:965-969`
+- 증거 5: Scanner no JSON block fallback은 objections 빈 배열을 반환한다. Ref: `jackal/scanner.py:719-724`
+- 증거 6: Scanner 예외 fallback도 objections 빈 배열을 반환한다. Ref: `jackal/scanner.py:725-728`
+- 증거 7: Hunt log에는 devil_verdict와 devil_score는 있으나 main_risk는 저장되지 않는다. Ref: `jackal/hunter.py:1748-1760`
+- 증거 8: 현재 hunt_log 표본에서는 부분동의 30 점수가 다수다. 실행일: 2026-04-23
+- 판단 메모: silent는 실제 무반박과 fallback을 현 로그만으로는 구분할 수 없다.
+- 권장 메모: no_objection / api_failed / parse_failed / render_suppressed 상태를 분리 저장하는 편이 좋다.
+# Appendix E: 요청별 체크리스트
+## Request 1 원 요청
+- 시장 상승장 정의를 먼저 고정할 것
+- 종목 continuation 정의를 candle과 분리할 것
+- pattern은 독립 alpha가 아니라 보조 신호로 시작할 것
+- Hammer/Doji/Morning Star 정의를 숫자로 명시할 것
+- quality_engine에 pattern slot을 넣을지 별도 helper로 둘지 결정할 것
+- 기존 overheat penalty와 충돌 여부를 확인할 것
+- backtest에서 existing rebound family와 비교할 것
+- Telegram에서 확률 문구를 바로 노출하지 말 것
+## Request 1 Extension RS
+- 미국주 benchmark를 SPY로 할지 QQQ로 할지 결정할 것
+- 한국주 benchmark를 KOSPI로 고정할지 종목군별로 다르게 둘지 결정할 것
+- 단순 초과수익률 버전과 ratio-line 버전을 비교할 것
+- new family vs quality component 방식을 선택할 것
+- regime별 성능 차이를 별도 집계할 것
+- 과열 추격 신호로 변질되지 않도록 volume/MAE도 같이 볼 것
+## Request 1 Extension 52주 신고가
+- 52w_pos threshold를 90/95/98 중 어디에 둘지 실험할 것
+- 신고가 근접과 실제 돌파를 구분할 것
+- 거래량 동반 여부를 필터로 둘지 결정할 것
+- 기존 52w_low_zone과 family 수준에서 공존 가능한지 확인할 것
+- false breakout 비율을 체크할 것
+## Request 1 Extension Volume Profile
+- window를 3개월/6개월/1년 중 무엇으로 둘지 정할 것
+- bucket granularity를 어떻게 둘지 정할 것
+- POC와 현재가 거리의 score 변환 규칙을 정할 것
+- 지지/저항 해석이 MA support와 어떻게 다른지 문구를 만들 것
+- OHLCV만으로 충분한지 거래대금 보정이 필요한지 확인할 것
+## Request 1 Extension Squeeze
+- bb_width percentile 기준을 정할 것
+- expansion 확인 기간을 1일/3일/5일 중 무엇으로 둘지 정할 것
+- 방향성 결정에 RS/volume을 함께 쓸지 정할 것
+- 독립 signal보다 filter로 시작할지 결정할 것
+## Request 1 Extension Accumulation
+- OBV 도입 여부를 먼저 정할 것
+- A/D line을 같이 볼지 정할 것
+- 단순 vol_accumulation heuristic과의 관계를 정리할 것
+- 매집 종료와 분출 시작을 어떤 수치로 볼지 좁힐 것
+## Request 2 설명 상세화
+- 긴 설명과 짧은 카드 문구를 분리할 것
+- 신호 이유와 반론을 같이 보여 줄지 정할 것
+- 확률 문구는 qualified sample이 있을 때만 허용할 것
+- 왜 스윙에 좋은지와 왜 당일 추격이 위험한지를 함께 설명할 것
+- family별 기본 템플릿을 만들 것
+## Request 3 Devil silent
+- silent taxonomy를 확정할 것
+- state log 필드를 설계할 것
+- fallback 기본값과 no-objection을 구분할 것
+- Hunter와 Scanner의 렌더링 차이를 통일할지 결정할 것
+- Telegram에서 사용자에게 어떻게 보여 줄지 문구를 정할 것
