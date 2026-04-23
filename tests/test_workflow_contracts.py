@@ -205,6 +205,17 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         self.assertIn('cron: "30 1 1 * *"', text)
         self.assertIn('python -m jackal.backtest --mode "${BACKTEST_MODE}"', text)
 
+    def test_jackal_backtest_learning_supports_artifact_handoff(self):
+        text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
+        self.assertIn("artifact_run_id:", text)
+        self.assertIn("actions: read", text)
+        self.assertIn("USE_ARTIFACT_HANDOFF", text)
+        self.assertIn("uses: actions/download-artifact@v4", text)
+        self.assertIn("github-token: ${{ github.token }}", text)
+        self.assertIn("repository: ${{ github.repository }}", text)
+        self.assertIn("run-id: ${{ github.event.inputs.artifact_run_id }}", text)
+        self.assertIn("Verify ORCA artifact", text)
+
 
 if __name__ == "__main__":
     unittest.main()

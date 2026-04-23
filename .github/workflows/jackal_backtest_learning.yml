@@ -14,6 +14,10 @@ on:
         description: "incremental / full"
         required: false
         default: "incremental"
+      artifact_run_id:
+        description: "orca_backtest.yml의 성공 run ID (Mode 1: artifact handoff)"
+        required: false
+        default: ""
 
 jobs:
   learn:
@@ -22,6 +26,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     permissions:
       contents: write
+      actions: read
 
     steps:
       - name: Checkout
@@ -41,16 +46,72 @@ jobs:
         run: |
           MODE="incremental"
           RUN_ORCA_REFRESH="false"
+          USE_ARTIFACT_HANDOFF="false"
+          ARTIFACT_RUN_ID=""
+
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             MODE="${{ github.event.inputs.mode || 'incremental' }}"
+            ARTIFACT_RUN_ID="${{ github.event.inputs.artifact_run_id || '' }}"
           elif [ "${{ github.event.schedule }}" = "30 1 1 * *" ]; then
             MODE="full"
           fi
-          if [ "$MODE" = "full" ]; then
+
+          if [ "$MODE" = "full" ] && [ -n "$ARTIFACT_RUN_ID" ]; then
+            USE_ARTIFACT_HANDOFF="true"
+            echo "Mode 1: Artifact handoff (ORCA refresh skipped)"
+          elif [ "$MODE" = "full" ]; then
             RUN_ORCA_REFRESH="true"
+            echo "::warning::Mode 2: Full rebuild with self-refresh (artifact 미사용)"
+            echo "Mode 2: Full rebuild with self-refresh"
+          else
+            echo "Mode 3: Daily incremental"
           fi
+
           echo "BACKTEST_MODE=$MODE" >> "$GITHUB_ENV"
           echo "RUN_ORCA_REFRESH=$RUN_ORCA_REFRESH" >> "$GITHUB_ENV"
+          echo "USE_ARTIFACT_HANDOFF=$USE_ARTIFACT_HANDOFF" >> "$GITHUB_ENV"
+          echo "ARTIFACT_RUN_ID=$ARTIFACT_RUN_ID" >> "$GITHUB_ENV"
+
+      - name: Download preflight ORCA artifact
+        if: env.USE_ARTIFACT_HANDOFF == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: research-state-${{ github.event.inputs.artifact_run_id }}
+          path: ./
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.inputs.artifact_run_id }}
+
+      - name: Verify ORCA artifact
+        if: env.USE_ARTIFACT_HANDOFF == 'true'
+        shell: bash
+        run: |
+          if [ ! -f data/orca_state.db ]; then
+            echo "::error::data/orca_state.db not found in artifact"
+            echo "::error::orca_backtest.yml run #${ARTIFACT_RUN_ID} 가 성공했고 artifact 가 90일 보존 기간 내인지 확인"
+            exit 1
+          fi
+
+          SIZE=$(stat -c%s data/orca_state.db)
+          if [ "$SIZE" -lt 1024 ]; then
+            echo "::error::data/orca_state.db size ${SIZE} bytes < 1KB, artifact 손상 의심"
+            exit 1
+          fi
+
+          python - <<'PY'
+          import sqlite3
+          conn = sqlite3.connect("data/orca_state.db")
+          try:
+              tables = [row[0] for row in conn.execute(
+                  "SELECT name FROM sqlite_master WHERE type='table'"
+              )]
+          finally:
+              conn.close()
+          assert "backtest_sessions" in tables, (
+              "backtest_sessions 테이블 없음, ORCA research 비정상"
+          )
+          print(f"Artifact verified: {len(tables)} tables")
+          PY
 
       - name: Refresh ORCA research session
         if: env.RUN_ORCA_REFRESH == 'true'
