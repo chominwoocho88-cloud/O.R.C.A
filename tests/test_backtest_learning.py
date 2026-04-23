@@ -184,6 +184,61 @@ class BacktestSignalTests(unittest.TestCase):
         self.assertEqual(materialization.infer_market("AAPL"), "US")
 
 
+class BacktestFamilyInferenceTests(unittest.TestCase):
+    def _assert_inference(self, signals: list[str], expected_family: str, expected_raw: str):
+        family, raw = materialization.infer_backtest_family(signals)
+        self.assertEqual(family, expected_family)
+        self.assertEqual(raw, expected_raw)
+
+    def test_infer_backtest_family_rotation(self):
+        self._assert_inference(["sector_rebound"], "rotation", "sector_rebound")
+
+    def test_infer_backtest_family_panic_rebound(self):
+        self._assert_inference(
+            ["volume_climax", "momentum_dip"],
+            "panic_rebound",
+            "volume_climax",
+        )
+
+    def test_infer_backtest_family_momentum_pullback(self):
+        self._assert_inference(["momentum_dip"], "momentum_pullback", "momentum_dip")
+
+    def test_infer_backtest_family_ma_reclaim(self):
+        self._assert_inference(["ma_support"], "ma_reclaim", "ma_support")
+
+    def test_infer_backtest_family_divergence(self):
+        self._assert_inference(["rsi_divergence"], "divergence", "rsi_divergence")
+
+    def test_infer_backtest_family_oversold_rebound(self):
+        self._assert_inference(
+            ["rsi_oversold", "bb_touch"],
+            "oversold_rebound",
+            "rsi_oversold",
+        )
+
+    def test_infer_backtest_family_general_rebound(self):
+        self._assert_inference([], "general_rebound", "general")
+
+    def test_build_backtest_candidate_entry_uses_family_inference(self):
+        entry = materialization.build_backtest_candidate_entry(
+            session_id="bt_jackal_entry",
+            source_session_id="bt_orca_entry",
+            analysis_date="2026-04-01",
+            ticker="AMD",
+            rank_index=1,
+            regime="위험선호",
+            inflows=["semiconductor"],
+            outflows=[],
+            market_note="risk on",
+            tech={"price": 100.0, "rsi": 31.0, "bb_pos": 14.0},
+            quality_score=72.0,
+            signals_fired=["rsi_oversold", "bb_touch"],
+        )
+
+        self.assertEqual(entry["signal_family"], "oversold_rebound")
+        self.assertEqual(entry["signal_family_raw"], "rsi_oversold")
+
+
 class BacktestMaterializationIntegrationTests(unittest.TestCase):
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp()
@@ -254,6 +309,7 @@ class BacktestMaterializationIntegrationTests(unittest.TestCase):
         candidates = state.list_candidates(source_system="jackal", source_event_type="backtest")
         self.assertEqual(len(candidates), 1)
         self.assertEqual(candidates[0]["signal_family"], "divergence")
+        self.assertEqual(candidates[0]["signal_family_raw"], "rsi_divergence")
         self.assertEqual(candidates[0]["status"], "resolved")
         self.assertEqual(candidates[0]["latest_outcome_horizon"], "swing")
 

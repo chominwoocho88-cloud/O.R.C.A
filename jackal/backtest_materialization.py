@@ -4,6 +4,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
+from jackal.families import canonical_family_key
 from orca.state import (
     record_backtest_candidate,
     record_backtest_lesson,
@@ -12,6 +13,14 @@ from orca.state import (
 
 
 BACKTEST_SOURCE_EVENT_TYPE = "backtest"
+_CANONICAL_FAMILY_SIGNAL_PRIORITY = {
+    "rotation": ("sector_rebound", "sector_inflow"),
+    "panic_rebound": ("volume_climax", "volume_surge"),
+    "momentum_pullback": ("momentum_dip", "vol_accumulation"),
+    "ma_reclaim": ("ma_support",),
+    "divergence": ("rsi_divergence", "bullish_div"),
+    "oversold_rebound": ("rsi_oversold", "bb_touch", "52w_low_zone"),
+}
 
 
 def merge_reports_by_analysis_date(*report_groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -133,6 +142,22 @@ def build_backtest_quality_label(score: float | int | None) -> str:
     return "약"
 
 
+def infer_backtest_family(signals_fired: list[str] | None) -> tuple[str, str]:
+    ordered_signals = [
+        str(signal).strip()
+        for signal in (signals_fired or [])
+        if str(signal).strip()
+    ]
+    canonical_family = canonical_family_key(signals_fired=ordered_signals)
+    priority_signals = _CANONICAL_FAMILY_SIGNAL_PRIORITY.get(canonical_family, ())
+    for signal in priority_signals:
+        if signal in ordered_signals:
+            return canonical_family, signal
+    if ordered_signals:
+        return canonical_family, ordered_signals[0]
+    return canonical_family, "general"
+
+
 def _analysis_timestamp(analysis_date: str, *, hour: int = 9, minute: int = 0) -> str:
     return f"{analysis_date}T{hour:02d}:{minute:02d}:00+09:00"
 
@@ -153,6 +178,7 @@ def build_backtest_candidate_entry(
     signals_fired: list[str],
 ) -> dict[str, Any]:
     detected_at = _analysis_timestamp(analysis_date)
+    signal_family, signal_family_raw = infer_backtest_family(signals_fired)
     return {
         "ticker": ticker,
         "market": infer_market(ticker),
@@ -163,8 +189,8 @@ def build_backtest_candidate_entry(
         "is_entry": True,
         "origin": "backtest",
         "mode": "backtest_replay",
-        "signal_family": "general",
-        "signal_family_raw": "general",
+        "signal_family": signal_family,
+        "signal_family_raw": signal_family_raw,
         "signals_fired": signals_fired,
         "quality_score": quality_score,
         "final_score": quality_score,
