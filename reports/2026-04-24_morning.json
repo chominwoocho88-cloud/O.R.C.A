@@ -1,0 +1,282 @@
+{
+  "analysis_date": "2026-04-24",
+  "analysis_time": "09:09 KST",
+  "mode": "MORNING",
+  "mode_label": "아침 풀분석",
+  "one_line_summary": "나스닥 24,438·S&P500 7,108 횡보권 유지 중, 이란발 유가 급등(WTI $96.50)이 스태그플레이션 압력 가중하며 소프트웨어·항공 섹터 급락 vs 에너지 섹터 로테이션 혼조 국면",
+  "market_regime": "혼조",
+  "trend_phase": "횡보추세",
+  "trend_strategy": {
+    "recommended": "선별적 종목 접근 — 실적 서프라이즈 종목(Tesla, Penn Entertainment) 단기 매수, 에너지·방산·원자재 섹터 비중 확대 검토. 나스닥 낙폭 제한 시 AI반도체(SK하이닉스) 단기 반등 포착",
+    "caution": "소프트웨어/SaaS·항공 섹터 추가 하락 가능성. IBM·ServiceNow·AAL 유사 가이던스 리스크 보유 종목 점검 필수. 유가 급등 지속 시 제조업 원가 압박 구간 유의",
+    "difficulty": "어려움"
+  },
+  "confidence_overall": "보통",
+  "consensus_level": "보통",
+  "top_headlines": [
+    {
+      "headline": "이란 전쟁 발발로 WTI $96.50·Brent $105 유가 급등, Strait of Hormuz 공급 90% 감소 충격",
+      "signal_tag": "지정학 위기·에너지 쇼크",
+      "impact": "높음"
+    },
+    {
+      "headline": "ServiceNow -18% 급락 — 중동 갈등 매출 직접 타격, SaaS 섹터 리레이팅 압력",
+      "signal_tag": "실적 충격·섹터 리스크",
+      "impact": "높음"
+    },
+    {
+      "headline": "AAL EPS 가이던스 84% 삭감 ($2.20→$0.35), 항공 섹터 유가 원가 폭증 직격",
+      "signal_tag": "가이던스 하향·항공 섹터",
+      "impact": "높음"
+    },
+    {
+      "headline": "S&P500 Q1 실적 88% 비트율 달성, Tesla·Penn Entertainment 어닝 서프라이즈",
+      "signal_tag": "실적 호조·펀더멘털 서포트",
+      "impact": "보통"
+    },
+    {
+      "headline": "카타르 라스라판 LNG 허브 타격, 글로벌 LNG 공급 20% 손실 — 한국·대만 팹 전력비 급증",
+      "signal_tag": "에너지 공급망 충격·아시아 리스크",
+      "impact": "보통"
+    },
+    {
+      "headline": "Fed 금리 동결(3.50-3.75%) 유지 중, 일부 위원 인상 재검토로 통화정책 불확실성 고조",
+      "signal_tag": "통화정책 불확실성",
+      "impact": "보통"
+    }
+  ],
+  "volatility_index": {
+    "vkospi": "N/A",
+    "vix": "19.31",
+    "fear_greed": "64 (Greed)",
+    "level": "중립",
+    "interpretation": "VIX 19.31은 공포·중립 경계권. 공포탐욕지수 64(탐욕)는 실적 호조가 공포 확산을 억제하고 있음을 시사. 이란 갈등 고조에도 패닉 수준에 미치지 않으나, Strait of Hormuz 공급 충격이 지속될 경우 VIX 25+ 도달 가능성 잠재. 현재는 '경계 속 탐욕' 구간."
+  },
+  "retail_reversal_signal": {
+    "retail_behavior": "Tesla 어닝 비트 후 개인 모멘텀 매수 유입 가능성. Penn Entertainment +15% 급등에 추격 매수 징후. IBM·ServiceNow 급락 구간에서 개인 역발상 저점 매수 시도 예상.",
+    "contrarian_implication": "IBM -8%, ServiceNow -18% 급락 후 개인 저점매수 진입 시 단기 반등 가능하나, 가이던스 하향 기업은 이익 추정치 연쇄 하향 사이클 위험 내포. 기관 투매 완료 여부 확인 전 진입은 위험. 에너지 섹터 개인 후행 유입 시 단기 고점 신호 주의.",
+    "reliability": "보통"
+  },
+  "outflows": [
+    {
+      "zone": "소프트웨어/SaaS 섹터",
+      "reason": "ServiceNow 중동 갈등發 매출 타격 -18% 급락. 지정학 리스크가 글로벌 소프트웨어 수요 직접 훼손 사례 확인. 단, 섹터 전반 확산은 과대해석 가능성 존재(중동 매출 비중 3~5% 수준).",
+      "severity": "높음",
+      "data_point": "ServiceNow -18% | IBM -8% | 중동 갈등 매출 영향 직접 반영"
+    },
+    {
+      "zone": "항공/운송 섹터",
+      "reason": "유가 WTI $96.50·Brent $105 급등으로 항공유 원가 폭증. AAL 연간 EPS 가이던스 84% 삭감.",
+      "severity": "높음",
+      "data_point": "AAL EPS 가이던스 $2.20 중간값 → $0.35 수준 | 이란전쟁 개전 후 누적 -8%+"
+    },
+    {
+      "zone": "LNG·천연가스 의존 제조업 (한국·대만)",
+      "reason": "카타르 라스라판 LNG 허브 타격으로 글로벌 LNG 공급 20% 제거. 한국·대만 반도체 팹 전력비 급증 압박. 단, 한국 전력믹스 원전·석탄 60% 완충 효과 존재.",
+      "severity": "보통",
+      "data_point": "QatarEnergy 생산 중단 | 글로벌 LNG 20% 공급 손실 | 한국 팹 전력비 스파이크 우려"
+    }
+  ],
+  "inflows": [
+    {
+      "zone": "에너지/정유 섹터",
+      "reason": "이란 전쟁발 유가 급등으로 정유·에너지 기업 수익성 급등. 역사적으로 지정학 충격 후 48~72시간 내 에너지 섹터 자금 이동 가시화.",
+      "momentum": "상승",
+      "data_point": "WTI $96.50, Brent $105 | 에너지 섹터 EPS 추정치 상향 사이클 진입"
+    },
+    {
+      "zone": "방산 섹터",
+      "reason": "이란 전쟁 개전으로 글로벌 방산 수요 급증 기대. 미국·유럽 방산 기업 수주 모멘텀 부각.",
+      "momentum": "상승",
+      "data_point": "중동 분쟁 격화 | 방산 예산 증액 기대감 | 과거 지정학 충격 시 방산 초과수익 패턴"
+    },
+    {
+      "zone": "AI반도체/메모리 (선별적)",
+      "reason": "나스닥 낙폭 제한 시 AI반도체 수요 내러티브 재점화. SK하이닉스 나스닥 베타 1.36x로 반등 탄력 강점. Q1 실적 88% 비트율이 펀더멘털 서포트.",
+      "momentum": "중립→상승 전환 대기",
+      "data_point": "나스닥 24,438 횡보 | SK하이닉스 베타 1.36x | S&P500 Q1 비트율 88%"
+    }
+  ],
+  "neutral_waiting": [
+    {
+      "zone": "코스피 전반",
+      "catalyst_needed": "외국인 순매도 전환 또는 원/달러 1,480 하향 안정, 나스닥 명확한 방향성 확인"
+    },
+    {
+      "zone": "테크 대형주 (FAANG류)",
+      "catalyst_needed": "Fed 통화정책 명확화 또는 유가 $85 이하 안정, 추가 실적발표 서프라이즈 확인"
+    },
+    {
+      "zone": "원자재 관련주 (비에너지)",
+      "catalyst_needed": "유가 급등의 수요 파괴 여부 확인 및 글로벌 경기 둔화 신호 부재 확인"
+    }
+  ],
+  "hidden_signals": [
+    {
+      "signal": "VIX 19.31 + 공포탐욕지수 64(탐욕) 괴리",
+      "implication": "실제 시장 참여자 정서는 탐욕 구간임에도 VIX는 중립 경계. 지정학 충격이 추가 가시화될 경우 VIX와 공포탐욕지수의 빠른 역전(공포 전환) 가능성 내재. 현재 과도한 낙관 포지션 청산 리스크 주목.",
+      "confidence": "보통"
+    }
+  ],
+  "thesis_killers": [
+    {
+      "event": "나스닥",
+      "timeframe": "당일 장중~종가",
+      "confirms_if": "나스닥 -2% 이상 종가 → 지정학 충격의 광범위 섹터 전이 확인",
+      "invalidates_if": "나스닥 -0.5% 이내 종가 → 충격이 개별 종목 수준에 그치며 섹터 리레이팅 thesis 붕괴",
+      "quality": "ok"
+    }
+  ],
+  "data_quality": "degraded",
+  "jackal_candidate_review": {
+    "analysis_date": "2026-04-24",
+    "market_bias": "mixed",
+    "market_bias_label": "혼조/관망",
+    "reviewed_count": 0,
+    "aligned_count": 0,
+    "neutral_count": 0,
+    "opposed_count": 0,
+    "follow_count": 0,
+    "watch_count": 0,
+    "avoid_count": 0,
+    "review_verdict_breakdown": {
+      "strong_aligned": 0,
+      "aligned": 0,
+      "neutral": 0,
+      "opposed": 0,
+      "strong_opposed": 0
+    },
+    "average_review_confidence": "low",
+    "reason_code_frequency": {},
+    "highlights": []
+  },
+  "jackal_probability_summary": {
+    "window_days": 90,
+    "min_samples": 5,
+    "raw_rows": 0,
+    "deduped_rows": 0,
+    "duplicates_skipped": 0,
+    "overall": {
+      "wins": 0,
+      "losses": 0,
+      "total": 0,
+      "win_rate": 0.0,
+      "effective_win_rate": 0.0,
+      "qualified": false
+    },
+    "trusted_families": [],
+    "cautious_families": [],
+    "alignment_summary": {},
+    "best_aligned_families": [],
+    "best_opposed_families": []
+  },
+  "learning_policy": {
+    "version": "v1",
+    "policy_source": "orca/learning_policy.py",
+    "min_samples": 5,
+    "prior_wins": 2,
+    "prior_total": 4,
+    "trusted_threshold": 0.58,
+    "cautious_threshold": 0.46,
+    "weight_adjustment_ladder": [
+      {
+        "threshold": 0.7,
+        "delta": 0.05
+      },
+      {
+        "threshold": 0.4,
+        "delta": -0.05
+      }
+    ],
+    "probability_score_adjustment_ladder": [
+      {
+        "min_samples": 12,
+        "threshold": 0.68,
+        "delta": 4.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.62,
+        "delta": 2.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.58,
+        "delta": 1.0
+      },
+      {
+        "min_samples": 12,
+        "threshold": 0.38,
+        "delta": -5.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.43,
+        "delta": -3.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.46,
+        "delta": -1.5
+      }
+    ]
+  },
+  "health": {
+    "status": "degraded",
+    "degraded_reasons": [
+      "external_data_degraded"
+    ],
+    "counters": {
+      "warnings": 1,
+      "soft_fails": 1
+    },
+    "details": [
+      {
+        "code": "external_data_degraded",
+        "where": "orca/run_cycle.py::run_orca_cycle",
+        "exception_type": "",
+        "message": "partial data failure: PCR, KRX_API, KOREA_NEWS"
+      }
+    ]
+  },
+  "failed_sources": [
+    {
+      "source": "PCR",
+      "error": "unavailable",
+      "category": "primary"
+    },
+    {
+      "source": "KRX_API",
+      "error": "unavailable",
+      "category": "primary"
+    },
+    {
+      "source": "KOREA_NEWS",
+      "error": "no_headlines",
+      "category": "secondary"
+    }
+  ],
+  "dual_db_state": {
+    "orca_state_db": {
+      "path": "data/orca_state.db",
+      "exists": true,
+      "size_bytes": 3399680,
+      "mtime_iso": "2026-04-24T09:09:34.091549+09:00"
+    },
+    "jackal_state_db": {
+      "path": "data/jackal_state.db",
+      "exists": true,
+      "size_bytes": 118784,
+      "mtime_iso": "2026-04-24T09:06:28.768017+09:00",
+      "tables": {
+        "jackal_shadow_signals": 0,
+        "jackal_live_events": 0,
+        "jackal_shadow_batches": 0,
+        "jackal_weight_snapshots": 0,
+        "jackal_recommendations": 0,
+        "jackal_accuracy_projection": 0,
+        "jackal_cooldowns": 0
+      }
+    }
+  }
+}

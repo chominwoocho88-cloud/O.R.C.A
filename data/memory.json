@@ -1128,98 +1128,130 @@
   },
   {
     "analysis_date": "2026-04-24",
-    "analysis_time": "00:53 KST",
-    "mode": "EVENING",
-    "mode_label": "저녁 마감",
-    "one_line_summary": "나스닥 24,581·S&P500 7,134 연고점권 유지에도 코스피 외국인 576억 순매도·인트라데이 -185pt 급락 반전, VIX 18.97 중립 속 AI반도체 강세와 에너지 쇼크 리스크가 공존하는 혼조 장세",
-    "market_regime": "위험선호(급반전 경계)",
-    "trend_phase": "상승추세",
+    "analysis_time": "09:09 KST",
+    "mode": "MORNING",
+    "mode_label": "아침 풀분석",
+    "one_line_summary": "나스닥 24,438·S&P500 7,108 횡보권 유지 중, 이란발 유가 급등(WTI $96.50)이 스태그플레이션 압력 가중하며 소프트웨어·항공 섹터 급락 vs 에너지 섹터 로테이션 혼조 국면",
+    "market_regime": "혼조",
+    "trend_phase": "횡보추세",
     "trend_strategy": {
-      "recommended": "반도체·AI 섹터 모멘텀 부분 유지, 신규 진입 비중 축소 및 단기 수익 실현 병행",
-      "caution": "나스닥 24,581 고점권 + 연속 상승 3일+ 구간 → 블랙스완 급반전 패턴 경계. TSMC·ASML·SK하이닉스 어닝 서프라이즈 이미 선반영 가능성 높음. 코스피 인트라데이 고점(6,557) 대비 종가 급락 패턴 재현 위험",
-      "difficulty": "보통"
+      "recommended": "선별적 종목 접근 — 실적 서프라이즈 종목(Tesla, Penn Entertainment) 단기 매수, 에너지·방산·원자재 섹터 비중 확대 검토. 나스닥 낙폭 제한 시 AI반도체(SK하이닉스) 단기 반등 포착",
+      "caution": "소프트웨어/SaaS·항공 섹터 추가 하락 가능성. IBM·ServiceNow·AAL 유사 가이던스 리스크 보유 종목 점검 필수. 유가 급등 지속 시 제조업 원가 압박 구간 유의",
+      "difficulty": "어려움"
     },
     "confidence_overall": "보통",
     "consensus_level": "보통",
     "top_headlines": [
       {
-        "headline": "SK하이닉스 분기 영업이익 37.6조원 사상 최대 기록, 반도체 수출 4월 1~20일 +180% YoY",
-        "signal_tag": "강세 실적 서프라이즈",
+        "headline": "이란 전쟁 발발로 WTI $96.50·Brent $105 유가 급등, Strait of Hormuz 공급 90% 감소 충격",
+        "signal_tag": "지정학 위기·에너지 쇼크",
         "impact": "높음"
       },
       {
-        "headline": "코스피 외국인 576.7억원 순매도, 장중 고점 6,557에서 종가 6,372로 -185pt 급락 반전",
-        "signal_tag": "외국인 이탈 경고",
+        "headline": "ServiceNow -18% 급락 — 중동 갈등 매출 직접 타격, SaaS 섹터 리레이팅 압력",
+        "signal_tag": "실적 충격·섹터 리스크",
         "impact": "높음"
       },
       {
-        "headline": "OPEC+ 생산 -9.4mb/d·중동 정유 6mb/d 가동 중단, 연료유 +44.2% YoY 에너지 공급 충격",
-        "signal_tag": "에너지 쇼크 리스크",
+        "headline": "AAL EPS 가이던스 84% 삭감 ($2.20→$0.35), 항공 섹터 유가 원가 폭증 직격",
+        "signal_tag": "가이던스 하향·항공 섹터",
         "impact": "높음"
       },
       {
-        "headline": "TSMC 2nm 전량 완판·엔비디아 데이터센터 백로그 2,750억달러 확인",
-        "signal_tag": "AI 수요 구조적 강세",
+        "headline": "S&P500 Q1 실적 88% 비트율 달성, Tesla·Penn Entertainment 어닝 서프라이즈",
+        "signal_tag": "실적 호조·펀더멘털 서포트",
         "impact": "보통"
       },
       {
-        "headline": "헤드라인 CPI 3.3%·시간당 임금 +3.5% YoY, 실질임금 사실상 마이너스 전환",
-        "signal_tag": "소비 구매력 약화",
+        "headline": "카타르 라스라판 LNG 허브 타격, 글로벌 LNG 공급 20% 손실 — 한국·대만 팹 전력비 급증",
+        "signal_tag": "에너지 공급망 충격·아시아 리스크",
+        "impact": "보통"
+      },
+      {
+        "headline": "Fed 금리 동결(3.50-3.75%) 유지 중, 일부 위원 인상 재검토로 통화정책 불확실성 고조",
+        "signal_tag": "통화정책 불확실성",
         "impact": "보통"
       }
     ],
     "volatility_index": {
-      "vkospi": "데이터 미제공",
-      "vix": "18.97",
-      "fear_greed": "65 (Greed)",
+      "vkospi": "N/A",
+      "vix": "19.31",
+      "fear_greed": "64 (Greed)",
       "level": "중립",
-      "interpretation": "VIX 18.97은 중립 구간으로 공포도 탐욕도 아닌 관망 상태. Fear & Greed 65(Greed)는 낙관 편향이 존재하나 과열 수준(75+)은 아님. 연속 상승 고점권에서 VIX 단독 신호 신뢰도 32%로 방향 판단보다 참고치로 활용. 인트라데이 급락 반전(-185pt)과 괴리가 존재하여 주의 필요."
+      "interpretation": "VIX 19.31은 공포·중립 경계권. 공포탐욕지수 64(탐욕)는 실적 호조가 공포 확산을 억제하고 있음을 시사. 이란 갈등 고조에도 패닉 수준에 미치지 않으나, Strait of Hormuz 공급 충격이 지속될 경우 VIX 25+ 도달 가능성 잠재. 현재는 '경계 속 탐욕' 구간."
     },
     "retail_reversal_signal": {
-      "retail_behavior": "코스피 개인 순매수 +472.2억원, 기관 +234.6억원 — 외국인 이탈 구간에서 저가매수 집중",
-      "contrarian_implication": "개인·기관 동반 매수로 하방 지지 유효하나, 역사적 고점 붕괴 직전 패턴에서 개인이 외국인 매도를 흡수하는 구조가 반복됨. 외국인 순매도 지속 시 개인 물량 소화 한계 도달 가능성 경계",
+      "retail_behavior": "Tesla 어닝 비트 후 개인 모멘텀 매수 유입 가능성. Penn Entertainment +15% 급등에 추격 매수 징후. IBM·ServiceNow 급락 구간에서 개인 역발상 저점 매수 시도 예상.",
+      "contrarian_implication": "IBM -8%, ServiceNow -18% 급락 후 개인 저점매수 진입 시 단기 반등 가능하나, 가이던스 하향 기업은 이익 추정치 연쇄 하향 사이클 위험 내포. 기관 투매 완료 여부 확인 전 진입은 위험. 에너지 섹터 개인 후행 유입 시 단기 고점 신호 주의.",
       "reliability": "보통"
     },
     "outflows": [
       {
-        "zone": "코스피 / 한국 주식시장",
-        "reason": "외국인 4월 23일 576.7억원 순매도. 인트라데이 고점(6,557) 대비 종가 6,372로 -185pt 급락 반전은 단순 차익실현이 아닌 구조적 매도 압력 신호 가능성",
+        "zone": "소프트웨어/SaaS 섹터",
+        "reason": "ServiceNow 중동 갈등發 매출 타격 -18% 급락. 지정학 리스크가 글로벌 소프트웨어 수요 직접 훼손 사례 확인. 단, 섹터 전반 확산은 과대해석 가능성 존재(중동 매출 비중 3~5% 수준).",
         "severity": "높음",
-        "data_point": "외국인 -576.7억원, 코스피 종가 6,475.81(참고: 인트라데이 고점 6,557 → 저점 급락)"
+        "data_point": "ServiceNow -18% | IBM -8% | 중동 갈등 매출 영향 직접 반영"
       },
       {
-        "zone": "에너지 의존 제조업·운송업",
-        "reason": "원유 공급 10.1mb/d 급감(사상 최대 충격), 중동 정유 6mb/d 가동 중단. 에너지 비용 급등으로 마진 압박이 한국 제조업 원가구조에 2~3개 분기 지연 반영",
+        "zone": "항공/운송 섹터",
+        "reason": "유가 WTI $96.50·Brent $105 급등으로 항공유 원가 폭증. AAL 연간 EPS 가이던스 84% 삭감.",
         "severity": "높음",
-        "data_point": "OPEC+ 생산 -9.4mb/d, 휘발유 +18.9% YoY, 연료유 +44.2% YoY"
+        "data_point": "AAL EPS 가이던스 $2.20 중간값 → $0.35 수준 | 이란전쟁 개전 후 누적 -8%+"
       },
       {
-        "zone": "미국 소비재·임금 민감 섹터",
-        "reason": "시간당 임금 3.5% YoY로 둔화, 헤드라인 CPI 3.3%로 실질임금 마이너스 전환. 소비 구매력 약화로 내수 의존 기업 실적 하향 위험",
+        "zone": "LNG·천연가스 의존 제조업 (한국·대만)",
+        "reason": "카타르 라스라판 LNG 허브 타격으로 글로벌 LNG 공급 20% 제거. 한국·대만 반도체 팹 전력비 급증 압박. 단, 한국 전력믹스 원전·석탄 60% 완충 효과 존재.",
         "severity": "보통",
-        "data_point": "평균 시급 +3.5% vs CPI +3.3% → 실질임금 사실상 정체"
+        "data_point": "QatarEnergy 생산 중단 | 글로벌 LNG 20% 공급 손실 | 한국 팹 전력비 스파이크 우려"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "에너지/정유 섹터",
+        "reason": "이란 전쟁발 유가 급등으로 정유·에너지 기업 수익성 급등. 역사적으로 지정학 충격 후 48~72시간 내 에너지 섹터 자금 이동 가시화.",
+        "momentum": "상승",
+        "data_point": "WTI $96.50, Brent $105 | 에너지 섹터 EPS 추정치 상향 사이클 진입"
+      },
+      {
+        "zone": "방산 섹터",
+        "reason": "이란 전쟁 개전으로 글로벌 방산 수요 급증 기대. 미국·유럽 방산 기업 수주 모멘텀 부각.",
+        "momentum": "상승",
+        "data_point": "중동 분쟁 격화 | 방산 예산 증액 기대감 | 과거 지정학 충격 시 방산 초과수익 패턴"
+      },
+      {
+        "zone": "AI반도체/메모리 (선별적)",
+        "reason": "나스닥 낙폭 제한 시 AI반도체 수요 내러티브 재점화. SK하이닉스 나스닥 베타 1.36x로 반등 탄력 강점. Q1 실적 88% 비트율이 펀더멘털 서포트.",
+        "momentum": "중립→상승 전환 대기",
+        "data_point": "나스닥 24,438 횡보 | SK하이닉스 베타 1.36x | S&P500 Q1 비트율 88%"
+      }
+    ],
+    "neutral_waiting": [
+      {
+        "zone": "코스피 전반",
+        "catalyst_needed": "외국인 순매도 전환 또는 원/달러 1,480 하향 안정, 나스닥 명확한 방향성 확인"
+      },
+      {
+        "zone": "테크 대형주 (FAANG류)",
+        "catalyst_needed": "Fed 통화정책 명확화 또는 유가 $85 이하 안정, 추가 실적발표 서프라이즈 확인"
+      },
+      {
+        "zone": "원자재 관련주 (비에너지)",
+        "catalyst_needed": "유가 급등의 수요 파괴 여부 확인 및 글로벌 경기 둔화 신호 부재 확인"
+      }
+    ],
+    "hidden_signals": [
+      {
+        "signal": "VIX 19.31 + 공포탐욕지수 64(탐욕) 괴리",
+        "implication": "실제 시장 참여자 정서는 탐욕 구간임에도 VIX는 중립 경계. 지정학 충격이 추가 가시화될 경우 VIX와 공포탐욕지수의 빠른 역전(공포 전환) 가능성 내재. 현재 과도한 낙관 포지션 청산 리스크 주목.",
+        "confidence": "보통"
       }
     ],
     "thesis_killers": [
       {
         "event": "나스닥",
-        "timeframe": "당일 종가 기준",
-        "confirms_if": "나스닥 +1% 이상 종가로 24,900pt 상회",
-        "invalidates_if": "나스닥 -1% 이하로 24,400pt 이탈",
-        "quality": "ok"
-      },
-      {
-        "event": "코스피",
-        "timeframe": "장중 및 종가",
-        "confirms_if": "코스피 6,420pt 이상 종가 유지, 외국인 순매수 전환",
-        "invalidates_if": "코스피 6,300pt 이하 이탈, 외국인 순매도 -500억원 이상 지속",
-        "quality": "ok"
-      },
-      {
-        "event": "SK하이닉스",
-        "timeframe": "당일 종가 기준",
-        "confirms_if": "SK하이닉스 +2% 이상 상승으로 HBM 수요 thesis 유효성 확인",
-        "invalidates_if": "SK하이닉스 -2% 이하 하락 (나스닥 -1.4% 시 베타 1.36x 적용 예상 낙폭 초과)",
+        "timeframe": "당일 장중~종가",
+        "confirms_if": "나스닥 -2% 이상 종가 → 지정학 충격의 광범위 섹터 전이 확인",
+        "invalidates_if": "나스닥 -0.5% 이내 종가 → 충격이 개별 종목 수준에 그치며 섹터 리레이팅 thesis 붕괴",
         "quality": "ok"
       }
     ],
@@ -1249,105 +1281,20 @@
     "jackal_probability_summary": {
       "window_days": 90,
       "min_samples": 5,
-      "raw_rows": 240,
-      "deduped_rows": 240,
+      "raw_rows": 0,
+      "deduped_rows": 0,
       "duplicates_skipped": 0,
       "overall": {
-        "wins": 168,
-        "losses": 72,
-        "total": 240,
-        "avg_return": 3.503,
-        "win_rate": 70.0,
-        "effective_win_rate": 69.7,
-        "qualified": true
+        "wins": 0,
+        "losses": 0,
+        "total": 0,
+        "win_rate": 0.0,
+        "effective_win_rate": 0.0,
+        "qualified": false
       },
-      "trusted_families": [
-        {
-          "signal_family": "momentum_pullback",
-          "signal_family_label": "모멘텀눌림목",
-          "wins": 135,
-          "losses": 53,
-          "total": 188,
-          "avg_return": 3.911,
-          "source_event_type": "backtest",
-          "win_rate": 71.8,
-          "effective_win_rate": 71.4,
-          "qualified": true
-        },
-        {
-          "signal_family": "oversold_rebound",
-          "signal_family_label": "기술적과매도",
-          "wins": 11,
-          "losses": 4,
-          "total": 15,
-          "avg_return": 2.175,
-          "source_event_type": "backtest",
-          "win_rate": 73.3,
-          "effective_win_rate": 68.4,
-          "qualified": true
-        },
-        {
-          "signal_family": "divergence",
-          "signal_family_label": "강세다이버전스",
-          "wins": 22,
-          "losses": 15,
-          "total": 37,
-          "avg_return": 1.955,
-          "source_event_type": "backtest",
-          "win_rate": 59.5,
-          "effective_win_rate": 58.5,
-          "qualified": true
-        }
-      ],
-      "cautious_families": [
-        {
-          "signal_family": "divergence",
-          "signal_family_label": "강세다이버전스",
-          "wins": 22,
-          "losses": 15,
-          "total": 37,
-          "avg_return": 1.955,
-          "source_event_type": "backtest",
-          "win_rate": 59.5,
-          "effective_win_rate": 58.5,
-          "qualified": true
-        },
-        {
-          "signal_family": "oversold_rebound",
-          "signal_family_label": "기술적과매도",
-          "wins": 11,
-          "losses": 4,
-          "total": 15,
-          "avg_return": 2.175,
-          "source_event_type": "backtest",
-          "win_rate": 73.3,
-          "effective_win_rate": 68.4,
-          "qualified": true
-        },
-        {
-          "signal_family": "momentum_pullback",
-          "signal_family_label": "모멘텀눌림목",
-          "wins": 135,
-          "losses": 53,
-          "total": 188,
-          "avg_return": 3.911,
-          "source_event_type": "backtest",
-          "win_rate": 71.8,
-          "effective_win_rate": 71.4,
-          "qualified": true
-        }
-      ],
-      "alignment_summary": {
-        "backtest": {
-          "wins": 168,
-          "losses": 72,
-          "total": 240,
-          "avg_return": 3.503,
-          "win_rate": 70.0,
-          "effective_win_rate": 69.7,
-          "qualified": true
-        }
-      },
+      "trusted_families": [],
+      "cautious_families": [],
+      "alignment_summary": {},
       "best_aligned_families": [],
       "best_opposed_families": []
     }
