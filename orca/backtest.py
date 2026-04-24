@@ -38,6 +38,10 @@ LESSONS_PATTERN_FILE  = _DATA_DIR / "lessons_pattern.json"  # 조건별 통계 �
 
 _RESEARCH_SESSION_ID: str | None = None
 _DYNAMIC_FETCH_SUMMARY: dict[str, object] = {}
+_backtest_results: list[dict] = []
+MAX_PARSE_FAILURES = 0.10
+STRICT_JSON = False
+VERBOSE_PARSE_ERRORS = False
 
 
 def _hist_coverage_snapshot() -> dict[str, object]:
@@ -808,6 +812,9 @@ confirms_if: "SK하이닉스 3일 누적 +2% 이상"
 invalidates_if: "SK하이닉스 3일 누적 -2% 이하"
 
 Return ONLY valid JSON. No markdown.
+Return exactly one JSON object and nothing else.
+Do not add commentary, recap, trailing text, or prose outside the JSON object.
+Every required key must be present. Use empty strings when values are unavailable.
 {
   "analysis_date": "",
   "market_regime": "위험선호/위험회피/전환중/혼조",
@@ -983,7 +990,150 @@ def _resolve_lesson_counts(accuracy_data: dict | None, generated_count: int) -> 
     return applied_count, int(generated_count)
 
 
-def generate_analysis(date, market_data, dry=False):
+def _strip_fences(text: str) -> str:
+    return re.sub(r"```(?:json)?|```", "", text or "").strip()
+
+
+def _balance_brackets(text: str) -> str:
+    text = text or ""
+    missing_square = max(0, text.count("[") - text.count("]"))
+    missing_curly = max(0, text.count("{") - text.count("}"))
+    return text + ("]" * missing_square) + ("}" * missing_curly)
+
+
+def _extract_first_balanced_json(text: str) -> str | None:
+    depth = 0
+    start = None
+    in_string = False
+    escape = False
+
+    for index, ch in enumerate(text or ""):
+        if start is None:
+            if ch == "{":
+                start = index
+                depth = 1
+            continue
+
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_string = False
+            continue
+
+        if ch == '"':
+            in_string = True
+            continue
+        if ch == "{":
+            depth += 1
+            continue
+        if ch == "}":
+            depth -= 1
+            if depth == 0 and start is not None:
+                return text[start : index + 1]
+            if depth < 0:
+                return None
+
+    return None
+
+
+def _parse_analysis_json(full_response: str) -> tuple[dict | None, dict | None]:
+    failure_detail = {
+        "raw_preview": (full_response or "")[:500],
+        "raw_response": full_response or "",
+        "extracted_preview": "",
+        "extracted_response": "",
+        "failed_stage": 0,
+        "exception_message": "",
+    }
+
+    text = _strip_fences(full_response)
+    match = re.search(r"\{[\s\S]*\}", text)
+    extracted = match.group(0) if match else ""
+    if extracted:
+        failure_detail["extracted_preview"] = extracted[:500]
+        failure_detail["extracted_response"] = extracted
+    elif "{" in text:
+        extracted = text[text.find("{") :]
+        failure_detail["extracted_preview"] = extracted[:500]
+        failure_detail["extracted_response"] = extracted
+        failure_detail["exception_message"] = "No closed JSON block found; attempting recovery from first brace"
+    else:
+        failure_detail["exception_message"] = "No JSON block found via greedy regex"
+
+    def _load(candidate: str) -> dict:
+        parsed = json.loads(candidate)
+        if not isinstance(parsed, dict):
+            raise ValueError(f"Top-level JSON must be object, got {type(parsed).__name__}")
+        return parsed
+
+    if extracted:
+        try:
+            return _load(extracted), None
+        except Exception as exc:
+            failure_detail["failed_stage"] = 1
+            failure_detail["exception_message"] = f"{type(exc).__name__}: {exc}"
+
+        cleaned = re.sub(r",\s*([}\]])", r"\1", extracted)
+        try:
+            return _load(cleaned), None
+        except Exception as exc:
+            failure_detail["failed_stage"] = 2
+            failure_detail["exception_message"] = f"{type(exc).__name__}: {exc}"
+
+        balanced = _balance_brackets(cleaned)
+        try:
+            return _load(balanced), None
+        except Exception as exc:
+            failure_detail["failed_stage"] = 3
+            failure_detail["exception_message"] = f"{type(exc).__name__}: {exc}"
+
+    balanced_object = _extract_first_balanced_json(text)
+    if balanced_object:
+        failure_detail["extracted_preview"] = balanced_object[:500]
+        failure_detail["extracted_response"] = balanced_object
+        try:
+            return _load(balanced_object), None
+        except Exception as exc:
+            failure_detail["failed_stage"] = 4
+            failure_detail["exception_message"] = f"{type(exc).__name__}: {exc}"
+
+    return None, failure_detail
+
+
+def _parse_failure_result(date: str, failure_detail: dict) -> dict:
+    return {
+        "_parse_failed": True,
+        "_failure_detail": dict(failure_detail),
+        "analysis_date": date,
+        "mode": "MORNING",
+    }
+
+
+def _is_parse_failure_result(analysis: dict | None) -> bool:
+    return isinstance(analysis, dict) and analysis.get("_parse_failed") is True
+
+
+def _log_parse_failure(seq: int, total: int, date: str, detail: dict) -> None:
+    stage = detail.get("failed_stage", "?")
+    message = str(detail.get("exception_message", ""))[:200]
+    print(f"  ❌[{seq:>3}/{total}] {date} JSON parse failed (stage {stage}): {message}")
+
+    limit = None if VERBOSE_PARSE_ERRORS else 500
+    raw = detail.get("raw_response") or detail.get("raw_preview") or ""
+    extracted = detail.get("extracted_response") or detail.get("extracted_preview") or ""
+    raw_out = raw if limit is None else raw[:limit]
+    extracted_out = extracted if limit is None else extracted[:limit]
+
+    if raw_out:
+        print(f"     raw preview: {raw_out}")
+    if extracted_out:
+        print(f"     extracted: {extracted_out}")
+
+
+def generate_analysis(date, market_data, dry=False, strict_json=False):
     dates_before = []
     prev_regime = ""
     try:
@@ -1134,19 +1284,16 @@ def generate_analysis(date, market_data, dry=False):
                 if d2 and getattr(d2,"type","") == "text_delta":
                     full += d2.text
 
-    raw = re.sub(r"```json|```","",full).strip()
-    m = re.search(r"\{[\s\S]*\}", raw)
-    if not m: raise ValueError("JSON 없음\n" + full[:300])
-    s = m.group()
-    for fn in [
-        lambda x: json.loads(x),
-        lambda x: json.loads(re.sub(r",\s*([}\]])", r"\1", x)),
-        lambda x: json.loads(x + "]"*(x.count("[")-x.count("]")) + "}"*(x.count("{")-x.count("}"))),
-    ]:
-        try: result = fn(s); break
-        except json.JSONDecodeError: continue
-    else:
-        raise ValueError("JSON 파싱 3단계 모두 실패")
+    result, failure_detail = _parse_analysis_json(full)
+    if result is None:
+        if strict_json:
+            raise ValueError(
+                f"JSON parse failed (stage {failure_detail['failed_stage']}): "
+                f"{failure_detail['exception_message']}\n"
+                f"raw_preview={failure_detail['raw_preview'][:200]!r}\n"
+                f"extracted_preview={failure_detail['extracted_preview'][:200]!r}"
+            )
+        return _parse_failure_result(date, failure_detail)
 
     result["analysis_date"] = date
     result["mode"] = "MORNING"
@@ -2207,12 +2354,13 @@ def _run_phase_dates(dates_slice: list, phase_label: str,
     """
     지정 날짜 범위를 분석→검증→교훈추출.
     save_accuracy=True 이면 research accuracy state도 업데이트.
-    Returns: (accuracy_pct, judged, correct, {date: (results, note)})
+    Returns: (accuracy_pct, judged, correct, {date: (results, note)}, parse_failures)
     """
     global _backtest_results
 
     phase_judged = phase_correct = 0
     all_results: dict = {}
+    parse_failures: list[dict] = []
 
     from datetime import datetime as _dt
     dates_all = DATES
@@ -2225,8 +2373,28 @@ def _run_phase_dates(dates_slice: list, phase_label: str,
         # ── 주말(토/일) 날짜: 장이 열리지 않음 → 분석은 컨텍스트로 저장하되
         #    검증 집계에서 제외. 분모에 넣으면 안 되는 날짜.
         is_weekend = _dt.strptime(date, "%Y-%m-%d").weekday() >= 5
+        analysis = generate_analysis(date, md, dry=dry, strict_json=STRICT_JSON)
+        if _is_parse_failure_result(analysis):
+            detail = dict(analysis.get("_failure_detail", {}))
+            detail["date"] = date
+            detail["phase"] = phase_label
+            parse_failures.append(detail)
+            _log_parse_failure(i + 1, len(dates_slice), date, detail)
+
+            fail_rate = len(parse_failures) / (i + 1)
+            if fail_rate > MAX_PARSE_FAILURES:
+                failed_dates = ", ".join(item["date"] for item in parse_failures[-5:])
+                raise ValueError(
+                    f"Parse failure rate exceeded threshold: "
+                    f"{fail_rate:.1%} > {MAX_PARSE_FAILURES:.1%} "
+                    f"(phase={phase_label}, recent={failed_dates})"
+                )
+
+            _record_research_day(date, phase_label, md, analysis, [])
+            all_results[date] = ([], md.get("note", ""))
+            continue
+
         if is_weekend:
-            analysis = generate_analysis(date, md, dry=dry)
             analysis["vix_at_time"] = md.get("vix", 20)
             save_to_memory(analysis)
             _record_research_day(date, phase_label, md, analysis, [])
@@ -2235,7 +2403,6 @@ def _run_phase_dates(dates_slice: list, phase_label: str,
                   f"주말 — 컨텍스트만 저장, 검증 제외")
             continue
 
-        analysis = generate_analysis(date, md, dry=dry)
         analysis["vix_at_time"] = md.get("vix", 20)
         analysis["vix_band"]    = classify_vix_band(md.get("vix", 20))
         analysis["task_type"]   = classify_task_type(
@@ -2299,7 +2466,7 @@ def _run_phase_dates(dates_slice: list, phase_label: str,
         all_results[date] = (results, md.get("note", ""))
 
     phase_acc = round(phase_correct / phase_judged * 100, 1) if phase_judged else 0
-    return phase_acc, phase_judged, phase_correct, all_results
+    return phase_acc, phase_judged, phase_correct, all_results, parse_failures
 
 
 def run_walk_forward(dry: bool = False) -> dict:
@@ -2324,6 +2491,8 @@ def run_walk_forward(dry: bool = False) -> dict:
 
     phase_summary = []
     _backtest_results = []
+    all_parse_failures: list[dict] = []
+    total_attempts = 0
 
     # ── Phase별 순차 학습 ─────────────────────────────────────────
     for phase_idx, ym in enumerate(months_sorted, 1):
@@ -2336,12 +2505,16 @@ def run_walk_forward(dry: bool = False) -> dict:
               f"({len(dates_slice)}거래일 | 적용 교훈 {lessons_now_n}개)")
         print(f"{'─' * 65}")
 
-        acc, judged, correct, _ = _run_phase_dates(
+        acc, judged, correct, _, phase_parse_failures = _run_phase_dates(
             dates_slice, ym, dry=dry, save_accuracy=False)
+        total_attempts += len(dates_slice)
+        all_parse_failures.extend(phase_parse_failures)
 
         lessons_new = _count_lessons() - lessons_before
         print(f"\n  → Phase {phase_idx} 완료: {acc}% ({correct}/{judged}) "
               f"| 교훈 +{lessons_new}개 (누계 {_count_lessons()}개)")
+        if phase_parse_failures:
+            print(f"  Parse failures in phase: {len(phase_parse_failures)}")
         phase_summary.append((ym, acc, judged, correct))
 
     # ── Final Pass 준비 ────────────────────────────────────────────
@@ -2373,8 +2546,10 @@ def run_walk_forward(dry: bool = False) -> dict:
 
     _backtest_results = []
 
-    final_acc, final_j, final_c, final_results = _run_phase_dates(
+    final_acc, final_j, final_c, final_results, final_parse_failures = _run_phase_dates(
         DATES[:-1], "Final", dry=dry, save_accuracy=True)
+    total_attempts += len(DATES[:-1])
+    all_parse_failures.extend(final_parse_failures)
 
     # 가중치 업데이트
     print(f"\n{'─' * 65}")
@@ -2404,8 +2579,13 @@ def run_walk_forward(dry: bool = False) -> dict:
 
     acc_data = _load(ACCURACY_FILE, {})
     applied_lessons, generated_lessons = _resolve_lesson_counts(acc_data, _count_lessons())
+    parse_fail_rate = (len(all_parse_failures) / total_attempts) if total_attempts else 0.0
     print(f"\n  적용 교훈 : {applied_lessons}개")
     print(f"  생성 교훈 : {generated_lessons}개")
+    print(f"  Parse failures: {len(all_parse_failures)} / {total_attempts} ({parse_fail_rate:.1%})")
+    if all_parse_failures:
+        failed_dates = ", ".join(item["date"] for item in all_parse_failures[:10])
+        print(f"  Failed dates: {failed_dates}")
     print(f"  강점      : {acc_data.get('strong_areas', [])}")
     print(f"  약점      : {acc_data.get('weak_areas',   [])}")
     print(f"  → 연구 세션에만 반영 (운영 MORNING 상태와 분리)")
@@ -2420,6 +2600,19 @@ def run_walk_forward(dry: bool = False) -> dict:
         "correct_count": final_c,
         "lesson_count": applied_lessons,
         "generated_lesson_count": generated_lessons,
+        "parse_fail_count": len(all_parse_failures),
+        "parse_fail_rate": parse_fail_rate,
+        "parse_failures": [
+            {
+                "date": item.get("date", ""),
+                "phase": item.get("phase", ""),
+                "failed_stage": item.get("failed_stage", 0),
+                "exception_message": item.get("exception_message", ""),
+                "raw_preview": item.get("raw_preview", ""),
+                "extracted_preview": item.get("extracted_preview", ""),
+            }
+            for item in all_parse_failures
+        ],
         "strong_areas": acc_data.get("strong_areas", []),
         "weak_areas": acc_data.get("weak_areas", []),
         "dynamic_fetch": dict(_DYNAMIC_FETCH_SUMMARY),
@@ -2431,6 +2624,7 @@ def run_walk_forward(dry: bool = False) -> dict:
         
 def main():
     global market_data_snapshot, _RESEARCH_SESSION_ID
+    global MAX_PARSE_FAILURES, STRICT_JSON, VERBOSE_PARSE_ERRORS
     parser = argparse.ArgumentParser(description=ORCA_NAME + " Backtest")
     parser.add_argument("--dry",            action="store_true",
                         help="분석만, 데이터 저장 없음")
@@ -2440,7 +2634,16 @@ def main():
                         help="Walk-Forward Optimization 실행 (월별 순차 학습 → Final Pass)")
     parser.add_argument("--fail-on-empty-dynamic-fetch", action="store_true",
                         help="개월 확장을 요청했는데 추가 거래일이 0일이면 즉시 실패")
+    parser.add_argument("--max-parse-failures", type=float, default=0.10,
+                        help="Maximum parse failure rate before the run fails (default: 0.10)")
+    parser.add_argument("--strict-json", action="store_true",
+                        help="Fail immediately on the first JSON parse failure")
+    parser.add_argument("--verbose-parse-errors", action="store_true",
+                        help="Log full raw/extracted response on JSON parse failure")
     args = parser.parse_args()
+    MAX_PARSE_FAILURES = args.max_parse_failures
+    STRICT_JSON = args.strict_json
+    VERBOSE_PARSE_ERRORS = args.verbose_parse_errors
 
     _RESEARCH_SESSION_ID = start_backtest_session(
         "orca",
@@ -2450,6 +2653,9 @@ def main():
             "months": args.months,
             "walk_forward": args.walk_forward,
             "fail_on_empty_dynamic_fetch": args.fail_on_empty_dynamic_fetch,
+            "max_parse_failures": args.max_parse_failures,
+            "strict_json": args.strict_json,
+            "verbose_parse_errors": args.verbose_parse_errors,
         },
     )
 
@@ -2475,6 +2681,7 @@ def main():
 
         total_judged = total_correct = total_wrong = total_unclear = 0
         all_results_by_date = {}
+        parse_failures: list[dict] = []
         global _backtest_results
         _backtest_results = []   # 자기 피드백용 결과 누적
 
@@ -2488,7 +2695,25 @@ def main():
             print(f"📅 [{i+1}/{len(DATES)}] {date} — {md['note'][:40]}")
             print(f"   S&P {md.get('sp500','N/A'):>7} ({md.get('sp500_change','N/A'):>7}) | VIX {md.get('vix','N/A'):>5} | FG {md.get('fear_greed','N/A')}")
 
-            analysis = generate_analysis(date, md, dry=args.dry)
+            analysis = generate_analysis(date, md, dry=args.dry, strict_json=STRICT_JSON)
+            if _is_parse_failure_result(analysis):
+                detail = dict(analysis.get("_failure_detail", {}))
+                detail["date"] = date
+                detail["phase"] = "main"
+                parse_failures.append(detail)
+                _log_parse_failure(i + 1, len(DATES), date, detail)
+
+                fail_rate = len(parse_failures) / (i + 1)
+                if fail_rate > MAX_PARSE_FAILURES:
+                    raise ValueError(
+                        f"Parse failure rate exceeded threshold: "
+                        f"{fail_rate:.1%} > {MAX_PARSE_FAILURES:.1%}"
+                    )
+
+                _record_research_day(date, "main", md, analysis, [])
+                all_results_by_date[date] = ([], md["note"])
+                continue
+
             analysis["vix_at_time"]   = md["vix"]
             analysis["vix_band"]      = classify_vix_band(md["vix"])
             analysis["task_type"]     = classify_task_type(
@@ -2555,6 +2780,7 @@ def main():
             acc, len(lessons.get("lessons", []))
         )
         overall = round(total_correct/total_judged*100,1) if total_judged else 0
+        parse_fail_rate = (len(parse_failures) / len(DATES)) if DATES else 0.0
 
         print(f"\n{'='*65}")
         print(f"✅ Backtest 완료 — {len(DATES)}거래일")
@@ -2562,6 +2788,10 @@ def main():
         print(f"   전체 정확도: {overall}%")
         print(f"   적용 교훈: {applied_lessons}개")
         print(f"   생성 교훈: {generated_lessons}개")
+        print(f"   Parse failures: {len(parse_failures)} / {len(DATES)} ({parse_fail_rate:.1%})")
+        if parse_failures:
+            failed_dates = ", ".join(item["date"] for item in parse_failures[:10])
+            print(f"   Failed dates: {failed_dates}")
         if acc.get("strong_areas"): print(f"   강점: {acc['strong_areas']}")
         if acc.get("weak_areas"):   print(f"   약점: {acc['weak_areas']}")
         _print_dynamic_fetch_summary()
@@ -2577,6 +2807,19 @@ def main():
             "unclear_count": total_unclear,
             "lesson_count": applied_lessons,
             "generated_lesson_count": generated_lessons,
+            "parse_fail_count": len(parse_failures),
+            "parse_fail_rate": parse_fail_rate,
+            "parse_failures": [
+                {
+                    "date": item.get("date", ""),
+                    "phase": item.get("phase", ""),
+                    "failed_stage": item.get("failed_stage", 0),
+                    "exception_message": item.get("exception_message", ""),
+                    "raw_preview": item.get("raw_preview", ""),
+                    "extracted_preview": item.get("extracted_preview", ""),
+                }
+                for item in parse_failures
+            ],
             "strong_areas": acc.get("strong_areas", []),
             "weak_areas": acc.get("weak_areas", []),
             "dynamic_fetch": dict(_DYNAMIC_FETCH_SUMMARY),
