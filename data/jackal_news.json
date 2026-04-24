@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-23 09:09 KST",
+  "collected_at": "2026-04-24 09:09 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,64 +12,64 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA reports $68.1 billion Q4 revenue with 73% year-over-year increase, solidifying AI and quantum computing leadership",
+      "headline": "Analyst reiterates Nvidia as overweight with strong AI demand continuing",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA expands Google Cloud collaboration, integrating Blackwell GPUs and custom infrastructure for enterprise AI workloads",
+      "headline": "Nvidia stock cooling amid macro headwinds but remains key AI infrastructure play",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK Hynix Q1 2026 earnings beat with 22.64% EPS surprise; stock up 8%",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix declares quarterly dividend of 265.76 billion won and benefits from strong AI memory demand",
+      "headline": "SK Hynix began mass production of next-generation memory module",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics quadruples monthly DRAM supply to Tesla, indicating strong semiconductor demand",
+      "headline": "Samsung Electronics quadrupled monthly DRAM supply to Tesla; strong HBM export growth",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics Q1 2026 preliminary results show 133 trillion won revenue and 57 trillion won operating profit, up 42% and 185% sequentially",
+      "headline": "Samsung Electronics technical analysis shows buy rating with strong momentum",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom expands collaboration with Google Cloud and announces extended Meta partnership for custom AI chips through 2029",
+      "headline": "Broadcom expands Google Cloud partnership; stock jumps 4.3%",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom stock up 4.3% on expanded Google Cloud collaboration announcement amid broad semiconductor rally",
+      "headline": "Broadcom extends Meta partnership for custom AI accelerators through 2029",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom up 21% YTD at record high; analyst reiterates Outperform with $480 target",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp achieves record quarterly revenue driven by platform growth and AI initiatives with ChatGPT integration",
+      "headline": "Kakao secures new partnership with OpenAI for expansion of Stargate initiative",
       "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "035720.KS",
-      "headline": "Kakao aims for over 10% annual consolidated revenue growth and 10% operating profit margin in 2026",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "466920.KS",
-      "headline": "Shinhan SOL Shipbuilding TOP3 Plus ETF tracking shipbuilding sector with limited recent market-moving developments",
-      "impact": "neutral",
       "source": "web_search"
     }
   ],
-  "total": 10
+  "total": 12
 }
