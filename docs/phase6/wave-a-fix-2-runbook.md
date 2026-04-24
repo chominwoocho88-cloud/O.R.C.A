@@ -26,7 +26,7 @@ backtest family 분포 bug를 수정한 뒤 252 trading day bootstrap을 다시 
 
 1. DB/session mismatch
    bootstrap 성공 로그는 `1260` rows와 session `bt_d76cc1...`를 보여주지만,
-   현재 main/local DB에는 `bt_ab55...` session과 `275` rows만 남아 있다.
+   main/local DB에는 더 짧은 session 기반 `275` 또는 `280` rows만 남을 수 있다.
 
 2. Family bug
    backtest materialization이 `signal_family="general"`을 하드코딩해서
@@ -47,7 +47,7 @@ Wave D 설계 전에 필요한 것은 아래 두 가지다.
 
 권장:
 - cleanup과 bootstrap 재실행은 같은 날 연속으로 수행한다.
-- Step 2에서 `artifact_run_id`를 비우지 않는다.
+- Step 4에서 `artifact_run_id`를 비우지 않는다.
 
 ## 3. Step 1: 로컬 DB 백업
 
@@ -65,8 +65,6 @@ Copy-Item data\orca_state.db data\orca_state.pre-wave-a-fix-2.db
 Get-Item data\orca_state.pre-wave-a-fix-2.db
 ```
 
-정상 확인 후 다음 단계로 진행한다.
-
 ## 4. Step 2: JACKAL backtest state cleanup
 
 cleanup은 JACKAL-owned backtest state만 삭제한다.
@@ -80,8 +78,7 @@ sqlite3 data/orca_state.db < scripts/cleanup_backtest_state.sql
 
 주의:
 - 이 스크립트는 destructive 하다.
-- preview-only로 보고 싶다면 SQL 파일의 마지막 `COMMIT;`를 `ROLLBACK;`로
-  바꾼 뒤 실행한다.
+- preview-only가 필요하면 SQL 파일의 마지막 `COMMIT;`를 `ROLLBACK;`로 바꾼 뒤 실행한다.
 
 cleanup 대상:
 - `candidate_registry`
@@ -100,11 +97,11 @@ cleanup 대상:
 - `backtest_state`
   - 위 JACKAL session에 연결된 rows
 
-ORCA 보존 항목:
+보존 대상:
 - ORCA `backtest_sessions`
 - ORCA `backtest_daily_results`
 - ORCA `backtest_state`
-- 기존 ORCA walk-forward research session
+- ORCA walk-forward research session
 
 ### Cleanup 후 확인 SQL
 
@@ -140,24 +137,21 @@ Actions에서 `orca_backtest.yml`을 수동 실행한다.
 - run URL 마지막 숫자에서 `run_id` 확보
 
 예:
-- URL: `.../actions/runs/24828017570`
-- `run_id = 24828017570`
-
-이 `run_id`를 메모한다.
+- URL: `.../actions/runs/24847623560`
+- `run_id = 24847623560`
 
 ## 6. Step 4: JACKAL persisted bootstrap 재실행
 
 Actions에서 `jackal_backtest_learning.yml`을 수동 실행한다.
 
 Inputs:
-
 - `mode: full`
 - `artifact_run_id: <Step 3 run_id>`
 
 중요:
 - `artifact_run_id`를 절대 비우지 않는다.
-- 비워두면 Mode 2로 떨어져 ORCA refresh를 다시 호출한다.
-- 그러면 yfinance rate limit로 같은 실패가 재발할 수 있다.
+- 비워두면 Mode 2로 떨어져 ORCA refresh를 다시 호출하고,
+  yfinance rate limit로 같은 실패가 재발할 수 있다.
 
 기대 로그:
 
@@ -165,14 +159,15 @@ Inputs:
 Mode 1: Artifact handoff (ORCA refresh skipped)
 ```
 
+Fix 3 이후 Mode 1 기대 동작:
+- artifact download
+- WAL checkpoint
+- strict verify
+- JACKAL 재실행 없음
+- save learning state
+
 예상 시간:
 - 1~3분
-
-성공 경로:
-- artifact download
-- verify artifact
-- JACKAL materialization
-- save learning state
 
 ## 7. Step 5: main DB 검증
 
@@ -249,7 +244,7 @@ Expected:
 ### 케이스 A: artifact download 실패
 
 확인:
-- `artifact_run_id` 입력값 오타
+- `artifact_run_id` 오타
 - Step 3 run이 실제 성공했는지
 - artifact가 보존 기간 내인지
 
@@ -295,8 +290,6 @@ FROM candidate_registry
 GROUP BY source_event_type;
 ```
 
-정상 복원 확인 후, 원인 분석을 마치기 전까지는 bootstrap을 재실행하지 않는다.
-
 ## 10. 완료 기준
 
 Wave A-fix 2는 아래를 모두 만족하면 완료로 본다.
@@ -307,4 +300,4 @@ Wave A-fix 2는 아래를 모두 만족하면 완료로 본다.
 4. `candidate_outcomes`가 대략 `2520`
 5. `candidate_lessons`가 대략 `1260`
 6. `source_session_id`가 새 bootstrap session 하나로 정리
-7. backtest family 분포가 3개 이상, 가능하면 4개 이상으로 확장
+7. backtest family 분포가 4개 이상으로 확장

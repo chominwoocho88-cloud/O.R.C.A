@@ -82,7 +82,27 @@ jobs:
           repository: ${{ github.repository }}
           run-id: ${{ github.event.inputs.artifact_run_id }}
 
-      - name: Verify ORCA artifact
+      - name: Checkpoint ORCA WAL
+        if: env.USE_ARTIFACT_HANDOFF == 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import sqlite3
+
+          conn = sqlite3.connect("data/orca_state.db")
+          conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+          conn.close()
+
+          for suffix in ("-wal", "-shm"):
+              path = f"data/orca_state.db{suffix}"
+              if os.path.exists(path):
+                  os.remove(path)
+                  print(f"Removed: {path}")
+          print("WAL checkpoint complete")
+          PY
+
+      - name: Verify ORCA artifact (strict)
         if: env.USE_ARTIFACT_HANDOFF == 'true'
         shell: bash
         run: |
@@ -100,17 +120,56 @@ jobs:
 
           python - <<'PY'
           import sqlite3
+
           conn = sqlite3.connect("data/orca_state.db")
           try:
               tables = [row[0] for row in conn.execute(
                   "SELECT name FROM sqlite_master WHERE type='table'"
               )]
+              assert "backtest_sessions" in tables, "backtest_sessions table 없음"
+              assert "candidate_registry" in tables, "candidate_registry table 없음"
+
+              orca_sessions = conn.execute(
+                  "SELECT COUNT(*) FROM backtest_sessions WHERE system='orca'"
+              ).fetchone()[0]
+              assert orca_sessions >= 1, f"ORCA walk_forward session 없음: {orca_sessions}"
+
+              jackal_sessions = conn.execute(
+                  "SELECT COUNT(*) FROM backtest_sessions WHERE system='jackal'"
+              ).fetchone()[0]
+              assert jackal_sessions >= 1, f"JACKAL backtest session 없음: {jackal_sessions}"
+
+              candidate_count = conn.execute(
+                  """
+                  SELECT COUNT(*)
+                  FROM candidate_registry
+                  WHERE source_event_type='backtest'
+                  """
+              ).fetchone()[0]
+              assert candidate_count >= 1000, (
+                  f"backtest candidate 부족: {candidate_count} (>= 1000 예상)"
+              )
+
+              outcomes = conn.execute(
+                  "SELECT COUNT(*) FROM candidate_outcomes"
+              ).fetchone()[0]
+              assert outcomes >= candidate_count, (
+                  f"outcomes 부족: {outcomes} < {candidate_count}"
+              )
+
+              lessons = conn.execute(
+                  "SELECT COUNT(*) FROM candidate_lessons"
+              ).fetchone()[0]
+              assert lessons >= 1000, f"lessons 부족: {lessons}"
           finally:
               conn.close()
-          assert "backtest_sessions" in tables, (
-              "backtest_sessions 테이블 없음, ORCA research 비정상"
-          )
-          print(f"Artifact verified: {len(tables)} tables")
+
+          print("✅ Artifact verified:")
+          print(f"   ORCA sessions: {orca_sessions}")
+          print(f"   JACKAL sessions: {jackal_sessions}")
+          print(f"   candidate_registry(backtest): {candidate_count}")
+          print(f"   candidate_outcomes: {outcomes}")
+          print(f"   candidate_lessons: {lessons}")
           PY
 
       - name: Refresh ORCA research session
@@ -125,6 +184,7 @@ jobs:
           python -m orca.backtest --months 13 --walk-forward --fail-on-empty-dynamic-fetch
 
       - name: Run JACKAL backtest learning
+        if: env.USE_ARTIFACT_HANDOFF != 'true'
         env:
           PYTHONIOENCODING: utf-8
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -142,6 +202,7 @@ jobs:
           python - <<'PY'
           import sqlite3
           from pathlib import Path
+
           db = Path("data/orca_state.db")
           if db.exists():
               conn = sqlite3.connect(db)
@@ -151,6 +212,7 @@ jobs:
 
           python - <<'PY'
           from orca.state import checkpoint_jackal_db
+
           checkpoint_jackal_db()
           PY
 

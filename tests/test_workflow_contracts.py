@@ -214,7 +214,18 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         self.assertIn("github-token: ${{ github.token }}", text)
         self.assertIn("repository: ${{ github.repository }}", text)
         self.assertIn("run-id: ${{ github.event.inputs.artifact_run_id }}", text)
-        self.assertIn("Verify ORCA artifact", text)
+        self.assertIn("Checkpoint ORCA WAL", text)
+        self.assertIn("PRAGMA wal_checkpoint(TRUNCATE);", text)
+        self.assertIn("Verify ORCA artifact (strict)", text)
+        self.assertIn("candidate_registry(backtest):", text)
+        self.assertIn("assert candidate_count >= 1000", text)
+
+    def test_jackal_backtest_learning_mode1_skips_jackal_rerun(self):
+        text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
+        self.assertIn("if: env.USE_ARTIFACT_HANDOFF != 'true'", text)
+        self.assertIn("Mode 1: Artifact handoff (ORCA refresh skipped)", text)
+        self.assertIn("Mode 2: Full rebuild with self-refresh", text)
+        self.assertIn("Mode 3: Daily incremental", text)
 
 
 if __name__ == "__main__":
