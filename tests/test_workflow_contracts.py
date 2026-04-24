@@ -199,6 +199,23 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
             text,
         )
 
+    def test_orca_backtest_has_upload_verify(self):
+        text = _read_text(_workflow_path("orca_backtest.yml"))
+        self.assertIn("Checkpoint ORCA DB", text)
+        self.assertIn("PRAGMA wal_checkpoint(TRUNCATE);", text)
+        self.assertIn("Strict verify before upload", text)
+        self.assertIn("candidate_registry(backtest):", text)
+        self.assertIn("session_dist", text)
+        self.assertIn("Date coverage:", text)
+        self.assertIn("Signal family distribution:", text)
+        checkpoint_idx = text.find("Checkpoint ORCA DB")
+        verify_idx = text.find("Strict verify before upload")
+        upload_idx = text.find("Upload research state")
+        self.assertTrue(0 <= checkpoint_idx < verify_idx < upload_idx)
+        self.assertIn("path: data/orca_state.db", text)
+        self.assertNotIn("data/orca_state.db-wal", text)
+        self.assertNotIn("data/orca_state.db-shm", text)
+
     def test_learning_workflow_runs_incremental_and_full_modes(self):
         text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
         self.assertIn('cron: "10 0 * * 1-5"', text)
@@ -214,11 +231,17 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         self.assertIn("github-token: ${{ github.token }}", text)
         self.assertIn("repository: ${{ github.repository }}", text)
         self.assertIn("run-id: ${{ github.event.inputs.artifact_run_id }}", text)
-        self.assertIn("Checkpoint ORCA WAL", text)
+        self.assertIn("_artifact_handoff/", text)
+        self.assertIn("_artifact_handoff/data/orca_state.db", text)
+        self.assertIn("_artifact_handoff/orca_state.db", text)
+        self.assertIn("Checkpoint + verify artifact DB", text)
         self.assertIn("PRAGMA wal_checkpoint(TRUNCATE);", text)
-        self.assertIn("Verify ORCA artifact (strict)", text)
+        self.assertIn('Found artifact DB: {path}', text)
+        self.assertIn("ARTIFACT_DB_PATH", text)
         self.assertIn("candidate_registry(backtest):", text)
         self.assertIn("assert candidate_count >= 1000", text)
+        self.assertIn("Promote artifact DB", text)
+        self.assertIn("shutil.copy", text)
 
     def test_jackal_backtest_learning_mode1_skips_jackal_rerun(self):
         text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
@@ -226,6 +249,20 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         self.assertIn("Mode 1: Artifact handoff (ORCA refresh skipped)", text)
         self.assertIn("Mode 2: Full rebuild with self-refresh", text)
         self.assertIn("Mode 3: Daily incremental", text)
+
+    def test_jackal_backtest_learning_mode1_isolated_path(self):
+        text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
+        self.assertIn("path: _artifact_handoff/", text)
+        self.assertIn("Checkpoint + verify artifact DB", text)
+        self.assertIn("Promote artifact DB", text)
+        self.assertIn('with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8")', text)
+
+    def test_jackal_backtest_learning_mode_2_3_unchanged(self):
+        text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
+        self.assertIn("Refresh ORCA research session", text)
+        self.assertIn("if: env.RUN_ORCA_REFRESH == 'true'", text)
+        self.assertIn("Run JACKAL backtest learning", text)
+        self.assertIn("if: env.USE_ARTIFACT_HANDOFF != 'true'", text)
 
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ on:
         required: false
         default: "incremental"
       artifact_run_id:
-        description: "orca_backtest.yml의 성공 run ID (Mode 1: artifact handoff)"
+        description: "orca_backtest.yml success run ID (Mode 1: artifact handoff)"
         required: false
         default: ""
 
@@ -61,7 +61,7 @@ jobs:
             echo "Mode 1: Artifact handoff (ORCA refresh skipped)"
           elif [ "$MODE" = "full" ]; then
             RUN_ORCA_REFRESH="true"
-            echo "::warning::Mode 2: Full rebuild with self-refresh (artifact 미사용)"
+            echo "::warning::Mode 2: Full rebuild with self-refresh (artifact not provided)"
             echo "Mode 2: Full rebuild with self-refresh"
           else
             echo "Mode 3: Daily incremental"
@@ -77,68 +77,56 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: research-state-${{ github.event.inputs.artifact_run_id }}
-          path: ./
+          path: _artifact_handoff/
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ github.event.inputs.artifact_run_id }}
 
-      - name: Checkpoint ORCA WAL
+      - name: Checkpoint + verify artifact DB
         if: env.USE_ARTIFACT_HANDOFF == 'true'
         shell: bash
         run: |
           python - <<'PY'
           import os
           import sqlite3
+          import sys
 
-          conn = sqlite3.connect("data/orca_state.db")
+          candidates = [
+              "_artifact_handoff/data/orca_state.db",
+              "_artifact_handoff/orca_state.db",
+          ]
+
+          artifact_db = None
+          for path in candidates:
+              if os.path.exists(path):
+                  artifact_db = path
+                  print(f"Found artifact DB: {path}")
+                  break
+
+          if artifact_db is None:
+              print("::error::Artifact DB not found in expected paths")
+              print("Paths searched:")
+              for path in candidates:
+                  print(f"  - {path}")
+              if os.path.exists("_artifact_handoff"):
+                  print("_artifact_handoff contents:")
+                  for root, _, files in os.walk("_artifact_handoff"):
+                      for filename in files:
+                          print(f"  {os.path.join(root, filename)}")
+              sys.exit(1)
+
+          conn = sqlite3.connect(artifact_db)
           conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
           conn.close()
 
           for suffix in ("-wal", "-shm"):
-              path = f"data/orca_state.db{suffix}"
+              path = f"{artifact_db}{suffix}"
               if os.path.exists(path):
                   os.remove(path)
                   print(f"Removed: {path}")
-          print("WAL checkpoint complete")
-          PY
 
-      - name: Verify ORCA artifact (strict)
-        if: env.USE_ARTIFACT_HANDOFF == 'true'
-        shell: bash
-        run: |
-          if [ ! -f data/orca_state.db ]; then
-            echo "::error::data/orca_state.db not found in artifact"
-            echo "::error::orca_backtest.yml run #${ARTIFACT_RUN_ID} 가 성공했고 artifact 가 90일 보존 기간 내인지 확인"
-            exit 1
-          fi
-
-          SIZE=$(stat -c%s data/orca_state.db)
-          if [ "$SIZE" -lt 1024 ]; then
-            echo "::error::data/orca_state.db size ${SIZE} bytes < 1KB, artifact 손상 의심"
-            exit 1
-          fi
-
-          python - <<'PY'
-          import sqlite3
-
-          conn = sqlite3.connect("data/orca_state.db")
+          conn = sqlite3.connect(artifact_db)
           try:
-              tables = [row[0] for row in conn.execute(
-                  "SELECT name FROM sqlite_master WHERE type='table'"
-              )]
-              assert "backtest_sessions" in tables, "backtest_sessions table 없음"
-              assert "candidate_registry" in tables, "candidate_registry table 없음"
-
-              orca_sessions = conn.execute(
-                  "SELECT COUNT(*) FROM backtest_sessions WHERE system='orca'"
-              ).fetchone()[0]
-              assert orca_sessions >= 1, f"ORCA walk_forward session 없음: {orca_sessions}"
-
-              jackal_sessions = conn.execute(
-                  "SELECT COUNT(*) FROM backtest_sessions WHERE system='jackal'"
-              ).fetchone()[0]
-              assert jackal_sessions >= 1, f"JACKAL backtest session 없음: {jackal_sessions}"
-
               candidate_count = conn.execute(
                   """
                   SELECT COUNT(*)
@@ -146,30 +134,71 @@ jobs:
                   WHERE source_event_type='backtest'
                   """
               ).fetchone()[0]
-              assert candidate_count >= 1000, (
-                  f"backtest candidate 부족: {candidate_count} (>= 1000 예상)"
-              )
-
               outcomes = conn.execute(
                   "SELECT COUNT(*) FROM candidate_outcomes"
               ).fetchone()[0]
-              assert outcomes >= candidate_count, (
-                  f"outcomes 부족: {outcomes} < {candidate_count}"
-              )
-
               lessons = conn.execute(
                   "SELECT COUNT(*) FROM candidate_lessons"
               ).fetchone()[0]
-              assert lessons >= 1000, f"lessons 부족: {lessons}"
+              orca_sessions = conn.execute(
+                  "SELECT COUNT(*) FROM backtest_sessions WHERE system='orca'"
+              ).fetchone()[0]
+              jackal_sessions = conn.execute(
+                  "SELECT COUNT(*) FROM backtest_sessions WHERE system='jackal'"
+              ).fetchone()[0]
           finally:
               conn.close()
 
-          print("✅ Artifact verified:")
-          print(f"   ORCA sessions: {orca_sessions}")
-          print(f"   JACKAL sessions: {jackal_sessions}")
-          print(f"   candidate_registry(backtest): {candidate_count}")
-          print(f"   candidate_outcomes: {outcomes}")
-          print(f"   candidate_lessons: {lessons}")
+          print("=" * 50)
+          print("Artifact verified (isolated):")
+          print(f"  path: {artifact_db}")
+          print(f"  candidate_registry(backtest): {candidate_count}")
+          print(f"  candidate_outcomes: {outcomes}")
+          print(f"  candidate_lessons: {lessons}")
+          print(f"  ORCA sessions: {orca_sessions}")
+          print(f"  JACKAL sessions: {jackal_sessions}")
+          print("=" * 50)
+
+          assert candidate_count >= 1000, f"backtest candidates insufficient: {candidate_count}"
+          assert outcomes >= candidate_count, f"outcomes < candidates: {outcomes} < {candidate_count}"
+          assert lessons >= 1000, f"lessons insufficient: {lessons}"
+          assert orca_sessions >= 1, "ORCA session missing"
+          assert jackal_sessions >= 1, "JACKAL session missing"
+
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as handle:
+              handle.write(f"ARTIFACT_DB_PATH={artifact_db}\n")
+
+          print("PASS Artifact verified in isolated dir")
+          PY
+
+      - name: Promote artifact DB
+        if: env.USE_ARTIFACT_HANDOFF == 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import shutil
+          import sqlite3
+
+          src = os.environ["ARTIFACT_DB_PATH"]
+          dst = "data/orca_state.db"
+
+          shutil.copy(src, dst)
+          print(f"Promoted {src} -> {dst}")
+
+          conn = sqlite3.connect(dst)
+          try:
+              candidate_count = conn.execute(
+                  """
+                  SELECT COUNT(*)
+                  FROM candidate_registry
+                  WHERE source_event_type='backtest'
+                  """
+              ).fetchone()[0]
+          finally:
+              conn.close()
+
+          print(f"Main DB now contains {candidate_count} backtest candidates")
           PY
 
       - name: Refresh ORCA research session

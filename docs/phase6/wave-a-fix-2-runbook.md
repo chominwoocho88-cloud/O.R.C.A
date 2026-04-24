@@ -7,51 +7,42 @@
 runbook
 
 목적:
-Wave A bootstrap 이후 main DB 정합성이 bootstrap artifact와 어긋난 상태를 복구하고,
-backtest family 분포 bug를 수정한 뒤 252 trading day bootstrap을 다시 생성한다.
+Wave A bootstrap 이후 확인된 두 가지 문제를 정리하고, backtest state를 clean 상태로 되돌린 뒤 artifact handoff 기반 bootstrap을 다시 수행한다.
 
 범위:
 - JACKAL backtest learning state cleanup
+- family bug 수정 반영 여부 확인
 - artifact handoff 기반 bootstrap 재실행
-- family 분포 검증
 
 범위 밖:
-- ORCA walk-forward session 자체 삭제
-- workflow_run chaining
-- probability % 사용자 노출
+- ORCA walk-forward session 삭제
+- workflow chaining
+- probability 퍼센트 노출
 
-## 1. 왜 Fix 2가 필요한가
+## 1. 왜 Fix 2가 필요했나
 
-현재 확인된 anomaly는 두 가지다.
+당시 확인된 문제는 두 가지였다.
 
 1. DB/session mismatch
-   bootstrap 성공 로그는 `1260` rows와 session `bt_d76cc1...`를 보여주지만,
-   main/local DB에는 더 짧은 session 기반 `275` 또는 `280` rows만 남을 수 있다.
+   - bootstrap 로그는 `1260` rows와 session `bt_d76cc1...`를 보여줬지만
+   - main/local DB는 `275` 또는 `280` rows만 남아 있었다.
 
 2. Family bug
-   backtest materialization이 `signal_family="general"`을 하드코딩해서
-   canonicalization이 `{momentum_pullback, divergence, oversold_rebound}`로만
-   수렴하고, `rotation`, `panic_rebound`, `ma_reclaim`, `general_rebound`
-   coverage가 사실상 막혀 있었다.
+   - backtest materialization이 `signal_family="general"`을 하드코딩해서
+   - canonical family가 사실상 `momentum_pullback`, `divergence`, `oversold_rebound` 세 family에만 몰렸다.
 
-Wave D 설계 전에 필요한 것은 아래 두 가지다.
-
-- authoritative 252-day sample 복구
-- 7 family가 모두 도달 가능한 backtest materialization 확보
+Fix 2의 목표는:
+- JACKAL backtest state만 깨끗하게 비우고
+- family bug 수정이 들어간 코드로
+- artifact handoff 기반 bootstrap을 다시 돌리는 것이다.
 
 ## 2. 사전 조건
 
-- 최근 코드가 pull 되어 있어야 한다.
-- `jackal_backtest_learning.yml`은 artifact handoff를 지원해야 한다.
-- `scripts/cleanup_backtest_state.sql`이 워크스페이스에 존재해야 한다.
+- 최신 코드를 pull 해둔다.
+- `scripts/cleanup_backtest_state.sql`이 workspace에 있어야 한다.
+- backup 없이 cleanup을 진행하지 않는다.
 
-권장:
-- cleanup과 bootstrap 재실행은 같은 날 연속으로 수행한다.
-- Step 4에서 `artifact_run_id`를 비우지 않는다.
-
-## 3. Step 1: 로컬 DB 백업
-
-cleanup 전에 현재 DB를 반드시 백업한다.
+## 3. Step 1: 로컬 DB backup
 
 PowerShell:
 
@@ -67,8 +58,7 @@ Get-Item data\orca_state.pre-wave-a-fix-2.db
 
 ## 4. Step 2: JACKAL backtest state cleanup
 
-cleanup은 JACKAL-owned backtest state만 삭제한다.
-ORCA walk-forward session과 ORCA backtest session은 보존한다.
+cleanup 대상은 JACKAL-owned backtest state만이다. ORCA walk-forward session은 보존한다.
 
 실행:
 
@@ -76,18 +66,14 @@ ORCA walk-forward session과 ORCA backtest session은 보존한다.
 sqlite3 data/orca_state.db < scripts/cleanup_backtest_state.sql
 ```
 
-주의:
-- 이 스크립트는 destructive 하다.
-- preview-only가 필요하면 SQL 파일의 마지막 `COMMIT;`를 `ROLLBACK;`로 바꾼 뒤 실행한다.
-
 cleanup 대상:
 - `candidate_registry`
   - `source_event_type='backtest'`
   - `source_system='jackal'`
 - `candidate_outcomes`
-  - 위 candidate에 연결된 rows
+  - 위 candidate와 연결된 rows
 - `candidate_lessons`
-  - 위 candidate에 연결된 rows
+  - 위 candidate와 연결된 rows
 - `backtest_sessions`
   - `system='jackal'`
 - `backtest_pick_results`
@@ -101,9 +87,8 @@ cleanup 대상:
 - ORCA `backtest_sessions`
 - ORCA `backtest_daily_results`
 - ORCA `backtest_state`
-- ORCA walk-forward research session
 
-### Cleanup 후 확인 SQL
+cleanup 직후 확인:
 
 ```sql
 SELECT COUNT(*)
@@ -123,45 +108,37 @@ WHERE system='jackal';
 Expected:
 `0`
 
-## 5. Step 3: ORCA research preflight 재실행
+## 5. Step 3: ORCA research preflight
 
-Actions에서 `orca_backtest.yml`을 수동 실행한다.
+Actions에서 `orca_backtest.yml`를 수동 실행한다.
 
 예상 시간:
 - 빠르면 10~20분
 - 실제 데이터 상황에 따라 60~95분 근접 가능
 
 완료 후 확인:
-- 성공 status
+- success status
 - artifact 생성
-- run URL 마지막 숫자에서 `run_id` 확보
+- run URL에서 `run_id` 확보
 
 예:
 - URL: `.../actions/runs/24847623560`
 - `run_id = 24847623560`
 
-## 6. Step 4: JACKAL persisted bootstrap 재실행
+## 6. Step 4: JACKAL persisted bootstrap
 
-Actions에서 `jackal_backtest_learning.yml`을 수동 실행한다.
+Actions에서 `jackal_backtest_learning.yml`를 수동 실행한다.
 
 Inputs:
 - `mode: full`
 - `artifact_run_id: <Step 3 run_id>`
 
 중요:
-- `artifact_run_id`를 절대 비우지 않는다.
-- 비워두면 Mode 2로 떨어져 ORCA refresh를 다시 호출하고,
-  yfinance rate limit로 같은 실패가 재발할 수 있다.
-
-기대 로그:
-
-```text
-Mode 1: Artifact handoff (ORCA refresh skipped)
-```
+- `artifact_run_id`를 비우지 않는다
+- 비우면 Mode 2로 떨어져 ORCA refresh를 다시 호출하고 rate limit 실패가 재발할 수 있다
 
 Fix 3 이후 Mode 1 기대 동작:
 - artifact download
-- WAL checkpoint
 - strict verify
 - JACKAL 재실행 없음
 - save learning state
@@ -171,13 +148,13 @@ Fix 3 이후 Mode 1 기대 동작:
 
 ## 7. Step 5: main DB 검증
 
-workflow 성공 후 로컬에서 최신 main을 가져온다.
+workflow 성공 후 로컬에서 최신 main을 pull 한다.
 
 ```powershell
 git pull
 ```
 
-그 뒤 아래 SQL 4종을 확인한다.
+아래 SQL 네 가지를 확인한다.
 
 ### 7.1 Origin 분포
 
@@ -199,7 +176,6 @@ FROM candidate_outcomes;
 
 Expected:
 - 대략 `2520`
-- 현재 schema 기준 `candidate 1개당 d1 + swing 2 horizons`
 
 ```sql
 SELECT COUNT(*)
@@ -221,7 +197,7 @@ ORDER BY COUNT(*) DESC;
 
 Expected:
 - 최소 `4개 이상` family
-- 특히 아래 중 최소 1개 이상은 새로 보여야 한다.
+- 특히 아래 중 최소 하나 이상 새로 보여야 한다
   - `rotation`
   - `panic_rebound`
   - `ma_reclaim`
@@ -237,52 +213,39 @@ GROUP BY source_session_id;
 
 Expected:
 - `1 row`
-- 새 bootstrap session 하나만 남아야 한다.
+- 새 bootstrap session 하나로 정리
 
 ## 8. 실패 시 대응
 
-### 케이스 A: artifact download 실패
+### Artifact 다운로드 실패
 
 확인:
-- `artifact_run_id` 오타
+- `artifact_run_id`가 맞는지
 - Step 3 run이 실제 성공했는지
 - artifact가 보존 기간 내인지
 
-조치:
-- Step 3을 다시 실행해 새 run_id를 사용한다.
-
-### 케이스 B: materialization row 수가 1260보다 크게 작다
+### Sample 수량이 예상보다 적은 경우
 
 확인:
-- `source_session_id`가 1개인지
-- `backtest_days`가 252인지
-- ORCA preflight artifact가 13개월 coverage인지
+- `source_session_id`가 하나인지
+- ORCA artifact가 실제 13개월 coverage인지
+- family bug 수정 커밋이 workflow에 반영됐는지
 
-조치:
-- 현재 DB를 버리지 말고 backup 유지
-- workflow logs와 session summary를 먼저 확인한다.
-
-### 케이스 C: family가 여전히 3개만 나온다
+### Family가 다시 세 개만 나오는 경우
 
 확인:
-- fix-2 코드가 실제로 배포됐는지
-- `signal_family_raw`가 여전히 `general`인지
-
-조치:
-- local test 재실행
-- deployed workflow commit SHA 확인
+- deployed workflow가 fix-2 이후 커밋인지
+- `signal_family_raw`가 여전히 `general`로 박혀 있는지
 
 ## 9. Rollback
 
-cleanup 이후 문제가 생기면 backup으로 복원한다.
-
-PowerShell:
+backup으로 복원:
 
 ```powershell
 Copy-Item data\orca_state.pre-wave-a-fix-2.db data\orca_state.db -Force
 ```
 
-복원 후 확인:
+검증:
 
 ```sql
 SELECT COUNT(*), source_event_type
@@ -292,12 +255,15 @@ GROUP BY source_event_type;
 
 ## 10. 완료 기준
 
-Wave A-fix 2는 아래를 모두 만족하면 완료로 본다.
+아래를 모두 만족하면 Fix 2 목표는 달성된 것으로 본다.
 
 1. cleanup 후 JACKAL backtest rows가 `0`
-2. artifact handoff bootstrap이 성공
+2. artifact handoff bootstrap 성공
 3. `candidate_registry(backtest)`가 대략 `1260`
 4. `candidate_outcomes`가 대략 `2520`
 5. `candidate_lessons`가 대략 `1260`
-6. `source_session_id`가 새 bootstrap session 하나로 정리
+6. `source_session_id`가 bootstrap session 하나로 정리
 7. backtest family 분포가 4개 이상으로 확장
+
+참고:
+- 이후 Mode 1 promote-only / isolated promote 문제는 Fix 3, Fix 4 runbook을 따른다.

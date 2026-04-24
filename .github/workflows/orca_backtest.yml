@@ -11,7 +11,7 @@ jobs:
   run-backtest:
     runs-on: ubuntu-latest
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Node.js 24 opt-in (deprecation 경고 해결)
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     permissions:
       contents: read
 
@@ -22,7 +22,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
           cache: pip
 
       - name: Install dependencies
@@ -44,16 +44,173 @@ jobs:
         run: |
           python -m jackal.backtest --mode full
 
+      - name: Checkpoint ORCA DB
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import sqlite3
+
+          conn = sqlite3.connect("data/orca_state.db")
+          conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+          conn.close()
+
+          for suffix in ("-wal", "-shm"):
+              path = f"data/orca_state.db{suffix}"
+              if os.path.exists(path):
+                  os.remove(path)
+                  print(f"Removed: {path}")
+          print("Checkpoint complete")
+          PY
+
+      - name: Strict verify before upload
+        shell: bash
+        run: |
+          python - <<'PY'
+          import sqlite3
+          import sys
+
+          conn = sqlite3.connect("data/orca_state.db")
+          try:
+              candidate_count = conn.execute(
+                  """
+                  SELECT COUNT(*)
+                  FROM candidate_registry
+                  WHERE source_event_type='backtest'
+                  """
+              ).fetchone()[0]
+              outcomes = conn.execute(
+                  "SELECT COUNT(*) FROM candidate_outcomes"
+              ).fetchone()[0]
+              lessons = conn.execute(
+                  "SELECT COUNT(*) FROM candidate_lessons"
+              ).fetchone()[0]
+              orca_sessions = conn.execute(
+                  "SELECT COUNT(*) FROM backtest_sessions WHERE system='orca'"
+              ).fetchone()[0]
+              jackal_sessions = conn.execute(
+                  "SELECT COUNT(*) FROM backtest_sessions WHERE system='jackal'"
+              ).fetchone()[0]
+
+              all_sessions = list(
+                  conn.execute(
+                      """
+                      SELECT system, session_id, started_at
+                      FROM backtest_sessions
+                      ORDER BY started_at DESC
+                      """
+                  )
+              )
+              session_dist = list(
+                  conn.execute(
+                      """
+                      SELECT source_session_id, COUNT(*)
+                      FROM candidate_registry
+                      WHERE source_event_type='backtest'
+                      GROUP BY source_session_id
+                      ORDER BY COUNT(*) DESC
+                      """
+                  )
+              )
+              date_stats = conn.execute(
+                  """
+                  SELECT
+                      MIN(analysis_date) AS min_date,
+                      MAX(analysis_date) AS max_date,
+                      COUNT(DISTINCT analysis_date) AS distinct_days
+                  FROM candidate_registry
+                  WHERE source_event_type='backtest'
+                  """
+              ).fetchone()
+              family_dist = list(
+                  conn.execute(
+                      """
+                      SELECT signal_family, COUNT(*)
+                      FROM candidate_registry
+                      WHERE source_event_type='backtest'
+                      GROUP BY signal_family
+                      ORDER BY COUNT(*) DESC
+                      """
+                  )
+              )
+          finally:
+              conn.close()
+
+          print("=" * 60)
+          print("Pre-upload DB verification")
+          print("=" * 60)
+          print("Main counts:")
+          print(f"  candidate_registry(backtest): {candidate_count}")
+          print(f"  candidate_outcomes: {outcomes}")
+          print(f"  candidate_lessons: {lessons}")
+          print()
+          print("Session summary:")
+          print(f"  ORCA sessions: {orca_sessions}")
+          print(f"  JACKAL sessions: {jackal_sessions}")
+          print()
+          print(f"All sessions ({len(all_sessions)}):")
+          for system_name, session_id, started_at in all_sessions[:10]:
+              print(f"  [{system_name}] {session_id[:20]}... started {started_at}")
+          print()
+          print("Candidate distribution by session:")
+          for session_id, count in session_dist[:5]:
+              session_short = session_id[:20] if session_id else "NULL"
+              print(f"  {session_short}...: {count}")
+          print()
+          print("Date coverage:")
+          if date_stats[0]:
+              print(f"  range: {date_stats[0]} ~ {date_stats[1]}")
+              print(f"  distinct days: {date_stats[2]}")
+          else:
+              print("  (empty)")
+          print()
+          print("Signal family distribution:")
+          for family_name, count in family_dist:
+              print(f"  {family_name}: {count}")
+          print("=" * 60)
+
+          errors = []
+          if candidate_count < 1000:
+              errors.append(
+                  f"backtest candidates insufficient: {candidate_count} (expected >= 1000)"
+              )
+          if outcomes < candidate_count:
+              errors.append(f"outcomes < candidates: {outcomes} < {candidate_count}")
+          if lessons < 1000:
+              errors.append(f"lessons insufficient: {lessons} (expected >= 1000)")
+          if orca_sessions < 1:
+              errors.append("ORCA session missing")
+          if jackal_sessions < 1:
+              errors.append("JACKAL session missing")
+
+          if errors:
+              print("FAIL Pre-upload verify FAILED:")
+              for error in errors:
+                  print(f"  - {error}")
+              print()
+              print("Possible causes:")
+              if candidate_count < 1000 and date_stats[2] and date_stats[2] < 252:
+                  print(f"  - Only {date_stats[2]} days materialized (expected 252)")
+                  print("  - jackal/backtest.py may not be processing all days")
+              if jackal_sessions > 1:
+                  print(f"  - Multiple JACKAL sessions ({jackal_sessions}) suggest merge issue")
+              print()
+              print("Next steps:")
+              print("  1. Review jackal/backtest.py per-day loop")
+              print("  2. Check materialize_backtest_day() return values")
+              print("  3. Verify record_backtest_candidate() call count")
+              sys.exit(1)
+
+          print("PASS Pre-upload verify PASSED")
+          PY
+
       - name: Upload research state
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: research-state-${{ github.run_id }}
           if-no-files-found: warn
-          path: |
-            data/orca_state.db
-            data/orca_state.db-shm
-            data/orca_state.db-wal
+          path: data/orca_state.db
+          retention-days: 90
 
   policy-eval:
     needs: run-backtest
