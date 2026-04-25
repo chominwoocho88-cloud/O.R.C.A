@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-24 09:09 KST",
+  "collected_at": "2026-04-25 17:27 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,64 +12,40 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Analyst reiterates Nvidia as overweight with strong AI demand continuing",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "Nvidia stock cooling amid macro headwinds but remains key AI infrastructure play",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix Q1 2026 earnings beat with 22.64% EPS surprise; stock up 8%",
+      "headline": "NVIDIA rose 4.46% as strong Q1 results from Intel boosted sentiment in the semiconductor sector",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix began mass production of next-generation memory module",
+      "headline": "SK Hynix stock up 4.97% with analysts showing Strong Buy rating and mass production of next-generation memory modules",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics quadrupled monthly DRAM supply to Tesla; strong HBM export growth",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics technical analysis shows buy rating with strong momentum",
-      "impact": "bullish",
+      "headline": "Samsung Electronics down 2.23% amid union's total strike threat from May 21 through June 7 over compensation demands",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom expands Google Cloud partnership; stock jumps 4.3%",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom extends Meta partnership for custom AI accelerators through 2029",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom up 21% YTD at record high; analyst reiterates Outperform with $480 target",
+      "headline": "Broadcom jumped 4.3% after announcing expanded collaboration with Google Cloud on Cloud Network Insights",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao secures new partnership with OpenAI for expansion of Stargate initiative",
+      "headline": "Kakao up 2.69% but facing analyst target downgrades due to disappointing AI progress and slower development",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "466920.KS",
+      "headline": "SOL 코리아고배당 ETF surpassed 4 trillion KRW in assets with strong performance driven by financial stocks and high dividend yields",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 12
+  "total": 6
 }
