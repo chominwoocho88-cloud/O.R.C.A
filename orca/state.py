@@ -84,6 +84,31 @@ def _json(data: Any) -> str | None:
     return json.dumps(data, ensure_ascii=False, sort_keys=True)
 
 
+def _decode_json_text(value: Any, default: Any) -> Any:
+    if not value:
+        return deepcopy(default)
+    try:
+        return json.loads(value)
+    except Exception:
+        return deepcopy(default)
+
+
+def _table_has_column(conn: sqlite3.Connection, table_name: str, column_name: str) -> bool:
+    rows = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
+    return any(str(row[1]) == column_name for row in rows)
+
+
+def _ensure_orca_schema_migrations(conn: sqlite3.Connection) -> None:
+    if not _table_has_column(conn, "candidate_lessons", "context_snapshot_id"):
+        conn.execute("ALTER TABLE candidate_lessons ADD COLUMN context_snapshot_id TEXT")
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_lessons_context
+            ON candidate_lessons(context_snapshot_id)
+        """
+    )
+
+
 def _candidate_systems(system: str) -> list[str]:
     system_key = str(system or "").strip().lower()
     aliases = {
@@ -351,8 +376,32 @@ def _init_orca_tables() -> None:
 
             CREATE INDEX IF NOT EXISTS idx_candidate_lessons_candidate
                 ON candidate_lessons(candidate_id, lesson_timestamp DESC);
+
+            CREATE TABLE IF NOT EXISTS lesson_context_snapshot (
+                snapshot_id TEXT PRIMARY KEY,
+                created_at TEXT NOT NULL,
+                trading_date TEXT NOT NULL,
+                regime TEXT,
+                regime_confidence REAL,
+                vix_level REAL,
+                vix_delta_7d REAL,
+                sp500_momentum_5d REAL,
+                sp500_momentum_20d REAL,
+                nasdaq_momentum_5d REAL,
+                nasdaq_momentum_20d REAL,
+                dominant_sectors TEXT,
+                source_event_type TEXT,
+                source_session_id TEXT
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_snapshot_date
+                ON lesson_context_snapshot(trading_date);
+
+            CREATE INDEX IF NOT EXISTS idx_snapshot_regime
+                ON lesson_context_snapshot(regime);
             """
         )
+        _ensure_orca_schema_migrations(conn)
 
 
 def _init_jackal_tables() -> None:
@@ -1122,6 +1171,135 @@ def list_backtest_days(
         }
         for row in rows
     ]
+
+
+def _row_to_context_snapshot(row: sqlite3.Row | None) -> dict[str, Any] | None:
+    if not row:
+        return None
+    return {
+        "snapshot_id": row["snapshot_id"],
+        "created_at": row["created_at"],
+        "trading_date": row["trading_date"],
+        "regime": row["regime"],
+        "regime_confidence": row["regime_confidence"],
+        "vix_level": row["vix_level"],
+        "vix_delta_7d": row["vix_delta_7d"],
+        "sp500_momentum_5d": row["sp500_momentum_5d"],
+        "sp500_momentum_20d": row["sp500_momentum_20d"],
+        "nasdaq_momentum_5d": row["nasdaq_momentum_5d"],
+        "nasdaq_momentum_20d": row["nasdaq_momentum_20d"],
+        "dominant_sectors": _decode_json_text(row["dominant_sectors"], []),
+        "source_event_type": row["source_event_type"],
+        "source_session_id": row["source_session_id"],
+    }
+
+
+def get_lesson_context_snapshot(
+    snapshot_id: str,
+    *,
+    conn: sqlite3.Connection | None = None,
+) -> dict[str, Any] | None:
+    own_conn = conn is None
+    if own_conn:
+        init_state_db()
+        conn = _connect_orca()
+    try:
+        row = conn.execute(
+            """
+            SELECT snapshot_id, created_at, trading_date, regime, regime_confidence,
+                   vix_level, vix_delta_7d, sp500_momentum_5d, sp500_momentum_20d,
+                   nasdaq_momentum_5d, nasdaq_momentum_20d, dominant_sectors,
+                   source_event_type, source_session_id
+              FROM lesson_context_snapshot
+             WHERE snapshot_id = ?
+            """,
+            (snapshot_id,),
+        ).fetchone()
+        return _row_to_context_snapshot(row)
+    finally:
+        if own_conn and conn is not None:
+            conn.close()
+
+
+def find_lesson_context_snapshot(
+    trading_date: str,
+    source_event_type: str,
+    *,
+    conn: sqlite3.Connection | None = None,
+) -> dict[str, Any] | None:
+    own_conn = conn is None
+    if own_conn:
+        init_state_db()
+        conn = _connect_orca()
+    try:
+        row = conn.execute(
+            """
+            SELECT snapshot_id, created_at, trading_date, regime, regime_confidence,
+                   vix_level, vix_delta_7d, sp500_momentum_5d, sp500_momentum_20d,
+                   nasdaq_momentum_5d, nasdaq_momentum_20d, dominant_sectors,
+                   source_event_type, source_session_id
+              FROM lesson_context_snapshot
+             WHERE trading_date = ?
+               AND source_event_type = ?
+             ORDER BY created_at ASC
+             LIMIT 1
+            """,
+            (trading_date, source_event_type),
+        ).fetchone()
+        return _row_to_context_snapshot(row)
+    finally:
+        if own_conn and conn is not None:
+            conn.close()
+
+
+def record_lesson_context_snapshot(
+    snapshot: dict[str, Any],
+    *,
+    conn: sqlite3.Connection | None = None,
+) -> str:
+    own_conn = conn is None
+    if own_conn:
+        init_state_db()
+        conn = _connect_orca()
+    try:
+        snapshot_id = str(snapshot.get("snapshot_id") or f"ctx_{uuid4().hex}")
+        dominant_sectors = snapshot.get("dominant_sectors") or []
+        if isinstance(dominant_sectors, str):
+            dominant_sectors_json = dominant_sectors
+        else:
+            dominant_sectors_json = _json(dominant_sectors) or "[]"
+        conn.execute(
+            """
+            INSERT INTO lesson_context_snapshot (
+                snapshot_id, created_at, trading_date, regime, regime_confidence,
+                vix_level, vix_delta_7d, sp500_momentum_5d, sp500_momentum_20d,
+                nasdaq_momentum_5d, nasdaq_momentum_20d, dominant_sectors,
+                source_event_type, source_session_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                snapshot_id,
+                str(snapshot.get("created_at") or _now_iso()),
+                str(snapshot.get("trading_date") or ""),
+                str(snapshot.get("regime") or "").strip() or None,
+                snapshot.get("regime_confidence"),
+                snapshot.get("vix_level"),
+                snapshot.get("vix_delta_7d"),
+                snapshot.get("sp500_momentum_5d"),
+                snapshot.get("sp500_momentum_20d"),
+                snapshot.get("nasdaq_momentum_5d"),
+                snapshot.get("nasdaq_momentum_20d"),
+                dominant_sectors_json,
+                str(snapshot.get("source_event_type") or "").strip() or None,
+                str(snapshot.get("source_session_id") or "").strip() or None,
+            ),
+        )
+        if own_conn:
+            conn.commit()
+        return snapshot_id
+    finally:
+        if own_conn and conn is not None:
+            conn.close()
 
 
 def record_backtest_pick_results(
