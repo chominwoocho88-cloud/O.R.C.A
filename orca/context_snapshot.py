@@ -16,6 +16,7 @@ except Exception:  # pragma: no cover - degraded runtime fallback
     yf = None
 
 from .paths import BASELINE_FILE
+from . import context_market_data
 from . import state
 
 
@@ -684,71 +685,12 @@ def _fetch_historical_market_data_range(
     max_date: str,
     buffer_days: int = 90,
 ) -> dict[str, list[tuple[str, float]]]:
-    """Fetch and normalize all historical market data needed for backfill."""
-    if yf is None:
-        return {ticker: [] for ticker in MARKET_TICKERS}
-    try:
-        start = datetime.fromisoformat(min_date) - timedelta(days=buffer_days)
-        end = datetime.fromisoformat(max_date) + timedelta(days=1)
-    except ValueError:
-        return {ticker: [] for ticker in MARKET_TICKERS}
-
-    try:
-        batch = yf.download(
-            tickers=list(MARKET_TICKERS),
-            start=start.date().isoformat(),
-            end=end.date().isoformat(),
-            interval="1d",
-            auto_adjust=False,
-            progress=False,
-            threads=True,
-            group_by="ticker",
-        )
-        parsed = _split_downloaded_history(batch, MARKET_TICKERS)
-        if any(parsed.values()):
-            return parsed
-    except Exception:
-        pass
-
-    result: dict[str, list[tuple[str, float]]] = {}
-    for ticker in MARKET_TICKERS:
-        result[ticker] = []
-        for attempt in range(2):
-            try:
-                frame = yf.download(
-                    tickers=ticker,
-                    start=start.date().isoformat(),
-                    end=end.date().isoformat(),
-                    interval="1d",
-                    auto_adjust=False,
-                    progress=False,
-                    threads=False,
-                )
-                result[ticker] = _points_from_frame(frame)
-                break
-            except Exception:
-                if attempt == 0:
-                    time.sleep(0.2)
-    return result
-
-
-def _split_downloaded_history(
-    downloaded: Any,
-    tickers: tuple[str, ...],
-) -> dict[str, list[tuple[str, float]]]:
-    result: dict[str, list[tuple[str, float]]] = {}
-    columns = getattr(downloaded, "columns", None)
-    for ticker in tickers:
-        frame = None
-        if columns is not None and getattr(columns, "nlevels", 1) > 1:
-            try:
-                frame = downloaded[ticker]
-            except Exception:
-                frame = None
-        elif len(tickers) == 1:
-            frame = downloaded
-        result[ticker] = _points_from_frame(frame)
-    return result
+    return context_market_data.fetch_historical_market_data_range(
+        MARKET_TICKERS,
+        min_date,
+        max_date,
+        buffer_days=buffer_days,
+    )
 
 
 def _compute_metrics_for_date(
@@ -792,7 +734,7 @@ def _points_until(points_or_frame: Any, trading_date: str) -> list[tuple[str, fl
     points = (
         points_or_frame
         if isinstance(points_or_frame, list)
-        else _points_from_frame(points_or_frame)
+        else context_market_data._points_from_frame(points_or_frame)
     )
     return [(date, value) for date, value in points if str(date)[:10] <= trading_date]
 
@@ -821,71 +763,7 @@ def _fetch_history_points(
         return []
     if history is None:
         return []
-    columns = getattr(history, "columns", [])
-    close_column = None
-    if "Adj Close" in columns:
-        close_column = "Adj Close"
-    elif "Close" in columns:
-        close_column = "Close"
-    if not close_column:
-        return []
-
-    points: list[tuple[str, float]] = []
-    try:
-        iterator = history.iterrows()
-    except Exception:
-        return []
-    for idx, row in iterator:
-        try:
-            close_value = row.get(close_column)
-        except Exception:
-            close_value = None
-        if close_value is None:
-            continue
-        try:
-            close_float = float(close_value)
-        except Exception:
-            continue
-        if close_float != close_float:
-            continue
-        date_str = idx.date().isoformat() if hasattr(idx, "date") else str(idx)[:10]
-        points.append((date_str, close_float))
-    return points
-
-
-def _points_from_frame(frame: Any) -> list[tuple[str, float]]:
-    if frame is None:
-        return []
-    columns = getattr(frame, "columns", [])
-    close_column = None
-    if "Adj Close" in columns:
-        close_column = "Adj Close"
-    elif "Close" in columns:
-        close_column = "Close"
-    if close_column is None:
-        return []
-
-    points: list[tuple[str, float]] = []
-    try:
-        iterator = frame.iterrows()
-    except Exception:
-        return []
-    for idx, row in iterator:
-        try:
-            close_value = row.get(close_column)
-        except Exception:
-            close_value = None
-        if close_value is None:
-            continue
-        try:
-            close_float = float(close_value)
-        except Exception:
-            continue
-        if close_float != close_float:
-            continue
-        date_str = idx.date().isoformat() if hasattr(idx, "date") else str(idx)[:10]
-        points.append((date_str, close_float))
-    return points
+    return context_market_data._points_from_frame(history)
 
 
 def _latest_close(points: list[tuple[str, float]]) -> float | None:

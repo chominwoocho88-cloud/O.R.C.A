@@ -10,6 +10,7 @@ from unittest.mock import patch
 import pandas as pd
 
 from orca import context_snapshot
+from orca import context_market_data
 from orca import state
 
 
@@ -37,6 +38,23 @@ def _single_ticker_frame(values: list[float]) -> pd.DataFrame:
         {"Close": values},
         index=pd.to_datetime([f"2026-03-{idx + 1:02d}" for idx in range(len(values))]),
     )
+
+
+class _FakeResponse:
+    def __init__(self, text: str, error: Exception | None = None):
+        self.text = text
+        self._error = error
+
+    def raise_for_status(self):
+        if self._error:
+            raise self._error
+
+
+def _alpha_csv(rows: list[tuple[str, float]]) -> str:
+    lines = ["timestamp,open,high,low,close,volume"]
+    for date, close in rows:
+        lines.append(f"{date},{close - 1},{close + 1},{close - 2},{close},1000")
+    return "\n".join(lines)
 
 
 class BackfillLessonContextTests(unittest.TestCase):
@@ -202,7 +220,10 @@ class BackfillLessonContextTests(unittest.TestCase):
                 raise RuntimeError("batch failed")
             return _single_ticker_frame([100, 101, 102, 103, 104, 105])
 
-        with patch.object(context_snapshot, "yf") as fake_yf:
+        with patch.object(context_market_data, "yf") as fake_yf, patch.object(
+            context_market_data.time,
+            "sleep",
+        ):
             fake_yf.download.side_effect = fake_download
             data = context_snapshot._fetch_historical_market_data_range(
                 "2026-03-10",
@@ -221,7 +242,10 @@ class BackfillLessonContextTests(unittest.TestCase):
                 raise RuntimeError("batch failed")
             return _single_ticker_frame([100, 101, 102, 103, 104, 105])
 
-        with patch.object(context_snapshot, "yf") as fake_yf:
+        with patch.object(context_market_data, "yf") as fake_yf, patch.object(
+            context_market_data.time,
+            "sleep",
+        ):
             fake_yf.download.side_effect = fake_download
             context_snapshot._fetch_historical_market_data_range("2026-03-10", "2026-03-10")
 
@@ -431,6 +455,265 @@ class BackfillLessonContextTests(unittest.TestCase):
 
         self.assertEqual(result["lessons_unlinked"], 1)
         self.assertEqual(self._linked_count(), 0)
+
+    def test_yfinance_batch_retry_succeeds_after_429(self):
+        calls = []
+
+        def fake_download(**_kwargs):
+            calls.append(1)
+            if len(calls) < 3:
+                raise RuntimeError("Too Many Requests")
+            return _single_ticker_frame([100, 101, 102])
+
+        with patch.object(context_market_data, "yf") as fake_yf, patch.object(
+            context_market_data.time,
+            "sleep",
+        ) as fake_sleep:
+            fake_yf.download.side_effect = fake_download
+            frame = context_market_data._fetch_yfinance_batch_with_retry(
+                ("XLK",),
+                "2026-03-01",
+                "2026-03-10",
+            )
+
+        self.assertFalse(frame.empty)
+        self.assertEqual(len(calls), 3)
+        fake_sleep.assert_any_call(2)
+        fake_sleep.assert_any_call(8)
+
+    def test_yfinance_batch_retry_max_attempts_raises(self):
+        with patch.object(context_market_data, "yf") as fake_yf, patch.object(
+            context_market_data.time,
+            "sleep",
+        ):
+            fake_yf.download.side_effect = RuntimeError("Too Many Requests")
+            with self.assertRaises(RuntimeError):
+                context_market_data._fetch_yfinance_batch_with_retry(
+                    ("XLK",),
+                    "2026-03-01",
+                    "2026-03-10",
+                )
+
+        self.assertEqual(fake_yf.download.call_count, 3)
+
+    def test_yfinance_ticker_retry_with_backoff(self):
+        calls = []
+
+        def fake_download(**_kwargs):
+            calls.append(1)
+            if len(calls) == 1:
+                raise RuntimeError("rate limit")
+            return _single_ticker_frame([100, 101, 102])
+
+        with patch.object(context_market_data, "yf") as fake_yf, patch.object(
+            context_market_data.time,
+            "sleep",
+        ) as fake_sleep:
+            fake_yf.download.side_effect = fake_download
+            frame = context_market_data._fetch_yfinance_ticker_with_retry(
+                "XLK",
+                "2026-03-01",
+                "2026-03-10",
+            )
+
+        self.assertFalse(frame.empty)
+        self.assertEqual(len(calls), 2)
+        fake_sleep.assert_any_call(1)
+        fake_sleep.assert_any_call(2)
+
+    def test_yfinance_ticker_max_retries(self):
+        with patch.object(context_market_data, "yf") as fake_yf, patch.object(
+            context_market_data.time,
+            "sleep",
+        ):
+            fake_yf.download.side_effect = RuntimeError("rate limit")
+            with self.assertRaises(RuntimeError):
+                context_market_data._fetch_yfinance_ticker_with_retry(
+                    "XLK",
+                    "2026-03-01",
+                    "2026-03-10",
+                )
+
+        self.assertEqual(fake_yf.download.call_count, 3)
+
+    def test_alpha_vantage_fetch_success(self):
+        csv = _alpha_csv(
+            [
+                ("2026-03-03", 100),
+                ("2026-03-04", 101),
+                ("2026-03-05", 102),
+            ]
+        )
+        with patch("requests.get", return_value=_FakeResponse(csv)) as fake_get:
+            frame = context_market_data._fetch_alpha_vantage_history(
+                "XLK",
+                "2026-03-01",
+                "2026-03-10",
+                api_key="key",
+            )
+
+        self.assertEqual(list(frame["Close"]), [100, 101, 102])
+        self.assertEqual(fake_get.call_args.kwargs["params"]["symbol"], "XLK")
+        self.assertEqual(fake_get.call_args.kwargs["params"]["outputsize"], "full")
+
+    def test_alpha_vantage_premium_notice_falls_back_to_compact(self):
+        premium = '{"Information": "premium endpoint"}'
+        compact = _alpha_csv([("2026-03-04", 101)])
+        with patch(
+            "requests.get",
+            side_effect=[_FakeResponse(premium), _FakeResponse(compact)],
+        ) as fake_get:
+            frame = context_market_data._fetch_alpha_vantage_history(
+                "XLK",
+                "2026-03-01",
+                "2026-03-10",
+                api_key="key",
+            )
+
+        self.assertEqual(float(frame.iloc[0]["Close"]), 101.0)
+        output_sizes = [call.kwargs["params"]["outputsize"] for call in fake_get.call_args_list]
+        self.assertEqual(output_sizes, ["full", "compact"])
+
+    def test_alpha_vantage_no_api_key_raises(self):
+        with patch.dict("os.environ", {}, clear=True):
+            with self.assertRaises(ValueError):
+                context_market_data._fetch_alpha_vantage_history(
+                    "XLK",
+                    "2026-03-01",
+                    "2026-03-10",
+                )
+
+    def test_alpha_vantage_ticker_mapping(self):
+        self.assertEqual(context_market_data._alpha_vantage_ticker("^VIX"), "VIXY")
+        self.assertEqual(context_market_data._alpha_vantage_ticker("^GSPC"), "SPY")
+        self.assertEqual(context_market_data._alpha_vantage_ticker("^IXIC"), "QQQ")
+        self.assertEqual(context_market_data._alpha_vantage_ticker("XLK"), "XLK")
+
+    def test_alpha_vantage_csv_parsing_and_date_filter(self):
+        csv = _alpha_csv(
+            [
+                ("2026-02-28", 99),
+                ("2026-03-03", 100),
+                ("2026-03-04", 101),
+                ("2026-03-20", 110),
+            ]
+        )
+
+        frame = context_market_data._parse_alpha_vantage_csv(
+            csv,
+            "2026-03-01",
+            "2026-03-10",
+        )
+
+        self.assertEqual(list(frame["Close"]), [100, 101])
+        self.assertEqual(frame.index[0].strftime("%Y-%m-%d"), "2026-03-03")
+
+    def test_fetch_with_fallback_uses_yfinance_first(self):
+        frame = _single_ticker_frame([100, 101])
+        with patch.object(
+            context_market_data,
+            "_fetch_yfinance_ticker_with_retry",
+            return_value=frame,
+        ), patch.object(context_market_data, "_fetch_alpha_vantage_with_retry") as alpha:
+            result, source = context_market_data._fetch_with_fallback(
+                "XLK",
+                "2026-03-01",
+                "2026-03-10",
+                av_api_key="key",
+            )
+
+        self.assertIs(result, frame)
+        self.assertEqual(source, "yfinance_ticker")
+        alpha.assert_not_called()
+
+    def test_fetch_with_fallback_uses_alpha_vantage_when_yfinance_fails(self):
+        frame = _single_ticker_frame([100, 101])
+        with patch.object(
+            context_market_data,
+            "_fetch_yfinance_ticker_with_retry",
+            side_effect=RuntimeError("rate limit"),
+        ), patch.object(
+            context_market_data,
+            "_fetch_alpha_vantage_with_retry",
+            return_value=frame,
+        ):
+            result, source = context_market_data._fetch_with_fallback(
+                "XLK",
+                "2026-03-01",
+                "2026-03-10",
+                av_api_key="key",
+            )
+
+        self.assertIs(result, frame)
+        self.assertEqual(source, "alpha_vantage")
+
+    def test_fetch_with_fallback_no_api_key_skips_alpha_vantage(self):
+        with patch.object(
+            context_market_data,
+            "_fetch_yfinance_ticker_with_retry",
+            side_effect=RuntimeError("rate limit"),
+        ), patch.object(context_market_data, "_fetch_alpha_vantage_with_retry") as alpha:
+            result, source = context_market_data._fetch_with_fallback(
+                "XLK",
+                "2026-03-01",
+                "2026-03-10",
+                av_api_key=None,
+            )
+
+        self.assertIsNone(result)
+        self.assertIsNone(source)
+        alpha.assert_not_called()
+
+    def test_fetch_with_fallback_returns_none_when_both_fail(self):
+        with patch.object(
+            context_market_data,
+            "_fetch_yfinance_ticker_with_retry",
+            side_effect=RuntimeError("rate limit"),
+        ), patch.object(
+            context_market_data,
+            "_fetch_alpha_vantage_with_retry",
+            side_effect=RuntimeError("api limit"),
+        ):
+            result, source = context_market_data._fetch_with_fallback(
+                "XLK",
+                "2026-03-01",
+                "2026-03-10",
+                av_api_key="key",
+            )
+
+        self.assertIsNone(result)
+        self.assertIsNone(source)
+
+    def test_source_tracking_counters_accurate(self):
+        frame = _single_ticker_frame([100, 101, 102])
+
+        def fake_fallback(ticker: str, *_args, **_kwargs):
+            if ticker == "^VIX":
+                return frame, "yfinance_ticker"
+            if ticker == "^GSPC":
+                return frame, "alpha_vantage"
+            return None, None
+
+        with patch.object(
+            context_market_data,
+            "_fetch_yfinance_batch_with_retry",
+            side_effect=RuntimeError("batch failed"),
+        ), patch.object(
+            context_market_data,
+            "_fetch_with_fallback",
+            side_effect=fake_fallback,
+        ), patch("builtins.print") as fake_print:
+            data = context_snapshot._fetch_historical_market_data_range(
+                "2026-03-10",
+                "2026-03-10",
+            )
+
+        self.assertTrue(data["^VIX"])
+        self.assertTrue(data["^GSPC"])
+        printed = "\n".join(str(call.args[0]) for call in fake_print.call_args_list)
+        self.assertIn("yfinance_ticker_success=1", printed)
+        self.assertIn("alpha_vantage_success=1", printed)
+        self.assertIn("failed=12", printed)
 
 
 if __name__ == "__main__":
