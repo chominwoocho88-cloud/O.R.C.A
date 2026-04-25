@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import time
+from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -17,7 +19,17 @@ from .paths import BASELINE_FILE
 from . import state
 
 
-VALID_SOURCE_EVENT_TYPES = {"live", "backtest", "walk_forward", "scan", "hunt", "shadow"}
+VALID_SOURCE_EVENT_TYPES = {
+    "live",
+    "backtest",
+    "backtest_backfill",
+    "walk_forward",
+    "scan",
+    "hunt",
+    "shadow",
+}
+
+BACKFILL_SOURCE_EVENT_TYPE = "backtest_backfill"
 
 SECTOR_ETFS = {
     "XLK": "Technology",
@@ -33,6 +45,7 @@ SECTOR_ETFS = {
     "XLC": "Communication Services",
 }
 
+MARKET_TICKERS = ("^VIX", "^GSPC", "^IXIC", *SECTOR_ETFS.keys())
 _LOOKBACK_BUFFER_DAYS = 90
 
 
@@ -258,6 +271,340 @@ def _compute_dominant_sectors(trading_date: str, top_n: int = 3) -> list[str]:
     return [label for label, _score in scored[:top_n]]
 
 
+def backfill_lessons_context(
+    limit: int | None = None,
+    skip_existing: bool = True,
+    dry_run: bool = False,
+    verbose: bool = False,
+    conn: sqlite3.Connection | None = None,
+) -> dict[str, Any]:
+    """Backfill context snapshots for existing backtest lessons.
+
+    ``limit`` is measured in distinct trading dates, not lessons. Dry-run mode
+    avoids both DB writes and network calls.
+    """
+    started = time.time()
+    own_conn = conn is None
+    if own_conn:
+        state.init_state_db()
+        conn = state._connect_orca()
+
+    try:
+        groups = _load_backfill_lesson_groups(conn, skip_existing=skip_existing)
+        total_lessons = _count_backtest_lessons(conn)
+        sorted_dates = sorted(groups)
+        if limit is not None:
+            sorted_dates = sorted_dates[: max(0, int(limit))]
+
+        selected_lesson_total = sum(len(groups[date]["lesson_ids"]) for date in sorted_dates)
+        summary: dict[str, Any] = {
+            "lessons_total": total_lessons,
+            "lessons_processed": 0,
+            "lessons_skipped": total_lessons,
+            "snapshots_created": 0,
+            "snapshots_reused": 0,
+            "failed_dates": [],
+            "duration_seconds": 0.0,
+            "dates_total": len(groups),
+            "dates_processed": 0,
+            "dry_run": bool(dry_run),
+        }
+
+        if verbose:
+            print(f"Backfill target dates: {len(sorted_dates)} / {len(groups)}")
+            print(f"Backfill target lessons: {selected_lesson_total} / {total_lessons}")
+
+        if dry_run or not sorted_dates:
+            existing_count = 0
+            for trading_date in sorted_dates:
+                if state.find_lesson_context_snapshot(
+                    trading_date,
+                    BACKFILL_SOURCE_EVENT_TYPE,
+                    conn=conn,
+                ):
+                    existing_count += 1
+            summary["snapshots_reused"] = existing_count
+            summary["snapshots_created"] = len(sorted_dates) - existing_count
+            summary["lessons_processed"] = selected_lesson_total
+            summary["lessons_skipped"] = total_lessons - selected_lesson_total
+            summary["dates_processed"] = len(sorted_dates)
+            summary["duration_seconds"] = round(time.time() - started, 3)
+            return summary
+
+        cached_data = _fetch_historical_market_data_range(sorted_dates[0], sorted_dates[-1])
+
+        for index, trading_date in enumerate(sorted_dates, start=1):
+            group = groups[trading_date]
+            lesson_ids = group["lesson_ids"]
+            try:
+                existing = None
+                if skip_existing:
+                    existing = state.find_lesson_context_snapshot(
+                        trading_date,
+                        BACKFILL_SOURCE_EVENT_TYPE,
+                        conn=conn,
+                    )
+                if existing:
+                    snapshot_id = str(existing["snapshot_id"])
+                    summary["snapshots_reused"] += 1
+                else:
+                    metrics = _compute_metrics_for_date(trading_date, cached_data)
+                    snapshot_id = state.record_lesson_context_snapshot(
+                        {
+                            "snapshot_id": f"ctx_{uuid4().hex}",
+                            "created_at": datetime.now().isoformat(),
+                            "trading_date": trading_date,
+                            "regime": group.get("regime"),
+                            "regime_confidence": None,
+                            **metrics,
+                            "source_event_type": BACKFILL_SOURCE_EVENT_TYPE,
+                            "source_session_id": group.get("source_session_id"),
+                        },
+                        conn=conn,
+                    )
+                    summary["snapshots_created"] += 1
+
+                _update_lessons_context_snapshot(conn, lesson_ids, snapshot_id)
+                summary["lessons_processed"] += len(lesson_ids)
+                summary["dates_processed"] += 1
+                if verbose:
+                    print(
+                        f"[{index}/{len(sorted_dates)}] {trading_date}: "
+                        f"{len(lesson_ids)} lessons -> {snapshot_id}"
+                    )
+            except Exception as exc:
+                summary["failed_dates"].append(
+                    {"date": trading_date, "reason": f"{type(exc).__name__}: {exc}"}
+                )
+                if verbose:
+                    print(f"[{index}/{len(sorted_dates)}] {trading_date}: failed ({exc})")
+
+        summary["lessons_skipped"] = total_lessons - summary["lessons_processed"]
+        summary["duration_seconds"] = round(time.time() - started, 3)
+        if own_conn:
+            conn.commit()
+        return summary
+    finally:
+        if own_conn and conn is not None:
+            conn.close()
+
+
+def _count_backtest_lessons(conn: sqlite3.Connection) -> int:
+    return int(
+        conn.execute(
+            """
+            SELECT COUNT(*)
+              FROM candidate_lessons l
+              JOIN candidate_registry c
+                ON c.candidate_id = l.candidate_id
+             WHERE c.source_event_type = 'backtest'
+            """
+        ).fetchone()[0]
+    )
+
+
+def _load_backfill_lesson_groups(
+    conn: sqlite3.Connection,
+    *,
+    skip_existing: bool,
+) -> dict[str, dict[str, Any]]:
+    query = """
+        SELECT l.lesson_id,
+               l.lesson_json,
+               l.context_snapshot_id,
+               c.analysis_date,
+               c.source_session_id
+          FROM candidate_lessons l
+          JOIN candidate_registry c
+            ON c.candidate_id = l.candidate_id
+         WHERE c.source_event_type = 'backtest'
+    """
+    if skip_existing:
+        query += " AND l.context_snapshot_id IS NULL"
+    query += " ORDER BY c.analysis_date ASC, l.lesson_id ASC"
+
+    grouped: dict[str, dict[str, Any]] = {}
+    for row in conn.execute(query).fetchall():
+        payload = _safe_json(row["lesson_json"])
+        trading_date = str(
+            payload.get("analysis_date") or row["analysis_date"] or ""
+        ).strip()[:10]
+        if not trading_date:
+            continue
+        group = grouped.setdefault(
+            trading_date,
+            {
+                "lesson_ids": [],
+                "regimes": Counter(),
+                "source_session_ids": Counter(),
+            },
+        )
+        group["lesson_ids"].append(str(row["lesson_id"]))
+        regime = _normalize_regime_value(payload.get("regime"))
+        if regime:
+            group["regimes"][regime] += 1
+        source_session_id = str(row["source_session_id"] or "").strip()
+        if source_session_id:
+            group["source_session_ids"][source_session_id] += 1
+
+    for group in grouped.values():
+        group["regime"] = _counter_mode(group.pop("regimes"))
+        group["source_session_id"] = _counter_mode(group.pop("source_session_ids"))
+    return grouped
+
+
+def _counter_mode(counter: Counter) -> str | None:
+    if not counter:
+        return None
+    return counter.most_common(1)[0][0]
+
+
+def _safe_json(value: Any) -> dict[str, Any]:
+    if not value:
+        return {}
+    try:
+        decoded = json.loads(value)
+    except Exception:
+        return {}
+    return decoded if isinstance(decoded, dict) else {}
+
+
+def _update_lessons_context_snapshot(
+    conn: sqlite3.Connection,
+    lesson_ids: list[str],
+    snapshot_id: str,
+) -> None:
+    if not lesson_ids:
+        return
+    placeholders = ", ".join("?" for _ in lesson_ids)
+    conn.execute(
+        f"""
+        UPDATE candidate_lessons
+           SET context_snapshot_id = ?
+         WHERE lesson_id IN ({placeholders})
+        """,
+        [snapshot_id, *lesson_ids],
+    )
+
+
+def _fetch_historical_market_data_range(
+    min_date: str,
+    max_date: str,
+    buffer_days: int = 90,
+) -> dict[str, list[tuple[str, float]]]:
+    """Fetch and normalize all historical market data needed for backfill."""
+    if yf is None:
+        return {ticker: [] for ticker in MARKET_TICKERS}
+    try:
+        start = datetime.fromisoformat(min_date) - timedelta(days=buffer_days)
+        end = datetime.fromisoformat(max_date) + timedelta(days=1)
+    except ValueError:
+        return {ticker: [] for ticker in MARKET_TICKERS}
+
+    try:
+        batch = yf.download(
+            tickers=list(MARKET_TICKERS),
+            start=start.date().isoformat(),
+            end=end.date().isoformat(),
+            interval="1d",
+            auto_adjust=False,
+            progress=False,
+            threads=True,
+            group_by="ticker",
+        )
+        parsed = _split_downloaded_history(batch, MARKET_TICKERS)
+        if any(parsed.values()):
+            return parsed
+    except Exception:
+        pass
+
+    result: dict[str, list[tuple[str, float]]] = {}
+    for ticker in MARKET_TICKERS:
+        result[ticker] = []
+        for attempt in range(2):
+            try:
+                frame = yf.download(
+                    tickers=ticker,
+                    start=start.date().isoformat(),
+                    end=end.date().isoformat(),
+                    interval="1d",
+                    auto_adjust=False,
+                    progress=False,
+                    threads=False,
+                )
+                result[ticker] = _points_from_frame(frame)
+                break
+            except Exception:
+                if attempt == 0:
+                    time.sleep(0.2)
+    return result
+
+
+def _split_downloaded_history(
+    downloaded: Any,
+    tickers: tuple[str, ...],
+) -> dict[str, list[tuple[str, float]]]:
+    result: dict[str, list[tuple[str, float]]] = {}
+    columns = getattr(downloaded, "columns", None)
+    for ticker in tickers:
+        frame = None
+        if columns is not None and getattr(columns, "nlevels", 1) > 1:
+            try:
+                frame = downloaded[ticker]
+            except Exception:
+                frame = None
+        elif len(tickers) == 1:
+            frame = downloaded
+        result[ticker] = _points_from_frame(frame)
+    return result
+
+
+def _compute_metrics_for_date(
+    trading_date: str,
+    cached_data: dict[str, Any],
+) -> dict[str, Any]:
+    """Compute snapshot metrics from cached data without network calls."""
+    vix_points = _points_until(cached_data.get("^VIX", []), trading_date)
+    sp_points = _points_until(cached_data.get("^GSPC", []), trading_date)
+    nq_points = _points_until(cached_data.get("^IXIC", []), trading_date)
+    return {
+        "vix_level": _latest_close(vix_points),
+        "vix_delta_7d": _absolute_delta(vix_points, 7),
+        "sp500_momentum_5d": _percent_change(sp_points, 5),
+        "sp500_momentum_20d": _percent_change(sp_points, 20),
+        "nasdaq_momentum_5d": _percent_change(nq_points, 5),
+        "nasdaq_momentum_20d": _percent_change(nq_points, 20),
+        "dominant_sectors": _compute_dominant_sectors_from_cache(
+            trading_date,
+            cached_data,
+        ),
+    }
+
+
+def _compute_dominant_sectors_from_cache(
+    trading_date: str,
+    cached_data: dict[str, Any],
+    top_n: int = 3,
+) -> list[str]:
+    scored: list[tuple[str, float]] = []
+    for ticker, label in SECTOR_ETFS.items():
+        points = _points_until(cached_data.get(ticker, []), trading_date)
+        change = _percent_change(points, 5)
+        if change is not None and change > 0:
+            scored.append((label, change))
+    scored.sort(key=lambda item: item[1], reverse=True)
+    return [label for label, _score in scored[:top_n]]
+
+
+def _points_until(points_or_frame: Any, trading_date: str) -> list[tuple[str, float]]:
+    points = (
+        points_or_frame
+        if isinstance(points_or_frame, list)
+        else _points_from_frame(points_or_frame)
+    )
+    return [(date, value) for date, value in points if str(date)[:10] <= trading_date]
+
+
 def _fetch_history_points(
     ticker: str,
     trading_date: str,
@@ -294,6 +641,41 @@ def _fetch_history_points(
     points: list[tuple[str, float]] = []
     try:
         iterator = history.iterrows()
+    except Exception:
+        return []
+    for idx, row in iterator:
+        try:
+            close_value = row.get(close_column)
+        except Exception:
+            close_value = None
+        if close_value is None:
+            continue
+        try:
+            close_float = float(close_value)
+        except Exception:
+            continue
+        if close_float != close_float:
+            continue
+        date_str = idx.date().isoformat() if hasattr(idx, "date") else str(idx)[:10]
+        points.append((date_str, close_float))
+    return points
+
+
+def _points_from_frame(frame: Any) -> list[tuple[str, float]]:
+    if frame is None:
+        return []
+    columns = getattr(frame, "columns", [])
+    close_column = None
+    if "Adj Close" in columns:
+        close_column = "Adj Close"
+    elif "Close" in columns:
+        close_column = "Close"
+    if close_column is None:
+        return []
+
+    points: list[tuple[str, float]] = []
+    try:
+        iterator = frame.iterrows()
     except Exception:
         return []
     for idx, row in iterator:
