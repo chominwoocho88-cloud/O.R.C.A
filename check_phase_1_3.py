@@ -1,0 +1,10 @@
+﻿import sqlite3
+conn = sqlite3.connect('data/orca_state.db')
+print('Snapshots:', conn.execute('SELECT COUNT(*) FROM lesson_context_snapshot').fetchone()[0])
+print('Backfill snapshots:', conn.execute("SELECT COUNT(*) FROM lesson_context_snapshot WHERE source_event_type='backtest_backfill'").fetchone()[0])
+print('Linked:', conn.execute('SELECT COUNT(*) FROM candidate_lessons WHERE context_snapshot_id IS NOT NULL').fetchone()[0])
+print('Unlinked:', conn.execute('SELECT COUNT(*) FROM candidate_lessons WHERE context_snapshot_id IS NULL').fetchone()[0])
+print('VIX filled:', conn.execute('SELECT COUNT(*) FROM lesson_context_snapshot WHERE vix_level IS NOT NULL').fetchone()[0])
+print('SP500 5d filled:', conn.execute('SELECT COUNT(*) FROM lesson_context_snapshot WHERE sp500_momentum_5d IS NOT NULL').fetchone()[0])
+print('Sectors filled:', conn.execute("SELECT COUNT(*) FROM lesson_context_snapshot WHERE dominant_sectors != '[]'").fetchone()[0])
+conn.close()

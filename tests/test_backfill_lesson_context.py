@@ -25,10 +25,10 @@ def _cached_market_data() -> dict[str, list[tuple[str, float]]]:
         "^IXIC": _points([200 + idx for idx in range(30)]),
     }
     for ticker in context_snapshot.SECTOR_ETFS:
-        cache[ticker] = _points([100, 100, 100, 100, 100, 101])
-    cache["XLK"] = _points([100, 100, 100, 100, 100, 120])
-    cache["XLE"] = _points([100, 100, 100, 100, 100, 115])
-    cache["XLV"] = _points([100, 100, 100, 100, 100, 110])
+        cache[ticker] = _points([100 + idx for idx in range(30)])
+    cache["XLK"] = _points([100 + idx * 4 for idx in range(30)])
+    cache["XLE"] = _points([100 + idx * 3 for idx in range(30)])
+    cache["XLV"] = _points([100 + idx * 2 for idx in range(30)])
     return cache
 
 
@@ -105,7 +105,7 @@ class BackfillLessonContextTests(unittest.TestCase):
             ).fetchone()[0]
 
     def test_backfill_dry_run_no_db_changes(self):
-        self._seed_backtest_lesson("2026-03-10", "AAA")
+        self._seed_backtest_lesson("2026-03-25", "AAA")
         with patch.object(context_snapshot, "_fetch_historical_market_data_range") as fetch:
             result = context_snapshot.backfill_lessons_context(dry_run=True)
 
@@ -311,6 +311,126 @@ class BackfillLessonContextTests(unittest.TestCase):
         with state._connect_orca() as conn:
             row = conn.execute("SELECT regime FROM lesson_context_snapshot").fetchone()
         self.assertEqual(row["regime"], "위험회피")
+
+    def test_verify_backfill_completeness_passes_when_complete(self):
+        self._seed_backtest_lesson("2026-03-25", "AAA")
+        with patch.object(
+            context_snapshot,
+            "_fetch_historical_market_data_range",
+            return_value=_cached_market_data(),
+        ):
+            context_snapshot.backfill_lessons_context()
+
+        result = context_snapshot.verify_backfill_completeness(
+            expected_snapshots=1,
+            expected_linked_lessons=1,
+            require_market_metrics=True,
+        )
+
+        self.assertTrue(result["passed"], result["failures"])
+        self.assertEqual(result["snapshots_backfill"], 1)
+        self.assertEqual(result["lessons_linked"], 1)
+        self.assertEqual(result["lessons_unlinked"], 0)
+        self.assertEqual(result["vix_filled"], 1)
+        self.assertEqual(result["sectors_filled"], 1)
+
+    def test_verify_backfill_completeness_fails_when_missing_metrics(self):
+        self._seed_backtest_lesson("2026-03-10", "AAA")
+        with patch.object(
+            context_snapshot,
+            "_fetch_historical_market_data_range",
+            return_value={},
+        ):
+            context_snapshot.backfill_lessons_context()
+
+        result = context_snapshot.verify_backfill_completeness(
+            expected_snapshots=1,
+            expected_linked_lessons=1,
+            require_market_metrics=True,
+        )
+
+        self.assertFalse(result["passed"])
+        self.assertTrue(
+            any("vix_level" in failure for failure in result["failures"]),
+            result["failures"],
+        )
+        self.assertTrue(
+            any("dominant_sectors" in failure for failure in result["failures"]),
+            result["failures"],
+        )
+
+    def test_verify_backfill_completeness_fails_when_unlinked_lessons(self):
+        self._seed_backtest_lesson("2026-03-10", "AAA")
+
+        result = context_snapshot.verify_backfill_completeness(
+            expected_snapshots=0,
+            expected_linked_lessons=0,
+            require_market_metrics=False,
+        )
+
+        self.assertFalse(result["passed"])
+        self.assertTrue(
+            any("unlinked backtest lessons remain" in failure for failure in result["failures"]),
+            result["failures"],
+        )
+
+    def test_cleanup_backfill_data_removes_backfill_snapshots(self):
+        self._seed_backtest_lesson("2026-03-10", "AAA")
+        with patch.object(
+            context_snapshot,
+            "_fetch_historical_market_data_range",
+            return_value=_cached_market_data(),
+        ):
+            context_snapshot.backfill_lessons_context()
+
+        result = context_snapshot.cleanup_backfill_data()
+
+        self.assertEqual(result["snapshots_deleted"], 1)
+        self.assertEqual(self._context_count(), 0)
+
+    def test_cleanup_backfill_data_preserves_live_snapshots(self):
+        with state._connect_orca() as conn:
+            state.record_lesson_context_snapshot(
+                {
+                    "snapshot_id": "ctx_live_1",
+                    "created_at": "2026-03-10T09:00:00",
+                    "trading_date": "2026-03-10",
+                    "regime": "risk_on",
+                    "regime_confidence": 0.7,
+                    "vix_level": 18.0,
+                    "vix_delta_7d": -1.2,
+                    "sp500_momentum_5d": 1.0,
+                    "sp500_momentum_20d": 3.0,
+                    "nasdaq_momentum_5d": 1.5,
+                    "nasdaq_momentum_20d": 4.0,
+                    "dominant_sectors": '["Technology"]',
+                    "source_event_type": "live",
+                    "source_session_id": "live_session",
+                },
+                conn=conn,
+            )
+
+        result = context_snapshot.cleanup_backfill_data()
+
+        self.assertEqual(result["snapshots_deleted"], 0)
+        with state._connect_orca() as conn:
+            live = state.get_lesson_context_snapshot("ctx_live_1", conn=conn)
+        self.assertIsNotNone(live)
+        self.assertEqual(self._context_count(), 1)
+
+    def test_cleanup_backfill_data_unlinks_lessons(self):
+        self._seed_backtest_lesson("2026-03-10", "AAA")
+        with patch.object(
+            context_snapshot,
+            "_fetch_historical_market_data_range",
+            return_value=_cached_market_data(),
+        ):
+            context_snapshot.backfill_lessons_context()
+
+        result = context_snapshot.cleanup_backfill_data()
+
+        self.assertEqual(result["lessons_unlinked"], 1)
+        self.assertEqual(self._linked_count(), 0)
 
 
 if __name__ == "__main__":

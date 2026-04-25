@@ -389,6 +389,198 @@ def backfill_lessons_context(
             conn.close()
 
 
+def verify_backfill_completeness(
+    expected_snapshots: int = 252,
+    expected_linked_lessons: int = 1260,
+    require_market_metrics: bool = True,
+    conn: sqlite3.Connection | None = None,
+) -> dict[str, Any]:
+    """Verify that Wave F Phase 1.3 backfill produced complete data."""
+    own_conn = conn is None
+    if own_conn:
+        state.init_state_db()
+        conn = state._connect_orca()
+    try:
+        snapshots_backfill = int(
+            conn.execute(
+                """
+                SELECT COUNT(*)
+                  FROM lesson_context_snapshot
+                 WHERE source_event_type = ?
+                """,
+                (BACKFILL_SOURCE_EVENT_TYPE,),
+            ).fetchone()[0]
+        )
+        snapshots_total = int(
+            conn.execute("SELECT COUNT(*) FROM lesson_context_snapshot").fetchone()[0]
+        )
+        lessons_linked = int(
+            conn.execute(
+                """
+                SELECT COUNT(*)
+                  FROM candidate_lessons l
+                  JOIN candidate_registry c
+                    ON c.candidate_id = l.candidate_id
+                 WHERE c.source_event_type = 'backtest'
+                   AND l.context_snapshot_id IS NOT NULL
+                """
+            ).fetchone()[0]
+        )
+        lessons_unlinked = int(
+            conn.execute(
+                """
+                SELECT COUNT(*)
+                  FROM candidate_lessons l
+                  JOIN candidate_registry c
+                    ON c.candidate_id = l.candidate_id
+                 WHERE c.source_event_type = 'backtest'
+                   AND l.context_snapshot_id IS NULL
+                """
+            ).fetchone()[0]
+        )
+        metric_counts = _backfill_metric_counts(conn)
+
+        failures: list[str] = []
+        if snapshots_backfill < expected_snapshots:
+            failures.append(
+                f"backtest_backfill snapshots {snapshots_backfill} < {expected_snapshots}"
+            )
+        if lessons_linked < expected_linked_lessons:
+            failures.append(
+                f"linked backtest lessons {lessons_linked} < {expected_linked_lessons}"
+            )
+        if lessons_unlinked != 0:
+            failures.append(f"unlinked backtest lessons remain: {lessons_unlinked}")
+
+        if require_market_metrics:
+            required_metrics = {
+                "vix_filled": "vix_level",
+                "sp500_5d_filled": "sp500_momentum_5d",
+                "sp500_20d_filled": "sp500_momentum_20d",
+                "nasdaq_5d_filled": "nasdaq_momentum_5d",
+                "nasdaq_20d_filled": "nasdaq_momentum_20d",
+                "sectors_filled": "dominant_sectors",
+            }
+            for key, label in required_metrics.items():
+                if metric_counts[key] < snapshots_backfill:
+                    failures.append(
+                        f"{label} filled {metric_counts[key]} < snapshots {snapshots_backfill}"
+                    )
+
+        return {
+            "passed": not failures,
+            "failures": failures,
+            "snapshots_total": snapshots_total,
+            "snapshots_backfill": snapshots_backfill,
+            "lessons_linked": lessons_linked,
+            "lessons_unlinked": lessons_unlinked,
+            **metric_counts,
+        }
+    finally:
+        if own_conn and conn is not None:
+            conn.close()
+
+
+def cleanup_backfill_data(
+    conn: sqlite3.Connection | None = None,
+    verbose: bool = False,
+) -> dict[str, int]:
+    """Remove Phase 1.3 backfill data while preserving schema and live snapshots."""
+    own_conn = conn is None
+    if own_conn:
+        state.init_state_db()
+        conn = state._connect_orca()
+    try:
+        lessons_unlinked = int(
+            conn.execute(
+                """
+                SELECT COUNT(*)
+                  FROM candidate_lessons
+                 WHERE context_snapshot_id IN (
+                       SELECT snapshot_id
+                         FROM lesson_context_snapshot
+                        WHERE source_event_type = ?
+                 )
+                """,
+                (BACKFILL_SOURCE_EVENT_TYPE,),
+            ).fetchone()[0]
+        )
+        snapshots_deleted = int(
+            conn.execute(
+                """
+                SELECT COUNT(*)
+                  FROM lesson_context_snapshot
+                 WHERE source_event_type = ?
+                """,
+                (BACKFILL_SOURCE_EVENT_TYPE,),
+            ).fetchone()[0]
+        )
+        conn.execute(
+            """
+            UPDATE candidate_lessons
+               SET context_snapshot_id = NULL
+             WHERE context_snapshot_id IN (
+                   SELECT snapshot_id
+                     FROM lesson_context_snapshot
+                    WHERE source_event_type = ?
+             )
+            """,
+            (BACKFILL_SOURCE_EVENT_TYPE,),
+        )
+        conn.execute(
+            """
+            DELETE FROM lesson_context_snapshot
+             WHERE source_event_type = ?
+            """,
+            (BACKFILL_SOURCE_EVENT_TYPE,),
+        )
+        if own_conn:
+            conn.commit()
+        if verbose:
+            print(f"Unlinked lessons: {lessons_unlinked}")
+            print(f"Deleted snapshots: {snapshots_deleted}")
+        return {
+            "lessons_unlinked": lessons_unlinked,
+            "snapshots_deleted": snapshots_deleted,
+        }
+    finally:
+        if own_conn and conn is not None:
+            conn.close()
+
+
+def _backfill_metric_counts(conn: sqlite3.Connection) -> dict[str, int]:
+    row = conn.execute(
+        """
+        SELECT
+            SUM(CASE WHEN vix_level IS NOT NULL THEN 1 ELSE 0 END) AS vix_filled,
+            SUM(CASE WHEN sp500_momentum_5d IS NOT NULL THEN 1 ELSE 0 END) AS sp500_5d_filled,
+            SUM(CASE WHEN sp500_momentum_20d IS NOT NULL THEN 1 ELSE 0 END) AS sp500_20d_filled,
+            SUM(CASE WHEN nasdaq_momentum_5d IS NOT NULL THEN 1 ELSE 0 END) AS nasdaq_5d_filled,
+            SUM(CASE WHEN nasdaq_momentum_20d IS NOT NULL THEN 1 ELSE 0 END) AS nasdaq_20d_filled,
+            SUM(
+                CASE
+                    WHEN dominant_sectors IS NOT NULL
+                     AND dominant_sectors != ''
+                     AND dominant_sectors != '[]'
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS sectors_filled
+          FROM lesson_context_snapshot
+         WHERE source_event_type = ?
+        """,
+        (BACKFILL_SOURCE_EVENT_TYPE,),
+    ).fetchone()
+    return {
+        "vix_filled": int(row["vix_filled"] or 0),
+        "sp500_5d_filled": int(row["sp500_5d_filled"] or 0),
+        "sp500_20d_filled": int(row["sp500_20d_filled"] or 0),
+        "nasdaq_5d_filled": int(row["nasdaq_5d_filled"] or 0),
+        "nasdaq_20d_filled": int(row["nasdaq_20d_filled"] or 0),
+        "sectors_filled": int(row["sectors_filled"] or 0),
+    }
+
+
 def _count_backtest_lessons(conn: sqlite3.Connection) -> int:
     return int(
         conn.execute(
