@@ -60,6 +60,10 @@ def retrieve_similar_lessons(
         if not target_cluster_id:
             return []
         lessons = _fetch_candidate_lessons(conn, target_cluster_id, as_of_date=as_of_date)
+        archive_by_lesson = _archive_lookup_for_lessons(
+            conn,
+            [lesson.get("lesson_id") for lesson in lessons],
+        )
         return _rank_lessons(
             lessons,
             target_cluster_id=target_cluster_id,
@@ -70,6 +74,7 @@ def retrieve_similar_lessons(
             signal_filter=signal_family,
             as_of_date=as_of_date,
             recency_decay_days=recency_decay_days,
+            archive_by_lesson=archive_by_lesson,
         )
     finally:
         if own_conn and conn is not None:
@@ -290,6 +295,46 @@ def _filter_by_signal(lessons: list[dict[str, Any]], target_family: str | None) 
     return [lesson for lesson in lessons if lesson.get("signal_family") == target_family]
 
 
+def _archive_lookup_for_lessons(
+    conn: sqlite3.Connection,
+    lesson_ids: list[Any],
+) -> dict[str, dict[str, Any]]:
+    """Load latest archive scores for candidate lessons when an archive exists."""
+    clean_ids = sorted({str(lesson_id) for lesson_id in lesson_ids if lesson_id})
+    if not clean_ids:
+        return {}
+    run_id = state.get_latest_archive_run_id(conn)
+    if not run_id:
+        return {}
+    placeholders = ", ".join("?" for _ in clean_ids)
+    rows = conn.execute(
+        f"""
+        SELECT lesson_id, run_id, quality_tier, quality_score,
+               outcome_percentile, win_score, speed_score, signal_score,
+               cluster_fit_score
+          FROM lesson_archive
+         WHERE run_id = ?
+           AND lesson_id IN ({placeholders})
+        """,
+        (run_id, *clean_ids),
+    ).fetchall()
+    archive_by_lesson: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        lesson_id = str(_row_value(row, "lesson_id", 0))
+        archive_by_lesson[lesson_id] = {
+            "lesson_id": lesson_id,
+            "archive_run_id": _row_value(row, "run_id", 1),
+            "quality_tier": _row_value(row, "quality_tier", 2),
+            "quality_score": _row_value(row, "quality_score", 3),
+            "outcome_percentile": _row_value(row, "outcome_percentile", 4),
+            "win_score": _row_value(row, "win_score", 5),
+            "speed_score": _row_value(row, "speed_score", 6),
+            "archive_signal_score": _row_value(row, "signal_score", 7),
+            "cluster_fit_score": _row_value(row, "cluster_fit_score", 8),
+        }
+    return archive_by_lesson
+
+
 def _rank_lessons(
     lessons: list[dict[str, Any]],
     *,
@@ -301,11 +346,18 @@ def _rank_lessons(
     signal_filter: str | None,
     as_of_date: str | None,
     recency_decay_days: float | None,
+    archive_by_lesson: dict[str, dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     all_values = [float(item["lesson_value"]) for item in lessons if item.get("lesson_value") is not None]
     ranked = []
     for item in lessons:
-        quality_score = _calculate_quality_score(item.get("lesson_value"), all_values)
+        archive = (archive_by_lesson or {}).get(str(item.get("lesson_id")))
+        if archive:
+            quality_score = float(archive.get("quality_score") or 0.5)
+            quality_tier = str(archive.get("quality_tier") or _classify_quality_tier(quality_score))
+        else:
+            quality_score = _calculate_quality_score(item.get("lesson_value"), all_values)
+            quality_tier = _classify_quality_tier(quality_score)
         context_score = _calculate_context_score(
             item.get("cluster_id") or "",
             target_cluster_id,
@@ -330,12 +382,18 @@ def _rank_lessons(
                 "ticker": payload.get("ticker") or item.get("ticker"),
                 "signal_family": item.get("signal_family") or payload.get("signal_family"),
                 "lesson_value": item.get("lesson_value"),
-                "quality_tier": _classify_quality_tier(quality_score),
+                "quality_tier": quality_tier,
                 "relevance_score": relevance_score,
                 "quality_score": quality_score,
                 "context_score": context_score,
                 "signal_score": signal_score,
                 "recency_score": recency_score,
+                "archive_run_id": archive.get("archive_run_id") if archive else None,
+                "outcome_percentile": archive.get("outcome_percentile") if archive else None,
+                "win_score": archive.get("win_score") if archive else None,
+                "speed_score": archive.get("speed_score") if archive else None,
+                "archive_signal_score": archive.get("archive_signal_score") if archive else None,
+                "cluster_fit_score": archive.get("cluster_fit_score") if archive else None,
                 "cluster_id": item.get("cluster_id"),
                 "cluster_label": item.get("cluster_label"),
                 "analysis_date": item.get("analysis_date"),

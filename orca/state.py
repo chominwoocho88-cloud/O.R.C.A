@@ -19,6 +19,13 @@ from uuid import uuid4
 
 from jackal.families import canonical_family_key, family_label
 
+from .lesson_archive_store import clear_lesson_archive
+from .lesson_archive_store import get_archives_for_cluster
+from .lesson_archive_store import get_archives_for_lesson
+from .lesson_archive_store import get_latest_archive_run_id
+from .lesson_archive_store import get_lesson_archive
+from .lesson_archive_store import migrate_lesson_archive_table as _migrate_lesson_archive_table
+from .lesson_archive_store import record_lesson_archive
 from .paths import JACKAL_DB_FILE, STATE_DB_FILE
 
 KST = timezone(timedelta(hours=9))
@@ -109,6 +116,7 @@ def _ensure_orca_schema_migrations(conn: sqlite3.Connection) -> None:
         """
     )
     _migrate_lesson_clustering_tables(conn)
+    _migrate_lesson_archive_table(conn)
 
 
 def _migrate_lesson_clustering_tables(conn: sqlite3.Connection) -> None:
