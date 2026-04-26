@@ -1,0 +1,191 @@
+name: Wave F Clustering
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (no DB write)"
+        type: boolean
+        default: true
+      n_clusters:
+        description: "Number of clusters"
+        type: string
+        default: "8"
+      force_rebuild:
+        description: "Clear existing clustering data before running"
+        type: boolean
+        default: false
+
+concurrency:
+  group: orca-repo-state
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  clustering:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Pre-flight status
+        run: |
+          python - <<'PY'
+          import sqlite3
+          from orca import state
+
+          state.init_state_db()
+          conn = sqlite3.connect('data/orca_state.db')
+          snapshots = conn.execute('SELECT COUNT(*) FROM lesson_context_snapshot').fetchone()[0]
+          linked_lessons = conn.execute("""
+              SELECT COUNT(*)
+              FROM candidate_lessons
+              WHERE context_snapshot_id IS NOT NULL
+          """).fetchone()[0]
+          clusters = conn.execute('SELECT COUNT(*) FROM lesson_clusters').fetchone()[0]
+          mappings = conn.execute('SELECT COUNT(*) FROM snapshot_cluster_mapping').fetchone()[0]
+          latest_run = state.get_latest_run_id(conn)
+          print('Pre-flight:')
+          print(f'  snapshots: {snapshots}')
+          print(f'  lessons with context: {linked_lessons}')
+          print(f'  existing clusters: {clusters}')
+          print(f'  existing mappings: {mappings}')
+          print(f'  latest run_id: {latest_run or "(none)"}')
+          conn.close()
+          PY
+
+      - name: Run clustering
+        run: |
+          ARGS="--n-clusters ${{ inputs.n_clusters }} --expected-snapshots 252 --expected-linked-lessons 1260 --min-silhouette 0.15"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          else
+            ARGS="$ARGS --execute"
+          fi
+          if [ "${{ inputs.force_rebuild }}" = "true" ]; then
+            ARGS="$ARGS --force-rebuild"
+          fi
+          python scripts/build_lesson_clusters.py --verbose $ARGS
+
+      - name: Strict verify
+        if: ${{ inputs.dry_run != true }}
+        env:
+          EXPECTED_CLUSTERS: ${{ inputs.n_clusters }}
+        run: |
+          python - <<'PY'
+          import os
+          import sqlite3
+          from orca import state
+
+          expected_clusters = int(os.environ['EXPECTED_CLUSTERS'])
+          conn = sqlite3.connect('data/orca_state.db')
+          latest_run = state.get_latest_run_id(conn)
+          failures = []
+          if not latest_run:
+              failures.append('No latest clustering run_id found')
+          clusters = conn.execute(
+              'SELECT COUNT(*) FROM lesson_clusters WHERE run_id = ?',
+              (latest_run,),
+          ).fetchone()[0] if latest_run else 0
+          mappings = conn.execute(
+              'SELECT COUNT(*) FROM snapshot_cluster_mapping WHERE run_id = ?',
+              (latest_run,),
+          ).fetchone()[0] if latest_run else 0
+          cached = conn.execute("""
+              SELECT COUNT(*)
+              FROM lesson_context_snapshot
+              WHERE context_cluster_id IS NOT NULL
+          """).fetchone()[0]
+          clustered_lessons = conn.execute("""
+              SELECT COUNT(*)
+              FROM candidate_lessons l
+              JOIN snapshot_cluster_mapping m
+                ON m.snapshot_id = l.context_snapshot_id
+              WHERE m.run_id = ?
+          """, (latest_run,)).fetchone()[0] if latest_run else 0
+          min_silhouette = conn.execute(
+              'SELECT MIN(silhouette_score) FROM lesson_clusters WHERE run_id = ?',
+              (latest_run,),
+          ).fetchone()[0] if latest_run else None
+          avg_silhouette = conn.execute(
+              'SELECT AVG(silhouette_score) FROM lesson_clusters WHERE run_id = ?',
+              (latest_run,),
+          ).fetchone()[0] if latest_run else None
+
+          if clusters != expected_clusters:
+              failures.append(f'clusters {clusters} != expected {expected_clusters}')
+          if mappings < 252:
+              failures.append(f'mappings {mappings} < 252')
+          if cached < 252:
+              failures.append(f'context_cluster_id cached {cached} < 252')
+          if clustered_lessons < 1260:
+              failures.append(f'clustered lessons {clustered_lessons} < 1260')
+
+          print('Strict verify:')
+          print(f'  latest_run: {latest_run}')
+          print(f'  clusters: {clusters}')
+          print(f'  mappings: {mappings}')
+          print(f'  cached snapshots: {cached}')
+          print(f'  clustered lessons: {clustered_lessons}')
+          print(f'  min cluster silhouette: {min_silhouette}')
+          print(f'  avg cluster silhouette: {avg_silhouette}')
+
+          conn.close()
+          if failures:
+              print()
+              print('FAILURES:')
+              for failure in failures:
+                  print(f'  - {failure}')
+              raise SystemExit(1)
+          print()
+          print('PASS clustering verification complete')
+          PY
+
+      - name: Checkpoint DB
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          python - <<'PY'
+          import os
+          import sqlite3
+
+          conn = sqlite3.connect('data/orca_state.db')
+          conn.execute('PRAGMA wal_checkpoint(TRUNCATE);')
+          conn.close()
+
+          for suffix in ('-wal', '-shm'):
+              path = f'data/orca_state.db{suffix}'
+              if os.path.exists(path):
+                  os.remove(path)
+                  print(f'Removed: {path}')
+          print('Checkpoint complete')
+          PY
+
+      - name: Commit and push
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          git config user.name "Wave F Clustering"
+          git config user.email "wave-f-clustering@orca-agent"
+          git add -f data/orca_state.db
+          git diff --cached --quiet && {
+            echo "No DB changes to commit."
+            exit 0
+          }
+          git commit -m "chore: Wave F Phase 2 - Build lesson clusters [skip ci]"
+          git push || {
+            git pull --rebase origin main || git rebase --abort
+            git push
+          }
