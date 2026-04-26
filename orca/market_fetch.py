@@ -19,7 +19,9 @@ try:
 except Exception:  # pragma: no cover - runtime degraded path
     yf = None
 
-from .context_market_data import _fetch_with_fallback
+from . import context_market_data as _context_market_data
+
+_fetch_with_fallback = _context_market_data._fetch_with_fallback
 
 
 _GLOBAL_FETCH_STATS: dict[str, int] = {
@@ -37,6 +39,8 @@ def fetch_daily_history(
     start: str,
     end: str,
     use_fallback: bool | None = None,
+    *,
+    _skip_yfinance: bool = False,
 ) -> pd.DataFrame | None:
     """Fetch daily OHLCV for one ticker.
 
@@ -59,7 +63,13 @@ def fetch_daily_history(
     if _resolve_use_fallback(use_fallback):
         av_api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
         try:
-            data, source = _fetch_with_fallback(ticker, start, end, av_api_key=av_api_key)
+            data, source = _fetch_with_fallback(
+                ticker,
+                start,
+                end,
+                av_api_key=av_api_key,
+                skip_yfinance=_skip_yfinance,
+            )
             frame = _normalize_history_frame(data)
             if frame is not None and not frame.empty:
                 _record_fetch_source(ticker, source)
@@ -102,10 +112,33 @@ def fetch_daily_history_batch(
 
     if _resolve_use_fallback(use_fallback):
         result: dict[str, pd.DataFrame] = {}
+        av_only = False
         for ticker in normalized_tickers:
-            frame = fetch_daily_history(ticker, start, end, use_fallback=True)
+            if av_only:
+                frame = fetch_daily_history(
+                    ticker,
+                    start,
+                    end,
+                    use_fallback=True,
+                    _skip_yfinance=av_only,
+                )
+            else:
+                frame = fetch_daily_history(ticker, start, end, use_fallback=True)
             if frame is not None and not frame.empty:
                 result[ticker] = frame
+            if (
+                not av_only
+                and _context_market_data.was_last_yfinance_failed()
+                and (
+                    _context_market_data.was_last_yfinance_rate_limited()
+                    or _last_fetch_source(ticker) == "alpha_vantage"
+                )
+            ):
+                av_only = True
+                sys.stderr.write(
+                    "WARN: yfinance batch rate-limit/degradation detected; "
+                    "switching remaining tickers to Alpha Vantage-only fallback\n"
+                )
         return result
 
     try:

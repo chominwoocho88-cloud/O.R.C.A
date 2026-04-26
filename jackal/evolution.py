@@ -18,7 +18,6 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from collections import defaultdict
 
-import yfinance as yf
 from anthropic import Anthropic
 from orca.paths import atomic_write_json
 from orca.state import (
@@ -45,6 +44,19 @@ LESSONS_DIR   = _BASE / "lessons"
 
 SKILLS_DIR.mkdir(exist_ok=True)
 LESSONS_DIR.mkdir(exist_ok=True)
+
+
+def _fetch_history(ticker: str, lookback_days: int):
+    """Fetch daily history through the unified ORCA/JACKAL market wrapper."""
+    try:
+        from orca.market_fetch import fetch_daily_history
+
+        end = (datetime.now(timezone.utc) + timedelta(days=1)).date().isoformat()
+        start = (datetime.now(timezone.utc) - timedelta(days=max(lookback_days, 1) * 2)).date().isoformat()
+        return fetch_daily_history(ticker, start, end)
+    except Exception as exc:
+        log.warning(f"  market history fetch failed for {ticker}: {exc}")
+        return None
 
 # [Bug Fix 1-B] 잘못된 모델명 수정
 MODEL_S = os.environ.get("ANTHROPIC_MODEL", os.environ.get("SUBAGENT_MODEL", "claude-sonnet-4-6"))
@@ -259,8 +271,8 @@ class JackalEvolution:
                 if not price_entry:
                     continue
 
-                hist = yf.Ticker(ticker).history(period="15d", interval="1d")
-                if hist.empty:
+                hist = _fetch_history(ticker, 15)
+                if hist is None or hist.empty:
                     continue
 
                 entry_ts = _parse_ts_aware(entry.get("timestamp", "2000-01-01T00:00:00"))
@@ -381,8 +393,8 @@ class JackalEvolution:
                     if not ticker or not price_entry:
                         continue
                     entry_ts = _parse_ts_aware(e.get("timestamp", "2000-01-01T00:00:00"))
-                    hist = yf.Ticker(ticker).history(period="10d", interval="1d")
-                    if hist.empty:
+                    hist = _fetch_history(ticker, 10)
+                    if hist is None or hist.empty:
                         continue
                     future = hist[hist.index > entry_ts.strftime("%Y-%m-%d")]
                     if future.empty:
@@ -490,8 +502,8 @@ class JackalEvolution:
                 if not price_rec:
                     continue
 
-                hist = yf.Ticker(ticker).history(period="5d", interval="1d")
-                if len(hist) < 2:
+                hist = _fetch_history(ticker, 5)
+                if hist is None or len(hist) < 2:
                     continue
 
                 price_next = float(hist["Close"].iloc[-1])

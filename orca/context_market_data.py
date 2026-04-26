@@ -18,6 +18,8 @@ except Exception:  # pragma: no cover - degraded runtime fallback
 _YFINANCE_MAX_RETRIES = 3
 _ALPHA_VANTAGE_MAX_RETRIES = 2
 ALPHA_VANTAGE_SLEEP_DEFAULT = 12.0
+_LAST_YFINANCE_FAILED = False
+_LAST_YFINANCE_RATE_LIMITED = False
 
 ALPHA_VANTAGE_TICKER_MAP = {
     "^VIX": "VIXY",
@@ -85,13 +87,15 @@ def _fetch_yfinance_batch_with_retry(
     tickers: tuple[str, ...],
     start: str,
     end: str,
-    max_retries: int = _YFINANCE_MAX_RETRIES,
+    max_retries: int | None = None,
+    fast_fail: bool = False,
 ) -> Any:
     """Fetch a yfinance batch with exponential backoff."""
     if yf is None:
         raise RuntimeError("yfinance is not available")
+    max_attempts = _get_yfinance_max_retries(max_retries)
     last_error: Exception | None = None
-    for attempt in range(max_retries):
+    for attempt in range(max_attempts):
         try:
             data = yf.download(
                 tickers=list(tickers),
@@ -107,10 +111,12 @@ def _fetch_yfinance_batch_with_retry(
                 return data
         except Exception as exc:
             last_error = exc
-        if attempt < max_retries - 1:
+            if fast_fail and _is_yfinance_rate_limit_error(exc):
+                raise exc
+        if attempt < max_attempts - 1:
             delay = _retry_delay_seconds(attempt)
             print(
-                f"Batch retry {attempt + 1}/{max_retries} after {delay}s "
+                f"Batch retry {attempt + 1}/{max_attempts} after {delay}s "
                 f"({type(last_error).__name__ if last_error else 'empty'})"
             )
             time.sleep(delay)
@@ -123,13 +129,15 @@ def _fetch_yfinance_ticker_with_retry(
     ticker: str,
     start: str,
     end: str,
-    max_retries: int = _YFINANCE_MAX_RETRIES,
+    max_retries: int | None = None,
+    fast_fail: bool = False,
 ) -> Any:
     """Fetch one yfinance ticker with retry and ticker-level pacing."""
     if yf is None:
         raise RuntimeError("yfinance is not available")
+    max_attempts = _get_yfinance_max_retries(max_retries)
     last_error: Exception | None = None
-    for attempt in range(max_retries):
+    for attempt in range(max_attempts):
         try:
             time.sleep(1)
             data = yf.download(
@@ -145,7 +153,9 @@ def _fetch_yfinance_ticker_with_retry(
                 return data
         except Exception as exc:
             last_error = exc
-        if attempt < max_retries - 1:
+            if fast_fail and _is_yfinance_rate_limit_error(exc):
+                raise exc
+        if attempt < max_attempts - 1:
             delay = _retry_delay_seconds(attempt)
             time.sleep(delay)
     if last_error:
@@ -158,15 +168,37 @@ def _fetch_with_fallback(
     start: str,
     end: str,
     av_api_key: str | None = None,
+    yf_max_retries: int | None = None,
+    skip_yfinance: bool = False,
 ) -> tuple[Any | None, str | None]:
     """Cascade per-ticker fetch: yfinance first, then Alpha Vantage."""
+    global _LAST_YFINANCE_FAILED, _LAST_YFINANCE_RATE_LIMITED
+
+    _LAST_YFINANCE_FAILED = False
+    _LAST_YFINANCE_RATE_LIMITED = False
     errors: list[str] = []
-    try:
-        data = _fetch_yfinance_ticker_with_retry(ticker, start, end)
-        if data is not None and not getattr(data, "empty", True):
-            return data, "yfinance_ticker"
-    except Exception as exc:
-        errors.append(f"yfinance: {type(exc).__name__}: {str(exc)[:100]}")
+    if not skip_yfinance:
+        try:
+            data = _fetch_yfinance_ticker_with_retry(
+                ticker,
+                start,
+                end,
+                max_retries=yf_max_retries,
+                fast_fail=_yfinance_rate_limit_fast_fail_enabled(),
+            )
+            if data is not None and not getattr(data, "empty", True):
+                return data, "yfinance_ticker"
+            _LAST_YFINANCE_FAILED = True
+            errors.append("yfinance: empty response")
+        except Exception as exc:
+            _LAST_YFINANCE_FAILED = True
+            if _is_yfinance_rate_limit_error(exc):
+                _LAST_YFINANCE_RATE_LIMITED = True
+                print(f"  yfinance rate limited for {ticker}; fast-fail to Alpha Vantage")
+            errors.append(f"yfinance: {type(exc).__name__}: {str(exc)[:100]}")
+    else:
+        _LAST_YFINANCE_FAILED = True
+        errors.append("yfinance: skipped")
 
     if av_api_key:
         try:
@@ -175,9 +207,53 @@ def _fetch_with_fallback(
                 return data, "alpha_vantage"
         except Exception as exc:
             errors.append(f"alpha_vantage: {type(exc).__name__}: {str(exc)[:100]}")
+    else:
+        print(f"  ALPHA_VANTAGE_API_KEY not set; skipping Alpha Vantage fallback for {ticker}")
 
     print(f"  All fetches failed for {ticker}: {errors}")
     return None, None
+
+
+def _get_yfinance_max_retries(override: int | None = None) -> int:
+    """Return yfinance retry count from explicit value or YF_MAX_RETRIES."""
+    if override is not None:
+        return max(1, int(override))
+    try:
+        return max(1, int(os.getenv("YF_MAX_RETRIES", str(_YFINANCE_MAX_RETRIES))))
+    except (TypeError, ValueError):
+        return _YFINANCE_MAX_RETRIES
+
+
+def _yfinance_rate_limit_fast_fail_enabled() -> bool:
+    """Whether yfinance rate-limit exceptions should immediately cascade to AV."""
+    value = os.getenv("YF_RATE_LIMIT_FAST_FAIL", "1").strip().lower()
+    return value not in {"0", "false", "no", "off"}
+
+
+def _is_yfinance_rate_limit_error(exc: Exception) -> bool:
+    """Detect common yfinance/Yahoo rate-limit exception text."""
+    text = f"{type(exc).__name__}: {exc}".lower()
+    return any(
+        token in text
+        for token in (
+            "rate limit",
+            "ratelimit",
+            "too many requests",
+            "429",
+            "yf ratelimit",
+            "yfratelimit",
+        )
+    )
+
+
+def was_last_yfinance_failed() -> bool:
+    """Return whether the last fallback attempt failed or skipped yfinance."""
+    return _LAST_YFINANCE_FAILED
+
+
+def was_last_yfinance_rate_limited() -> bool:
+    """Return whether the last fallback attempt saw a yfinance rate limit."""
+    return _LAST_YFINANCE_RATE_LIMITED
 
 
 def _get_alpha_vantage_sleep_seconds() -> float:

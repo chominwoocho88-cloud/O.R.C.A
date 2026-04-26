@@ -458,11 +458,13 @@ def _load_schd_regime_signal() -> float:
     Doc7/9 부분 수용: 기각 유지 + 새 용도 추가, 충돌 없음.
     """
     try:
-        import yfinance as _yf
-        df = _yf.Ticker("SCHD").history(
-            period=f"{_SCANNER_SCHD['period_days']}d",
-            interval="1d",
-        )
+        from orca.market_fetch import fetch_daily_history
+
+        end = (datetime.now(KST) + timedelta(days=1)).date().isoformat()
+        start = (datetime.now(KST) - timedelta(days=int(_SCANNER_SCHD["period_days"]) * 2)).date().isoformat()
+        df = fetch_daily_history("SCHD", start, end)
+        if df is None:
+            return 0.0
         if df.empty or len(df) < _SCANNER_SCHD["min_rows"]:
             return 0.0
         change_5d = (
@@ -1065,15 +1067,16 @@ def _save_recommendation(extra: dict, aria: dict):
     1. data/jackal_watchlist.json  → ARIA Hunter가 읽어 뉴스 검색
     2. jackal/recommendation_log.json → 24h 후 결과 확인용
     """
-    import yfinance as _yf
     now = datetime.now(KST)
     entries = []
     for ticker, info in extra.items():
         price_now = None
         try:
-            hist = _yf.Ticker(ticker).history(period="2d", interval="1d")
-            if not hist.empty:
-                price_now = float(hist["Close"].iloc[-1])
+            from orca.market_fetch import fetch_latest_close
+
+            latest = fetch_latest_close(ticker, lookback_days=3)
+            if latest:
+                price_now = float(latest[0])
         except Exception:
             pass
         entries.append({

@@ -1895,6 +1895,9 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
 
     print(f"\n📥 {months}개월 데이터 동적 fetch: {start} ~ {today}")
 
+    if not os.getenv("ALPHA_VANTAGE_API_KEY"):
+        print("  WARN: ALPHA_VANTAGE_API_KEY not set; Alpha Vantage fallback unavailable")
+
     YF_MAP = {
         "^GSPC":     "sp500",
         "^IXIC":     "nasdaq",
@@ -1920,7 +1923,7 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
             try:
                 raw = data_map.get(yt)
             except Exception as exc:
-                print(f"  {yt} yfinance fetch 실패 — {exc}")
+                print(f"  {yt} market data fallback fetch 실패 — {exc}")
                 summary["ticker_failures"][yt] = str(exc)
                 continue
 
@@ -1940,14 +1943,16 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
                 all_dates.add(idx.strftime("%Y-%m-%d"))
 
         if not closes_map:
-            print("  yfinance 데이터 없음 — 스킵")
+            print("  market data fallback 데이터 없음 — 스킵 (yfinance + Alpha Vantage 모두 실패)")
             summary["status"] = "no_data"
             summary["fetched_ticker_count"] = 0
             summary["empty_extension_warning"] = bool(summary["expected_extension"])
             if summary["empty_extension_warning"]:
                 summary["warning"] = (
                     f"요청한 {months}개월 확장을 위한 추가 데이터가 수집되지 않았습니다. "
-                    "현재 백테스트는 하드코딩 HIST_DATA 범위만 사용합니다."
+                    "현재 백테스트는 하드코딩 HIST_DATA 범위만 사용합니다. "
+                    f"AV key set={bool(os.getenv('ALPHA_VANTAGE_API_KEY'))}, "
+                    f"tickers attempted={len(YF_MAP)}"
                 )
                 print(f"  ⚠️ {summary['warning']}")
             return _store_dynamic_fetch_summary(summary)

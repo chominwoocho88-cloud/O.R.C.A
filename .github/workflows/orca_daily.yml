@@ -23,6 +23,10 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       ORCA_DASHBOARD_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/reports/dashboard.html
+      ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+      ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
+      USE_UNIFIED_FETCH: "1"
+      YF_RATE_LIMIT_FAST_FAIL: "1"
     permissions:
       contents: write
 
