@@ -108,6 +108,69 @@ def _ensure_orca_schema_migrations(conn: sqlite3.Connection) -> None:
             ON candidate_lessons(context_snapshot_id)
         """
     )
+    _migrate_lesson_clustering_tables(conn)
+
+
+def _migrate_lesson_clustering_tables(conn: sqlite3.Connection) -> None:
+    """Create Wave F Phase 2 clustering tables and nullable cache column."""
+    conn.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS lesson_clusters (
+            cluster_id TEXT PRIMARY KEY,
+            cluster_label TEXT,
+            size INTEGER NOT NULL,
+            representative_snapshot_id TEXT,
+            centroid_vix REAL,
+            centroid_sp500_5d REAL,
+            centroid_sp500_20d REAL,
+            centroid_nasdaq_5d REAL,
+            centroid_nasdaq_20d REAL,
+            dominant_regime TEXT,
+            common_sectors TEXT,
+            silhouette_score REAL,
+            within_variance REAL,
+            avg_outcome_score REAL,
+            win_rate REAL,
+            sample_count INTEGER,
+            algorithm TEXT,
+            n_clusters_total INTEGER,
+            random_seed INTEGER,
+            run_id TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_lesson_clusters_run
+            ON lesson_clusters(run_id, cluster_id);
+
+        CREATE INDEX IF NOT EXISTS idx_lesson_clusters_label
+            ON lesson_clusters(cluster_label);
+
+        CREATE TABLE IF NOT EXISTS snapshot_cluster_mapping (
+            snapshot_id TEXT NOT NULL,
+            cluster_id TEXT NOT NULL,
+            distance_to_centroid REAL,
+            run_id TEXT NOT NULL,
+            PRIMARY KEY (snapshot_id, run_id),
+            FOREIGN KEY(snapshot_id) REFERENCES lesson_context_snapshot(snapshot_id),
+            FOREIGN KEY(cluster_id) REFERENCES lesson_clusters(cluster_id)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_snapshot_cluster_mapping_cluster
+            ON snapshot_cluster_mapping(cluster_id, run_id);
+
+        CREATE INDEX IF NOT EXISTS idx_snapshot_cluster_mapping_run
+            ON snapshot_cluster_mapping(run_id);
+        """
+    )
+    if not _table_has_column(conn, "lesson_context_snapshot", "context_cluster_id"):
+        conn.execute("ALTER TABLE lesson_context_snapshot ADD COLUMN context_cluster_id TEXT")
+    conn.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_snapshot_context_cluster
+            ON lesson_context_snapshot(context_cluster_id)
+        """
+    )
 
 
 def _candidate_systems(system: str) -> list[str]:
@@ -1190,6 +1253,7 @@ def _row_to_context_snapshot(row: sqlite3.Row | None) -> dict[str, Any] | None:
         "nasdaq_momentum_5d": row["nasdaq_momentum_5d"],
         "nasdaq_momentum_20d": row["nasdaq_momentum_20d"],
         "dominant_sectors": _decode_json_text(row["dominant_sectors"], []),
+        "context_cluster_id": row["context_cluster_id"] if "context_cluster_id" in row.keys() else None,
         "source_event_type": row["source_event_type"],
         "source_session_id": row["source_session_id"],
     }
@@ -1210,7 +1274,7 @@ def get_lesson_context_snapshot(
             SELECT snapshot_id, created_at, trading_date, regime, regime_confidence,
                    vix_level, vix_delta_7d, sp500_momentum_5d, sp500_momentum_20d,
                    nasdaq_momentum_5d, nasdaq_momentum_20d, dominant_sectors,
-                   source_event_type, source_session_id
+                   context_cluster_id, source_event_type, source_session_id
               FROM lesson_context_snapshot
              WHERE snapshot_id = ?
             """,
@@ -1238,7 +1302,7 @@ def find_lesson_context_snapshot(
             SELECT snapshot_id, created_at, trading_date, regime, regime_confidence,
                    vix_level, vix_delta_7d, sp500_momentum_5d, sp500_momentum_20d,
                    nasdaq_momentum_5d, nasdaq_momentum_20d, dominant_sectors,
-                   source_event_type, source_session_id
+                   context_cluster_id, source_event_type, source_session_id
               FROM lesson_context_snapshot
              WHERE trading_date = ?
                AND source_event_type = ?
@@ -1301,6 +1365,285 @@ def record_lesson_context_snapshot(
     finally:
         if own_conn and conn is not None:
             conn.close()
+
+
+def _row_to_lesson_cluster(row: sqlite3.Row | None) -> dict[str, Any] | None:
+    if not row:
+        return None
+    return {
+        "cluster_id": row["cluster_id"],
+        "cluster_label": row["cluster_label"],
+        "size": row["size"],
+        "representative_snapshot_id": row["representative_snapshot_id"],
+        "centroid_vix": row["centroid_vix"],
+        "centroid_sp500_5d": row["centroid_sp500_5d"],
+        "centroid_sp500_20d": row["centroid_sp500_20d"],
+        "centroid_nasdaq_5d": row["centroid_nasdaq_5d"],
+        "centroid_nasdaq_20d": row["centroid_nasdaq_20d"],
+        "dominant_regime": row["dominant_regime"],
+        "common_sectors": _decode_json_text(row["common_sectors"], []),
+        "silhouette_score": row["silhouette_score"],
+        "within_variance": row["within_variance"],
+        "avg_outcome_score": row["avg_outcome_score"],
+        "win_rate": row["win_rate"],
+        "sample_count": row["sample_count"],
+        "algorithm": row["algorithm"],
+        "n_clusters_total": row["n_clusters_total"],
+        "random_seed": row["random_seed"],
+        "run_id": row["run_id"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
+def record_lesson_cluster(conn: sqlite3.Connection, cluster_data: dict[str, Any]) -> str:
+    """Insert or update one lesson cluster row."""
+    cluster_id = str(cluster_data.get("cluster_id") or f"cluster_{uuid4().hex}")
+    now = _now_iso()
+    common_sectors = cluster_data.get("common_sectors") or []
+    common_sectors_json = common_sectors if isinstance(common_sectors, str) else (_json(common_sectors) or "[]")
+    conn.execute(
+        """
+        INSERT INTO lesson_clusters (
+            cluster_id, cluster_label, size, representative_snapshot_id,
+            centroid_vix, centroid_sp500_5d, centroid_sp500_20d,
+            centroid_nasdaq_5d, centroid_nasdaq_20d,
+            dominant_regime, common_sectors, silhouette_score, within_variance,
+            avg_outcome_score, win_rate, sample_count,
+            algorithm, n_clusters_total, random_seed, run_id, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(cluster_id) DO UPDATE SET
+            cluster_label = excluded.cluster_label,
+            size = excluded.size,
+            representative_snapshot_id = excluded.representative_snapshot_id,
+            centroid_vix = excluded.centroid_vix,
+            centroid_sp500_5d = excluded.centroid_sp500_5d,
+            centroid_sp500_20d = excluded.centroid_sp500_20d,
+            centroid_nasdaq_5d = excluded.centroid_nasdaq_5d,
+            centroid_nasdaq_20d = excluded.centroid_nasdaq_20d,
+            dominant_regime = excluded.dominant_regime,
+            common_sectors = excluded.common_sectors,
+            silhouette_score = excluded.silhouette_score,
+            within_variance = excluded.within_variance,
+            avg_outcome_score = excluded.avg_outcome_score,
+            win_rate = excluded.win_rate,
+            sample_count = excluded.sample_count,
+            algorithm = excluded.algorithm,
+            n_clusters_total = excluded.n_clusters_total,
+            random_seed = excluded.random_seed,
+            run_id = excluded.run_id,
+            updated_at = excluded.updated_at
+        """,
+        (
+            cluster_id,
+            cluster_data.get("cluster_label"),
+            int(cluster_data.get("size") or 0),
+            cluster_data.get("representative_snapshot_id"),
+            cluster_data.get("centroid_vix"),
+            cluster_data.get("centroid_sp500_5d"),
+            cluster_data.get("centroid_sp500_20d"),
+            cluster_data.get("centroid_nasdaq_5d"),
+            cluster_data.get("centroid_nasdaq_20d"),
+            cluster_data.get("dominant_regime"),
+            common_sectors_json,
+            cluster_data.get("silhouette_score"),
+            cluster_data.get("within_variance"),
+            cluster_data.get("avg_outcome_score"),
+            cluster_data.get("win_rate"),
+            cluster_data.get("sample_count"),
+            cluster_data.get("algorithm"),
+            cluster_data.get("n_clusters_total"),
+            cluster_data.get("random_seed"),
+            cluster_data.get("run_id"),
+            str(cluster_data.get("created_at") or now),
+            str(cluster_data.get("updated_at") or now),
+        ),
+    )
+    return cluster_id
+
+
+def assign_snapshot_to_cluster(
+    conn: sqlite3.Connection,
+    snapshot_id: str,
+    cluster_id: str,
+    distance: float | None,
+    run_id: str,
+) -> None:
+    """Assign a context snapshot to a cluster and update the lookup cache."""
+    conn.execute(
+        """
+        INSERT INTO snapshot_cluster_mapping (
+            snapshot_id, cluster_id, distance_to_centroid, run_id
+        ) VALUES (?, ?, ?, ?)
+        ON CONFLICT(snapshot_id, run_id) DO UPDATE SET
+            cluster_id = excluded.cluster_id,
+            distance_to_centroid = excluded.distance_to_centroid
+        """,
+        (snapshot_id, cluster_id, distance, run_id),
+    )
+    conn.execute(
+        """
+        UPDATE lesson_context_snapshot
+           SET context_cluster_id = ?
+         WHERE snapshot_id = ?
+        """,
+        (cluster_id, snapshot_id),
+    )
+
+
+def get_cluster_by_id(conn: sqlite3.Connection, cluster_id: str) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        SELECT *
+          FROM lesson_clusters
+         WHERE cluster_id = ?
+        """,
+        (cluster_id,),
+    ).fetchone()
+    return _row_to_lesson_cluster(row)
+
+
+def get_latest_run_id(conn: sqlite3.Connection) -> str | None:
+    row = conn.execute(
+        """
+        SELECT run_id
+          FROM lesson_clusters
+         WHERE run_id IS NOT NULL
+         ORDER BY created_at DESC, COALESCE(updated_at, created_at) DESC, run_id DESC
+         LIMIT 1
+        """
+    ).fetchone()
+    return row["run_id"] if row else None
+
+
+def get_active_clusters(
+    conn: sqlite3.Connection,
+    run_id: str | None = None,
+) -> list[dict[str, Any]]:
+    effective_run_id = run_id or get_latest_run_id(conn)
+    if not effective_run_id:
+        return []
+    rows = conn.execute(
+        """
+        SELECT *
+          FROM lesson_clusters
+         WHERE run_id = ?
+         ORDER BY cluster_id
+        """,
+        (effective_run_id,),
+    ).fetchall()
+    return [cluster for row in rows if (cluster := _row_to_lesson_cluster(row)) is not None]
+
+
+def get_snapshots_in_cluster(conn: sqlite3.Connection, cluster_id: str) -> list[str]:
+    rows = conn.execute(
+        """
+        SELECT snapshot_id
+          FROM snapshot_cluster_mapping
+         WHERE cluster_id = ?
+         ORDER BY snapshot_id
+        """,
+        (cluster_id,),
+    ).fetchall()
+    return [row["snapshot_id"] for row in rows]
+
+
+def get_lessons_in_cluster(conn: sqlite3.Connection, cluster_id: str) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        """
+        SELECT l.lesson_id, l.candidate_id, l.outcome_id, l.lesson_type,
+               l.label, l.lesson_value, l.lesson_timestamp, l.lesson_json,
+               l.context_snapshot_id, c.ticker, c.analysis_date, c.signal_family,
+               s.trading_date, s.regime, s.context_cluster_id
+          FROM candidate_lessons l
+          JOIN snapshot_cluster_mapping m
+            ON m.snapshot_id = l.context_snapshot_id
+          JOIN lesson_context_snapshot s
+            ON s.snapshot_id = m.snapshot_id
+          JOIN candidate_registry c
+            ON c.candidate_id = l.candidate_id
+         WHERE m.cluster_id = ?
+         ORDER BY s.trading_date, c.ticker, l.lesson_timestamp
+        """,
+        (cluster_id,),
+    ).fetchall()
+    return [
+        {
+            "lesson_id": row["lesson_id"],
+            "candidate_id": row["candidate_id"],
+            "outcome_id": row["outcome_id"],
+            "lesson_type": row["lesson_type"],
+            "label": row["label"],
+            "lesson_value": row["lesson_value"],
+            "lesson_timestamp": row["lesson_timestamp"],
+            "lesson": _decode_json_text(row["lesson_json"], {}),
+            "context_snapshot_id": row["context_snapshot_id"],
+            "ticker": row["ticker"],
+            "analysis_date": row["analysis_date"],
+            "signal_family": row["signal_family"],
+            "trading_date": row["trading_date"],
+            "regime": row["regime"],
+            "context_cluster_id": row["context_cluster_id"],
+        }
+        for row in rows
+    ]
+
+
+def clear_clustering_data(conn: sqlite3.Connection, run_id: str | None = None) -> dict[str, int]:
+    """Remove clustering rows and refresh the denormalized snapshot cache."""
+    if run_id is None:
+        mapping_deleted = conn.execute("SELECT COUNT(*) FROM snapshot_cluster_mapping").fetchone()[0]
+        cluster_deleted = conn.execute("SELECT COUNT(*) FROM lesson_clusters").fetchone()[0]
+        conn.execute("DELETE FROM snapshot_cluster_mapping")
+        conn.execute("DELETE FROM lesson_clusters")
+        conn.execute("UPDATE lesson_context_snapshot SET context_cluster_id = NULL")
+        return {
+            "mappings_deleted": mapping_deleted,
+            "clusters_deleted": cluster_deleted,
+            "cache_refreshed": 0,
+        }
+
+    mapping_deleted = conn.execute(
+        "SELECT COUNT(*) FROM snapshot_cluster_mapping WHERE run_id = ?",
+        (run_id,),
+    ).fetchone()[0]
+    cluster_deleted = conn.execute(
+        "SELECT COUNT(*) FROM lesson_clusters WHERE run_id = ?",
+        (run_id,),
+    ).fetchone()[0]
+    conn.execute("DELETE FROM snapshot_cluster_mapping WHERE run_id = ?", (run_id,))
+    conn.execute("DELETE FROM lesson_clusters WHERE run_id = ?", (run_id,))
+    refreshed = _refresh_context_cluster_cache(conn)
+    return {
+        "mappings_deleted": mapping_deleted,
+        "clusters_deleted": cluster_deleted,
+        "cache_refreshed": refreshed,
+    }
+
+
+def _refresh_context_cluster_cache(conn: sqlite3.Connection, run_id: str | None = None) -> int:
+    effective_run_id = run_id or get_latest_run_id(conn)
+    conn.execute("UPDATE lesson_context_snapshot SET context_cluster_id = NULL")
+    if not effective_run_id:
+        return 0
+    rows = conn.execute(
+        """
+        SELECT snapshot_id, cluster_id
+          FROM snapshot_cluster_mapping
+         WHERE run_id = ?
+        """,
+        (effective_run_id,),
+    ).fetchall()
+    for row in rows:
+        conn.execute(
+            """
+            UPDATE lesson_context_snapshot
+               SET context_cluster_id = ?
+             WHERE snapshot_id = ?
+            """,
+            (row["cluster_id"], row["snapshot_id"]),
+        )
+    return len(rows)
 
 
 def record_backtest_pick_results(
