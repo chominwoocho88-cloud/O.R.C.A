@@ -99,6 +99,8 @@ jobs:
       - name: Run backfill
         env:
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+          ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
+          USE_UNIFIED_FETCH: "1"
         run: |
           ARGS=""
           if [ "${{ inputs.dry_run }}" = "true" ]; then

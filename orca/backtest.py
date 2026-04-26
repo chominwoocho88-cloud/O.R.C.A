@@ -1865,8 +1865,8 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
     - Fear&Greed는 VIX 프록시 사용
     - 앞(과거) + 뒤(미래) 양방향 확장
     """
-    import yfinance as yf
     from datetime import date as _date
+    from orca.market_fetch import fetch_daily_history_batch
 
     today = _date.today()
     start = today - timedelta(days=int(months * 30.5) + 10)
@@ -1910,17 +1910,15 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
         closes_map: dict[str, object] = {}
         all_dates: set[str] = set()
 
+        data_map = fetch_daily_history_batch(
+            list(YF_MAP.keys()),
+            str(start),
+            str(today + timedelta(days=1)),
+        )
+
         for yt in YF_MAP:
             try:
-                raw = yf.download(
-                    yt,
-                    start=str(start),
-                    end=str(today + timedelta(days=1)),
-                    auto_adjust=True,
-                    progress=False,
-                    threads=False,
-                    timeout=20,
-                )
+                raw = data_map.get(yt)
             except Exception as exc:
                 print(f"  {yt} yfinance fetch 실패 — {exc}")
                 summary["ticker_failures"][yt] = str(exc)

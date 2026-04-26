@@ -24,7 +24,6 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import httpx
-import yfinance as yf
 import pandas as pd
 from anthropic import Anthropic
 from orca.paths import atomic_write_json
@@ -380,9 +379,16 @@ def _fetch_macro_gate(aria: dict) -> dict:
     Returns:
         {risk_level, score_penalty, vix, yield_curve, hy_stress, reason}
     """
+    from orca.market_fetch import fetch_daily_history
+
+    today = datetime.now(KST).date()
+    end_date = (today + timedelta(days=1)).isoformat()
+    start_3d = (today - timedelta(days=10)).isoformat()
+    start_10d = (today - timedelta(days=20)).isoformat()
+
     vix = 20.0
     try:
-        vix_df = yf.Ticker("^VIX").history(period="3d", interval="1d")
+        vix_df = fetch_daily_history("^VIX", start_3d, end_date)
         if not vix_df.empty:
             vix = float(vix_df["Close"].iloc[-1])
     except Exception:
@@ -390,9 +396,9 @@ def _fetch_macro_gate(aria: dict) -> dict:
 
     curve = 0.0
     try:
-        tnx_df = yf.Ticker("^TNX").history(period="3d", interval="1d")  # 10Y yield
-        irx_df = yf.Ticker("^IRX").history(period="3d", interval="1d")  # 3M yield
-        if not tnx_df.empty and not irx_df.empty:
+        tnx_df = fetch_daily_history("^TNX", start_3d, end_date)  # 10Y yield
+        irx_df = fetch_daily_history("^IRX", start_3d, end_date)  # 3M yield
+        if tnx_df is not None and irx_df is not None and not tnx_df.empty and not irx_df.empty:
             t10    = float(tnx_df["Close"].iloc[-1])
             t3m    = float(irx_df["Close"].iloc[-1])
             curve  = round(t10 - t3m, 2)
@@ -402,8 +408,8 @@ def _fetch_macro_gate(aria: dict) -> dict:
     # HY Stress: HYG 5일 수익률 (하락 = 스프레드 확대 = 위험)
     hy_chg5 = 0.0
     try:
-        hyg_df = yf.Ticker("HYG").history(period="10d", interval="1d")
-        if len(hyg_df) >= 6:
+        hyg_df = fetch_daily_history("HYG", start_10d, end_date)
+        if hyg_df is not None and len(hyg_df) >= 6:
             p_now = float(hyg_df["Close"].iloc[-1])
             p_5d  = float(hyg_df["Close"].iloc[-6])
             hy_chg5 = round((p_now - p_5d) / p_5d * 100, 2)
@@ -466,16 +472,22 @@ def _fetch_macro_gate(aria: dict) -> dict:
 
 def _fetch_etf_returns() -> dict:
     """섹터 ETF 5일 수익률 가져오기 (상대강도 계산용)."""
+    from orca.market_fetch import fetch_daily_history_batch
+
     etfs = list(set(SECTOR_ETF.values()))
     ret  = {}
     try:
-        raw = yf.download(
-            " ".join(etfs), period="10d", interval="1d",
-            group_by="ticker", auto_adjust=True, progress=False,
+        today = datetime.now(KST).date()
+        raw = fetch_daily_history_batch(
+            etfs,
+            (today - timedelta(days=15)).isoformat(),
+            (today + timedelta(days=1)).isoformat(),
         )
         for etf in etfs:
             try:
-                df    = raw[etf] if len(etfs) > 1 else raw
+                df    = raw.get(etf)
+                if df is None:
+                    continue
                 close = df["Close"].dropna()
                 if len(close) >= 6:
                     ret[etf] = round(
@@ -496,6 +508,30 @@ def _batch_technicals(tickers: list) -> dict:
     """
     log.info(f"  yfinance 다운로드: {len(tickers)}종목...")
     result = {}
+    from orca.market_fetch import fetch_daily_history_batch
+
+    today = datetime.now(KST).date()
+    try:
+        data_map = fetch_daily_history_batch(
+            tickers,
+            (today - timedelta(days=750)).isoformat(),
+            (today + timedelta(days=1)).isoformat(),
+        )
+    except Exception as e:
+        log.warning(f"  market fetch batch 실패: {e}")
+        data_map = {}
+
+    for t in tickers:
+        try:
+            df = data_map.get(t)
+            tech = _calc_tech(df) if df is not None else None
+            result[t] = tech
+        except Exception:
+            result[t] = None
+
+    success_count = sum(1 for tech in result.values() if tech)
+    log.info(f"  기술지표 완료: {success_count}/{len(tickers)}개")
+    return result
 
     # 미국/한국 분리 (한국은 개별이 더 안정적)
     us_tickers = [t for t in tickers if not t.endswith(".KS")]
@@ -504,7 +540,7 @@ def _batch_technicals(tickers: list) -> dict:
     # 미국 batch
     if us_tickers:
         try:
-            raw = yf.download(
+            raw = _legacy_download_removed(
                 " ".join(us_tickers), period="65d", interval="1d",
                 group_by="ticker", auto_adjust=True, progress=False,
             )
@@ -522,7 +558,7 @@ def _batch_technicals(tickers: list) -> dict:
     # 한국 개별
     for t in kr_tickers:
         try:
-            df   = yf.Ticker(t).history(period="65d", interval="1d")
+            df   = None
             tech = _calc_tech(df)
             if tech:
                 result[t] = tech

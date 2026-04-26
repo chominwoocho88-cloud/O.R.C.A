@@ -17,6 +17,7 @@ except Exception:  # pragma: no cover - degraded runtime fallback
 
 _YFINANCE_MAX_RETRIES = 3
 _ALPHA_VANTAGE_MAX_RETRIES = 2
+ALPHA_VANTAGE_SLEEP_DEFAULT = 12.0
 
 ALPHA_VANTAGE_TICKER_MAP = {
     "^VIX": "VIXY",
@@ -179,6 +180,15 @@ def _fetch_with_fallback(
     return None, None
 
 
+def _get_alpha_vantage_sleep_seconds() -> float:
+    """Return Alpha Vantage pacing seconds from env, defaulting to free-tier safe."""
+    try:
+        value = float(os.getenv("ALPHA_VANTAGE_SLEEP_SECONDS", ALPHA_VANTAGE_SLEEP_DEFAULT))
+        return max(0.0, value)
+    except (TypeError, ValueError):
+        return ALPHA_VANTAGE_SLEEP_DEFAULT
+
+
 def _fetch_alpha_vantage_with_retry(
     ticker: str,
     start: str,
@@ -188,9 +198,11 @@ def _fetch_alpha_vantage_with_retry(
 ) -> pd.DataFrame | None:
     """Fetch Alpha Vantage with free-tier pacing and retry."""
     last_error: Exception | None = None
+    sleep_seconds = _get_alpha_vantage_sleep_seconds()
     for attempt in range(max_retries):
         try:
-            time.sleep(12)
+            if sleep_seconds > 0:
+                time.sleep(sleep_seconds)
             data = _fetch_alpha_vantage_history(ticker, start, end, api_key)
             if data is not None and not data.empty:
                 return data
