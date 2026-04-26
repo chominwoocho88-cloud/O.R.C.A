@@ -4,7 +4,7 @@ Jackal Hunter — 100→50→25→10→5 단계별 스윙 타점 탐색
 
 흐름:
   Universe 구성  (~100):  고정 섹터풀 80 + ARIA 뉴스 기반 Claude 추천 20
-  Stage 1 100→50: yfinance 기술지표 점수 (비용 $0)
+  Stage 1 100→50: unified market fetch 기술지표 점수
   Stage 2  50→25: ARIA 레짐/섹터 매칭 보정 (비용 $0)
   Stage 3  25→10: Claude Haiku 빠른 판단, 웹서치 없음 (~$0.04)
   Stage 4  10→5:  Analyst → Devil → Final, 웹서치 포함 (~$0.15)
@@ -33,6 +33,10 @@ from orca.state import (
 )
 from .explanation import build_hunter_explanation_lines
 from .families import canonical_family_key, family_label
+from .historical_context import apply_historical_adjustment as _apply_historical_context
+from .historical_context import historical_alert_lines as _historical_alert_lines
+from .historical_context import market_features_from_aria as _historical_market_features_from_aria
+from .historical_context import try_retrieve_historical_context as _try_retrieve_historical_context
 from .probability import apply_probability_adjustment, load_probability_summary
 from .thresholds import THRESHOLDS
 
@@ -362,7 +366,7 @@ def _save_watchlist_snapshot(top5: list, aria: dict) -> None:
 # ══════════════════════════════════════════════════════════════════
 
 # ══════════════════════════════════════════════════════════════════
-# 개선안 2: Macro Quality Gate (PCR 대체 — yfinance 무료 데이터)
+# 개선안 2: Macro Quality Gate (PCR 대체 — unified market fetch)
 # ══════════════════════════════════════════════════════════════════
 
 def _fetch_macro_gate(aria: dict) -> dict:
@@ -503,10 +507,10 @@ def _fetch_etf_returns() -> dict:
 
 def _batch_technicals(tickers: list) -> dict:
     """
-    yfinance batch 다운로드로 전 종목 지표 한 번에 계산.
+    market_fetch batch로 전 종목 지표 한 번에 계산.
     개별 호출보다 빠름.
     """
-    log.info(f"  yfinance 다운로드: {len(tickers)}종목...")
+    log.info(f"  market_fetch 다운로드: {len(tickers)}종목...")
     result = {}
     from orca.market_fetch import fetch_daily_history_batch
 
@@ -650,7 +654,7 @@ def _stage1_technical(universe: list, tech_map: dict,
                        aria: dict = None,
                        macro_penalty: int = 0) -> list:
     """
-    yfinance 기술지표 + 다이버전스 + 섹터상대강도로 100 → 50 선별.
+    market_fetch 기술지표 + 다이버전스 + 섹터상대강도로 100 → 50 선별.
     macro_penalty: Macro Gate 점수 페널티 (극단 환경에서 임계값 상향 효과)
     """
     etf_returns = etf_returns or {}
@@ -1500,6 +1504,13 @@ def _stage4_full_analysis(top10: list, aria: dict) -> list:
             entry_threshold=float(final.get("entry_threshold", ALERT_THRESHOLD)),
             blocked_mode_token="차단",
         )
+        market_features = _historical_market_features_from_aria(aria)
+        historical_context = _try_retrieve_historical_context(
+            market_features,
+            signal_family,
+            {"ticker": ticker, "name": name, "tech": tech, "currency": cur},
+        )
+        final = _apply_historical_context(final, historical_context)
 
         log.info(f"  {ticker:12} A:{analyst['analyst_score']} "
                  f"D:{devil['devil_score']}({devil.get('verdict','?')}) "
@@ -1508,6 +1519,12 @@ def _stage4_full_analysis(top10: list, aria: dict) -> list:
                     f" | learn {final['probability_adjustment']:+.0f}"
                     f" ({final['probability_win_rate']:.1f}%/{final['probability_samples']}표본)"
                     if final.get("probability_adjustment")
+                    else ""
+                 )
+                 + (
+                    f" | hist {historical_context['win_rate'] * 100:.0f}%"
+                    f"/{historical_context['avg_value']:+.1f}"
+                    if historical_context
                     else ""
                  ))
 
@@ -1519,6 +1536,8 @@ def _stage4_full_analysis(top10: list, aria: dict) -> list:
                 "final": final,
                 "signal_family": signal_family,
                 "raw_signal_family": raw_signal_family,
+                "historical_context": historical_context,
+                "historical_adjustment": final.get("historical_adjustment", 0.0),
             }
         )
 
@@ -1645,6 +1664,7 @@ def _build_alert(item: dict, aria: dict) -> str:
         lines.append(f"🐂 {bull_case[:100]}")
     if devil_line:
         lines.append(devil_line)
+    lines.extend(_historical_alert_lines(item.get("historical_context"), final))
 
     lines.extend(
         [
@@ -1794,6 +1814,8 @@ def _build_hunt_log_entry(item: dict, aria: dict) -> dict:
         "probability_adjustment": final.get("probability_adjustment", 0),
         "probability_samples": final.get("probability_samples", 0),
         "probability_win_rate": final.get("probability_win_rate"),
+        "historical_context": item.get("historical_context"),
+        "historical_adjustment": final.get("historical_adjustment", item.get("historical_adjustment", 0)),
         "is_entry":          final["is_entry"],
         "alerted":           final["is_entry"],
         "outcome_checked":   False,
