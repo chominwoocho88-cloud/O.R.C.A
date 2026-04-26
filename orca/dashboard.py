@@ -31,6 +31,52 @@ def _j(v): return json.dumps(v, ensure_ascii=False)
 def _e(s): return str(s).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
 def _trim(s, n): t=str(s); return _e(t[:n]+("…" if len(t)>n else ""))
 
+def _safe_float(value, default=0.0):
+    try:
+        return float(value)
+    except Exception:
+        return default
+
+def _render_historical_context_html(historical_context):
+    if not historical_context:
+        return ""
+    lessons = historical_context.get("top_lessons") or []
+    lesson_rows = ""
+    for lesson in lessons[:10]:
+        value = _safe_float(lesson.get("lesson_value"))
+        peak = _safe_float(lesson.get("peak_pct"))
+        day = lesson.get("peak_day")
+        date = str(lesson.get("analysis_date") or "")[:10]
+        lesson_rows += (
+            '<li class="hc-row">'
+            f'<span class="hc-tk">{_e(lesson.get("ticker") or "-")}</span>'
+            f'<span class="hc-meta">{_e(date)} · {_e(lesson.get("quality_tier") or "-")}</span>'
+            f'<span class="hc-val">{value:+.2f}%</span>'
+            f'<span class="hc-peak">Peak {peak:+.2f}% D{_e(day if day is not None else "-")}</span>'
+            '</li>'
+        )
+    if not lesson_rows:
+        lesson_rows = '<li class="hc-empty">No similar examples</li>'
+    cluster_label = historical_context.get("cluster_label") or historical_context.get("cluster_id") or "-"
+    win_rate = _safe_float(historical_context.get("win_rate")) * 100
+    avg_value = _safe_float(historical_context.get("avg_value"))
+    high_count = int(historical_context.get("high_quality_count") or 0)
+    cluster_size = int(historical_context.get("cluster_size") or len(lessons))
+    return f'''
+<div class="sec">
+  <div class="sh"><span class="st">Historical Market Context</span><span class="sn">Wave F Phase 3</span></div>
+  <div class="card hc-card">
+    <div class="hc-label">{_e(cluster_label)}</div>
+    <div class="hc-stats">
+      <span>Samples <b>{cluster_size}</b></span>
+      <span>Win <b>{win_rate:.0f}%</b></span>
+      <span>Avg <b>{avg_value:+.2f}%</b></span>
+      <span>High <b>{high_count}/{len(lessons)}</b></span>
+    </div>
+    <ul class="hc-list">{lesson_rows}</ul>
+  </div>
+</div>'''
+
 def build_dashboard():
     now    = datetime.now(KST)
     sent   = _load(SENTIMENT_FILE, {"history":[],"current":{}})
@@ -48,6 +94,7 @@ def build_dashboard():
     cur    = sent.get("current",{})
     h30    = sent.get("history",[])[-30:]
     latest = memory[-1] if isinstance(memory,list) and memory else {}
+    historical_html = _render_historical_context_html(latest.get("historical_context"))
 
     sd = [h["date"][5:] for h in h30]; ss = [h["score"] for h in h30]
     sc = cur.get("score",50); sl = cur.get("level","중립"); se = cur.get("emoji","😐")
@@ -493,6 +540,17 @@ body{{
 .jgate-ok{{background:rgba(20,232,122,.08);color:#0DAE6B;}}
 .jgate-warn{{background:rgba(255,181,71,.1);color:#D4872A;}}
 .jgate-danger{{background:rgba(255,82,82,.1);color:#E03030;}}
+/* ── Historical context */
+.hc-card{{background:linear-gradient(135deg,rgba(20,232,122,.08),rgba(255,181,71,.08));}}
+.hc-label{{font-size:14px;font-weight:800;line-height:1.35;margin-bottom:10px;}}
+.hc-stats{{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}}
+.hc-stats span{{background:rgba(255,255,255,.55);border:.5px solid var(--bd);border-radius:9px;padding:8px;font-size:11px;color:var(--mu);}}
+.hc-stats b{{display:block;color:var(--tx);font-size:14px;margin-top:2px;}}
+.hc-list{{list-style:none;display:flex;flex-direction:column;gap:7px;}}
+.hc-row{{display:grid;grid-template-columns:46px 1fr auto;gap:6px;align-items:center;border-top:.5px solid var(--bd);padding-top:7px;font-size:11px;}}
+.hc-tk{{font-weight:800;}} .hc-meta{{color:var(--mu);}} .hc-val{{font-weight:800;color:var(--gr);}}
+.hc-peak{{grid-column:2 / 4;color:var(--mu);font-size:10px;}}
+.hc-empty{{font-size:12px;color:var(--mu);}}
 </style>
 </head>
 <body>
@@ -591,6 +649,9 @@ body{{
 </div>
 
 <!-- ⑧ 거시지표 -->
+{historical_html}
+
+<!-- ⑧-1 거시지표 -->
 {"" if not mchips_html else f'<div class="sec"><div class="sh"><span class="st">거시지표</span></div><div class="card" style="padding:12px;"><div class="mr">{mchips_html}</div></div></div>'}
 
 <!-- ⑨ 경고 -->

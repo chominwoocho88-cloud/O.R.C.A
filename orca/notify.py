@@ -72,6 +72,39 @@ def _build_health_badge(report: dict) -> str:
     return "⚠ degraded: " + ", ".join(reasons)
 
 
+def _build_historical_context_lines(report: dict) -> list[str]:
+    historical_context = report.get("historical_context") or {}
+    if not historical_context:
+        return []
+    cluster_label = historical_context.get("cluster_label") or historical_context.get("cluster_id") or "-"
+    win_rate = _safe_float(historical_context.get("win_rate")) * 100
+    avg_value = _safe_float(historical_context.get("avg_value"))
+    lines = [
+        "",
+        "━━ 📊 Historical Context ━━",
+        "Cluster: " + str(cluster_label),
+        f"Win rate: {win_rate:.0f}% | Avg value: {avg_value:+.2f}%",
+    ]
+    examples = historical_context.get("top_lessons") or []
+    if examples:
+        sample = examples[0]
+        lines.append(
+            "Top: {ticker} {value:+.2f}% [{tier}]".format(
+                ticker=sample.get("ticker") or "-",
+                value=_safe_float(sample.get("lesson_value")),
+                tier=sample.get("quality_tier") or "-",
+            )
+        )
+    return lines
+
+
+def _safe_float(value, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except Exception:
+        return default
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # TELEGRAM
 # ══════════════════════════════════════════════════════════════════════════════
@@ -132,6 +165,7 @@ def send_report(report: dict, run_number: int) -> bool:
         "DAWN":      _build_dawn,
     }
     lines = header + builders.get(mode, _build_morning)(report)
+    lines += _build_historical_context_lines(report)
     dash_url = _dashboard_url()
     if dash_url:
         lines += ["", f"📊 <a href=\"{dash_url}\">대시보드 보기</a>"]

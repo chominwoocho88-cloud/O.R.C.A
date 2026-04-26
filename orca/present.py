@@ -52,6 +52,43 @@ def print_start_banner(mode: str) -> None:
     ))
 
 
+def _render_historical_section(historical_context: dict) -> str:
+    """Render ORCA Daily historical context for console reports."""
+    lessons = historical_context.get("top_lessons") or []
+    lines = [
+        "Market pattern: " + str(historical_context.get("cluster_label") or historical_context.get("cluster_id") or "-"),
+        "Similar samples: " + str(historical_context.get("cluster_size") or len(lessons)),
+        "Win rate: " + f"{_safe_float(historical_context.get('win_rate')) * 100:.0f}%",
+        "Avg value: " + f"{_safe_float(historical_context.get('avg_value')):+.2f}%",
+        "High quality: " + str(historical_context.get("high_quality_count") or 0) + "/" + str(len(lessons)),
+    ]
+    if lessons:
+        lines.extend(["", "Top examples:"])
+        for lesson in lessons[:5]:
+            value = _safe_float(lesson.get("lesson_value"))
+            peak = _safe_float(lesson.get("peak_pct"))
+            day = lesson.get("peak_day")
+            date = str(lesson.get("analysis_date") or "")[:10]
+            lines.append(
+                "- {ticker} ({date}): {value:+.2f}% | peak {peak:+.2f}% day {day} [{tier}]".format(
+                    ticker=lesson.get("ticker") or "-",
+                    date=date or "-",
+                    value=value,
+                    peak=peak,
+                    day=day if day is not None else "-",
+                    tier=lesson.get("quality_tier") or "-",
+                )
+            )
+    return "\n".join(lines)
+
+
+def _safe_float(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except Exception:
+        return default
+
+
 def print_report(report: dict, run_n: int):
     regime     = report.get("market_regime", "?")
     mode       = report.get("mode", "MORNING")
@@ -180,6 +217,16 @@ def print_report(report: dict, run_n: int):
                 for item in opposed_best[:2]
             ))
         console.print(Panel("\n".join(lines), title=JACKAL_NAME + " Probability View", border_style="bright_blue"))
+
+    historical_context = report.get("historical_context")
+    if historical_context:
+        console.print(
+            Panel(
+                _render_historical_section(historical_context),
+                title="Historical Market Context",
+                border_style="bright_magenta",
+            )
+        )
 
     if report.get("tomorrow_setup") and mode in ["EVENING", "DAWN"]:
         console.print(Panel(report["tomorrow_setup"], title="Tomorrow Setup", border_style="yellow"))
