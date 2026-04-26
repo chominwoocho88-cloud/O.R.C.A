@@ -60,6 +60,7 @@ class ProbabilityStateIntegrationTests(unittest.TestCase):
             label=lesson_type,
             lesson_value=lesson_value,
             lesson={"origin": source_event_type},
+            auto_context_snapshot=False,
         )
         return candidate_id
 
@@ -145,6 +146,7 @@ class ProbabilityStateIntegrationTests(unittest.TestCase):
             label="duplicate",
             lesson_value=4.5,
             lesson={"origin": "backtest"},
+            auto_context_snapshot=False,
         )
 
         summary = state.summarize_candidate_probabilities(days=400, source_event_types=("backtest",))

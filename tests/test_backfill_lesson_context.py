@@ -108,6 +108,7 @@ class BackfillLessonContextTests(unittest.TestCase):
                 "regime": regime,
                 "signal_family": "momentum_pullback",
             },
+            auto_context_snapshot=False,
         )
         self.assertIsNotNone(lesson_id)
         return str(lesson_id)
@@ -478,6 +479,7 @@ class BackfillLessonContextTests(unittest.TestCase):
                 lesson_value=1.0,
                 lesson_timestamp=f"{date}T16:00:00+09:00",
                 lesson={"analysis_date": date, "ticker": f"T{index}"},
+                auto_context_snapshot=False,
             )
             with state._connect_orca() as conn:
                 snapshot_id = state.record_lesson_context_snapshot(

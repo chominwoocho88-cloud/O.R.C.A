@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import sys
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -2805,12 +2806,20 @@ def _sync_candidate_probability_lesson(
     )
 
     lesson_id = f"lesson_{uuid4().hex}"
+    lesson_timestamp = _now_iso()
+    context_snapshot_id = _try_create_lesson_context_snapshot(
+        conn,
+        candidate_id,
+        lesson_payload,
+        lesson_timestamp,
+        None,
+    )
     conn.execute(
         """
         INSERT INTO candidate_lessons (
             lesson_id, candidate_id, outcome_id, lesson_type,
-            label, lesson_value, lesson_timestamp, lesson_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            label, lesson_value, lesson_timestamp, lesson_json, context_snapshot_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             lesson_id,
@@ -2819,8 +2828,9 @@ def _sync_candidate_probability_lesson(
             lesson_type,
             label,
             float(outcome.get("return_pct") or 0.0),
-            _now_iso(),
+            lesson_timestamp,
             _json(lesson_payload) or "{}",
+            context_snapshot_id,
         ),
     )
     return lesson_id
@@ -2951,6 +2961,91 @@ def record_backtest_outcome(candidate_id: str, entry: dict[str, Any]) -> dict[st
         latest_outcome = _sync_candidate_outcomes(conn, candidate_id, payload)
         _update_candidate_latest_outcome(conn, candidate_id=candidate_id, latest_outcome=latest_outcome)
     return latest_outcome
+
+
+def _get_candidate_context_metadata(conn: sqlite3.Connection, candidate_id: str) -> dict[str, str | None]:
+    """Return context-relevant candidate metadata, or an empty dict if unavailable."""
+    try:
+        row = conn.execute(
+            """
+            SELECT analysis_date, source_event_type, source_session_id
+              FROM candidate_registry
+             WHERE candidate_id = ?
+            """,
+            (candidate_id,),
+        ).fetchone()
+    except Exception:
+        return {}
+    if not row:
+        return {}
+    return {
+        "analysis_date": row["analysis_date"],
+        "source_event_type": row["source_event_type"],
+        "source_session_id": row["source_session_id"],
+    }
+
+
+def _snapshot_source_event_type(source_event_type: str | None) -> str:
+    """Map candidate source events into context snapshot provenance buckets."""
+    source = str(source_event_type or "").strip().lower()
+    if source in {"hunt", "scan", "shadow"}:
+        return "live"
+    if source == "backtest":
+        return "backtest"
+    return source or "unknown"
+
+
+def _lesson_context_trading_date(
+    metadata: dict[str, str | None],
+    lesson: dict[str, Any] | None,
+    lesson_timestamp: str | None,
+) -> str:
+    payload = lesson or {}
+    return str(
+        metadata.get("analysis_date")
+        or payload.get("analysis_date")
+        or (str(lesson_timestamp)[:10] if lesson_timestamp else "")
+        or _now_iso()[:10]
+    )[:10]
+
+
+def _try_create_lesson_context_snapshot(
+    conn: sqlite3.Connection,
+    candidate_id: str,
+    lesson: dict[str, Any] | None,
+    lesson_timestamp: str | None,
+    source_event_type: str | None = None,
+) -> str | None:
+    """Create/reuse a context snapshot without blocking the lesson insert on failure."""
+    try:
+        metadata = _get_candidate_context_metadata(conn, candidate_id)
+        trading_date = _lesson_context_trading_date(metadata, lesson, lesson_timestamp)
+        snapshot_source = _snapshot_source_event_type(
+            source_event_type or metadata.get("source_event_type") or (lesson or {}).get("source_event_type")
+        )
+        from .context_snapshot import get_or_create_context_snapshot
+
+        return get_or_create_context_snapshot(
+            trading_date,
+            snapshot_source,
+            source_session_id=metadata.get("source_session_id"),
+            conn=conn,
+        )
+    except Exception as exc:
+        _record_health_event(
+            "context_snapshot_failed",
+            "orca/state.py::_try_create_lesson_context_snapshot",
+            exc,
+            message=(
+                f"candidate_id={candidate_id} source_event_type={source_event_type or ''} "
+                f"error={exc}"
+            ),
+        )
+        sys.stderr.write(
+            "WARN: context_snapshot creation failed for lesson "
+            f"(candidate={candidate_id}, source={source_event_type or ''}): {exc}\n"
+        )
+        return None
 
 
 def list_candidates(
@@ -3459,16 +3554,27 @@ def record_candidate_lesson(
     lesson_value: float | None = None,
     lesson: dict[str, Any] | None = None,
     outcome_id: str | None = None,
+    context_snapshot_id: str | None = None,
+    auto_context_snapshot: bool = True,
 ) -> str:
     init_state_db()
     lesson_id = f"lesson_{uuid4().hex}"
+    lesson_timestamp = str((lesson or {}).get("lesson_timestamp") or _now_iso())
     with _connect_orca() as conn:
+        if context_snapshot_id is None and auto_context_snapshot:
+            context_snapshot_id = _try_create_lesson_context_snapshot(
+                conn,
+                candidate_id,
+                lesson,
+                lesson_timestamp,
+                None,
+            )
         conn.execute(
             """
             INSERT INTO candidate_lessons (
                 lesson_id, candidate_id, outcome_id, lesson_type,
-                label, lesson_value, lesson_timestamp, lesson_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                label, lesson_value, lesson_timestamp, lesson_json, context_snapshot_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 lesson_id,
@@ -3477,8 +3583,9 @@ def record_candidate_lesson(
                 lesson_type,
                 label,
                 lesson_value,
-                _now_iso(),
+                lesson_timestamp,
                 _json(lesson or {}) or "{}",
+                context_snapshot_id,
             ),
         )
     return lesson_id
@@ -3493,6 +3600,8 @@ def record_backtest_lesson(
     lesson: dict[str, Any] | None = None,
     outcome_id: str | None = None,
     lesson_timestamp: str | None = None,
+    context_snapshot_id: str | None = None,
+    auto_context_snapshot: bool = True,
 ) -> str | None:
     init_state_db()
     if not lesson_type:
@@ -3501,6 +3610,7 @@ def record_backtest_lesson(
     lesson_id = f"lesson_{uuid4().hex}"
     payload = deepcopy(lesson or {})
     payload["origin"] = "backtest"
+    effective_timestamp = lesson_timestamp or str(payload.get("analysis_date") or _now_iso())
     with _connect_orca() as conn:
         conn.execute(
             """
@@ -3510,12 +3620,20 @@ def record_backtest_lesson(
             """,
             (candidate_id,),
         )
+        if context_snapshot_id is None and auto_context_snapshot:
+            context_snapshot_id = _try_create_lesson_context_snapshot(
+                conn,
+                candidate_id,
+                payload,
+                effective_timestamp,
+                "backtest",
+            )
         conn.execute(
             """
             INSERT INTO candidate_lessons (
                 lesson_id, candidate_id, outcome_id, lesson_type,
-                label, lesson_value, lesson_timestamp, lesson_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                label, lesson_value, lesson_timestamp, lesson_json, context_snapshot_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 lesson_id,
@@ -3524,8 +3642,9 @@ def record_backtest_lesson(
                 lesson_type,
                 label,
                 lesson_value,
-                lesson_timestamp or str(payload.get("analysis_date") or _now_iso()),
+                effective_timestamp,
                 _json(payload) or "{}",
+                context_snapshot_id,
             ),
         )
     return lesson_id

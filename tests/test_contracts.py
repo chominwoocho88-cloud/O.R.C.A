@@ -169,7 +169,7 @@ def _exercise_market_data_contract(
 
 
 class TestPR1HealthCodes(unittest.TestCase):
-    """PR 1: HealthTracker 10 codes invariant."""
+    """PR 1: HealthTracker known codes invariant."""
 
     EXPECTED_CODES = {
         "state_db_unavailable",
@@ -182,9 +182,10 @@ class TestPR1HealthCodes(unittest.TestCase):
         "dashboard_generation_failed",
         "external_data_degraded",
         "notification_failed",
+        "context_snapshot_failed",
     }
 
-    def test_exactly_10_unique_health_codes_exist(self):
+    def test_expected_unique_health_codes_exist(self):
         actual = set()
         for py_file in (ROOT / "orca").rglob("*.py"):
             module = _parse_module(py_file)
@@ -211,7 +212,11 @@ class TestPR1HealthCodes(unittest.TestCase):
             f"Extra={sorted(actual - self.EXPECTED_CODES)}, "
             f"Actual={sorted(actual)}",
         )
-        self.assertEqual(len(actual), 10, f"PR 1 requires exactly 10 unique codes, found {len(actual)}")
+        self.assertEqual(
+            len(actual),
+            len(self.EXPECTED_CODES),
+            f"PR 1 health code count drifted, found {len(actual)}",
+        )
 
 
 class TestPR2LearningPolicy(unittest.TestCase):
