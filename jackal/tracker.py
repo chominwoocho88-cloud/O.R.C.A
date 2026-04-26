@@ -41,7 +41,6 @@ import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-import yfinance as yf
 import pandas as pd
 from orca.paths import atomic_write_json
 from orca.state import (
@@ -125,21 +124,16 @@ def _fetch_post_hunt_closes(ticker: str, hunt_ts: str,
     if dt is None:
         return None
 
-    # yfinance start/end — 캘린더일 기준 충분히 넓게
+    # 캘린더일 기준 충분히 넓게 조회한다.
     start_date = dt.date()
     end_date   = (dt + timedelta(days=max_days * 2 + 5)).date()
 
     try:
-        df = yf.download(
-            ticker,
-            start=str(start_date),
-            end=str(end_date),
-            interval="1d",
-            progress=False,
-            auto_adjust=True,
-        )
+        from orca.market_fetch import fetch_daily_history
+
+        df = fetch_daily_history(ticker, str(start_date), str(end_date))
     except Exception as e:
-        log.warning(f"  yfinance 실패 [{ticker}]: {e}")
+        log.warning(f"  market fetch 실패 [{ticker}]: {e}")
         return None
 
     if df is None or df.empty:
@@ -153,6 +147,7 @@ def _fetch_post_hunt_closes(ticker: str, hunt_ts: str,
         return None
 
     # hunt 당일 이후만 (> 당일)
+    df.index = pd.to_datetime(df.index).tz_localize(None)
     hunt_date = pd.Timestamp(start_date)
     series = df.loc[df.index > hunt_date, "Close"].dropna()
 

@@ -28,6 +28,7 @@ import json
 import os
 import sys
 import time
+from datetime import datetime, timedelta
 from pathlib import Path
 from collections import defaultdict
 
@@ -35,7 +36,6 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-import yfinance as yf
 import pandas as pd
 from orca.state import (
     finish_backtest_session,
@@ -400,16 +400,20 @@ def load_memory(*, mode: str = BACKTEST_MODE_FULL) -> tuple[list, dict]:
 
 @functools.lru_cache(maxsize=128)
 def _fetch_yf_cached(ticker: str):
-    """yfinance 2년 일봉 캐싱 — 중복 호출 방지."""
-    for attempt in range(3):
-        try:
-            df = yf.Ticker(ticker).history(period=YF_HISTORY_PERIOD, interval="1d")
-            if not df.empty:
-                df.index = pd.to_datetime(df.index).tz_localize(None)
-                return df
-        except Exception:
-            if attempt < 2:
-                time.sleep(2)
+    """Fetch 2y daily bars through the unified market wrapper, with cache."""
+    end_date = datetime.now().strftime("%Y-%m-%d")
+    start_date = (datetime.now() - timedelta(days=750)).strftime("%Y-%m-%d")
+
+    try:
+        from orca.market_fetch import fetch_daily_history
+
+        df = fetch_daily_history(ticker, start_date, end_date)
+        if df is None or df.empty:
+            return None
+        df.index = pd.to_datetime(df.index).tz_localize(None)
+        return df
+    except Exception as exc:
+        sys.stderr.write(f"WARN: jackal backtest fetch failed for {ticker}: {exc}\n")
     return None
 
 

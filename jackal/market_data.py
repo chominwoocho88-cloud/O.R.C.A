@@ -1,4 +1,4 @@
-"""
+﻿"""
 JACKAL market data helpers.
 
 This module keeps the JACKAL data contract small and explicit:
@@ -13,13 +13,10 @@ from __future__ import annotations
 import json
 import logging
 import os
-import random
-import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import httpx
-import yfinance as yf
 
 from orca.paths import SENTIMENT_FILE, atomic_write_json
 
@@ -235,7 +232,7 @@ def fetch_fsc() -> dict:
     )
     for row in oil_rows:
         category = str(row.get("oilCtg", ""))
-        if "경유" not in category:
+        if "寃쎌쑀" not in category:
             continue
         value = _to_float(row.get("wtAvgPrcCptn") or row.get("clpr"))
         if value is None:
@@ -251,18 +248,18 @@ def fetch_fsc() -> dict:
 def load_sentiment() -> dict:
     """Load the latest ORCA sentiment snapshot if it exists."""
     if not SENTIMENT_FILE.exists():
-        return {"score": 50, "level": "중립", "trend": "정보없음", "regime": ""}
+        return {"score": 50, "level": "以묐┰", "trend": "?뺣낫?놁쓬", "regime": ""}
     try:
         data = json.loads(SENTIMENT_FILE.read_text(encoding="utf-8"))
         current = data.get("current", {})
         return {
             "score": current.get("score", 50),
-            "level": current.get("level", "중립"),
-            "trend": current.get("trend", "정보없음"),
+            "level": current.get("level", "以묐┰"),
+            "trend": current.get("trend", "?뺣낫?놁쓬"),
             "regime": current.get("regime", ""),
         }
     except Exception:
-        return {"score": 50, "level": "중립", "trend": "정보없음", "regime": ""}
+        return {"score": 50, "level": "以묐┰", "trend": "?뺣낫?놁쓬", "regime": ""}
 
 
 def _load_technical_cache() -> dict:
@@ -423,44 +420,35 @@ def _compute_technicals_from_history(history) -> dict | None:
     }
 
 
-def _is_rate_limit_error(exc: Exception) -> bool:
-    text = str(exc).lower()
-    return any(token in text for token in ("too many requests", "rate limited", "429"))
-
-
 def fetch_technicals(ticker: str) -> dict | None:
     """Compute the technical snapshot used by the JACKAL scanner."""
     last_exc: Exception | None = None
-    for attempt in range(1, 4):
-        try:
-            history = yf.Ticker(ticker).history(period="1y", interval="1d")
-            technicals = _compute_technicals_from_history(history)
-            if technicals:
-                _store_cached_technicals(ticker, technicals)
-                return technicals
-            if attempt == 1:
-                cached = _load_cached_technicals(ticker, max_age_hours=TECHNICAL_CACHE_TTL_HOURS)
-                if cached:
-                    log.warning(
-                        "%s technical fetch returned empty history; using %.1f min cache",
-                        ticker,
-                        cached.get("cache_age_minutes", 0.0),
-                    )
-                    return cached
-            return None
-        except Exception as exc:
-            last_exc = exc
-            if _is_rate_limit_error(exc) and attempt < 3:
-                delay = round((1.2 * attempt) + random.uniform(0.2, 0.8), 2)
-                log.warning("%s technical fetch rate-limited (attempt %s/3) — retry in %.2fs", ticker, attempt, delay)
-                time.sleep(delay)
-                continue
-            break
+    try:
+        from orca.market_fetch import fetch_daily_history
+
+        end_date = datetime.now(KST).date()
+        start_date = end_date - timedelta(days=400)
+        history = fetch_daily_history(ticker, start_date.isoformat(), end_date.isoformat())
+        technicals = _compute_technicals_from_history(history) if history is not None else None
+        if technicals:
+            _store_cached_technicals(ticker, technicals)
+            return technicals
+
+        cached = _load_cached_technicals(ticker, max_age_hours=TECHNICAL_CACHE_TTL_HOURS)
+        if cached:
+            log.warning(
+                "%s technical fetch returned empty history; using %.1f min cache",
+                ticker,
+                cached.get("cache_age_minutes", 0.0),
+            )
+            return cached
+    except Exception as exc:
+        last_exc = exc
 
     cached = _load_cached_technicals(ticker, max_age_hours=TECHNICAL_STALE_FALLBACK_HOURS)
     if cached:
         log.warning(
-            "%s technical fetch failed: %s — using cached snapshot (%.1f min old)",
+            "%s technical fetch failed: %s; using cached snapshot (%.1f min old)",
             ticker,
             last_exc,
             cached.get("cache_age_minutes", 0.0),
