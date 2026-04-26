@@ -33,7 +33,11 @@ def historical_context_mode() -> str:
     return "adjust" if mode == "adjust" else "observe"
 
 
-def market_features_from_aria(aria: dict[str, Any] | None) -> dict[str, Any] | None:
+def market_features_from_aria(
+    aria: dict[str, Any] | None,
+    *,
+    allow_latest_fallback: bool = True,
+) -> dict[str, Any] | None:
     """Resolve current market features without creating snapshots."""
     aria = aria or {}
     for key in ("historical_context_features", "market_features", "context_features"):
@@ -42,24 +46,66 @@ def market_features_from_aria(aria: dict[str, Any] | None) -> dict[str, Any] | N
             return _normalize_features(features)
     if _is_complete_features(aria):
         return _normalize_features(aria)
-    return _latest_snapshot_features()
+    return _latest_snapshot_features() if allow_latest_fallback else None
 
 
 def try_retrieve_historical_context(
     market_features: dict[str, Any] | None,
     signal_family: str | None,
     candidate_data: dict[str, Any] | None = None,
+    *,
+    analysis_date: str | None = None,
+    as_of_date: str | None = None,
+    source_system: str = "jackal_hunter",
+    source_event_type: str | None = "live",
+    source_event_id: str | None = None,
+    backtest_run_id: str | None = None,
+    log_retrieval: bool = False,
 ) -> dict[str, Any] | None:
     """Retrieve top historical lessons with graceful fallback."""
-    if not historical_context_enabled() or not market_features:
+    if not historical_context_enabled() or (not market_features and not analysis_date):
         return None
     try:
-        lessons = retrieve_similar_lessons_for_features(
-            features=market_features,
-            top_k=5,
-            signal_family=signal_family,
-            quality_filter="high",
-        )
+        retrieval_kwargs = {
+            "top_k": 5,
+            "signal_family": signal_family,
+            "quality_filter": "high",
+            "as_of_date": as_of_date,
+            "log_retrieval": log_retrieval,
+            "source_system": source_system,
+            "source_event_type": source_event_type,
+            "source_event_id": source_event_id,
+            "trading_date": analysis_date or as_of_date,
+            "mode": historical_context_mode(),
+            "backtest_run_id": backtest_run_id,
+        }
+        if market_features:
+            lessons = retrieve_similar_lessons_for_features(
+                features=market_features,
+                **retrieval_kwargs,
+            )
+        else:
+            from orca.lesson_retrieval import retrieve_similar_lessons
+
+            lookup_kwargs = dict(retrieval_kwargs)
+            if log_retrieval and signal_family:
+                lookup_kwargs["log_retrieval"] = False
+            lessons = retrieve_similar_lessons(
+                analysis_date=analysis_date,
+                **lookup_kwargs,
+            )
+            if not lessons and signal_family:
+                fallback_kwargs = dict(retrieval_kwargs)
+                fallback_kwargs["signal_family"] = None
+                lessons = retrieve_similar_lessons(
+                    analysis_date=analysis_date,
+                    **fallback_kwargs,
+                )
+            elif lessons and lookup_kwargs.get("log_retrieval") is False:
+                lessons = retrieve_similar_lessons(
+                    analysis_date=analysis_date,
+                    **retrieval_kwargs,
+                )
         if not lessons:
             return None
         values = [float(lesson.get("lesson_value") or 0.0) for lesson in lessons]

@@ -58,6 +58,12 @@ def get_market_historical_context(
     top_k: int = 20,
     quality_filter: str = "high",
     recency_decay_days: float | None = 365,
+    as_of_date: str | None = None,
+    log_retrieval: bool = False,
+    source_system: str = "orca_pipeline",
+    source_event_type: str | None = "live",
+    source_event_id: str | None = None,
+    backtest_run_id: str | None = None,
 ) -> dict[str, Any] | None:
     """Get read-only historical context for ORCA Daily reporting."""
     if not historical_context_enabled():
@@ -72,7 +78,15 @@ def get_market_historical_context(
             features=features,
             top_k=top_k,
             quality_filter=quality_filter,
+            as_of_date=as_of_date,
             recency_decay_days=recency_decay_days,
+            log_retrieval=log_retrieval,
+            source_system=source_system,
+            source_event_type=source_event_type,
+            source_event_id=source_event_id,
+            trading_date=as_of_date,
+            mode="observe",
+            backtest_run_id=backtest_run_id,
         )
         if not lessons:
             return None

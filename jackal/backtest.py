@@ -295,6 +295,60 @@ def parse_orca_context(report: dict) -> dict:
 # 데이터 로딩
 # ══════════════════════════════════════════════════════════════════
 
+def _infer_backtest_signal_family(item: dict) -> str:
+    tech = item.get("tech") or {}
+    if tech.get("bullish_div"):
+        return "divergence"
+    if float(tech.get("rsi") or 50) <= 35 and float(tech.get("bb_pos") or 50) <= 35:
+        return "oversold_rebound"
+    if float(tech.get("change_5d") or 0) <= -3:
+        return "momentum_pullback"
+    return "general_rebound"
+
+
+def _attach_historical_context_to_backtest_item(
+    item: dict,
+    report: dict,
+    date_str: str,
+    rank_index: int,
+) -> dict:
+    """Attach historical context to a backtest candidate with look-ahead guard."""
+    try:
+        from . import historical_context as hc
+
+        signal_family = item.get("signal_family") or _infer_backtest_signal_family(item)
+        item["signal_family"] = signal_family
+        market_features = hc.market_features_from_aria(report, allow_latest_fallback=False)
+        event_id = f"{_JACKAL_SESSION_ID or 'jackal_backtest'}:{date_str}:{item.get('ticker')}:{rank_index}"
+        context = hc.try_retrieve_historical_context(
+            market_features,
+            signal_family,
+            candidate_data={"ticker": item.get("ticker"), "rank_index": rank_index},
+            analysis_date=date_str,
+            as_of_date=date_str,
+            source_system="jackal_backtest",
+            source_event_type="backtest",
+            source_event_id=event_id,
+            backtest_run_id=_JACKAL_SESSION_ID,
+            log_retrieval=True,
+        )
+        item["historical_context"] = context
+        if not context:
+            return item
+        if context.get("mode") == "adjust":
+            adjustment = hc.calculate_score_adjustment(context)
+            before = float(item.get("s2_score") or 0.0)
+            item["s2_score"] = round(max(0.0, min(100.0, before + adjustment)), 2)
+            item["historical_adjustment"] = round(adjustment, 2)
+        else:
+            item["historical_adjustment"] = 0.0
+        return item
+    except Exception as exc:
+        sys.stderr.write(f"WARN: jackal backtest historical context failed: {exc}\n")
+        item["historical_context"] = None
+        return item
+
+
 def _load_all_morning_reports() -> tuple[list[dict], dict]:
     source_info = {"source": "production_memory", "session_id": None, "phase_label": None}
     orca_reports: list[dict] = []
@@ -527,8 +581,9 @@ def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
             funnel_totals["s1_top50"] += len(top50)
 
             regime_boost = 8 if "선호" in regime else -5 if "회피" in regime else 2
-            for item in top50:
+            for rank_index, item in enumerate(top50, start=1):
                 item["s2_score"] = item["s1_score"] + regime_boost
+                _attach_historical_context_to_backtest_item(item, report, date_str, rank_index)
             top50.sort(key=lambda x: x["s2_score"], reverse=True)
             top25 = top50[:25]
             funnel_totals["s2_top25"] += len(top25)
@@ -572,7 +627,10 @@ def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
                     "scores": {
                         "s1_score": item.get("s1_score"),
                         "s2_score": item.get("s2_score"),
+                        "historical_adjustment": item.get("historical_adjustment"),
                     },
+                    "signal_family": item.get("signal_family"),
+                    "historical_context": item.get("historical_context"),
                     "indicators": {
                         "price": item["tech"].get("price"),
                         "ma50": item["tech"].get("ma50"),

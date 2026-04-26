@@ -31,6 +31,16 @@ def retrieve_similar_lessons(
     as_of_date: str | None = None,
     recency_decay_days: float | None = None,
     allow_create_snapshot: bool = False,
+    log_retrieval: bool = False,
+    source_system: str | None = None,
+    source_event_type: str | None = None,
+    source_event_id: str | None = None,
+    trading_date: str | None = None,
+    mode: str = "observe",
+    adjustment_value: float | None = None,
+    adjustment_capped: bool = False,
+    hunter_run_id: str | None = None,
+    backtest_run_id: str | None = None,
     conn: sqlite3.Connection | None = None,
 ) -> list[dict[str, Any]]:
     """Retrieve historical lessons from the most similar market context cluster."""
@@ -64,7 +74,7 @@ def retrieve_similar_lessons(
             conn,
             [lesson.get("lesson_id") for lesson in lessons],
         )
-        return _rank_lessons(
+        ranked = _rank_lessons(
             lessons,
             target_cluster_id=target_cluster_id,
             target_distance=target_distance,
@@ -76,6 +86,30 @@ def retrieve_similar_lessons(
             recency_decay_days=recency_decay_days,
             archive_by_lesson=archive_by_lesson,
         )
+        if log_retrieval:
+            _log_retrieval_result(
+                conn,
+                ranked,
+                context=context,
+                target_cluster_id=target_cluster_id,
+                target_distance=target_distance,
+                top_k=top_k,
+                quality_filter=quality_filter,
+                signal_family=target_signal_family,
+                as_of_date=as_of_date,
+                source_system=source_system,
+                source_event_type=source_event_type,
+                source_event_id=source_event_id,
+                trading_date=trading_date or analysis_date,
+                mode=mode,
+                adjustment_value=adjustment_value,
+                adjustment_capped=adjustment_capped,
+                hunter_run_id=hunter_run_id,
+                backtest_run_id=backtest_run_id,
+            )
+            if own_conn:
+                conn.commit()
+        return ranked
     finally:
         if own_conn and conn is not None:
             conn.close()
@@ -88,6 +122,16 @@ def retrieve_similar_lessons_for_features(
     signal_family: str | None = None,
     as_of_date: str | None = None,
     recency_decay_days: float | None = None,
+    log_retrieval: bool = False,
+    source_system: str | None = None,
+    source_event_type: str | None = None,
+    source_event_id: str | None = None,
+    trading_date: str | None = None,
+    mode: str = "observe",
+    adjustment_value: float | None = None,
+    adjustment_capped: bool = False,
+    hunter_run_id: str | None = None,
+    backtest_run_id: str | None = None,
     conn: sqlite3.Connection | None = None,
 ) -> list[dict[str, Any]]:
     """Retrieve similar historical lessons for a direct feature dictionary."""
@@ -99,6 +143,16 @@ def retrieve_similar_lessons_for_features(
         as_of_date=as_of_date,
         recency_decay_days=recency_decay_days,
         allow_create_snapshot=False,
+        log_retrieval=log_retrieval,
+        source_system=source_system,
+        source_event_type=source_event_type,
+        source_event_id=source_event_id,
+        trading_date=trading_date,
+        mode=mode,
+        adjustment_value=adjustment_value,
+        adjustment_capped=adjustment_capped,
+        hunter_run_id=hunter_run_id,
+        backtest_run_id=backtest_run_id,
         conn=conn,
     )
 
@@ -418,6 +472,83 @@ def _rank_lessons(
     if top_k <= 0:
         return []
     return ranked[:top_k]
+
+
+def _log_retrieval_result(
+    conn: sqlite3.Connection,
+    lessons: list[dict[str, Any]],
+    *,
+    context: dict[str, Any],
+    target_cluster_id: str,
+    target_distance: float | None,
+    top_k: int,
+    quality_filter: str | None,
+    signal_family: str | None,
+    as_of_date: str | None,
+    source_system: str | None,
+    source_event_type: str | None,
+    source_event_id: str | None,
+    trading_date: str | None,
+    mode: str,
+    adjustment_value: float | None,
+    adjustment_capped: bool,
+    hunter_run_id: str | None,
+    backtest_run_id: str | None,
+) -> None:
+    """Best-effort retrieval logging for Phase 4 measurement."""
+    try:
+        cluster = state.get_cluster_by_id(conn, target_cluster_id) or {}
+        values = [float(item.get("lesson_value") or 0.0) for item in lessons]
+        win_rate = sum(1 for value in values if value > 0) / len(values) if values else None
+        avg_value = sum(values) / len(values) if values else None
+        top_lessons = [
+            {
+                "lesson_id": item.get("lesson_id"),
+                "ticker": item.get("ticker"),
+                "lesson_value": item.get("lesson_value"),
+                "quality_tier": item.get("quality_tier"),
+                "analysis_date": item.get("analysis_date"),
+            }
+            for item in lessons
+        ]
+        features = context.get("features") or {}
+        log_trading_date = (
+            trading_date
+            or features.get("trading_date")
+            or features.get("analysis_date")
+            or as_of_date
+            or datetime.now().date().isoformat()
+        )
+        state.record_retrieval_log(
+            conn,
+            {
+                "source_system": source_system or "unknown",
+                "source_event_type": source_event_type,
+                "source_event_id": source_event_id,
+                "trading_date": str(log_trading_date)[:10],
+                "as_of_date": as_of_date[:10] if as_of_date else None,
+                "top_k": top_k,
+                "quality_filter": quality_filter,
+                "signal_family": signal_family,
+                "cluster_id": target_cluster_id,
+                "cluster_label": cluster.get("cluster_label") or (lessons[0].get("cluster_label") if lessons else None),
+                "cluster_distance": target_distance,
+                "lessons_count": len(lessons),
+                "win_rate": win_rate,
+                "avg_value": avg_value,
+                "high_quality_count": sum(1 for item in lessons if item.get("quality_tier") == "high"),
+                "top_lessons_json": top_lessons,
+                "mode": mode or "observe",
+                "adjustment_value": adjustment_value,
+                "adjustment_capped": adjustment_capped,
+                "hunter_run_id": hunter_run_id,
+                "backtest_run_id": backtest_run_id,
+            },
+        )
+    except Exception as exc:
+        import sys
+
+        sys.stderr.write(f"WARN: retrieval logging failed: {exc}\n")
 
 
 def _resolve_snapshot_for_date(
