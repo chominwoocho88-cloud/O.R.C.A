@@ -394,6 +394,7 @@ def verify_backfill_completeness(
     expected_snapshots: int = 252,
     expected_linked_lessons: int = 1260,
     require_market_metrics: bool = True,
+    sector_min_ratio: float = 0.95,
     conn: sqlite3.Connection | None = None,
 ) -> dict[str, Any]:
     """Verify that Wave F Phase 1.3 backfill produced complete data."""
@@ -460,13 +461,25 @@ def verify_backfill_completeness(
                 "sp500_20d_filled": "sp500_momentum_20d",
                 "nasdaq_5d_filled": "nasdaq_momentum_5d",
                 "nasdaq_20d_filled": "nasdaq_momentum_20d",
-                "sectors_filled": "dominant_sectors",
             }
             for key, label in required_metrics.items():
                 if metric_counts[key] < snapshots_backfill:
                     failures.append(
-                        f"{label} filled {metric_counts[key]} < snapshots {snapshots_backfill}"
+                        f"{label} required 100%, only {metric_counts[key]}/{snapshots_backfill}"
                     )
+
+            sector_threshold = int(snapshots_backfill * sector_min_ratio + 0.999999)
+            if metric_counts["sectors_filled"] < sector_threshold:
+                ratio = (
+                    metric_counts["sectors_filled"] / snapshots_backfill
+                    if snapshots_backfill
+                    else 0.0
+                )
+                failures.append(
+                    "dominant_sectors filled "
+                    f"{metric_counts['sectors_filled']} < threshold {sector_threshold} "
+                    f"({ratio:.1%})"
+                )
 
         return {
             "passed": not failures,

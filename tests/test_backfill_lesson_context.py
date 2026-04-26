@@ -456,6 +456,93 @@ class BackfillLessonContextTests(unittest.TestCase):
         self.assertEqual(result["lessons_unlinked"], 1)
         self.assertEqual(self._linked_count(), 0)
 
+    def _seed_completed_backfill_snapshot_set(self, total: int, sectors_filled: int) -> None:
+        for index in range(total):
+            date = f"2026-03-{index + 1:02d}"
+            candidate_id = state.record_backtest_candidate(
+                {
+                    "ticker": f"T{index}",
+                    "analysis_date": date,
+                    "timestamp": f"{date}T16:00:00+09:00",
+                    "signal_family": "momentum_pullback",
+                    "quality_score": 70.0,
+                    "market": "USA",
+                },
+                source_external_key=f"threshold:{index}",
+                source_session_id="bt_threshold",
+            )
+            lesson_id = state.record_backtest_lesson(
+                candidate_id,
+                lesson_type="backtest_win",
+                label="backtest win",
+                lesson_value=1.0,
+                lesson_timestamp=f"{date}T16:00:00+09:00",
+                lesson={"analysis_date": date, "ticker": f"T{index}"},
+            )
+            with state._connect_orca() as conn:
+                snapshot_id = state.record_lesson_context_snapshot(
+                    {
+                        "snapshot_id": f"ctx_threshold_{index}",
+                        "created_at": f"{date}T16:00:00+09:00",
+                        "trading_date": date,
+                        "regime": "risk_on",
+                        "vix_level": 20.0,
+                        "vix_delta_7d": 1.0,
+                        "sp500_momentum_5d": 1.0,
+                        "sp500_momentum_20d": 2.0,
+                        "nasdaq_momentum_5d": 1.0,
+                        "nasdaq_momentum_20d": 2.0,
+                        "dominant_sectors": ["Technology"] if index < sectors_filled else [],
+                        "source_event_type": context_snapshot.BACKFILL_SOURCE_EVENT_TYPE,
+                        "source_session_id": "bt_threshold",
+                    },
+                    conn=conn,
+                )
+                conn.execute(
+                    "UPDATE candidate_lessons SET context_snapshot_id=? WHERE lesson_id=?",
+                    (snapshot_id, lesson_id),
+                )
+
+    def test_verify_passes_when_sectors_at_95_percent(self):
+        self._seed_completed_backfill_snapshot_set(total=20, sectors_filled=19)
+
+        result = context_snapshot.verify_backfill_completeness(
+            expected_snapshots=20,
+            expected_linked_lessons=20,
+        )
+
+        self.assertTrue(result["passed"], result["failures"])
+        self.assertEqual(result["sectors_filled"], 19)
+
+    def test_verify_fails_when_sectors_below_95_percent(self):
+        self._seed_completed_backfill_snapshot_set(total=20, sectors_filled=18)
+
+        result = context_snapshot.verify_backfill_completeness(
+            expected_snapshots=20,
+            expected_linked_lessons=20,
+        )
+
+        self.assertFalse(result["passed"])
+        self.assertTrue(
+            any("dominant_sectors filled 18 < threshold 19" in failure for failure in result["failures"]),
+            result["failures"],
+        )
+
+    def test_verify_strict_mode_with_sector_min_ratio_100(self):
+        self._seed_completed_backfill_snapshot_set(total=20, sectors_filled=19)
+
+        result = context_snapshot.verify_backfill_completeness(
+            expected_snapshots=20,
+            expected_linked_lessons=20,
+            sector_min_ratio=1.0,
+        )
+
+        self.assertFalse(result["passed"])
+        self.assertTrue(
+            any("dominant_sectors filled 19 < threshold 20" in failure for failure in result["failures"]),
+            result["failures"],
+        )
+
     def test_yfinance_batch_retry_succeeds_after_429(self):
         calls = []
 
