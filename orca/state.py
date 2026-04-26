@@ -1367,32 +1367,45 @@ def record_lesson_context_snapshot(
             conn.close()
 
 
-def _row_to_lesson_cluster(row: sqlite3.Row | None) -> dict[str, Any] | None:
+def _row_value(row: Any, key: str, index: int, default: Any = None) -> Any:
+    """Read a sqlite row from either Row-factory or default tuple connections."""
+    if row is None:
+        return default
+    try:
+        return row[key]
+    except (TypeError, KeyError, IndexError):
+        try:
+            return row[index]
+        except (TypeError, KeyError, IndexError):
+            return default
+
+
+def _row_to_lesson_cluster(row: sqlite3.Row | tuple[Any, ...] | None) -> dict[str, Any] | None:
     if not row:
         return None
     return {
-        "cluster_id": row["cluster_id"],
-        "cluster_label": row["cluster_label"],
-        "size": row["size"],
-        "representative_snapshot_id": row["representative_snapshot_id"],
-        "centroid_vix": row["centroid_vix"],
-        "centroid_sp500_5d": row["centroid_sp500_5d"],
-        "centroid_sp500_20d": row["centroid_sp500_20d"],
-        "centroid_nasdaq_5d": row["centroid_nasdaq_5d"],
-        "centroid_nasdaq_20d": row["centroid_nasdaq_20d"],
-        "dominant_regime": row["dominant_regime"],
-        "common_sectors": _decode_json_text(row["common_sectors"], []),
-        "silhouette_score": row["silhouette_score"],
-        "within_variance": row["within_variance"],
-        "avg_outcome_score": row["avg_outcome_score"],
-        "win_rate": row["win_rate"],
-        "sample_count": row["sample_count"],
-        "algorithm": row["algorithm"],
-        "n_clusters_total": row["n_clusters_total"],
-        "random_seed": row["random_seed"],
-        "run_id": row["run_id"],
-        "created_at": row["created_at"],
-        "updated_at": row["updated_at"],
+        "cluster_id": _row_value(row, "cluster_id", 0),
+        "cluster_label": _row_value(row, "cluster_label", 1),
+        "size": _row_value(row, "size", 2),
+        "representative_snapshot_id": _row_value(row, "representative_snapshot_id", 3),
+        "centroid_vix": _row_value(row, "centroid_vix", 4),
+        "centroid_sp500_5d": _row_value(row, "centroid_sp500_5d", 5),
+        "centroid_sp500_20d": _row_value(row, "centroid_sp500_20d", 6),
+        "centroid_nasdaq_5d": _row_value(row, "centroid_nasdaq_5d", 7),
+        "centroid_nasdaq_20d": _row_value(row, "centroid_nasdaq_20d", 8),
+        "dominant_regime": _row_value(row, "dominant_regime", 9),
+        "common_sectors": _decode_json_text(_row_value(row, "common_sectors", 10), []),
+        "silhouette_score": _row_value(row, "silhouette_score", 11),
+        "within_variance": _row_value(row, "within_variance", 12),
+        "avg_outcome_score": _row_value(row, "avg_outcome_score", 13),
+        "win_rate": _row_value(row, "win_rate", 14),
+        "sample_count": _row_value(row, "sample_count", 15),
+        "algorithm": _row_value(row, "algorithm", 16),
+        "n_clusters_total": _row_value(row, "n_clusters_total", 17),
+        "random_seed": _row_value(row, "random_seed", 18),
+        "run_id": _row_value(row, "run_id", 19),
+        "created_at": _row_value(row, "created_at", 20),
+        "updated_at": _row_value(row, "updated_at", 21),
     }
 
 
@@ -1504,16 +1517,17 @@ def get_cluster_by_id(conn: sqlite3.Connection, cluster_id: str) -> dict[str, An
 
 
 def get_latest_run_id(conn: sqlite3.Connection) -> str | None:
+    """Get the most recent clustering run_id with or without Row factory."""
     row = conn.execute(
         """
         SELECT run_id
           FROM lesson_clusters
          WHERE run_id IS NOT NULL
          ORDER BY created_at DESC, COALESCE(updated_at, created_at) DESC, run_id DESC
-         LIMIT 1
+        LIMIT 1
         """
     ).fetchone()
-    return row["run_id"] if row else None
+    return row[0] if row else None
 
 
 def get_active_clusters(
@@ -1545,7 +1559,7 @@ def get_snapshots_in_cluster(conn: sqlite3.Connection, cluster_id: str) -> list[
         """,
         (cluster_id,),
     ).fetchall()
-    return [row["snapshot_id"] for row in rows]
+    return [_row_value(row, "snapshot_id", 0) for row in rows]
 
 
 def get_lessons_in_cluster(conn: sqlite3.Connection, cluster_id: str) -> list[dict[str, Any]]:
@@ -1569,21 +1583,21 @@ def get_lessons_in_cluster(conn: sqlite3.Connection, cluster_id: str) -> list[di
     ).fetchall()
     return [
         {
-            "lesson_id": row["lesson_id"],
-            "candidate_id": row["candidate_id"],
-            "outcome_id": row["outcome_id"],
-            "lesson_type": row["lesson_type"],
-            "label": row["label"],
-            "lesson_value": row["lesson_value"],
-            "lesson_timestamp": row["lesson_timestamp"],
-            "lesson": _decode_json_text(row["lesson_json"], {}),
-            "context_snapshot_id": row["context_snapshot_id"],
-            "ticker": row["ticker"],
-            "analysis_date": row["analysis_date"],
-            "signal_family": row["signal_family"],
-            "trading_date": row["trading_date"],
-            "regime": row["regime"],
-            "context_cluster_id": row["context_cluster_id"],
+            "lesson_id": _row_value(row, "lesson_id", 0),
+            "candidate_id": _row_value(row, "candidate_id", 1),
+            "outcome_id": _row_value(row, "outcome_id", 2),
+            "lesson_type": _row_value(row, "lesson_type", 3),
+            "label": _row_value(row, "label", 4),
+            "lesson_value": _row_value(row, "lesson_value", 5),
+            "lesson_timestamp": _row_value(row, "lesson_timestamp", 6),
+            "lesson": _decode_json_text(_row_value(row, "lesson_json", 7), {}),
+            "context_snapshot_id": _row_value(row, "context_snapshot_id", 8),
+            "ticker": _row_value(row, "ticker", 9),
+            "analysis_date": _row_value(row, "analysis_date", 10),
+            "signal_family": _row_value(row, "signal_family", 11),
+            "trading_date": _row_value(row, "trading_date", 12),
+            "regime": _row_value(row, "regime", 13),
+            "context_cluster_id": _row_value(row, "context_cluster_id", 14),
         }
         for row in rows
     ]
@@ -1641,7 +1655,7 @@ def _refresh_context_cluster_cache(conn: sqlite3.Connection, run_id: str | None 
                SET context_cluster_id = ?
              WHERE snapshot_id = ?
             """,
-            (row["cluster_id"], row["snapshot_id"]),
+            (_row_value(row, "cluster_id", 1), _row_value(row, "snapshot_id", 0)),
         )
     return len(rows)
 

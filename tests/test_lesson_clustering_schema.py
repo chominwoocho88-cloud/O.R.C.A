@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shutil
+import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
@@ -199,6 +200,56 @@ class LessonClusteringSchemaTests(unittest.TestCase):
             latest = state.get_latest_run_id(conn)
 
         self.assertEqual(latest, "run_new")
+
+    def test_get_latest_run_id_with_default_tuple_factory(self):
+        self._seed_snapshot()
+        self._seed_cluster("cluster_tuple", "run_tuple")
+        conn = sqlite3.connect(self.state_db)
+        try:
+            latest = state.get_latest_run_id(conn)
+        finally:
+            conn.close()
+
+        self.assertEqual(latest, "run_tuple")
+
+    def test_get_latest_run_id_with_row_factory(self):
+        self._seed_snapshot()
+        self._seed_cluster("cluster_row", "run_row")
+        conn = sqlite3.connect(self.state_db)
+        conn.row_factory = sqlite3.Row
+        try:
+            latest = state.get_latest_run_id(conn)
+        finally:
+            conn.close()
+
+        self.assertEqual(latest, "run_row")
+
+    def test_clustering_helpers_with_default_tuple_factory(self):
+        snapshot_id = self._seed_snapshot()
+        lesson_id = self._seed_lesson_for_snapshot(snapshot_id)
+        cluster_id = self._seed_cluster("cluster_tuple", "run_tuple")
+        conn = sqlite3.connect(self.state_db)
+        try:
+            state.assign_snapshot_to_cluster(conn, snapshot_id, cluster_id, 0.25, "run_tuple")
+            conn.commit()
+
+            cluster = state.get_cluster_by_id(conn, cluster_id)
+            latest = state.get_latest_run_id(conn)
+            active = state.get_active_clusters(conn, "run_tuple")
+            snapshots = state.get_snapshots_in_cluster(conn, cluster_id)
+            lessons = state.get_lessons_in_cluster(conn, cluster_id)
+            result = state.clear_clustering_data(conn, "run_tuple")
+            conn.commit()
+        finally:
+            conn.close()
+
+        self.assertEqual(cluster["cluster_id"], cluster_id)
+        self.assertEqual(latest, "run_tuple")
+        self.assertEqual([row["cluster_id"] for row in active], [cluster_id])
+        self.assertEqual(snapshots, [snapshot_id])
+        self.assertEqual([row["lesson_id"] for row in lessons], [lesson_id])
+        self.assertEqual(result["clusters_deleted"], 1)
+        self.assertEqual(result["mappings_deleted"], 1)
 
     def test_get_snapshots_in_cluster(self):
         first = self._seed_snapshot("ctx_a", "2026-04-20")
