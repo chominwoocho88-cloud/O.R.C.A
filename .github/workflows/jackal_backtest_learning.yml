@@ -18,6 +18,26 @@ on:
         description: "orca_backtest.yml success run ID (Mode 1: artifact handoff)"
         required: false
         default: ""
+      orca_months:
+        description: "ORCA refresh months (Mode 2 only)"
+        required: false
+        default: "13"
+      backtest_days:
+        description: "JACKAL backtest days"
+        required: false
+        default: "252"
+      history_days:
+        description: "Universe price history days"
+        required: false
+        default: "750"
+      materialize_mode:
+        description: "replace / add_missing / fail_on_duplicate"
+        required: false
+        default: "replace"
+      auto_context_snapshot:
+        description: "Auto context snapshot per lesson"
+        type: boolean
+        default: true
 
 jobs:
   learn:
@@ -48,6 +68,11 @@ jobs:
           RUN_ORCA_REFRESH="false"
           USE_ARTIFACT_HANDOFF="false"
           ARTIFACT_RUN_ID=""
+          ORCA_MONTHS="${{ github.event.inputs.orca_months || '13' }}"
+          JACKAL_BACKTEST_DAYS_VALUE="${{ github.event.inputs.backtest_days || '252' }}"
+          JACKAL_HISTORY_DAYS_VALUE="${{ github.event.inputs.history_days || '750' }}"
+          JACKAL_MATERIALIZE_MODE_VALUE="${{ github.event.inputs.materialize_mode || 'replace' }}"
+          JACKAL_AUTO_CONTEXT_SNAPSHOT_VALUE="${{ github.event.inputs.auto_context_snapshot || 'true' }}"
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             MODE="${{ github.event.inputs.mode || 'incremental' }}"
@@ -71,6 +96,11 @@ jobs:
           echo "RUN_ORCA_REFRESH=$RUN_ORCA_REFRESH" >> "$GITHUB_ENV"
           echo "USE_ARTIFACT_HANDOFF=$USE_ARTIFACT_HANDOFF" >> "$GITHUB_ENV"
           echo "ARTIFACT_RUN_ID=$ARTIFACT_RUN_ID" >> "$GITHUB_ENV"
+          echo "ORCA_BACKTEST_MONTHS=$ORCA_MONTHS" >> "$GITHUB_ENV"
+          echo "JACKAL_BACKTEST_DAYS=$JACKAL_BACKTEST_DAYS_VALUE" >> "$GITHUB_ENV"
+          echo "JACKAL_HISTORY_DAYS=$JACKAL_HISTORY_DAYS_VALUE" >> "$GITHUB_ENV"
+          echo "JACKAL_MATERIALIZE_MODE=$JACKAL_MATERIALIZE_MODE_VALUE" >> "$GITHUB_ENV"
+          echo "JACKAL_AUTO_CONTEXT_SNAPSHOT=$JACKAL_AUTO_CONTEXT_SNAPSHOT_VALUE" >> "$GITHUB_ENV"
 
       - name: Download preflight ORCA artifact
         if: env.USE_ARTIFACT_HANDOFF == 'true'
@@ -209,8 +239,11 @@ jobs:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
+          ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+          ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
+          USE_UNIFIED_FETCH: "1"
         run: |
-          python -m orca.backtest --months 13 --walk-forward --fail-on-empty-dynamic-fetch
+          python -m orca.backtest --months "${ORCA_BACKTEST_MONTHS}" --walk-forward --fail-on-empty-dynamic-fetch
 
       - name: Run JACKAL backtest learning
         if: env.USE_ARTIFACT_HANDOFF != 'true'
@@ -220,8 +253,17 @@ jobs:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
+          ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+          ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
+          USE_UNIFIED_FETCH: "1"
         run: |
-          python -m jackal.backtest --mode "${BACKTEST_MODE}"
+          # Default path remains: python -m jackal.backtest --mode "${BACKTEST_MODE}"
+          python -m jackal.backtest \
+            --mode "${BACKTEST_MODE}" \
+            --backtest-days "${JACKAL_BACKTEST_DAYS}" \
+            --history-days "${JACKAL_HISTORY_DAYS}" \
+            --materialize-mode "${JACKAL_MATERIALIZE_MODE}" \
+            --auto-context-snapshot "${JACKAL_AUTO_CONTEXT_SNAPSHOT}"
 
       - name: Save learning state
         run: |

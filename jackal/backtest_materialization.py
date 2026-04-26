@@ -4,6 +4,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
+from orca import state
 from jackal.families import canonical_family_key
 from orca.state import (
     record_backtest_candidate,
@@ -13,6 +14,14 @@ from orca.state import (
 
 
 BACKTEST_SOURCE_EVENT_TYPE = "backtest"
+MATERIALIZE_MODE_REPLACE = "replace"
+MATERIALIZE_MODE_ADD_MISSING = "add_missing"
+MATERIALIZE_MODE_FAIL_ON_DUPLICATE = "fail_on_duplicate"
+VALID_MATERIALIZE_MODES = {
+    MATERIALIZE_MODE_REPLACE,
+    MATERIALIZE_MODE_ADD_MISSING,
+    MATERIALIZE_MODE_FAIL_ON_DUPLICATE,
+}
 _CANONICAL_FAMILY_SIGNAL_PRIORITY = {
     "rotation": ("sector_rebound", "sector_inflow"),
     "panic_rebound": ("volume_climax", "volume_surge"),
@@ -162,6 +171,26 @@ def _analysis_timestamp(analysis_date: str, *, hour: int = 9, minute: int = 0) -
     return f"{analysis_date}T{hour:02d}:{minute:02d}:00+09:00"
 
 
+def _candidate_external_key(source_external_key: str) -> str:
+    return f"candidate|jackal|backtest|{source_external_key}"
+
+
+def _find_existing_backtest_candidate_id(source_external_key: str) -> str | None:
+    """Return existing JACKAL backtest candidate_id for add-missing materialization."""
+
+    state.init_state_db()
+    with state._connect_orca() as conn:
+        row = conn.execute(
+            """
+            SELECT candidate_id
+              FROM candidate_registry
+             WHERE external_key = ?
+            """,
+            (_candidate_external_key(source_external_key),),
+        ).fetchone()
+    return row["candidate_id"] if row else None
+
+
 def build_backtest_candidate_entry(
     *,
     session_id: str,
@@ -250,11 +279,20 @@ def materialize_backtest_day(
     market_note: str,
     daily_picks: list[dict[str, Any]],
     tracking_days: int,
+    materialize_mode: str = MATERIALIZE_MODE_REPLACE,
+    auto_context_snapshot: bool = True,
 ) -> dict[str, Any]:
+    if materialize_mode not in VALID_MATERIALIZE_MODES:
+        raise ValueError(
+            f"Unsupported materialize_mode={materialize_mode!r}; "
+            f"expected one of {sorted(VALID_MATERIALIZE_MODES)}"
+        )
+
     results = {
         "candidates": 0,
         "outcomes": 0,
         "lessons": 0,
+        "skipped_existing": 0,
         "candidate_ids": [],
     }
     for pick in daily_picks:
@@ -264,6 +302,18 @@ def materialize_backtest_day(
         outcome = dict(pick.get("outcome") or {})
         if not ticker:
             continue
+        external_key = f"jackal-backtest:{analysis_date}:{ticker}"
+        existing_candidate_id = _find_existing_backtest_candidate_id(external_key)
+        if existing_candidate_id and materialize_mode == MATERIALIZE_MODE_ADD_MISSING:
+            results["skipped_existing"] += 1
+            results["candidate_ids"].append(existing_candidate_id)
+            continue
+        if existing_candidate_id and materialize_mode == MATERIALIZE_MODE_FAIL_ON_DUPLICATE:
+            raise ValueError(
+                "Duplicate JACKAL backtest lesson candidate for "
+                f"{analysis_date} {ticker}: {existing_candidate_id}"
+            )
+
         signals_fired = build_backtest_signals(
             ticker=ticker,
             tech=tech,
@@ -285,7 +335,6 @@ def materialize_backtest_day(
             quality_score=quality_score,
             signals_fired=signals_fired,
         )
-        external_key = f"jackal-backtest:{analysis_date}:{ticker}"
         source_event_id = f"{session_id}:{analysis_date}:{ticker}:{rank_index}"
         candidate_id = record_backtest_candidate(
             entry,
@@ -325,6 +374,7 @@ def materialize_backtest_day(
                     "peak_day": outcome.get("peak_day"),
                     "peak_pct": outcome.get("peak_pct"),
                 },
+                auto_context_snapshot=auto_context_snapshot,
             )
             if lesson_id:
                 results["lessons"] += 1

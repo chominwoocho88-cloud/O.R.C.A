@@ -249,6 +249,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Clear existing clustering data before executing",
     )
     parser.add_argument(
+        "--append",
+        action="store_true",
+        help="Append a new clustering run while preserving existing runs",
+    )
+    parser.add_argument(
         "--no-backup",
         action="store_true",
         help="Skip automatic DB backup when executing (not recommended)",
@@ -291,15 +296,28 @@ def main(argv: list[str] | None = None) -> int:
     try:
         preflight = _print_preflight(conn)
 
+        if args.force_rebuild and args.append:
+            print()
+            print("--force-rebuild and --append are mutually exclusive.")
+            return 1
+
         if args.dry_run and args.force_rebuild:
             print()
             print("force_rebuild=true requested, but dry_run=true prevents DB changes.")
+        if args.dry_run and args.append:
+            print()
+            print("append=true requested, but dry_run=true prevents DB changes.")
 
-        if not args.dry_run and preflight["latest_run_id"] and not args.force_rebuild:
+        if (
+            not args.dry_run
+            and preflight["latest_run_id"]
+            and not args.force_rebuild
+            and not args.append
+        ):
             print()
             print(
                 "Existing clustering run found. Re-run with --force-rebuild "
-                "to replace clustering data."
+                "to replace clustering data, or --append to preserve it."
             )
             return 1
 

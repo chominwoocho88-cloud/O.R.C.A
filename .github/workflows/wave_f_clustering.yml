@@ -15,6 +15,22 @@ on:
         description: "Clear existing clustering data before running"
         type: boolean
         default: false
+      append_mode:
+        description: "Append a new clustering run and preserve existing runs"
+        type: boolean
+        default: false
+      expected_snapshots:
+        description: "Expected snapshot assignments"
+        type: string
+        default: "252"
+      expected_linked_lessons:
+        description: "Expected lessons reachable through cluster mappings"
+        type: string
+        default: "1260"
+      min_silhouette:
+        description: "Minimum acceptable silhouette"
+        type: string
+        default: "0.15"
 
 concurrency:
   group: orca-repo-state
@@ -70,7 +86,7 @@ jobs:
 
       - name: Run clustering
         run: |
-          ARGS="--n-clusters ${{ inputs.n_clusters }} --expected-snapshots 252 --expected-linked-lessons 1260 --min-silhouette 0.15"
+          ARGS="--n-clusters ${{ inputs.n_clusters }} --expected-snapshots ${{ inputs.expected_snapshots }} --expected-linked-lessons ${{ inputs.expected_linked_lessons }} --min-silhouette ${{ inputs.min_silhouette }}"
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           else
@@ -79,12 +95,17 @@ jobs:
           if [ "${{ inputs.force_rebuild }}" = "true" ]; then
             ARGS="$ARGS --force-rebuild"
           fi
+          if [ "${{ inputs.append_mode }}" = "true" ]; then
+            ARGS="$ARGS --append"
+          fi
           python scripts/build_lesson_clusters.py --verbose $ARGS
 
       - name: Strict verify
         if: ${{ inputs.dry_run != true }}
         env:
           EXPECTED_CLUSTERS: ${{ inputs.n_clusters }}
+          EXPECTED_SNAPSHOTS: ${{ inputs.expected_snapshots }}
+          EXPECTED_LINKED_LESSONS: ${{ inputs.expected_linked_lessons }}
         run: |
           python - <<'PY'
           import os
@@ -92,6 +113,8 @@ jobs:
           from orca import state
 
           expected_clusters = int(os.environ['EXPECTED_CLUSTERS'])
+          expected_snapshots = int(os.environ.get('EXPECTED_SNAPSHOTS', '252'))
+          expected_linked_lessons = int(os.environ.get('EXPECTED_LINKED_LESSONS', '1260'))
           conn = sqlite3.connect('data/orca_state.db')
           latest_run = state.get_latest_run_id(conn)
           failures = []
@@ -128,12 +151,12 @@ jobs:
 
           if clusters != expected_clusters:
               failures.append(f'clusters {clusters} != expected {expected_clusters}')
-          if mappings < 252:
-              failures.append(f'mappings {mappings} < 252')
-          if cached < 252:
-              failures.append(f'context_cluster_id cached {cached} < 252')
-          if clustered_lessons < 1260:
-              failures.append(f'clustered lessons {clustered_lessons} < 1260')
+          if mappings < expected_snapshots:
+              failures.append(f'mappings {mappings} < {expected_snapshots}')
+          if cached < expected_snapshots:
+              failures.append(f'context_cluster_id cached {cached} < {expected_snapshots}')
+          if clustered_lessons < expected_linked_lessons:
+              failures.append(f'clustered lessons {clustered_lessons} < {expected_linked_lessons}')
 
           print('Strict verify:')
           print(f'  latest_run: {latest_run}')

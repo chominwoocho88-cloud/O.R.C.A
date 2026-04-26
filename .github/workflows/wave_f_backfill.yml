@@ -19,6 +19,14 @@ on:
         description: "Cleanup backfill data BEFORE running (recovery mode)"
         type: boolean
         default: false
+      expected_snapshots:
+        description: "Expected snapshots count"
+        type: string
+        default: "252"
+      expected_linked_lessons:
+        description: "Expected linked backtest lessons"
+        type: string
+        default: "1260"
 
 concurrency:
   group: orca-repo-state
@@ -118,13 +126,17 @@ jobs:
 
       - name: Strict verify
         if: ${{ inputs.dry_run != true }}
+        env:
+          EXPECTED_SNAPSHOTS: ${{ inputs.expected_snapshots }}
+          EXPECTED_LINKED_LESSONS: ${{ inputs.expected_linked_lessons }}
         run: |
           python - <<'PY'
+          import os
           from orca.context_snapshot import verify_backfill_completeness
 
           result = verify_backfill_completeness(
-              expected_snapshots=252,
-              expected_linked_lessons=1260,
+              expected_snapshots=int(os.environ.get('EXPECTED_SNAPSHOTS', '252')),
+              expected_linked_lessons=int(os.environ.get('EXPECTED_LINKED_LESSONS', '1260')),
               require_market_metrics=True,
           )
           print('Verify result:')

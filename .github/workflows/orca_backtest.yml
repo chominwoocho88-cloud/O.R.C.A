@@ -6,6 +6,15 @@ concurrency:
 
 on:
   workflow_dispatch:
+    inputs:
+      months:
+        description: "Backtest months"
+        required: true
+        default: "13"
+      walk_forward:
+        description: "Walk-forward mode"
+        type: boolean
+        default: true
 
 jobs:
   run-backtest:
@@ -33,14 +42,26 @@ jobs:
           PYTHONIOENCODING: utf-8
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+          ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
+          USE_UNIFIED_FETCH: "1"
         run: |
-          python -m orca.backtest --months 13 --walk-forward --fail-on-empty-dynamic-fetch
+          # Default path remains:
+          # python -m orca.backtest --months 13 --walk-forward --fail-on-empty-dynamic-fetch
+          ARGS="--months ${{ inputs.months }} --fail-on-empty-dynamic-fetch"
+          if [ "${{ inputs.walk_forward }}" = "true" ]; then
+            ARGS="$ARGS --walk-forward"
+          fi
+          python -m orca.backtest $ARGS
 
       - name: Run JACKAL Backtest
         env:
           PYTHONIOENCODING: utf-8
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+          ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
+          USE_UNIFIED_FETCH: "1"
         run: |
           python -m jackal.backtest --mode full
 

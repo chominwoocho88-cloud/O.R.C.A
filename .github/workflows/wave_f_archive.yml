@@ -15,6 +15,14 @@ on:
         description: "Clear existing archive data before running"
         type: boolean
         default: false
+      append_mode:
+        description: "Append a new archive run and preserve existing archive rows"
+        type: boolean
+        default: false
+      expected_archive_count:
+        description: "Expected archive rows for latest run"
+        type: string
+        default: "1260"
 
 concurrency:
   group: orca-repo-state
@@ -79,7 +87,7 @@ jobs:
 
       - name: Run archive build
         run: |
-          ARGS="--expected-lessons 1260"
+          ARGS="--expected-lessons ${{ inputs.expected_archive_count }}"
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           else
@@ -91,15 +99,22 @@ jobs:
           if [ "${{ inputs.force_rebuild }}" = "true" ]; then
             ARGS="$ARGS --force-rebuild"
           fi
+          if [ "${{ inputs.append_mode }}" = "true" ]; then
+            ARGS="$ARGS --append"
+          fi
           python scripts/build_lesson_archive.py --verbose $ARGS
 
       - name: Strict verify
         if: ${{ inputs.dry_run != true }}
+        env:
+          EXPECTED_ARCHIVE_COUNT: ${{ inputs.expected_archive_count }}
         run: |
           python - <<'PY'
+          import os
           import sqlite3
           from orca import state
 
+          expected_archive_count = int(os.environ.get('EXPECTED_ARCHIVE_COUNT', '1260'))
           conn = sqlite3.connect('data/orca_state.db')
           latest_run = state.get_latest_archive_run_id(conn)
           failures = []
@@ -127,10 +142,10 @@ jobs:
               (latest_run,),
           ).fetchone()[0] if latest_run else 0
 
-          if archive_rows != 1260:
-              failures.append(f'archive rows {archive_rows} != 1260')
-          if distinct_lessons != 1260:
-              failures.append(f'distinct archived lessons {distinct_lessons} != 1260')
+          if archive_rows != expected_archive_count:
+              failures.append(f'archive rows {archive_rows} != {expected_archive_count}')
+          if distinct_lessons != expected_archive_count:
+              failures.append(f'distinct archived lessons {distinct_lessons} != {expected_archive_count}')
           if tier_total != archive_rows:
               failures.append(f'tier rows {tier_total} != archive rows {archive_rows}')
           if avg_quality is None or avg_quality <= 0:

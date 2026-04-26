@@ -48,6 +48,8 @@ from orca.state import (
     start_backtest_session,
 )
 from .backtest_materialization import (
+    MATERIALIZE_MODE_REPLACE,
+    VALID_MATERIALIZE_MODES,
     materialize_backtest_day,
     merge_reports_by_analysis_date,
     select_backtest_reports,
@@ -61,12 +63,31 @@ MEMORY_FILE = _REPO_ROOT / "data" / "memory.json"          # fallback source
 
 _JACKAL_SESSION_ID: str | None = None
 
-BACKTEST_DAYS = 252
+def _env_int(name: str, default: int) -> int:
+    try:
+        return int(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+
+def _parse_bool(value: object, *, default: bool = True) -> bool:
+    if value is None:
+        return default
+    text = str(value).strip().lower()
+    if text in {"1", "true", "yes", "y", "on"}:
+        return True
+    if text in {"0", "false", "no", "n", "off"}:
+        return False
+    return default
+
+
+BACKTEST_DAYS = _env_int("JACKAL_BACKTEST_DAYS", 252)
 TRACKING_DAYS = 10
 BACKTEST_MODE_FULL = "full"
 BACKTEST_MODE_INCREMENTAL = "incremental"
 BACKTEST_CURSOR_STATE_KEY = "jackal_materialization_cursor"
-YF_HISTORY_PERIOD = "2y"
+JACKAL_HISTORY_DAYS = _env_int("JACKAL_HISTORY_DAYS", 750)
+YF_HISTORY_PERIOD = f"{JACKAL_HISTORY_DAYS}d"
 
 # ── 실운용 상수 import (Universe 정의) ────────────────────────────
 from .hunter import SECTOR_POOLS, get_portfolio_exclusions
@@ -454,9 +475,9 @@ def load_memory(*, mode: str = BACKTEST_MODE_FULL) -> tuple[list, dict]:
 
 @functools.lru_cache(maxsize=128)
 def _fetch_yf_cached(ticker: str):
-    """Fetch 2y daily bars through the unified market wrapper, with cache."""
+    """Fetch daily bars through the unified market wrapper, with cache."""
     end_date = datetime.now().strftime("%Y-%m-%d")
-    start_date = (datetime.now() - timedelta(days=750)).strftime("%Y-%m-%d")
+    start_date = (datetime.now() - timedelta(days=JACKAL_HISTORY_DAYS)).strftime("%Y-%m-%d")
 
     try:
         from orca.market_fetch import fetch_daily_history
@@ -475,13 +496,29 @@ def _fetch_yf_cached(ticker: str):
 # 메인 백테스트
 # ══════════════════════════════════════════════════════════════════
 
-def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
+def run_backtest(
+    *,
+    mode: str = BACKTEST_MODE_FULL,
+    materialize_mode: str | None = None,
+    auto_context_snapshot: bool | None = None,
+):
     global _JACKAL_SESSION_ID
+    materialize_mode = materialize_mode or os.getenv("JACKAL_MATERIALIZE_MODE", MATERIALIZE_MODE_REPLACE)
+    if materialize_mode not in VALID_MATERIALIZE_MODES:
+        raise ValueError(
+            f"Unsupported materialize_mode={materialize_mode!r}; "
+            f"expected one of {sorted(VALID_MATERIALIZE_MODES)}"
+        )
+    if auto_context_snapshot is None:
+        auto_context_snapshot = _parse_bool(os.getenv("JACKAL_AUTO_CONTEXT_SNAPSHOT"), default=True)
 
     print("\n" + "=" * 62)
     print("  🦊 Jackal Backtest v2 — research spine 연동")
     print("  파이프라인: Universe→Stage1(50)→Stage2(25)→Stage3(10)→Stage4(5)")
-    print(f"  대상: 최근 {BACKTEST_DAYS}거래일 | Peak 추적: {TRACKING_DAYS}일 | mode={mode}")
+    print(
+        f"  대상: 최근 {BACKTEST_DAYS}거래일 | Peak 추적: {TRACKING_DAYS}일 | "
+        f"mode={mode} | materialize={materialize_mode} | auto_context={auto_context_snapshot}"
+    )
     print("=" * 62)
 
     memory, source_info = load_memory(mode=mode)
@@ -490,8 +527,11 @@ def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
         "backtest",
         config={
             "backtest_days": BACKTEST_DAYS,
+            "history_days": JACKAL_HISTORY_DAYS,
             "tracking_days": TRACKING_DAYS,
             "mode": mode,
+            "materialize_mode": materialize_mode,
+            "auto_context_snapshot": auto_context_snapshot,
             "yfinance_period": YF_HISTORY_PERIOD,
             "source": source_info,
         },
@@ -509,6 +549,9 @@ def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
                 "materialized_candidates": 0,
                 "materialized_outcomes": 0,
                 "materialized_lessons": 0,
+                "skipped_existing": 0,
+                "materialize_mode": materialize_mode,
+                "auto_context_snapshot": auto_context_snapshot,
                 "last_materialized_analysis_date": source_info.get("incremental_from_analysis_date"),
             }
             save_backtest_state(
@@ -550,7 +593,7 @@ def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
             "s4_top5": 0,
             "tracked": 0,
         }
-        materialization_totals = {"candidates": 0, "outcomes": 0, "lessons": 0}
+        materialization_totals = {"candidates": 0, "outcomes": 0, "lessons": 0, "skipped_existing": 0}
         last_materialized_analysis_date: str | None = None
 
         print("=" * 62)
@@ -682,6 +725,8 @@ def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
                 market_note=report.get("one_line_summary", ""),
                 daily_picks=daily_picks,
                 tracking_days=TRACKING_DAYS,
+                materialize_mode=materialize_mode,
+                auto_context_snapshot=auto_context_snapshot,
             )
             for key in materialization_totals:
                 materialization_totals[key] += int(materialized.get(key, 0))
@@ -739,7 +784,8 @@ def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
         print(
             f"  Feed         : C {materialization_totals['candidates']:,} | "
             f"O {materialization_totals['outcomes']:,} | "
-            f"L {materialization_totals['lessons']:,}"
+            f"L {materialization_totals['lessons']:,} | "
+            f"skip {materialization_totals['skipped_existing']:,}"
         )
 
         total = len(all_results)
@@ -755,6 +801,9 @@ def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
                 "materialized_candidates": materialization_totals["candidates"],
                 "materialized_outcomes": materialization_totals["outcomes"],
                 "materialized_lessons": materialization_totals["lessons"],
+                "skipped_existing": materialization_totals["skipped_existing"],
+                "materialize_mode": materialize_mode,
+                "auto_context_snapshot": auto_context_snapshot,
                 "last_materialized_analysis_date": last_materialized_analysis_date,
             }
             finish_backtest_session(_JACKAL_SESSION_ID, "completed", summary=summary)
@@ -833,6 +882,9 @@ def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
             "materialized_candidates": materialization_totals["candidates"],
             "materialized_outcomes": materialization_totals["outcomes"],
             "materialized_lessons": materialization_totals["lessons"],
+            "skipped_existing": materialization_totals["skipped_existing"],
+            "materialize_mode": materialize_mode,
+            "auto_context_snapshot": auto_context_snapshot,
             "last_materialized_analysis_date": last_materialized_analysis_date,
         }
         finish_backtest_session(_JACKAL_SESSION_ID, "completed", summary=summary)
@@ -860,6 +912,8 @@ def run_backtest(*, mode: str = BACKTEST_MODE_FULL):
 
 
 def main() -> None:
+    global BACKTEST_DAYS, JACKAL_HISTORY_DAYS, YF_HISTORY_PERIOD
+
     parser = argparse.ArgumentParser(description="JACKAL backtest")
     parser.add_argument(
         "--mode",
@@ -867,8 +921,47 @@ def main() -> None:
         default=BACKTEST_MODE_FULL,
         help="full=최근 252 거래일 전체 재생, incremental=마지막 materialized 날짜 이후 delta만 반영",
     )
+    parser.add_argument(
+        "--backtest-days",
+        type=int,
+        default=None,
+        help="Override JACKAL_BACKTEST_DAYS for this run (default/env: 252)",
+    )
+    parser.add_argument(
+        "--history-days",
+        type=int,
+        default=None,
+        help="Override JACKAL_HISTORY_DAYS for this run (default/env: 750)",
+    )
+    parser.add_argument(
+        "--materialize-mode",
+        choices=tuple(sorted(VALID_MATERIALIZE_MODES)),
+        default=None,
+        help="replace/add_missing/fail_on_duplicate materialization mode",
+    )
+    parser.add_argument(
+        "--auto-context-snapshot",
+        choices=("true", "false", "1", "0", "yes", "no", "on", "off"),
+        default=None,
+        help="Create context snapshots during lesson insert (default/env: true)",
+    )
     args = parser.parse_args()
-    run_backtest(mode=args.mode)
+    if args.backtest_days is not None:
+        BACKTEST_DAYS = int(args.backtest_days)
+    if args.history_days is not None:
+        JACKAL_HISTORY_DAYS = int(args.history_days)
+        YF_HISTORY_PERIOD = f"{JACKAL_HISTORY_DAYS}d"
+        _fetch_yf_cached.cache_clear()
+    auto_context_snapshot = (
+        None
+        if args.auto_context_snapshot is None
+        else _parse_bool(args.auto_context_snapshot, default=True)
+    )
+    run_backtest(
+        mode=args.mode,
+        materialize_mode=args.materialize_mode,
+        auto_context_snapshot=auto_context_snapshot,
+    )
 
 
 if __name__ == "__main__":

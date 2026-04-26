@@ -185,6 +185,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Clear existing lesson_archive rows before executing",
     )
     parser.add_argument(
+        "--append",
+        action="store_true",
+        help="Append a new archive run while preserving existing archive rows",
+    )
+    parser.add_argument(
         "--no-backup",
         action="store_true",
         help="Skip automatic DB backup when executing (not recommended)",
@@ -220,15 +225,28 @@ def main(argv: list[str] | None = None) -> int:
             print("No clustering run found. Build clusters before archiving.")
             return 1
 
+        if args.force_rebuild and args.append:
+            print()
+            print("--force-rebuild and --append are mutually exclusive.")
+            return 1
+
         if args.dry_run and args.force_rebuild:
             print()
             print("force_rebuild=true requested, but dry_run=true prevents DB changes.")
+        if args.dry_run and args.append:
+            print()
+            print("append=true requested, but dry_run=true prevents DB changes.")
 
-        if not args.dry_run and preflight["archives"] and not args.force_rebuild:
+        if (
+            not args.dry_run
+            and preflight["archives"]
+            and not args.force_rebuild
+            and not args.append
+        ):
             print()
             print(
                 "Existing lesson_archive rows found. Re-run with --force-rebuild "
-                "to replace archive data."
+                "to replace archive data, or --append to preserve it."
             )
             return 1
 
