@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-25 17:27 KST",
+  "collected_at": "2026-04-26 12:11 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA rose 4.46% as strong Q1 results from Intel boosted sentiment in the semiconductor sector",
+      "headline": "Stock surges 4.3% to record close above $208 as Intel's strong earnings boost semiconductor sector confidence",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix stock up 4.97% with analysts showing Strong Buy rating and mass production of next-generation memory modules",
+      "headline": "HSBC forecasts record Q2 2026 with DRAM prices +28% and NAND prices +35% quarter-on-quarter",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics down 2.23% amid union's total strike threat from May 21 through June 7 over compensation demands",
+      "headline": "Samsung Electronics union threatens total strike from May 21 to June 7 over wage demands; stock falls 2.23%",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom jumped 4.3% after announcing expanded collaboration with Google Cloud on Cloud Network Insights",
+      "headline": "Stock jumps 4.3% after announcing expanded Google Cloud partnership for Cloud Network Insights service",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao up 2.69% but facing analyst target downgrades due to disappointing AI progress and slower development",
+      "headline": "Kakao CEO confirms reelection and pledges AI-focused business restructuring with 10% revenue growth target for 2026",
       "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL 코리아고배당 ETF surpassed 4 trillion KRW in assets with strong performance driven by financial stocks and high dividend yields",
+      "headline": "SOL Korea High Dividend ETF breaks 5 trillion won in net assets with monthly 61 won dividend yield around 6%",
       "impact": "bullish",
       "source": "web_search"
     }

@@ -1,0 +1,430 @@
+{
+  "analysis_date": "2026-04-26",
+  "analysis_time": "12:11 KST",
+  "mode": "MORNING",
+  "mode_label": "아침 풀분석",
+  "one_line_summary": "나스닥 24,836·코스피 6,475 연고점 경신 지속이나 3일+ 연속 급등 후 블랙스완 반전 리스크 최고 경계, 호르무즈 봉쇄·브렌트 $106 인플레 충격 전이 가능성으로 상승 확신 어려운 혼재 국면",
+  "market_regime": "위험선호(전환 경계)",
+  "trend_phase": "상승추세",
+  "trend_strategy": {
+    "recommended": "반도체·AI 인프라 기존 포지션 유지 수준으로 비중 동결, 신규 추격 매수 자제",
+    "caution": "나스닥 3일+ 연속 급등 후 블랙스완 충격 패턴 경계, 브렌트 $106 고착화 시 전 섹터 비용 충격 전이 리스크",
+    "difficulty": "높음"
+  },
+  "confidence_overall": "낮음",
+  "consensus_level": "낮음",
+  "top_headlines": [
+    {
+      "headline": "나스닥 24,836·S&P500 7,165 연고점 재경신, Q1 EPS 서프라이즈율 84% 달성",
+      "signal_tag": "강세",
+      "impact": "높음"
+    },
+    {
+      "headline": "브렌트 $106/배럴 고착화, 호르무즈 봉쇄로 글로벌 LNG 공급 20% 감소",
+      "signal_tag": "약세",
+      "impact": "높음"
+    },
+    {
+      "headline": "한국 4월 반도체 수출 +152.5% YoY, DRAM/NAND 공급 부족 심화로 메모리 슈퍼사이클 진행",
+      "signal_tag": "강세",
+      "impact": "높음"
+    },
+    {
+      "headline": "아시아 제트유·디젤 2배 급등, 항공·물류 수익성 직격탄",
+      "signal_tag": "약세",
+      "impact": "높음"
+    },
+    {
+      "headline": "연속 급등 3일+ 구간 진입, 60거래일 백테스트 블랙스완 충격 집중 패턴 발동",
+      "signal_tag": "경고",
+      "impact": "높음"
+    }
+  ],
+  "volatility_index": {
+    "vkospi": "데이터 미제공",
+    "vix": "18.71",
+    "fear_greed": "67 (Greed)",
+    "level": "중립~탐욕",
+    "interpretation": "VIX 18.71은 급락 공포 구간(25+)을 완전히 벗어난 중립~약탐욕 경계. Fear & Greed 67로 탐욕 구간 진입. 표면적 안정세이나 호르무즈 봉쇄·브렌트 $106·연속 급등 후 잠재 충격 리스크가 내재되어 있어 현 낮은 VIX가 오히려 과신 경계 신호로 해석 필요."
+  },
+  "retail_reversal_signal": {
+    "retail_behavior": "나스닥 24,836·코스피 6,475 연고점 경신 뉴스에 개인 FOMO 매수 유입 가능성 높음. 반도체 수출 +152.5% 호재로 SK하이닉스·삼성전자 추격 매수 집중 예상.",
+    "contrarian_implication": "연고점 권역에서 개인 FOMO 집중은 전형적 고점 과열 신호. 3일+ 연속 상승 모멘텀 소진 시 개인 물량이 하방 압력 가중 요인으로 전환될 위험 내재.",
+    "reliability": "보통"
+  },
+  "outflows": [
+    {
+      "zone": "에너지 섹터 주식",
+      "reason": "Q1 에너지 EPS -14.4% YoY, 통합 Oil&Gas -46% 붕괴 수준 실적 부진. 유가 $106에도 정제 마진 역설적 악화로 구조적 디스럽션 신호.",
+      "severity": "높음",
+      "data_point": "에너지 섹터 Q1 EPS -14.4% YoY, 통합 Oil&Gas -46%"
+    },
+    {
+      "zone": "아시아 항공·물류·수송주",
+      "reason": "호르무즈 봉쇄로 아시아 제트유·디젤 2배 급등, 연료비 급증으로 항공사 수익성 직격탄.",
+      "severity": "높음",
+      "data_point": "브렌트 $106/배럴, 아시아 제트유·디젤 2배 급등"
+    },
+    {
+      "zone": "중동·글로벌 LNG 의존 유틸리티",
+      "reason": "카타르 라스 라판 허브 피격·호르무즈 봉쇄로 글로벌 LNG 공급 20% 감소. 한국·일본 에너지 수입 의존도 90%+ 국가 직격.",
+      "severity": "높음",
+      "data_point": "호르무즈 원유 흐름 20mb/d → 2mb/d, LNG 20% 공급 손실"
+    },
+    {
+      "zone": "반도체 팹 에너지 비용 민감 종목",
+      "reason": "브렌트 $106 고착화 시 SK하이닉스·삼성전자 등 에너지 집약적 팹 운영 비용 직접 상승. 매출 호조에도 마진 압박 가능성.",
+      "severity": "보통",
+      "data_point": "SK하이닉스 베타 1.36x, 나스닥 -2% 시 예상 낙폭 -2.8%+"
+    }
+  ],
+  "inflows": [
+    {
+      "zone": "메모리 반도체 (SK하이닉스·삼성전자)",
+      "reason": "한국 4월 반도체 수출 +152.5% YoY, DRAM/NAND 공급 부족 심화. 메모리 슈퍼사이클 펀더멘털 강세 유효.",
+      "momentum": "강함",
+      "data_point": "반도체 수출 +152.5% YoY, 공급 부족 심화"
+    },
+    {
+      "zone": "AI 인프라·빅테크",
+      "reason": "Q1 EPS 서프라이즈율 84%, 블렌디드 성장률 15.1%로 실적 펀더멘털 서포트 지속.",
+      "momentum": "보통",
+      "data_point": "S&P500 Q1 EPS 서프라이즈율 84%, 블렌디드 성장률 15.1%"
+    }
+  ],
+  "neutral_waiting": [
+    {
+      "zone": "코스피 전반",
+      "catalyst_needed": "외국인 수급 데이터 확인(현재 미제공), 원달러 1,476원 안정화 또는 추가 약세 여부 확인"
+    },
+    {
+      "zone": "글로벌 소비재·산업재",
+      "catalyst_needed": "브렌트 유가 $106 고착화 여부 및 호르무즈 봉쇄 해제 신호 확인"
+    }
+  ],
+  "hidden_signals": [
+    {
+      "signal": "inflows 항목 실질적 근거 빈약 - 반도체 외 자금 유입처 부재",
+      "implication": "상승 thesis가 반도체 단일 모멘텀에만 의존. 분산되지 않은 랠리는 취약성이 높아 충격 발생 시 낙폭 확대 구조.",
+      "confidence": "높음"
+    },
+    {
+      "signal": "60거래일 백테스트: 연속 상승 3일+ 이후 블랙스완 충격 6회 중 4회 집중",
+      "implication": "현재 3일+ 연속 급등 구간 진입으로 통계적 충격 발생 확률 최고 경계 구간. 향후 2-3거래일이 핵심 변곡 시점.",
+      "confidence": "보통"
+    },
+    {
+      "signal": "VIX 18.71·Fear&Greed 67 동시 저변동·탐욕 신호",
+      "implication": "낮은 VIX와 탐욕 구간 진입의 조합은 시장 과신(complacency) 국면. 충격 발생 시 변동성 스파이크 속도가 빠를 수 있음.",
+      "confidence": "높음"
+    },
+    {
+      "signal": "Powell 교체 불확실성 잠재",
+      "implication": "연준 독립성 훼손 우려가 재점화될 경우 채권·달러 동반 충격으로 위험자산 전반 급격한 리레이팅 가능.",
+      "confidence": "보통"
+    }
+  ],
+  "thesis_killers": [
+    {
+      "event": "나스닥",
+      "timeframe": "향후 2거래일",
+      "confirms_if": "나스닥 종가 24,836pt 이상 유지 + 일중 낙폭 -0.5% 미만",
+      "invalidates_if": "나스닥 종가 -1.5% 이하 하락 또는 24,400pt 이탈",
+      "quality": "ok"
+    },
+    {
+      "event": "SK하이닉스",
+      "timeframe": "향후 3거래일",
+      "confirms_if": "SK하이닉스 종가 +1% 이상 또는 직전 고점 대비 -1% 이내 유지",
+      "invalidates_if": "SK하이닉스 종가 -2.8% 이하 하락 (나스닥 -2% 연동 베타 1.36x 적용)",
+      "quality": "ok"
+    }
+  ],
+  "data_quality": "degraded",
+  "jackal_candidate_review": {
+    "analysis_date": "2026-04-26",
+    "market_bias": "mixed",
+    "market_bias_label": "혼조/관망",
+    "reviewed_count": 0,
+    "aligned_count": 0,
+    "neutral_count": 0,
+    "opposed_count": 0,
+    "follow_count": 0,
+    "watch_count": 0,
+    "avoid_count": 0,
+    "review_verdict_breakdown": {
+      "strong_aligned": 0,
+      "aligned": 0,
+      "neutral": 0,
+      "opposed": 0,
+      "strong_opposed": 0
+    },
+    "average_review_confidence": "low",
+    "reason_code_frequency": {},
+    "highlights": []
+  },
+  "jackal_probability_summary": {
+    "window_days": 90,
+    "min_samples": 5,
+    "raw_rows": 330,
+    "deduped_rows": 330,
+    "duplicates_skipped": 0,
+    "overall": {
+      "wins": 239,
+      "losses": 91,
+      "total": 330,
+      "avg_return": 4.13,
+      "win_rate": 72.4,
+      "effective_win_rate": 72.2,
+      "qualified": true
+    },
+    "trusted_families": [
+      {
+        "signal_family": "panic_rebound",
+        "signal_family_label": "패닉셀반등",
+        "wins": 44,
+        "losses": 13,
+        "total": 57,
+        "avg_return": 5.304,
+        "source_event_type": "backtest",
+        "win_rate": 77.2,
+        "effective_win_rate": 75.4,
+        "qualified": true
+      },
+      {
+        "signal_family": "momentum_pullback",
+        "signal_family_label": "모멘텀눌림목",
+        "wins": 133,
+        "losses": 54,
+        "total": 187,
+        "avg_return": 3.963,
+        "source_event_type": "backtest",
+        "win_rate": 71.1,
+        "effective_win_rate": 70.7,
+        "qualified": true
+      },
+      {
+        "signal_family": "divergence",
+        "signal_family_label": "강세다이버전스",
+        "wins": 37,
+        "losses": 15,
+        "total": 52,
+        "avg_return": 2.973,
+        "source_event_type": "backtest",
+        "win_rate": 71.2,
+        "effective_win_rate": 69.6,
+        "qualified": true
+      },
+      {
+        "signal_family": "oversold_rebound",
+        "signal_family_label": "기술적과매도",
+        "wins": 14,
+        "losses": 5,
+        "total": 19,
+        "avg_return": 3.822,
+        "source_event_type": "backtest",
+        "win_rate": 73.7,
+        "effective_win_rate": 69.6,
+        "qualified": true
+      },
+      {
+        "signal_family": "rotation",
+        "signal_family_label": "섹터로테이션",
+        "wins": 11,
+        "losses": 4,
+        "total": 15,
+        "avg_return": 6.109,
+        "source_event_type": "backtest",
+        "win_rate": 73.3,
+        "effective_win_rate": 68.4,
+        "qualified": true
+      }
+    ],
+    "cautious_families": [
+      {
+        "signal_family": "rotation",
+        "signal_family_label": "섹터로테이션",
+        "wins": 11,
+        "losses": 4,
+        "total": 15,
+        "avg_return": 6.109,
+        "source_event_type": "backtest",
+        "win_rate": 73.3,
+        "effective_win_rate": 68.4,
+        "qualified": true
+      },
+      {
+        "signal_family": "divergence",
+        "signal_family_label": "강세다이버전스",
+        "wins": 37,
+        "losses": 15,
+        "total": 52,
+        "avg_return": 2.973,
+        "source_event_type": "backtest",
+        "win_rate": 71.2,
+        "effective_win_rate": 69.6,
+        "qualified": true
+      },
+      {
+        "signal_family": "oversold_rebound",
+        "signal_family_label": "기술적과매도",
+        "wins": 14,
+        "losses": 5,
+        "total": 19,
+        "avg_return": 3.822,
+        "source_event_type": "backtest",
+        "win_rate": 73.7,
+        "effective_win_rate": 69.6,
+        "qualified": true
+      },
+      {
+        "signal_family": "momentum_pullback",
+        "signal_family_label": "모멘텀눌림목",
+        "wins": 133,
+        "losses": 54,
+        "total": 187,
+        "avg_return": 3.963,
+        "source_event_type": "backtest",
+        "win_rate": 71.1,
+        "effective_win_rate": 70.7,
+        "qualified": true
+      },
+      {
+        "signal_family": "panic_rebound",
+        "signal_family_label": "패닉셀반등",
+        "wins": 44,
+        "losses": 13,
+        "total": 57,
+        "avg_return": 5.304,
+        "source_event_type": "backtest",
+        "win_rate": 77.2,
+        "effective_win_rate": 75.4,
+        "qualified": true
+      }
+    ],
+    "alignment_summary": {
+      "backtest": {
+        "wins": 239,
+        "losses": 91,
+        "total": 330,
+        "avg_return": 4.13,
+        "win_rate": 72.4,
+        "effective_win_rate": 72.2,
+        "qualified": true
+      }
+    },
+    "best_aligned_families": [],
+    "best_opposed_families": []
+  },
+  "learning_policy": {
+    "version": "v1",
+    "policy_source": "orca/learning_policy.py",
+    "min_samples": 5,
+    "prior_wins": 2,
+    "prior_total": 4,
+    "trusted_threshold": 0.58,
+    "cautious_threshold": 0.46,
+    "weight_adjustment_ladder": [
+      {
+        "threshold": 0.7,
+        "delta": 0.05
+      },
+      {
+        "threshold": 0.4,
+        "delta": -0.05
+      }
+    ],
+    "probability_score_adjustment_ladder": [
+      {
+        "min_samples": 12,
+        "threshold": 0.68,
+        "delta": 4.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.62,
+        "delta": 2.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.58,
+        "delta": 1.0
+      },
+      {
+        "min_samples": 12,
+        "threshold": 0.38,
+        "delta": -5.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.43,
+        "delta": -3.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.46,
+        "delta": -1.5
+      }
+    ]
+  },
+  "health": {
+    "status": "degraded",
+    "degraded_reasons": [
+      "external_data_degraded",
+      "weight_update_failed"
+    ],
+    "counters": {
+      "warnings": 2,
+      "soft_fails": 2
+    },
+    "details": [
+      {
+        "code": "external_data_degraded",
+        "where": "orca/run_cycle.py::run_orca_cycle",
+        "exception_type": "",
+        "message": "partial data failure: KRX_API, KOREA_NEWS"
+      },
+      {
+        "code": "weight_update_failed",
+        "where": "orca/main.py::main",
+        "exception_type": "UnicodeEncodeError",
+        "message": "가중치 업데이트 실패"
+      }
+    ]
+  },
+  "failed_sources": [
+    {
+      "source": "KRX_API",
+      "error": "unavailable",
+      "category": "primary"
+    },
+    {
+      "source": "KOREA_NEWS",
+      "error": "no_headlines",
+      "category": "secondary"
+    }
+  ],
+  "dual_db_state": {
+    "orca_state_db": {
+      "path": "data/orca_state.db",
+      "exists": true,
+      "size_bytes": 11984896,
+      "mtime_iso": "2026-04-26T12:08:23.033634+09:00"
+    },
+    "jackal_state_db": {
+      "path": "data/jackal_state.db",
+      "exists": true,
+      "size_bytes": 118784,
+      "mtime_iso": "2026-04-26T12:07:55.762885+09:00",
+      "tables": {
+        "jackal_shadow_signals": 0,
+        "jackal_live_events": 0,
+        "jackal_shadow_batches": 0,
+        "jackal_weight_snapshots": 0,
+        "jackal_recommendations": 0,
+        "jackal_accuracy_projection": 0,
+        "jackal_cooldowns": 0
+      }
+    }
+  }
+}
