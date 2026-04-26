@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-26 12:11 KST",
+  "collected_at": "2026-04-27 07:13 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,38 +12,38 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Stock surges 4.3% to record close above $208 as Intel's strong earnings boost semiconductor sector confidence",
+      "headline": "Nvidia stock closes at record, pushing market cap past $5 trillion",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "HSBC forecasts record Q2 2026 with DRAM prices +28% and NAND prices +35% quarter-on-quarter",
+      "headline": "SK Hynix shatters Q1 2026 records with 60% revenue surge to 52.2 trillion won, management declares 'structural shift' in AI-driven memory demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics union threatens total strike from May 21 to June 7 over wage demands; stock falls 2.23%",
-      "impact": "bearish",
+      "headline": "Samsung Electronics has quadrupled its monthly supply of DRAM to Tesla, with record Q4 2025 revenue and strong AI memory cycle momentum",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Stock jumps 4.3% after announcing expanded Google Cloud partnership for Cloud Network Insights service",
+      "headline": "Broadcom expands collaboration with Google Cloud on Cloud Network Insights; stock up 4.3% on broader semiconductor rally",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao CEO confirms reelection and pledges AI-focused business restructuring with 10% revenue growth target for 2026",
-      "impact": "neutral",
+      "headline": "Kakao partners with OpenAI; Q3 2025 record revenue with ChatGPT for Kakao reaching 2 million users within 10 days of launch",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF breaks 5 trillion won in net assets with monthly 61 won dividend yield around 6%",
-      "impact": "bullish",
+      "headline": "Shinhan SOL Shipbuilding TOP3 Plus ETF shows 125% yearly performance but down 7.2% last month; tracks shipbuilding sector leaders",
+      "impact": "neutral",
       "source": "web_search"
     }
   ],
