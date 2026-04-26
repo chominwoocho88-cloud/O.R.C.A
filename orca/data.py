@@ -5,14 +5,10 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
 KST=timezone(timedelta(hours=9))
+from .market_fetch import fetch_latest_close, fetch_put_call_ratio_summary
 from .notify_transport import send_message
 from .paths import COST_FILE, DATA_FILE
 _CORE={"sp500","nasdaq","vix","kospi"}
-
-try:
-    import yfinance as yf
-except ImportError:
-    yf = None
 
 def _fetch_one(ticker,retries=2):
     for i in range(retries+1):
@@ -26,7 +22,29 @@ def _fetch_one(ticker,retries=2):
         except Exception as e:
             if i<retries: time.sleep(1.0*(i+1))
             else: print("  "+ticker+" 실패("+str(retries+1)+"회): "+str(e))
+    fallback = _fetch_one_market_fallback(ticker)
+    if fallback is not None:
+        return fallback
     return "N/A",""
+
+
+def _fetch_one_market_fallback(ticker):
+    """Fallback to unified daily close when Yahoo chart is unavailable."""
+    if os.getenv("USE_UNIFIED_FETCH", "1").strip().lower() in {"0", "false", "no", "off"}:
+        return None
+    try:
+        result = fetch_latest_close(ticker, lookback_days=7)
+        if result is None:
+            return None
+        price, change_pct, source = result
+        chg = round(float(change_pct), 2)
+        price_str = str(round(float(price), 2))
+        change_str = ("+" if chg >= 0 else "") + str(chg) + "%"
+        print("  " + ticker + ": daily_close_fallback via " + str(source))
+        return price_str, change_str
+    except Exception as e:
+        print("  " + ticker + " fallback 실패: " + str(e)[:70])
+        return None
 
 def fetch_krx_flow() -> dict:
     """KRX OpenAPI — 실제 제공 데이터로 한국 시장 보조 지표 수집
@@ -123,51 +141,18 @@ def fetch_yahoo_data():
 def fetch_put_call_ratio() -> dict:
     """SPY·QQQ 풋/콜 비율 (PCR) — CNN F&G 구성요소 직접 계산
     PCR > 1.0 → 공포(헤지 수요 급증), < 0.7 → 탐욕(콜 과열)
-    yfinance 이미 설치됨 → 추가 패키지 불필요
+    options 데이터는 market_fetch wrapper 내부 yfinance 경로에 격리
     """
-    result = {"pcr_spy": None, "pcr_qqq": None, "pcr_avg": None, "pcr_signal": "N/A"}
     try:
-        if yf is None:
-            print("  PCR: yfinance 미설치")
-            return result
-        pcrs = []
-        for ticker in ["SPY", "QQQ"]:
-            try:
-                tk = yf.Ticker(ticker)
-                exps = tk.options[:2]   # 가까운 만기 2개만 (속도 최적화)
-                total_put = total_call = 0
-                for exp in exps:
-                    chain = tk.option_chain(exp)
-                    total_put  += chain.puts["volume"].fillna(0).sum()
-                    total_call += chain.calls["volume"].fillna(0).sum()
-                if total_call > 0:
-                    pcr = round(total_put / total_call, 3)
-                    pcrs.append(pcr)
-                    result["pcr_" + ticker.lower()] = pcr
-                    time.sleep(1.0)   # rate limit 방지용 대기 늘림
-                else:
-                    print("  PCR " + ticker + ": 옵션 거래량 0 (장 마감 후 or 데이터 없음)")
-            except Exception as e:
-                err = str(e)
-                if "Rate" in err or "429" in err or "Too Many" in err:
-                    print("  PCR " + ticker + ": Rate limit — 다음 실행에서 재시도")
-                else:
-                    print("  PCR " + ticker + " 실패: " + err[:70])
-
-        if pcrs:
-            avg = round(sum(pcrs) / len(pcrs), 3)
-            result["pcr_avg"] = avg
-            if avg >= 1.2:    result["pcr_signal"] = "극단공포"
-            elif avg >= 0.9:  result["pcr_signal"] = "공포"
-            elif avg >= 0.7:  result["pcr_signal"] = "중립"
-            elif avg >= 0.5:  result["pcr_signal"] = "탐욕"
-            else:             result["pcr_signal"] = "극단탐욕"
+        result = fetch_put_call_ratio_summary()
+        if result.get("pcr_avg") is not None:
             print("  PCR: SPY=" + str(result.get("pcr_spy","N/A"))
                   + " QQQ=" + str(result.get("pcr_qqq","N/A"))
-                  + " 평균=" + str(avg) + " → " + result["pcr_signal"])
+                  + " 평균=" + str(result.get("pcr_avg")) + " → " + result["pcr_signal"])
+        return result
     except Exception as e:
         print("  PCR 실패: " + str(e)[:60])
-    return result
+        return {"pcr_spy": None, "pcr_qqq": None, "pcr_avg": None, "pcr_signal": "N/A"}
 
 
 def fetch_fear_greed(yahoo_data: dict = None) -> dict:

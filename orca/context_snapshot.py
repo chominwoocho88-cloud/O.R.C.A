@@ -10,11 +10,6 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-try:
-    import yfinance as yf
-except Exception:  # pragma: no cover - degraded runtime fallback
-    yf = None
-
 from .paths import BASELINE_FILE
 from . import context_market_data
 from . import state
@@ -758,19 +753,18 @@ def _fetch_history_points(
     *,
     lookback_days: int,
 ) -> list[tuple[str, float]]:
-    if yf is None:
-        return []
     try:
         end_date = datetime.fromisoformat(trading_date) + timedelta(days=1)
     except ValueError:
         return []
     start_date = end_date - timedelta(days=max(_LOOKBACK_BUFFER_DAYS, lookback_days * 4))
     try:
-        history = yf.Ticker(ticker).history(
-            start=start_date.date().isoformat(),
-            end=end_date.date().isoformat(),
-            interval="1d",
-            auto_adjust=False,
+        from .market_fetch import fetch_daily_history
+
+        history = fetch_daily_history(
+            ticker,
+            start_date.date().isoformat(),
+            end_date.date().isoformat(),
         )
     except Exception:
         return []

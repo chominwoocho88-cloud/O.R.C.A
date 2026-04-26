@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import sys
+import time
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -159,6 +160,96 @@ def fetch_latest_close(
     return latest, change_pct, _last_fetch_source(ticker) or "unknown"
 
 
+def fetch_put_call_ratio(
+    ticker: str,
+    expiry: str | None = None,
+    use_yfinance: bool = True,
+) -> dict[str, Any] | None:
+    """Fetch put/call ratio for one ticker via yfinance options data.
+
+    This is intentionally options-only and isolated from daily OHLCV fallback.
+    Alpha Vantage standard market-data endpoints do not replace option chains;
+    a future Polygon Options path can be added behind this wrapper.
+    """
+    if not use_yfinance:
+        return None
+    if yf is None:
+        sys.stderr.write("WARN: fetch_put_call_ratio skipped because yfinance is unavailable\n")
+        return None
+
+    try:
+        ticker_obj = yf.Ticker(ticker)
+        expiries = list(getattr(ticker_obj, "options", []) or [])
+        if not expiries:
+            return None
+
+        target_expiry = expiry or expiries[0]
+        if expiry and expiry not in expiries:
+            return None
+
+        chain = ticker_obj.option_chain(target_expiry)
+        puts = getattr(chain, "puts", None)
+        calls = getattr(chain, "calls", None)
+        if puts is None or calls is None or getattr(puts, "empty", True) or getattr(calls, "empty", True):
+            return None
+
+        put_volume = _sum_option_column(puts, "volume")
+        call_volume = _sum_option_column(calls, "volume")
+        put_oi = _sum_option_column(puts, "openInterest")
+        call_oi = _sum_option_column(calls, "openInterest")
+
+        return {
+            "ticker": str(ticker),
+            "expiry": target_expiry,
+            "put_volume": put_volume,
+            "call_volume": call_volume,
+            "put_oi": put_oi,
+            "call_oi": call_oi,
+            "pcr_volume": round(put_volume / call_volume, 6) if call_volume > 0 else 0.0,
+            "pcr_oi": round(put_oi / call_oi, 6) if call_oi > 0 else 0.0,
+            "source": "yfinance",
+        }
+    except Exception as exc:
+        sys.stderr.write(f"WARN: fetch_put_call_ratio failed for {ticker}: {exc}\n")
+        return None
+
+
+def fetch_put_call_ratio_summary(
+    tickers: tuple[str, ...] = ("SPY", "QQQ"),
+    expiries: int = 2,
+    sleep_seconds: float = 1.0,
+    use_yfinance: bool = True,
+) -> dict[str, Any]:
+    """Return the legacy ORCA PCR summary while keeping yfinance isolated here."""
+    result: dict[str, Any] = {"pcr_spy": None, "pcr_qqq": None, "pcr_avg": None, "pcr_signal": "N/A"}
+    pcrs: list[float] = []
+
+    for ticker in tickers:
+        pcr_values: list[float] = []
+        try:
+            available_expiries = _option_expiries(ticker, use_yfinance=use_yfinance)
+            for expiry in available_expiries[: max(1, expiries)]:
+                detail = fetch_put_call_ratio(ticker, expiry=expiry, use_yfinance=use_yfinance)
+                if detail and detail.get("call_volume", 0) > 0:
+                    pcr_values.append(float(detail["pcr_volume"]))
+            if pcr_values:
+                pcr = round(sum(pcr_values) / len(pcr_values), 3)
+                pcrs.append(pcr)
+                result["pcr_" + ticker.lower()] = pcr
+                if sleep_seconds > 0:
+                    time.sleep(sleep_seconds)
+            else:
+                sys.stderr.write(f"WARN: PCR {ticker} has no usable option volume\n")
+        except Exception as exc:
+            sys.stderr.write(f"WARN: PCR {ticker} failed: {exc}\n")
+
+    if pcrs:
+        avg = round(sum(pcrs) / len(pcrs), 3)
+        result["pcr_avg"] = avg
+        result["pcr_signal"] = _pcr_signal(avg)
+    return result
+
+
 def get_fetch_stats() -> dict[str, int]:
     """Return session-level source counters."""
     return dict(_GLOBAL_FETCH_STATS)
@@ -206,6 +297,32 @@ def _record_fetch_source(ticker: str, source: str | None) -> None:
 
 def _last_fetch_source(ticker: str) -> str | None:
     return _LAST_FETCH_SOURCE.get(str(ticker))
+
+
+def _option_expiries(ticker: str, use_yfinance: bool = True) -> list[str]:
+    if not use_yfinance or yf is None:
+        return []
+    ticker_obj = yf.Ticker(ticker)
+    return list(getattr(ticker_obj, "options", []) or [])
+
+
+def _sum_option_column(frame: Any, column: str) -> float:
+    if column not in getattr(frame, "columns", []):
+        return 0.0
+    series = pd.to_numeric(frame[column], errors="coerce").fillna(0)
+    return float(series.sum())
+
+
+def _pcr_signal(avg: float) -> str:
+    if avg >= 1.2:
+        return "극단공포"
+    if avg >= 0.9:
+        return "공포"
+    if avg >= 0.7:
+        return "중립"
+    if avg >= 0.5:
+        return "탐욕"
+    return "극단탐욕"
 
 
 def _download_direct(ticker: str, start: str, end: str) -> Any:
