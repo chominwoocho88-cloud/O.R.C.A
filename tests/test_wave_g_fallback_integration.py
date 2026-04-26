@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -40,6 +41,12 @@ class WaveGFallbackFastFailTests(unittest.TestCase):
         self.assertTrue(context_market_data._is_yfinance_rate_limit_error(RuntimeError("Too Many Requests")))
         self.assertTrue(context_market_data._is_yfinance_rate_limit_error(RuntimeError("HTTP 429")))
         self.assertTrue(context_market_data._is_yfinance_rate_limit_error(RuntimeError("YFRateLimitError")))
+        try:
+            from yfinance.exceptions import YFRateLimitError
+        except Exception:
+            YFRateLimitError = None
+        if YFRateLimitError is not None:
+            self.assertTrue(context_market_data._is_yfinance_rate_limit_error(YFRateLimitError()))
 
     def test_rate_limit_detection_ignores_non_rate_errors(self):
         self.assertFalse(context_market_data._is_yfinance_rate_limit_error(RuntimeError("temporary network down")))
@@ -74,6 +81,115 @@ class WaveGFallbackFastFailTests(unittest.TestCase):
                 )
 
         self.assertEqual(calls["count"], 1)
+
+    def test_real_yfratelimit_fast_fails_to_av_without_retry_delay(self):
+        from yfinance.exceptions import YFRateLimitError
+
+        calls = {"yf": 0, "av": 0}
+        frame = _frame([100.0, 101.0])
+
+        class FakeYF:
+            @staticmethod
+            def download(**_kwargs):
+                calls["yf"] += 1
+                raise YFRateLimitError()
+
+        def fake_av(*_args, **_kwargs):
+            calls["av"] += 1
+            return frame
+
+        with patch.object(context_market_data, "yf", FakeYF), patch.object(
+            context_market_data,
+            "_fetch_alpha_vantage_with_retry",
+            side_effect=fake_av,
+        ), patch.dict(
+            os.environ,
+            {"YF_RATE_LIMIT_FAST_FAIL": "1", "YF_MAX_RETRIES": "3"},
+        ):
+            started = time.perf_counter()
+            result, source = context_market_data._fetch_with_fallback(
+                "AAPL",
+                "2026-04-01",
+                "2026-04-03",
+                av_api_key="key",
+            )
+            elapsed = time.perf_counter() - started
+
+        self.assertIs(result, frame)
+        self.assertEqual(source, "alpha_vantage")
+        self.assertEqual(calls, {"yf": 1, "av": 1})
+        self.assertLess(elapsed, 0.5)
+
+    def test_empty_yfinance_response_fast_fails_to_av_without_retries(self):
+        calls = {"yf": 0, "av": 0}
+        frame = _frame([100.0, 101.0])
+
+        class FakeYF:
+            @staticmethod
+            def download(**_kwargs):
+                calls["yf"] += 1
+                return pd.DataFrame()
+
+        def fake_av(*_args, **_kwargs):
+            calls["av"] += 1
+            return frame
+
+        with patch.object(context_market_data, "yf", FakeYF), patch.object(
+            context_market_data,
+            "_fetch_alpha_vantage_with_retry",
+            side_effect=fake_av,
+        ), patch.dict(
+            os.environ,
+            {"YF_RATE_LIMIT_FAST_FAIL": "1", "YF_MAX_RETRIES": "3"},
+        ):
+            result, source = context_market_data._fetch_with_fallback(
+                "AAPL",
+                "2026-04-01",
+                "2026-04-03",
+                av_api_key="key",
+            )
+
+        self.assertIs(result, frame)
+        self.assertEqual(source, "alpha_vantage")
+        self.assertEqual(calls, {"yf": 1, "av": 1})
+
+    def test_market_fetch_production_path_rate_limit_uses_av_quickly(self):
+        from yfinance.exceptions import YFRateLimitError
+
+        calls = {"yf": 0, "av": 0}
+        frame = _frame([100.0, 101.0])
+
+        class FakeYF:
+            @staticmethod
+            def download(**_kwargs):
+                calls["yf"] += 1
+                raise YFRateLimitError()
+
+        def fake_av(*_args, **_kwargs):
+            calls["av"] += 1
+            return frame
+
+        with patch.object(context_market_data, "yf", FakeYF), patch.object(
+            context_market_data,
+            "_fetch_alpha_vantage_with_retry",
+            side_effect=fake_av,
+        ), patch.dict(
+            os.environ,
+            {
+                "ALPHA_VANTAGE_API_KEY": "key",
+                "USE_UNIFIED_FETCH": "1",
+                "YF_RATE_LIMIT_FAST_FAIL": "1",
+                "YF_MAX_RETRIES": "3",
+            },
+        ):
+            started = time.perf_counter()
+            result = market_fetch.fetch_daily_history("AAPL", "2026-04-01", "2026-04-03")
+            elapsed = time.perf_counter() - started
+
+        self.assertIsNotNone(result)
+        self.assertEqual(calls, {"yf": 1, "av": 1})
+        self.assertEqual(market_fetch.get_fetch_stats()["alpha_vantage_success"], 1)
+        self.assertLess(elapsed, 0.5)
 
     def test_fetch_with_fallback_yfinance_success(self):
         frame = _frame([100.0, 101.0])

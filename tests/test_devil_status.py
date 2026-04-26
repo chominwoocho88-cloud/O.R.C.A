@@ -469,6 +469,8 @@ class ScannerDevilStatusTests(unittest.TestCase):
         self.assertIsNone(entry["devil_raw_excerpt"])
 
     def test_scanner_scan_log_entry_backfills_missing_status_fields(self):
+        if hasattr(self.scanner, "weights"):
+            delattr(self.scanner, "weights")
         entry = self.scanner._build_scan_log_entry(
             now_kst=self.scanner.datetime.now(self.scanner.KST),
             ticker="NVDA",
@@ -496,6 +498,33 @@ class ScannerDevilStatusTests(unittest.TestCase):
         self.assertEqual(entry["devil_render_mode"], "label_only")
         self.assertTrue(entry["devil_called"])
         self.assertFalse(entry["devil_parse_ok"])
+
+    def test_scanner_scan_log_entry_loads_weights_without_global_variable(self):
+        if hasattr(self.scanner, "weights"):
+            delattr(self.scanner, "weights")
+        with patch.object(self.scanner, "_load_weights", return_value={}) as loader:
+            entry = self.scanner._build_scan_log_entry(
+                now_kst=self.scanner.datetime.now(self.scanner.KST),
+                ticker="NVDA",
+                market="US",
+                info=_scanner_info(),
+                tech=_scanner_tech(),
+                macro=_scanner_macro(),
+                aria=_scanner_aria(),
+                quality=_scanner_quality(),
+                analyst=_scanner_analyst(),
+                devil={
+                    "devil_score": 30,
+                    "verdict": "neutral",
+                    "objections": [],
+                    "thesis_killer_hit": False,
+                },
+                final=_scanner_final(),
+                canonical_signal_family="crash_rebound",
+            )
+
+        loader.assert_called_once()
+        self.assertIn("reason_detail", entry)
 
 
 if __name__ == "__main__":

@@ -114,6 +114,7 @@ def fetch_daily_history_batch(
         result: dict[str, pd.DataFrame] = {}
         av_only = False
         for ticker in normalized_tickers:
+            _context_market_data.reset_last_yfinance_status()
             if av_only:
                 frame = fetch_daily_history(
                     ticker,

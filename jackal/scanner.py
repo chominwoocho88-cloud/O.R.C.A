@@ -1317,6 +1317,7 @@ def _build_scan_log_entry(
 ) -> dict:
     devil_status = _resolve_scanner_devil_status(devil)
     fired_sigs = analyst.get("signals_fired", []) or final.get("signals_fired", [])
+    weights = _load_weights()
     best_info = select_scanner_swing_info(fired_sigs, weights)
     reason_detail, reason_components = build_scanner_reason_payload(
         signal_family=canonical_signal_family,

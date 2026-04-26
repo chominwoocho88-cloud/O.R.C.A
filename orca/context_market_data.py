@@ -14,6 +14,11 @@ try:
 except Exception:  # pragma: no cover - degraded runtime fallback
     yf = None
 
+try:
+    from yfinance.exceptions import YFRateLimitError
+except Exception:  # pragma: no cover - optional yfinance internals
+    YFRateLimitError = None
+
 
 _YFINANCE_MAX_RETRIES = 3
 _ALPHA_VANTAGE_MAX_RETRIES = 2
@@ -109,6 +114,8 @@ def _fetch_yfinance_batch_with_retry(
             )
             if data is not None and not getattr(data, "empty", True):
                 return data
+            if fast_fail:
+                return None
         except Exception as exc:
             last_error = exc
             if fast_fail and _is_yfinance_rate_limit_error(exc):
@@ -139,7 +146,8 @@ def _fetch_yfinance_ticker_with_retry(
     last_error: Exception | None = None
     for attempt in range(max_attempts):
         try:
-            time.sleep(1)
+            if not fast_fail:
+                time.sleep(1)
             data = yf.download(
                 tickers=ticker,
                 start=start,
@@ -151,6 +159,8 @@ def _fetch_yfinance_ticker_with_retry(
             )
             if data is not None and not getattr(data, "empty", True):
                 return data
+            if fast_fail:
+                return None
         except Exception as exc:
             last_error = exc
             if fast_fail and _is_yfinance_rate_limit_error(exc):
@@ -232,6 +242,8 @@ def _yfinance_rate_limit_fast_fail_enabled() -> bool:
 
 def _is_yfinance_rate_limit_error(exc: Exception) -> bool:
     """Detect common yfinance/Yahoo rate-limit exception text."""
+    if YFRateLimitError is not None and isinstance(exc, YFRateLimitError):
+        return True
     text = f"{type(exc).__name__}: {exc}".lower()
     return any(
         token in text
@@ -254,6 +266,13 @@ def was_last_yfinance_failed() -> bool:
 def was_last_yfinance_rate_limited() -> bool:
     """Return whether the last fallback attempt saw a yfinance rate limit."""
     return _LAST_YFINANCE_RATE_LIMITED
+
+
+def reset_last_yfinance_status() -> None:
+    """Clear per-fetch yfinance status flags before a new wrapper attempt."""
+    global _LAST_YFINANCE_FAILED, _LAST_YFINANCE_RATE_LIMITED
+    _LAST_YFINANCE_FAILED = False
+    _LAST_YFINANCE_RATE_LIMITED = False
 
 
 def _get_alpha_vantage_sleep_seconds() -> float:
