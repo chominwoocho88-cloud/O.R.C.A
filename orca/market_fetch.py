@@ -1,8 +1,8 @@
 """Unified daily market-data fetch wrapper for ORCA/JACKAL.
 
-Wave G introduces this module as the public entry point for daily OHLCV
-fetches. Existing callers can migrate here gradually while keeping a rollback
-switch through USE_UNIFIED_FETCH.
+Wave G introduced this module as the public entry point for daily OHLCV
+fetches. Wave H adds FinanceDataReader as an optional primary provider while
+keeping rollback through USE_FDR_MAIN and USE_UNIFIED_FETCH.
 """
 from __future__ import annotations
 
@@ -25,6 +25,7 @@ _fetch_with_fallback = _context_market_data._fetch_with_fallback
 
 
 _GLOBAL_FETCH_STATS: dict[str, int] = {
+    "fdr_success": 0,
     "yfinance_batch_success": 0,
     "yfinance_ticker_success": 0,
     "alpha_vantage_success": 0,
@@ -48,7 +49,7 @@ def fetch_daily_history(
         ticker: yfinance-style ticker such as ``^VIX`` or ``AAPL``.
         start: Inclusive ISO date (YYYY-MM-DD).
         end: Exclusive-ish ISO date as accepted by data providers.
-        use_fallback: ``True`` for yfinance->Alpha Vantage cascade,
+        use_fallback: ``True`` for the unified cascade,
             ``False`` for direct yfinance rollback, ``None`` to use
             USE_UNIFIED_FETCH (default enabled).
 
@@ -61,6 +62,43 @@ def fetch_daily_history(
         return None
 
     if _resolve_use_fallback(use_fallback):
+        _context_market_data.reset_last_yfinance_status()
+        if _use_fdr_main():
+            fdr_frame = _try_fdr_history(ticker, start, end)
+            if fdr_frame is not None and not fdr_frame.empty:
+                _record_fetch_source(ticker, "fdr")
+                return fdr_frame
+
+            av_api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
+            if av_api_key and not _is_korean_market_ticker(ticker):
+                av_frame = _try_alpha_vantage_history(ticker, start, end, av_api_key)
+                if av_frame is not None and not av_frame.empty:
+                    _record_fetch_source(ticker, "alpha_vantage")
+                    return av_frame
+
+            if _skip_yfinance:
+                _record_fetch_source(ticker, None)
+                return None
+
+            try:
+                data, source = _fetch_with_fallback(
+                    ticker,
+                    start,
+                    end,
+                    av_api_key=None,
+                    skip_yfinance=False,
+                )
+                frame = _normalize_history_frame(data)
+                if frame is not None and not frame.empty:
+                    _record_fetch_source(ticker, source)
+                    return frame
+                _record_fetch_source(ticker, None)
+                return None
+            except Exception as exc:
+                _record_fetch_source(ticker, None)
+                sys.stderr.write(f"WARN: market_fetch fallback failed for {ticker}: {exc}\n")
+                return None
+
         av_api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
         try:
             data, source = _fetch_with_fallback(
@@ -103,8 +141,8 @@ def fetch_daily_history_batch(
     """Fetch daily OHLCV for multiple tickers.
 
     Failed tickers are omitted from the returned dict. In unified mode this
-    intentionally loops through ``fetch_daily_history`` so each ticker can fall
-    through to Alpha Vantage independently.
+    intentionally loops through ``fetch_daily_history`` so each ticker can use
+    the configured provider cascade independently.
     """
     normalized_tickers = [str(ticker).strip() for ticker in tickers if str(ticker).strip()]
     if not normalized_tickers:
@@ -297,6 +335,7 @@ def reset_fetch_stats() -> None:
             "yfinance_batch_success": 0,
             "yfinance_ticker_success": 0,
             "alpha_vantage_success": 0,
+            "fdr_success": 0,
             "failed": 0,
             "total": 0,
         }
@@ -316,7 +355,9 @@ def _record_fetch_source(ticker: str, source: str | None) -> None:
     """Update global counters and per-ticker last-source tracking."""
     _GLOBAL_FETCH_STATS["total"] += 1
     normalized_source = str(source or "").strip() or "failed"
-    if normalized_source == "yfinance_batch":
+    if normalized_source == "fdr":
+        key = "fdr_success"
+    elif normalized_source == "yfinance_batch":
         key = "yfinance_batch_success"
     elif normalized_source == "yfinance_ticker":
         key = "yfinance_ticker_success"
@@ -331,6 +372,43 @@ def _record_fetch_source(ticker: str, source: str | None) -> None:
 
 def _last_fetch_source(ticker: str) -> str | None:
     return _LAST_FETCH_SOURCE.get(str(ticker))
+
+
+def _use_fdr_main() -> bool:
+    """Return whether FinanceDataReader should be tried before AV/yfinance."""
+    value = os.getenv("USE_FDR_MAIN", "0").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _try_fdr_history(ticker: str, start: str, end: str) -> pd.DataFrame | None:
+    """Fetch through the FDR adapter when available and supported."""
+    try:
+        from orca import fdr_fetch
+
+        if not fdr_fetch.is_fdr_supported(ticker):
+            return None
+        return _normalize_history_frame(fdr_fetch.fetch_fdr_history(ticker, start, end))
+    except Exception as exc:
+        if exc.__class__.__name__ == "FDRTickerNotSupportedError":
+            return None
+        sys.stderr.write(f"WARN: FDR provider failed for {ticker}: {exc}\n")
+        return None
+
+
+def _try_alpha_vantage_history(ticker: str, start: str, end: str, av_api_key: str) -> pd.DataFrame | None:
+    """Fetch directly from Alpha Vantage for the Wave H second provider slot."""
+    try:
+        frame = _context_market_data._fetch_alpha_vantage_with_retry(ticker, start, end, av_api_key)
+        return _normalize_history_frame(frame)
+    except Exception as exc:
+        sys.stderr.write(f"WARN: Alpha Vantage provider failed for {ticker}: {exc}\n")
+        return None
+
+
+def _is_korean_market_ticker(ticker: str) -> bool:
+    """Return whether Alpha Vantage should be skipped for this Korean ticker."""
+    upper = str(ticker or "").strip().upper()
+    return upper.endswith(".KS") or upper.endswith(".KQ") or (upper.isdigit() and len(upper) == 6)
 
 
 def _option_expiries(ticker: str, use_yfinance: bool = True) -> list[str]:

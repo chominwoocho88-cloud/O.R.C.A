@@ -38,6 +38,8 @@ permissions:
 jobs:
   backfill:
     runs-on: ubuntu-latest
+    env:
+      USE_FDR_MAIN: "1"
 
     steps:
       - name: Checkout

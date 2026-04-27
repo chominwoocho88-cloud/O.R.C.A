@@ -23,6 +23,8 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      USE_FDR_MAIN: "1"
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
