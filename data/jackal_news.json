@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-27 07:13 KST",
+  "collected_at": "2026-04-27 21:45 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,38 +12,38 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia stock closes at record, pushing market cap past $5 trillion",
+      "headline": "NVIDIA market cap surpasses $5 trillion amid strong AI demand and bullish analyst sentiment",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix shatters Q1 2026 records with 60% revenue surge to 52.2 trillion won, management declares 'structural shift' in AI-driven memory demand",
+      "headline": "SK Hynix surges 5% to record high of 1.289 million won, ranks 17th globally by market cap",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics has quadrupled its monthly supply of DRAM to Tesla, with record Q4 2025 revenue and strong AI memory cycle momentum",
-      "impact": "bullish",
+      "headline": "Samsung Electronics faces potential union strike in May amid semiconductor supply concerns",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom expands collaboration with Google Cloud on Cloud Network Insights; stock up 4.3% on broader semiconductor rally",
+      "headline": "Broadcom expands collaboration with Meta through 2029 and launches Google Cloud partnership",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao partners with OpenAI; Q3 2025 record revenue with ChatGPT for Kakao reaching 2 million users within 10 days of launch",
+      "headline": "Kakao signs strategic partnership with OpenAI to expand AI capabilities",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "Shinhan SOL Shipbuilding TOP3 Plus ETF shows 125% yearly performance but down 7.2% last month; tracks shipbuilding sector leaders",
-      "impact": "neutral",
+      "headline": "Shinhan SOL Shipbuilding ETF shows technical strong sell signal with minimal price movement",
+      "impact": "bearish",
       "source": "web_search"
     }
   ],
