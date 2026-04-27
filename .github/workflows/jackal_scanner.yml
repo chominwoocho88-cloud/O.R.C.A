@@ -35,7 +35,7 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: pip install anthropic==0.94.0 httpx yfinance==0.2.55 pandas
+        run: pip install -r requirements.txt
 
       - name: Run JACKAL Scanner
         env:

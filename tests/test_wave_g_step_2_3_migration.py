@@ -181,6 +181,22 @@ class WaveGStep23MigrationTests(unittest.TestCase):
         self.assertEqual(summary["ticker_observations"].get("USDKRW=X"), 0)
         self.assertGreaterEqual(summary["added_days"], 1)
 
+    def test_orca_backtest_dynamic_hist_records_provider_diagnostics_on_empty(self):
+        with patch("orca.market_fetch.fetch_daily_history_batch", return_value={}), patch(
+            "orca.market_fetch.get_fetch_stats",
+            return_value={"fdr_success": 0, "alpha_vantage_success": 0, "failed": 8, "total": 8},
+        ), patch("orca.market_fetch._last_fetch_source", return_value="failed"), patch.dict(
+            os.environ,
+            {"USE_FDR_MAIN": "1", "ALPHA_VANTAGE_API_KEY": "key"},
+        ):
+            summary = orca_backtest._fetch_dynamic_hist(months=36)
+
+        self.assertEqual(summary["status"], "no_data")
+        self.assertEqual(summary["fetch_stats"]["failed"], 8)
+        self.assertEqual(summary["fetch_sources"]["^GSPC"], "failed")
+        self.assertIn("USE_FDR_MAIN=1", summary["warning"])
+        self.assertIn("fetch_stats=", summary["warning"])
+
 
 if __name__ == "__main__":
     unittest.main()

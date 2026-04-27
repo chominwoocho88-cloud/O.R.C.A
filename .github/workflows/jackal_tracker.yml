@@ -52,7 +52,7 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: pip install yfinance pandas httpx
+        run: pip install -r requirements.txt
 
       - name: Run Tracker
         env:

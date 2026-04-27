@@ -1883,6 +1883,8 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
         "tickers_with_data": [],
         "ticker_observations": {},
         "ticker_failures": {},
+        "fetch_sources": {},
+        "fetch_stats": {},
         "added_days": 0,
         "effective_trading_days": before["trading_days"],
         "effective_first_date": before["first_date"],
@@ -1895,6 +1897,13 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
 
     print(f"\n📥 {months}개월 데이터 동적 fetch: {start} ~ {today}")
 
+    print(
+        "  Provider flags: "
+        f"USE_FDR_MAIN={os.getenv('USE_FDR_MAIN', '0')} | "
+        f"USE_UNIFIED_FETCH={os.getenv('USE_UNIFIED_FETCH', '1')} | "
+        f"AV key set={bool(os.getenv('ALPHA_VANTAGE_API_KEY'))} | "
+        f"AV sleep={os.getenv('ALPHA_VANTAGE_SLEEP_SECONDS', '12')}"
+    )
     if not os.getenv("ALPHA_VANTAGE_API_KEY"):
         print("  WARN: ALPHA_VANTAGE_API_KEY not set; Alpha Vantage fallback unavailable")
 
@@ -1912,12 +1921,17 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
     try:
         closes_map: dict[str, object] = {}
         all_dates: set[str] = set()
+        from orca.market_fetch import get_fetch_stats, _last_fetch_source
 
         data_map = fetch_daily_history_batch(
             list(YF_MAP.keys()),
             str(start),
             str(today + timedelta(days=1)),
         )
+        summary["fetch_stats"] = dict(get_fetch_stats())
+        summary["fetch_sources"] = {yt: (_last_fetch_source(yt) or "missing") for yt in YF_MAP}
+        print(f"  Provider stats: {summary['fetch_stats']}")
+        print(f"  Provider sources: {summary['fetch_sources']}")
 
         for yt in YF_MAP:
             try:
@@ -1943,7 +1957,7 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
                 all_dates.add(idx.strftime("%Y-%m-%d"))
 
         if not closes_map:
-            print("  market data fallback 데이터 없음 — 스킵 (yfinance + Alpha Vantage 모두 실패)")
+            print("  market data fallback 데이터 없음 — 스킵 (FDR + Alpha Vantage + yfinance 모두 실패)")
             summary["status"] = "no_data"
             summary["fetched_ticker_count"] = 0
             summary["empty_extension_warning"] = bool(summary["expected_extension"])
@@ -1952,7 +1966,10 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
                     f"요청한 {months}개월 확장을 위한 추가 데이터가 수집되지 않았습니다. "
                     "현재 백테스트는 하드코딩 HIST_DATA 범위만 사용합니다. "
                     f"AV key set={bool(os.getenv('ALPHA_VANTAGE_API_KEY'))}, "
-                    f"tickers attempted={len(YF_MAP)}"
+                    f"USE_FDR_MAIN={os.getenv('USE_FDR_MAIN', '0')}, "
+                    f"tickers attempted={len(YF_MAP)}, "
+                    f"fetch_stats={summary.get('fetch_stats')}, "
+                    f"fetch_sources={summary.get('fetch_sources')}"
                 )
                 print(f"  ⚠️ {summary['warning']}")
             return _store_dynamic_fetch_summary(summary)

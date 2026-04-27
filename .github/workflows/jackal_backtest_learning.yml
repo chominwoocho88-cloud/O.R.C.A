@@ -247,6 +247,7 @@ jobs:
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
           ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
           USE_UNIFIED_FETCH: "1"
+          USE_FDR_MAIN: "1"
         run: |
           python -m orca.backtest --months "${ORCA_BACKTEST_MONTHS}" --walk-forward --fail-on-empty-dynamic-fetch
 
@@ -261,6 +262,7 @@ jobs:
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
           ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
           USE_UNIFIED_FETCH: "1"
+          USE_FDR_MAIN: "1"
         run: |
           # Default path remains: python -m jackal.backtest --mode "${BACKTEST_MODE}"
           python -m jackal.backtest \

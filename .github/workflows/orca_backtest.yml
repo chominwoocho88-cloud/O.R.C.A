@@ -36,7 +36,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install anthropic rich httpx yfinance pandas
+        run: pip install -r requirements.txt
 
       - name: Run ORCA Backtest
         env:
@@ -46,6 +46,7 @@ jobs:
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
           ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
           USE_UNIFIED_FETCH: "1"
+          USE_FDR_MAIN: "1"
           YF_RATE_LIMIT_FAST_FAIL: "1"
         run: |
           # Default path remains:
@@ -64,6 +65,7 @@ jobs:
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
           ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
           USE_UNIFIED_FETCH: "1"
+          USE_FDR_MAIN: "1"
           YF_RATE_LIMIT_FAST_FAIL: "1"
         run: |
           python -m jackal.backtest --mode full

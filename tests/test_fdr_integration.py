@@ -233,6 +233,27 @@ class MarketFetchFDRPriorityTests(unittest.TestCase):
                 text = (ROOT / ".github" / "workflows" / workflow).read_text(encoding="utf-8-sig")
                 self.assertIn("USE_FDR_MAIN", text)
 
+    def test_workflows_install_requirements_for_fdr_dependency(self):
+        workflows = [
+            "orca_jackal.yml",
+            "jackal_scanner.yml",
+            "jackal_tracker.yml",
+            "orca_daily.yml",
+            "orca_backtest.yml",
+            "jackal_backtest_learning.yml",
+            "wave_f_backfill.yml",
+            "wave_f_clustering.yml",
+            "wave_f_archive.yml",
+        ]
+        for workflow in workflows:
+            with self.subTest(workflow=workflow):
+                text = (ROOT / ".github" / "workflows" / workflow).read_text(encoding="utf-8-sig")
+                self.assertIn("pip install -r requirements.txt", text)
+
+    def test_orca_backtest_run_steps_include_fdr_env(self):
+        text = (ROOT / ".github" / "workflows" / "orca_backtest.yml").read_text(encoding="utf-8-sig")
+        self.assertGreaterEqual(text.count('USE_FDR_MAIN: "1"'), 3)
+
     def test_requirements_include_finance_datareader(self):
         text = (ROOT / "requirements.txt").read_text(encoding="utf-8-sig").lower()
         self.assertIn("finance-datareader", text)

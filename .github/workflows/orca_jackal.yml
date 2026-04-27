@@ -62,7 +62,7 @@ jobs:
       - name: Install dependencies
         # [Bug Fix] jackal_hunter imports pandas via jackal_core, so include it in CI.
         # Keep anthropic pinned to the version already used elsewhere in the repo.
-        run: pip install anthropic==0.94.0 httpx yfinance==0.2.55 pandas
+        run: pip install -r requirements.txt
 
       - name: Run JACKAL Hunter
         if: >
