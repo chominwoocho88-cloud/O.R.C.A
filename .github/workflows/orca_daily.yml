@@ -153,22 +153,10 @@ jobs:
               ORCA_MODE="$ORCA_RUN_MODE" python -m orca.main
               ;;
             WEEKLY)
-              python - <<'PY'
-              from orca.notify import send_weekly_report
-              send_weekly_report()
-              PY
+              python scripts/run_weekly_report.py
               ;;
             MONTHLY)
-              python - <<'PY'
-              import json
-              from orca.notify import send_monthly_report
-              from orca.analysis import extract_monthly_lessons
-              from orca.paths import MEMORY_FILE, ACCURACY_FILE
-              send_monthly_report()
-              memory = json.loads(MEMORY_FILE.read_text(encoding='utf-8')) if MEMORY_FILE.exists() else []
-              accuracy = json.loads(ACCURACY_FILE.read_text(encoding='utf-8')) if ACCURACY_FILE.exists() else {}
-              extract_monthly_lessons(memory, accuracy)
-              PY
+              python scripts/run_monthly_report.py
               ;;
             *)
               echo "Unsupported ORCA_RUN_MODE: $ORCA_RUN_MODE" >&2

@@ -8,6 +8,7 @@ needs explicit review before workflow edits continue.
 
 from __future__ import annotations
 
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -321,6 +322,37 @@ class TestPriorityWorkflowUiContracts(unittest.TestCase):
                 checkpoint_idx = text.find("Checkpoint DB")
                 commit_idx = text.find("Commit and push")
                 self.assertTrue(0 <= checkpoint_idx < commit_idx)
+
+    def test_orca_daily_yaml_no_heredoc_in_case(self):
+        text = _read_text(_workflow_path("orca_daily.yml"))
+        case_start = text.find('case "$ORCA_RUN_MODE" in')
+        case_end = text.find("          esac", case_start)
+        self.assertGreaterEqual(case_start, 0)
+        self.assertGreater(case_end, case_start)
+        case_block = text[case_start:case_end]
+        self.assertNotIn("python - <<", case_block)
+        self.assertIn("python scripts/run_weekly_report.py", case_block)
+        self.assertIn("python scripts/run_monthly_report.py", case_block)
+
+    def test_run_weekly_script_callable(self):
+        result = subprocess.run(
+            [sys.executable, "scripts/run_weekly_report.py", "--dry-run"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("DRY RUN weekly report runner OK", result.stdout)
+
+    def test_run_monthly_script_callable(self):
+        result = subprocess.run(
+            [sys.executable, "scripts/run_monthly_report.py", "--dry-run"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("DRY RUN monthly report runner OK", result.stdout)
 
 
 if __name__ == "__main__":
