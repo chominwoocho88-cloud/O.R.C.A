@@ -457,6 +457,72 @@ class BackfillLessonContextTests(unittest.TestCase):
         self.assertEqual(result["lessons_unlinked"], 1)
         self.assertEqual(self._linked_count(), 0)
 
+    def test_cleanup_backfill_data_clears_cluster_dependencies(self):
+        lesson_id = self._seed_backtest_lesson("2026-03-10", "AAA")
+        with patch.object(
+            context_snapshot,
+            "_fetch_historical_market_data_range",
+            return_value=_cached_market_data(),
+        ):
+            context_snapshot.backfill_lessons_context()
+
+        with state._connect_orca() as conn:
+            snapshot_id = conn.execute(
+                """
+                SELECT context_snapshot_id
+                  FROM candidate_lessons
+                 WHERE lesson_id = ?
+                """,
+                (lesson_id,),
+            ).fetchone()["context_snapshot_id"]
+            cluster_id = state.record_lesson_cluster(
+                conn,
+                {
+                    "cluster_id": "cluster_backfill",
+                    "cluster_label": "test",
+                    "size": 1,
+                    "representative_snapshot_id": snapshot_id,
+                    "run_id": "cluster_run",
+                    "algorithm": "kmeans",
+                    "n_clusters_total": 1,
+                    "random_seed": 42,
+                },
+            )
+            state.assign_snapshot_to_cluster(conn, snapshot_id, cluster_id, 0.1, "cluster_run")
+            state.record_lesson_archive(
+                conn,
+                archive_id="archive_1",
+                lesson_id=lesson_id,
+                cluster_id=cluster_id,
+                run_id="archive_run",
+                quality_tier="high",
+                quality_score=0.9,
+                outcome_percentile=1.0,
+                win_score=1.0,
+                speed_score=1.0,
+                signal_score=1.0,
+                cluster_fit_score=1.0,
+                lesson_value=2.5,
+                peak_pct=2.5,
+                peak_day=3,
+                signal_family="momentum_pullback",
+                ticker="AAA",
+                analysis_date="2026-03-10",
+            )
+            conn.commit()
+
+        result = context_snapshot.cleanup_backfill_data()
+
+        self.assertEqual(result["snapshots_deleted"], 1)
+        self.assertEqual(result["cluster_mappings_deleted"], 1)
+        self.assertEqual(result["clusters_deleted"], 1)
+        self.assertEqual(result["archives_deleted"], 1)
+        self.assertEqual(self._context_count(), 0)
+        with state._connect_orca() as conn:
+            self.assertEqual(conn.execute("SELECT COUNT(*) FROM snapshot_cluster_mapping").fetchone()[0], 0)
+            self.assertEqual(conn.execute("SELECT COUNT(*) FROM lesson_clusters").fetchone()[0], 0)
+            self.assertEqual(conn.execute("SELECT COUNT(*) FROM lesson_archive").fetchone()[0], 0)
+
     def _seed_completed_backfill_snapshot_set(self, total: int, sectors_filled: int) -> None:
         for index in range(total):
             date = f"2026-03-{index + 1:02d}"

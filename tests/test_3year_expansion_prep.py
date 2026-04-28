@@ -187,6 +187,11 @@ class ExpansionWorkflowContractTests(unittest.TestCase):
         self.assertIn("expected_linked_lessons:", text)
         self.assertIn("EXPECTED_SNAPSHOTS", text)
         self.assertIn("EXPECTED_LINKED_LESSONS", text)
+        self.assertIn("Resolve inputs", text)
+        self.assertIn("trim_workflow_input()", text)
+        self.assertIn("normalize_bool()", text)
+        self.assertIn("BACKFILL_CLEANUP", text)
+        self.assertNotIn("if: ${{ inputs.cleanup == true", text)
 
     def test_wave_f_clustering_append_mode(self):
         text = _workflow_text("wave_f_clustering.yml")

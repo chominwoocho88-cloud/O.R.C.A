@@ -524,6 +524,17 @@ def cleanup_backfill_data(
                 (BACKFILL_SOURCE_EVENT_TYPE,),
             ).fetchone()[0]
         )
+        archive_deleted = 0
+        mapping_deleted = 0
+        cluster_deleted = 0
+        if snapshots_deleted:
+            # Backfill snapshots may be part of the active clustering run.
+            # Clear dependent Phase 2/3 rows first so recovery cleanup cannot
+            # violate snapshot_cluster_mapping -> lesson_context_snapshot FKs.
+            archive_deleted = int(state.clear_lesson_archive(conn).get("archives_deleted", 0))
+            clustering_result = state.clear_clustering_data(conn)
+            mapping_deleted = int(clustering_result.get("mappings_deleted", 0))
+            cluster_deleted = int(clustering_result.get("clusters_deleted", 0))
         conn.execute(
             """
             UPDATE candidate_lessons
@@ -551,6 +562,9 @@ def cleanup_backfill_data(
         return {
             "lessons_unlinked": lessons_unlinked,
             "snapshots_deleted": snapshots_deleted,
+            "archives_deleted": archive_deleted,
+            "cluster_mappings_deleted": mapping_deleted,
+            "clusters_deleted": cluster_deleted,
         }
     finally:
         if own_conn and conn is not None:

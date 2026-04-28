@@ -56,6 +56,56 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Resolve inputs
+        shell: bash
+        run: |
+          trim_workflow_input() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
+
+          normalize_bool() {
+            local value
+            value="$(trim_workflow_input "$1")"
+            value="${value,,}"
+            if [ "$value" = "true" ] || [ "$value" = "1" ] || [ "$value" = "yes" ]; then
+              printf 'true'
+            else
+              printf 'false'
+            fi
+          }
+
+          BACKFILL_DRY_RUN="$(normalize_bool "${{ inputs.dry_run }}")"
+          BACKFILL_LIMIT="$(trim_workflow_input "${{ inputs.limit }}")"
+          BACKFILL_SKIP_EXISTING="$(normalize_bool "${{ inputs.skip_existing }}")"
+          BACKFILL_CLEANUP="$(normalize_bool "${{ inputs.cleanup }}")"
+          EXPECTED_SNAPSHOTS_VALUE="$(trim_workflow_input "${{ inputs.expected_snapshots }}")"
+          EXPECTED_LINKED_LESSONS_VALUE="$(trim_workflow_input "${{ inputs.expected_linked_lessons }}")"
+
+          if [ -z "$EXPECTED_SNAPSHOTS_VALUE" ]; then
+            EXPECTED_SNAPSHOTS_VALUE="252"
+          fi
+          if [ -z "$EXPECTED_LINKED_LESSONS_VALUE" ]; then
+            EXPECTED_LINKED_LESSONS_VALUE="1260"
+          fi
+
+          echo "BACKFILL_DRY_RUN=$BACKFILL_DRY_RUN" >> "$GITHUB_ENV"
+          echo "BACKFILL_LIMIT=$BACKFILL_LIMIT" >> "$GITHUB_ENV"
+          echo "BACKFILL_SKIP_EXISTING=$BACKFILL_SKIP_EXISTING" >> "$GITHUB_ENV"
+          echo "BACKFILL_CLEANUP=$BACKFILL_CLEANUP" >> "$GITHUB_ENV"
+          echo "EXPECTED_SNAPSHOTS=$EXPECTED_SNAPSHOTS_VALUE" >> "$GITHUB_ENV"
+          echo "EXPECTED_LINKED_LESSONS=$EXPECTED_LINKED_LESSONS_VALUE" >> "$GITHUB_ENV"
+
+          echo "Resolved inputs:"
+          echo "  dry_run=$BACKFILL_DRY_RUN"
+          echo "  limit=${BACKFILL_LIMIT:-all}"
+          echo "  skip_existing=$BACKFILL_SKIP_EXISTING"
+          echo "  cleanup=$BACKFILL_CLEANUP"
+          echo "  expected_snapshots=$EXPECTED_SNAPSHOTS_VALUE"
+          echo "  expected_linked_lessons=$EXPECTED_LINKED_LESSONS_VALUE"
+
       - name: Pre-flight status
         run: |
           python - <<'PY'
@@ -91,13 +141,13 @@ jobs:
           PY
 
       - name: Cleanup requested during dry run
-        if: ${{ inputs.cleanup == true && inputs.dry_run == true }}
+        if: env.BACKFILL_CLEANUP == 'true' && env.BACKFILL_DRY_RUN == 'true'
         run: |
           echo "cleanup=true was requested, but dry_run=true prevents DB writes."
           echo "Re-run with dry_run=false to cleanup and execute backfill."
 
       - name: Cleanup backfill data
-        if: ${{ inputs.cleanup == true && inputs.dry_run != true }}
+        if: env.BACKFILL_CLEANUP == 'true' && env.BACKFILL_DRY_RUN != 'true'
         run: |
           python - <<'PY'
           from orca.context_snapshot import cleanup_backfill_data
@@ -113,13 +163,13 @@ jobs:
           USE_UNIFIED_FETCH: "1"
         run: |
           ARGS=""
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
+          if [ "$BACKFILL_DRY_RUN" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi
-          if [ -n "${{ inputs.limit }}" ]; then
-            ARGS="$ARGS --limit ${{ inputs.limit }}"
+          if [ -n "$BACKFILL_LIMIT" ]; then
+            ARGS="$ARGS --limit $BACKFILL_LIMIT"
           fi
-          if [ "${{ inputs.skip_existing }}" = "true" ]; then
+          if [ "$BACKFILL_SKIP_EXISTING" = "true" ]; then
             ARGS="$ARGS --skip-existing"
           else
             ARGS="$ARGS --include-existing"
@@ -127,10 +177,7 @@ jobs:
           python scripts/backfill_lesson_context.py --verbose $ARGS
 
       - name: Strict verify
-        if: ${{ inputs.dry_run != true }}
-        env:
-          EXPECTED_SNAPSHOTS: ${{ inputs.expected_snapshots }}
-          EXPECTED_LINKED_LESSONS: ${{ inputs.expected_linked_lessons }}
+        if: env.BACKFILL_DRY_RUN != 'true'
         run: |
           python - <<'PY'
           import os
@@ -157,7 +204,7 @@ jobs:
           PY
 
       - name: Checkpoint DB
-        if: ${{ inputs.dry_run != true }}
+        if: env.BACKFILL_DRY_RUN != 'true'
         run: |
           python - <<'PY'
           import os
@@ -176,7 +223,7 @@ jobs:
           PY
 
       - name: Commit and push
-        if: ${{ inputs.dry_run != true }}
+        if: env.BACKFILL_DRY_RUN != 'true'
         run: |
           git config user.name "Wave F Backfill"
           git config user.email "wave-f-backfill@orca-agent"
