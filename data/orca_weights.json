@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "last_updated": "2026-04-27",
-  "total_learning_cycles": 4,
+  "last_updated": "2026-04-28",
+  "total_learning_cycles": 5,
   "sentiment": {
     "시장레짐": 1.0,
     "추세방향": 1.0,
@@ -20,7 +20,7 @@
     "기업": 1.0,
     "기타": 0.6,
     "VIX": 0.3,
-    "ok": 1.2
+    "ok": 1.25
   },
   "learning_log": [],
   "component_accuracy": {

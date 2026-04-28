@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-27 21:45 KST",
+  "collected_at": "2026-04-28 09:13 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,40 +12,64 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA market cap surpasses $5 trillion amid strong AI demand and bullish analyst sentiment",
+      "headline": "Nvidia stock closes at record, pushing market cap past $5 trillion",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Nvidia experiencing renewed optimism as AI infrastructure market surges with hyperscaler spending",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix surges 5% to record high of 1.289 million won, ranks 17th globally by market cap",
+      "headline": "SK Hynix posts record first-quarter profit as AI memory demand strengthens",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics faces potential union strike in May amid semiconductor supply concerns",
-      "impact": "bearish",
+      "headline": "Samsung Electronics quadruples DRAM supply to Tesla amid AI chip boom",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung flagged stronger-than-expected first-quarter profit reinforcing investor optimism",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom expands collaboration with Meta through 2029 and launches Google Cloud partnership",
+      "headline": "Broadcom experiencing significant momentum driven by AI demand and partnerships with Meta and Google",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom stock erupts in historic 28% April surge as AI dealmaking hits overdrive",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao signs strategic partnership with OpenAI to expand AI capabilities",
+      "headline": "OpenAI CEO Sam Altman signs strategic partnership deal with South Korean tech giant Kakao",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "Kakao positioned as major beneficiary of South Korea's AI infrastructure expansion with Nvidia",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "Shinhan SOL Shipbuilding ETF shows technical strong sell signal with minimal price movement",
-      "impact": "bearish",
+      "headline": "SOL Korea High Dividend ETF surges 42.7% year-to-date outperforming KOSPI 200",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 6
+  "total": 10
 }
