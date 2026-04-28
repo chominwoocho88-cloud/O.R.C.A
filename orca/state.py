@@ -19,13 +19,13 @@ from uuid import uuid4
 
 from jackal.families import canonical_family_key, family_label
 
-from .lesson_archive_store import clear_lesson_archive
 from .lesson_archive_store import get_archives_for_cluster
 from .lesson_archive_store import get_archives_for_lesson
 from .lesson_archive_store import get_latest_archive_run_id
 from .lesson_archive_store import get_lesson_archive
 from .lesson_archive_store import migrate_lesson_archive_table as _migrate_lesson_archive_table
 from .lesson_archive_store import record_lesson_archive
+from orca.lesson_archive_store import clear_lesson_archive
 from . import retrieval_log_store as _retrieval_log_store
 from .paths import JACKAL_DB_FILE, STATE_DB_FILE
 
@@ -1630,6 +1630,7 @@ def clear_clustering_data(conn: sqlite3.Connection, run_id: str | None = None) -
         )
     """
     if run_id is None:
+        # FK order: lesson_archive -> snapshot_cluster_mapping -> lesson_clusters -> cache.
         archive_deleted = int(clear_lesson_archive(conn).get("archives_deleted", 0))
         mapping_deleted = conn.execute("SELECT COUNT(*) FROM snapshot_cluster_mapping").fetchone()[0]
         cluster_deleted = conn.execute("SELECT COUNT(*) FROM lesson_clusters").fetchone()[0]
@@ -1655,6 +1656,7 @@ def clear_clustering_data(conn: sqlite3.Connection, run_id: str | None = None) -
         "SELECT COUNT(*) FROM lesson_clusters WHERE run_id = ?",
         (run_id,),
     ).fetchone()[0]
+    # Archive run_id is independent from clustering run_id, so clear by referenced cluster ids.
     conn.execute(
         "DELETE FROM lesson_archive " + archive_run_filter,
         (run_id,),

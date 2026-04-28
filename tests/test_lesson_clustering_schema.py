@@ -385,6 +385,95 @@ class LessonClusteringSchemaTests(unittest.TestCase):
         self.assertEqual(result["clusters_deleted"], 1)
         self.assertEqual(archives, 0)
 
+    def test_import_clear_clustering_data(self):
+        from orca.state import clear_clustering_data
+
+        self.assertTrue(callable(clear_clustering_data))
+
+    def test_clear_clustering_data_with_archives(self):
+        snapshot_id = self._seed_snapshot()
+        lesson_id = self._seed_lesson_for_snapshot(snapshot_id)
+        cluster_id = self._seed_cluster("cluster_with_archive", "run_with_archive")
+        with state._connect_orca() as conn:
+            state.assign_snapshot_to_cluster(conn, snapshot_id, cluster_id, 0.3, "run_with_archive")
+            state.record_lesson_archive(
+                conn,
+                archive_id="archive_with_cluster_fk",
+                lesson_id=lesson_id,
+                cluster_id=cluster_id,
+                run_id="archive_run_with_cluster_fk",
+                quality_tier="high",
+                quality_score=0.9,
+                outcome_percentile=1.0,
+                win_score=1.0,
+                speed_score=1.0,
+                signal_score=1.0,
+                cluster_fit_score=1.0,
+                lesson_value=4.0,
+                peak_pct=4.0,
+                peak_day=3,
+                signal_family="momentum_pullback",
+                ticker="NVDA",
+                analysis_date="2026-04-20",
+            )
+            result = state.clear_clustering_data(conn)
+            conn.commit()
+            archives = conn.execute("SELECT COUNT(*) FROM lesson_archive").fetchone()[0]
+            mappings = conn.execute("SELECT COUNT(*) FROM snapshot_cluster_mapping").fetchone()[0]
+            clusters = conn.execute("SELECT COUNT(*) FROM lesson_clusters").fetchone()[0]
+
+        self.assertEqual(result["archives_deleted"], 1)
+        self.assertEqual(result["mappings_deleted"], 1)
+        self.assertEqual(result["clusters_deleted"], 1)
+        self.assertEqual(archives, 0)
+        self.assertEqual(mappings, 0)
+        self.assertEqual(clusters, 0)
+
+    def test_clear_clustering_data_no_fk_violation(self):
+        snapshot_id = self._seed_snapshot()
+        lesson_id = self._seed_lesson_for_snapshot(snapshot_id)
+        cluster_id = self._seed_cluster("cluster_fk_guard", "run_fk_guard")
+        with state._connect_orca() as conn:
+            state.assign_snapshot_to_cluster(conn, snapshot_id, cluster_id, 0.3, "run_fk_guard")
+            state.record_lesson_archive(
+                conn,
+                archive_id="archive_fk_guard",
+                lesson_id=lesson_id,
+                cluster_id=cluster_id,
+                run_id="archive_run_fk_guard",
+                quality_tier="high",
+                quality_score=0.9,
+                outcome_percentile=1.0,
+                win_score=1.0,
+                speed_score=1.0,
+                signal_score=1.0,
+                cluster_fit_score=1.0,
+                lesson_value=4.0,
+                peak_pct=4.0,
+                peak_day=3,
+                signal_family="momentum_pullback",
+                ticker="NVDA",
+                analysis_date="2026-04-20",
+            )
+
+        conn = sqlite3.connect(self.state_db)
+        conn.execute("PRAGMA foreign_keys = ON")
+        try:
+            result = state.clear_clustering_data(conn)
+            conn.commit()
+            counts = {
+                "archives": conn.execute("SELECT COUNT(*) FROM lesson_archive").fetchone()[0],
+                "mappings": conn.execute("SELECT COUNT(*) FROM snapshot_cluster_mapping").fetchone()[0],
+                "clusters": conn.execute("SELECT COUNT(*) FROM lesson_clusters").fetchone()[0],
+            }
+        finally:
+            conn.close()
+
+        self.assertEqual(result["archives_deleted"], 1)
+        self.assertEqual(result["mappings_deleted"], 1)
+        self.assertEqual(result["clusters_deleted"], 1)
+        self.assertEqual(counts, {"archives": 0, "mappings": 0, "clusters": 0})
+
     def test_existing_lessons_and_snapshots_unaffected_before_clustering(self):
         snapshot_id = self._seed_snapshot()
         lesson_id = self._seed_lesson_for_snapshot(snapshot_id)
