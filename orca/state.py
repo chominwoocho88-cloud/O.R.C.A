@@ -21,6 +21,7 @@ from jackal.families import canonical_family_key, family_label
 
 from .lesson_archive_store import get_archives_for_cluster
 from .lesson_archive_store import get_archives_for_lesson
+from .lesson_archive_store import get_cold_backtest_days
 from .lesson_archive_store import get_latest_archive_run_id
 from .lesson_archive_store import get_lesson_archive
 from .lesson_archive_store import migrate_lesson_archive_table as _migrate_lesson_archive_table
@@ -1231,7 +1232,10 @@ def list_backtest_days(
     query += " ORDER BY analysis_date ASC"
 
     with _connect_orca() as conn:
-        rows = conn.execute(query, params).fetchall()
+        rows = list(conn.execute(query, params).fetchall())
+    cold_path = STATE_DB_FILE.parent / "archive" / "lesson_archive_cold.db"
+    rows.extend(get_cold_backtest_days(session_id, phase_label=phase_label, cold_db_path=cold_path))
+    rows.sort(key=lambda row: (_row_value(row, "analysis_date", 0), _row_value(row, "phase_label", 1)))
 
     def _decode(value: Any, default: Any) -> Any:
         if not value:

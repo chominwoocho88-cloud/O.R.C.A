@@ -4,8 +4,11 @@ from __future__ import annotations
 import json
 import sqlite3
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any
 from uuid import uuid4
+
+from . import lesson_archive_store
 
 
 KST = timezone(timedelta(hours=9))
@@ -139,7 +142,7 @@ def update_retrieval_outcome(
     outcome_at: str,
     outcome_match: bool | int,
 ) -> None:
-    conn.execute(
+    cursor = conn.execute(
         """
         UPDATE retrieval_log
            SET actual_outcome = ?,
@@ -150,15 +153,31 @@ def update_retrieval_outcome(
         """,
         (float(actual_outcome), outcome_at, 1 if outcome_match else 0, _now_iso(), log_id),
     )
+    if cursor.rowcount == 0:
+        _update_cold_retrieval_outcome(
+            log_id,
+            actual_outcome,
+            outcome_at,
+            outcome_match,
+            cold_db_path=lesson_archive_store.cold_archive_path_for_connection(conn),
+        )
 
 
 def get_retrieval_log(conn: sqlite3.Connection, log_id: str) -> dict[str, Any] | None:
     row = conn.execute("SELECT * FROM retrieval_log WHERE log_id = ?", (log_id,)).fetchone()
-    return _row_to_retrieval_log(row)
+    item = _row_to_retrieval_log(row)
+    if item is not None:
+        return item
+    rows = lesson_archive_store.query_cold_retrieval_logs(
+        "SELECT * FROM retrieval_log WHERE log_id = ?",
+        (log_id,),
+        cold_db_path=lesson_archive_store.cold_archive_path_for_connection(conn),
+    )
+    return _row_to_retrieval_log(rows[0]) if rows else None
 
 
 def get_pending_outcomes(conn: sqlite3.Connection, before_date: str) -> list[dict[str, Any]]:
-    rows = conn.execute(
+    rows = list(conn.execute(
         """
         SELECT *
           FROM retrieval_log
@@ -167,8 +186,22 @@ def get_pending_outcomes(conn: sqlite3.Connection, before_date: str) -> list[dic
          ORDER BY trading_date, created_at
         """,
         (before_date[:10],),
-    ).fetchall()
-    return [item for row in rows if (item := _row_to_retrieval_log(row)) is not None]
+    ).fetchall())
+    rows.extend(
+        lesson_archive_store.query_cold_retrieval_logs(
+            """
+            SELECT *
+              FROM retrieval_log
+             WHERE actual_outcome IS NULL
+               AND trading_date < ?
+            """,
+            (before_date[:10],),
+            cold_db_path=lesson_archive_store.cold_archive_path_for_connection(conn),
+        )
+    )
+    items = [item for row in rows if (item := _row_to_retrieval_log(row)) is not None]
+    items.sort(key=lambda item: (item.get("trading_date") or "", item.get("created_at") or ""))
+    return items
 
 
 def get_retrieval_stats_for_cluster(
@@ -181,7 +214,14 @@ def get_retrieval_stats_for_cluster(
     if since_date:
         query += " AND trading_date >= ?"
         params.append(since_date[:10])
-    rows = conn.execute(query, tuple(params)).fetchall()
+    rows = list(conn.execute(query, tuple(params)).fetchall())
+    rows.extend(
+        lesson_archive_store.query_cold_retrieval_logs(
+            query,
+            tuple(params),
+            cold_db_path=lesson_archive_store.cold_archive_path_for_connection(conn),
+        )
+    )
     logs = [item for row in rows if (item := _row_to_retrieval_log(row)) is not None]
     completed = [item for item in logs if item.get("actual_outcome") is not None]
     matches = [item for item in completed if int(item.get("outcome_match") or 0) == 1]
@@ -208,7 +248,14 @@ def measure_retrieval_accuracy(
     if since_date:
         query += " AND trading_date >= ?"
         params.append(since_date[:10])
-    rows = conn.execute(query, tuple(params)).fetchall()
+    rows = list(conn.execute(query, tuple(params)).fetchall())
+    rows.extend(
+        lesson_archive_store.query_cold_retrieval_logs(
+            query,
+            tuple(params),
+            cold_db_path=lesson_archive_store.cold_archive_path_for_connection(conn),
+        )
+    )
     logs = [item for row in rows if (item := _row_to_retrieval_log(row)) is not None]
     completed = [item for item in logs if item.get("actual_outcome") is not None]
     return {
@@ -236,6 +283,37 @@ def _row_to_retrieval_log(row: sqlite3.Row | tuple[Any, ...] | None) -> dict[str
     item = {key: _row_value(row, key, idx) for idx, key in enumerate(keys)}
     item["top_lessons"] = _decode_json_text(item.get("top_lessons_json"), [])
     return item
+
+
+def _update_cold_retrieval_outcome(
+    log_id: str,
+    actual_outcome: float,
+    outcome_at: str,
+    outcome_match: bool | int,
+    *,
+    cold_db_path: str | Path | None = None,
+) -> None:
+    db_path = Path(cold_db_path) if cold_db_path is not None else lesson_archive_store.COLD_ARCHIVE_DB_FILE
+    if not db_path.exists():
+        return
+    cold = lesson_archive_store._connect_cold_archive(db_path)
+    try:
+        if not lesson_archive_store._cold_table_exists(cold, "retrieval_log"):
+            return
+        cold.execute(
+            """
+            UPDATE retrieval_log
+               SET actual_outcome = ?,
+                   outcome_at = ?,
+                   outcome_match = ?,
+                   updated_at = ?
+             WHERE log_id = ?
+            """,
+            (float(actual_outcome), outcome_at, 1 if outcome_match else 0, _now_iso(), log_id),
+        )
+        cold.commit()
+    finally:
+        cold.close()
 
 
 def _accuracy(items: list[dict[str, Any]]) -> float | None:

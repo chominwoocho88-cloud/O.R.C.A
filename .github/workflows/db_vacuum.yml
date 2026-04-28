@@ -1,0 +1,78 @@
+name: DB Vacuum
+
+on:
+  workflow_dispatch:
+    inputs:
+      migrate_cold:
+        description: "Move cold archive/log/backtest rows before VACUUM"
+        type: boolean
+        default: true
+      threshold_runs:
+        description: "Archive runs to keep in hot DB"
+        type: string
+        default: "1"
+  schedule:
+    # KST monthly 1st 03:00 = UTC previous day 18:00.
+    - cron: "0 18 1 * *"
+
+concurrency:
+  group: orca-repo-state
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  vacuum:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run DB maintenance
+        run: |
+          THRESHOLD="$(echo "${{ inputs.threshold_runs || '1' }}" | xargs)"
+          ARGS="--threshold-runs ${THRESHOLD} --no-backup"
+          if [ "${{ inputs.migrate_cold || 'true' }}" = "true" ]; then
+            ARGS="$ARGS --migrate-cold"
+          fi
+          python scripts/vacuum_orca_db.py $ARGS
+
+      - name: Verify DB sizes
+        run: |
+          python - <<'PY'
+          import os
+          main = 'data/orca_state.db'
+          cold = 'data/archive/lesson_archive_cold.db'
+          main_mb = os.path.getsize(main) / 1024 / 1024
+          cold_mb = os.path.getsize(cold) / 1024 / 1024 if os.path.exists(cold) else 0
+          print(f'main_mb={main_mb:.2f}')
+          print(f'cold_mb={cold_mb:.2f}')
+          if main_mb >= 50:
+              raise SystemExit(f'main DB still above 50MB warning threshold: {main_mb:.2f}MB')
+          PY
+
+      - name: Commit DB maintenance result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/orca_state.db data/archive/lesson_archive_cold.db
+          if git diff --cached --quiet; then
+            echo "No DB changes to commit"
+          else
+            git commit -m "chore: vacuum ORCA database"
+            git pull --rebase
+            git push
+          fi

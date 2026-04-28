@@ -3,10 +3,20 @@ from __future__ import annotations
 
 import sqlite3
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any
+
+from .paths import DATA_DIR
 
 
 KST = timezone(timedelta(hours=9))
+COLD_ARCHIVE_DB_FILE = DATA_DIR / "archive" / "lesson_archive_cold.db"
+COLD_TABLE_KEYS = {
+    "lesson_archive": ("archive_id",),
+    "retrieval_log": ("log_id",),
+    "backtest_daily_results": ("session_id", "analysis_date", "phase_label"),
+    "backtest_pick_results": ("session_id", "analysis_date", "selection_stage", "rank_index", "ticker"),
+}
 
 
 def migrate_lesson_archive_table(conn: sqlite3.Connection) -> None:
@@ -153,11 +163,20 @@ def get_lesson_archive(conn: sqlite3.Connection, archive_id: str) -> dict[str, A
         "SELECT * FROM lesson_archive WHERE archive_id = ?",
         (archive_id,),
     ).fetchone()
-    return _row_to_lesson_archive(row)
+    archive = _row_to_lesson_archive(row)
+    if archive is not None:
+        return archive
+    rows = _query_cold_rows(
+        "lesson_archive",
+        "SELECT * FROM lesson_archive WHERE archive_id = ?",
+        (archive_id,),
+        cold_db_path=cold_archive_path_for_connection(conn),
+    )
+    return _row_to_lesson_archive(rows[0]) if rows else None
 
 
 def get_archives_for_lesson(conn: sqlite3.Connection, lesson_id: str) -> list[dict[str, Any]]:
-    rows = conn.execute(
+    rows = list(conn.execute(
         """
         SELECT *
           FROM lesson_archive
@@ -165,22 +184,56 @@ def get_archives_for_lesson(conn: sqlite3.Connection, lesson_id: str) -> list[di
          ORDER BY archived_at DESC, quality_score DESC
         """,
         (lesson_id,),
-    ).fetchall()
-    return [archive for row in rows if (archive := _row_to_lesson_archive(row)) is not None]
+    ).fetchall())
+    rows.extend(
+        _query_cold_rows(
+            "lesson_archive",
+            """
+            SELECT *
+              FROM lesson_archive
+             WHERE lesson_id = ?
+            """,
+            (lesson_id,),
+            cold_db_path=cold_archive_path_for_connection(conn),
+        )
+    )
+    archives = [archive for row in rows if (archive := _row_to_lesson_archive(row)) is not None]
+    archives.sort(key=lambda row: (row.get("archived_at") or "", row.get("quality_score") or 0), reverse=True)
+    return archives
 
 
 def get_latest_archive_run_id(conn: sqlite3.Connection) -> str | None:
     """Get the most recent lesson archive run_id with or without Row factory."""
-    row = conn.execute(
+    rows = list(conn.execute(
         """
-        SELECT run_id
+        SELECT run_id, archived_at, COALESCE(updated_at, archived_at) AS updated_order
           FROM lesson_archive
          WHERE run_id IS NOT NULL
          ORDER BY archived_at DESC, COALESCE(updated_at, archived_at) DESC, run_id DESC
-         LIMIT 1
         """
-    ).fetchone()
-    return row[0] if row else None
+    ).fetchall())
+    rows.extend(
+        _query_cold_rows(
+            "lesson_archive",
+            """
+            SELECT run_id, archived_at, COALESCE(updated_at, archived_at) AS updated_order
+              FROM lesson_archive
+             WHERE run_id IS NOT NULL
+            """,
+            cold_db_path=cold_archive_path_for_connection(conn),
+        )
+    )
+    if not rows:
+        return None
+    rows.sort(
+        key=lambda row: (
+            str(_row_value(row, "archived_at", 1) or ""),
+            str(_row_value(row, "updated_order", 2) or ""),
+            str(_row_value(row, "run_id", 0) or ""),
+        ),
+        reverse=True,
+    )
+    return _row_value(rows[0], "run_id", 0)
 
 
 def get_archives_for_cluster(
@@ -203,8 +256,18 @@ def get_archives_for_cluster(
         query += " AND quality_tier = ?"
         params.append(str(quality_tier).lower())
     query += " ORDER BY quality_score DESC, lesson_value DESC, analysis_date DESC"
-    rows = conn.execute(query, tuple(params)).fetchall()
-    return [archive for row in rows if (archive := _row_to_lesson_archive(row)) is not None]
+    rows = list(conn.execute(query, tuple(params)).fetchall())
+    rows.extend(_query_cold_rows("lesson_archive", query, tuple(params), cold_db_path=cold_archive_path_for_connection(conn)))
+    archives = [archive for row in rows if (archive := _row_to_lesson_archive(row)) is not None]
+    archives.sort(
+        key=lambda row: (
+            row.get("quality_score") or 0,
+            row.get("lesson_value") or 0,
+            row.get("analysis_date") or "",
+        ),
+        reverse=True,
+    )
+    return archives
 
 
 def clear_lesson_archive(conn: sqlite3.Connection, run_id: str | None = None) -> dict[str, int]:
@@ -219,6 +282,152 @@ def clear_lesson_archive(conn: sqlite3.Connection, run_id: str | None = None) ->
     ).fetchone()[0]
     conn.execute("DELETE FROM lesson_archive WHERE run_id = ?", (run_id,))
     return {"archives_deleted": deleted}
+
+
+def migrate_to_cold(
+    conn: sqlite3.Connection | None = None,
+    *,
+    threshold_runs: int = 1,
+    cold_db_path: str | Path | None = None,
+    include_retrieval_logs: bool = True,
+    include_backtest_results: bool = True,
+    vacuum: bool = False,
+) -> dict[str, Any]:
+    """Move cold archive/log/backtest rows out of the hot ORCA DB.
+
+    Keeps the latest ``threshold_runs`` lesson_archive runs in the hot DB.
+    Backtest retrieval logs and raw backtest result rows are moved because they
+    are read-heavy historical data and the largest source of repository bloat.
+    """
+    owns_conn = conn is None
+    if conn is None:
+        from .paths import STATE_DB_FILE
+
+        conn = sqlite3.connect(STATE_DB_FILE)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+    cold_path = Path(cold_db_path) if cold_db_path is not None else COLD_ARCHIVE_DB_FILE
+    cold = _connect_cold_archive(cold_path)
+    try:
+        moved: dict[str, int] = {}
+        archive_run_ids = _archive_run_ids_to_move(conn, threshold_runs)
+        moved["lesson_archive"] = _move_rows_to_cold(
+            conn,
+            cold,
+            "lesson_archive",
+            _where_in("run_id", archive_run_ids),
+            tuple(archive_run_ids),
+        ) if archive_run_ids else 0
+        if include_retrieval_logs:
+            moved["retrieval_log"] = _move_rows_to_cold(
+                conn,
+                cold,
+                "retrieval_log",
+                "source_event_type = ? OR source_system LIKE ? OR backtest_run_id IS NOT NULL",
+                ("backtest", "%backtest%"),
+            )
+        if include_backtest_results:
+            moved["backtest_daily_results"] = _move_rows_to_cold(conn, cold, "backtest_daily_results")
+            moved["backtest_pick_results"] = _move_rows_to_cold(conn, cold, "backtest_pick_results")
+        conn.commit()
+        cold.commit()
+    finally:
+        cold.close()
+        if owns_conn:
+            conn.close()
+    if vacuum:
+        from .paths import STATE_DB_FILE
+
+        vacuum_sqlite_database(STATE_DB_FILE)
+        vacuum_sqlite_database(cold_path)
+    return {
+        "cold_db_path": str(cold_path),
+        "moved": moved,
+        "rows_moved": sum(moved.values()),
+    }
+
+
+def restore_from_cold(
+    conn: sqlite3.Connection | None = None,
+    *,
+    cold_db_path: str | Path | None = None,
+    tables: tuple[str, ...] = ("lesson_archive", "retrieval_log", "backtest_daily_results", "backtest_pick_results"),
+    delete_cold_rows: bool = False,
+) -> dict[str, int]:
+    """Copy cold archive rows back into the hot DB for rollback."""
+    owns_conn = conn is None
+    if conn is None:
+        from .paths import STATE_DB_FILE
+
+        conn = sqlite3.connect(STATE_DB_FILE)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+    cold_path = Path(cold_db_path) if cold_db_path is not None else COLD_ARCHIVE_DB_FILE
+    cold = _connect_cold_archive(cold_path)
+    try:
+        restored = {}
+        for table in tables:
+            restored[table] = _restore_table_from_cold(conn, cold, table, delete_cold_rows=delete_cold_rows)
+        conn.commit()
+        cold.commit()
+        return restored
+    finally:
+        cold.close()
+        if owns_conn:
+            conn.close()
+
+
+def vacuum_sqlite_database(path: str | Path) -> dict[str, float]:
+    """Run PRAGMA optimize + VACUUM and return before/after MB."""
+    db_path = Path(path)
+    before = db_path.stat().st_size if db_path.exists() else 0
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.execute("PRAGMA optimize")
+        conn.execute("VACUUM")
+    finally:
+        conn.close()
+    after = db_path.stat().st_size if db_path.exists() else 0
+    return {"before_mb": round(before / 1024 / 1024, 2), "after_mb": round(after / 1024 / 1024, 2)}
+
+
+def get_cold_backtest_days(
+    session_id: str,
+    *,
+    phase_label: str | None = None,
+    cold_db_path: str | Path | None = None,
+) -> list[sqlite3.Row]:
+    params: list[Any] = [session_id]
+    query = """
+        SELECT analysis_date, phase_label, market_note, analysis_json, results_json, metrics_json
+          FROM backtest_daily_results
+         WHERE session_id = ?
+    """
+    if phase_label:
+        query += " AND phase_label = ?"
+        params.append(phase_label)
+    query += " ORDER BY analysis_date ASC"
+    return _query_cold_rows("backtest_daily_results", query, tuple(params), cold_db_path=cold_db_path)
+
+
+def query_cold_retrieval_logs(
+    query: str,
+    params: tuple[Any, ...] = (),
+    *,
+    cold_db_path: str | Path | None = None,
+) -> list[sqlite3.Row]:
+    return _query_cold_rows("retrieval_log", query, params, cold_db_path=cold_db_path)
+
+
+def cold_archive_path_for_connection(conn: sqlite3.Connection) -> Path:
+    row = conn.execute("PRAGMA database_list").fetchone()
+    hot_path = _row_value(row, "file", 2)
+    return cold_archive_path_for_hot_db(hot_path) if hot_path else COLD_ARCHIVE_DB_FILE
+
+
+def cold_archive_path_for_hot_db(hot_db_path: str | Path) -> Path:
+    hot_path = Path(hot_db_path)
+    return hot_path.parent / "archive" / "lesson_archive_cold.db"
 
 
 def _row_to_lesson_archive(row: sqlite3.Row | tuple[Any, ...] | None) -> dict[str, Any] | None:
@@ -261,3 +470,153 @@ def _row_value(row: Any, key: str, index: int, default: Any = None) -> Any:
             return row[index]
         except (TypeError, KeyError, IndexError):
             return default
+
+
+def _connect_cold_archive(path: str | Path | None = None) -> sqlite3.Connection:
+    db_path = Path(path) if path is not None else COLD_ARCHIVE_DB_FILE
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = OFF")
+    conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA synchronous = NORMAL")
+    return conn
+
+
+def _query_cold_rows(
+    table: str,
+    query: str,
+    params: tuple[Any, ...] = (),
+    *,
+    cold_db_path: str | Path | None = None,
+) -> list[sqlite3.Row]:
+    db_path = Path(cold_db_path) if cold_db_path is not None else COLD_ARCHIVE_DB_FILE
+    if not db_path.exists():
+        return []
+    cold = _connect_cold_archive(db_path)
+    try:
+        if not _cold_table_exists(cold, table):
+            return []
+        return list(cold.execute(query, params).fetchall())
+    finally:
+        cold.close()
+
+
+def _cold_table_exists(conn: sqlite3.Connection, table: str) -> bool:
+    return conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+        (table,),
+    ).fetchone() is not None
+
+
+def _archive_run_ids_to_move(conn: sqlite3.Connection, threshold_runs: int) -> list[str]:
+    rows = conn.execute(
+        """
+        SELECT run_id, MAX(archived_at) AS latest_archived_at, MAX(COALESCE(updated_at, archived_at)) AS latest_updated_at
+          FROM lesson_archive
+         WHERE run_id IS NOT NULL
+         GROUP BY run_id
+         ORDER BY latest_archived_at DESC, latest_updated_at DESC, run_id DESC
+        """
+    ).fetchall()
+    keep = max(0, int(threshold_runs or 0))
+    return [str(_row_value(row, "run_id", 0)) for row in rows[keep:]]
+
+
+def _move_rows_to_cold(
+    hot: sqlite3.Connection,
+    cold: sqlite3.Connection,
+    table: str,
+    where_sql: str = "1=1",
+    params: tuple[Any, ...] = (),
+) -> int:
+    if not _hot_table_exists(hot, table):
+        return 0
+    _ensure_cold_table_like(hot, cold, table)
+    columns = _table_columns(hot, table)
+    keys = COLD_TABLE_KEYS.get(table, tuple(columns[:1]))
+    rows = list(hot.execute(f'SELECT {", ".join(_q(col) for col in columns)} FROM {_q(table)} WHERE {where_sql}', params))
+    if not rows:
+        return 0
+    for row in rows:
+        key_values = tuple(_row_value(row, key, columns.index(key)) for key in keys)
+        cold.execute(
+            f'DELETE FROM {_q(table)} WHERE ' + " AND ".join(f"{_q(key)} = ?" for key in keys),
+            key_values,
+        )
+    placeholders = ", ".join("?" for _ in columns)
+    cold.executemany(
+        f'INSERT INTO {_q(table)} ({", ".join(_q(col) for col in columns)}) VALUES ({placeholders})',
+        [tuple(_row_value(row, col, idx) for idx, col in enumerate(columns)) for row in rows],
+    )
+    hot.execute(f'DELETE FROM {_q(table)} WHERE {where_sql}', params)
+    return len(rows)
+
+
+def _restore_table_from_cold(
+    hot: sqlite3.Connection,
+    cold: sqlite3.Connection,
+    table: str,
+    *,
+    delete_cold_rows: bool,
+) -> int:
+    if not _cold_table_exists(cold, table) or not _hot_table_exists(hot, table):
+        return 0
+    columns = _table_columns(hot, table)
+    keys = COLD_TABLE_KEYS.get(table, tuple(columns[:1]))
+    rows = list(cold.execute(f'SELECT {", ".join(_q(col) for col in columns)} FROM {_q(table)}'))
+    for row in rows:
+        key_values = tuple(_row_value(row, key, columns.index(key)) for key in keys)
+        hot.execute(
+            f'DELETE FROM {_q(table)} WHERE ' + " AND ".join(f"{_q(key)} = ?" for key in keys),
+            key_values,
+        )
+    placeholders = ", ".join("?" for _ in columns)
+    hot.executemany(
+        f'INSERT INTO {_q(table)} ({", ".join(_q(col) for col in columns)}) VALUES ({placeholders})',
+        [tuple(_row_value(row, col, idx) for idx, col in enumerate(columns)) for row in rows],
+    )
+    if delete_cold_rows:
+        cold.execute(f"DELETE FROM {_q(table)}")
+    return len(rows)
+
+
+def _ensure_cold_table_like(hot: sqlite3.Connection, cold: sqlite3.Connection, table: str) -> None:
+    cols = hot.execute(f"PRAGMA table_info({_q(table)})").fetchall()
+    if not cols:
+        raise sqlite3.OperationalError(f"table not found: {table}")
+    definitions = []
+    for row in cols:
+        name = _row_value(row, "name", 1)
+        col_type = _row_value(row, "type", 2) or "TEXT"
+        definitions.append(f"{_q(str(name))} {col_type}")
+    cold.execute(f"CREATE TABLE IF NOT EXISTS {_q(table)} ({', '.join(definitions)})")
+    key_cols = COLD_TABLE_KEYS.get(table)
+    if key_cols:
+        cold.execute(
+            f"CREATE INDEX IF NOT EXISTS idx_cold_{table}_key ON {_q(table)} "
+            + "("
+            + ", ".join(_q(col) for col in key_cols)
+            + ")"
+        )
+
+
+def _table_columns(conn: sqlite3.Connection, table: str) -> list[str]:
+    return [str(_row_value(row, "name", 1)) for row in conn.execute(f"PRAGMA table_info({_q(table)})").fetchall()]
+
+
+def _hot_table_exists(conn: sqlite3.Connection, table: str) -> bool:
+    return conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+        (table,),
+    ).fetchone() is not None
+
+
+def _where_in(column: str, values: list[str]) -> str:
+    if not values:
+        return "0=1"
+    return f"{_q(column)} IN ({', '.join('?' for _ in values)})"
+
+
+def _q(identifier: str) -> str:
+    return '"' + identifier.replace('"', '""') + '"'
