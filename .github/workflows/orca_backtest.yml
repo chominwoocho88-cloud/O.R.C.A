@@ -9,19 +9,45 @@ on:
     inputs:
       months:
         description: "Backtest months"
-        required: true
+        type: choice
+        options:
+          - "13"
+          - "36"
         default: "13"
       walk_forward:
         description: "Walk-forward mode"
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - "true"
+          - "false"
+        default: "true"
+      expected_min_candidates:
+        description: "Minimum backtest candidate rows"
+        type: string
+        default: "1000"
+      expected_min_lessons:
+        description: "Minimum backtest lessons"
+        type: string
+        default: "1000"
+      expected_min_orca_sessions:
+        description: "Minimum ORCA sessions"
+        type: string
+        default: "1"
+      expected_min_jackal_sessions:
+        description: "Minimum JACKAL sessions"
+        type: string
+        default: "1"
 
 jobs:
   run-backtest:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      PYTHONIOENCODING: utf-8
       USE_FDR_MAIN: "1"
+      USE_UNIFIED_FETCH: "1"
+      YF_RATE_LIMIT_FAST_FAIL: "1"
+      ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
     permissions:
       contents: read
 
@@ -38,37 +64,100 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Resolve inputs
+        shell: bash
+        run: |
+          trim_workflow_input() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
+
+          normalize_bool() {
+            local value
+            value="$(trim_workflow_input "$1")"
+            value="${value,,}"
+            if [ "$value" = "true" ] || [ "$value" = "1" ] || [ "$value" = "yes" ]; then
+              printf 'true'
+            else
+              printf 'false'
+            fi
+          }
+
+          ORCA_BACKTEST_MONTHS="$(trim_workflow_input "${{ inputs.months }}")"
+          ORCA_BACKTEST_WALK_FORWARD="$(normalize_bool "${{ inputs.walk_forward }}")"
+          EXPECTED_MIN_CANDIDATES_VALUE="$(trim_workflow_input "${{ inputs.expected_min_candidates }}")"
+          EXPECTED_MIN_LESSONS_VALUE="$(trim_workflow_input "${{ inputs.expected_min_lessons }}")"
+          EXPECTED_MIN_ORCA_SESSIONS_VALUE="$(trim_workflow_input "${{ inputs.expected_min_orca_sessions }}")"
+          EXPECTED_MIN_JACKAL_SESSIONS_VALUE="$(trim_workflow_input "${{ inputs.expected_min_jackal_sessions }}")"
+
+          [ -z "$ORCA_BACKTEST_MONTHS" ] && ORCA_BACKTEST_MONTHS="13"
+          [ -z "$EXPECTED_MIN_CANDIDATES_VALUE" ] && EXPECTED_MIN_CANDIDATES_VALUE="1000"
+          [ -z "$EXPECTED_MIN_LESSONS_VALUE" ] && EXPECTED_MIN_LESSONS_VALUE="1000"
+          [ -z "$EXPECTED_MIN_ORCA_SESSIONS_VALUE" ] && EXPECTED_MIN_ORCA_SESSIONS_VALUE="1"
+          [ -z "$EXPECTED_MIN_JACKAL_SESSIONS_VALUE" ] && EXPECTED_MIN_JACKAL_SESSIONS_VALUE="1"
+
+          echo "ORCA_BACKTEST_MONTHS=$ORCA_BACKTEST_MONTHS" >> "$GITHUB_ENV"
+          echo "ORCA_BACKTEST_WALK_FORWARD=$ORCA_BACKTEST_WALK_FORWARD" >> "$GITHUB_ENV"
+          echo "EXPECTED_MIN_CANDIDATES=$EXPECTED_MIN_CANDIDATES_VALUE" >> "$GITHUB_ENV"
+          echo "EXPECTED_MIN_LESSONS=$EXPECTED_MIN_LESSONS_VALUE" >> "$GITHUB_ENV"
+          echo "EXPECTED_MIN_ORCA_SESSIONS=$EXPECTED_MIN_ORCA_SESSIONS_VALUE" >> "$GITHUB_ENV"
+          echo "EXPECTED_MIN_JACKAL_SESSIONS=$EXPECTED_MIN_JACKAL_SESSIONS_VALUE" >> "$GITHUB_ENV"
+
+          echo "Resolved inputs:"
+          echo "  months=$ORCA_BACKTEST_MONTHS"
+          echo "  walk_forward=$ORCA_BACKTEST_WALK_FORWARD"
+          echo "  expected_min_candidates=$EXPECTED_MIN_CANDIDATES_VALUE"
+          echo "  expected_min_lessons=$EXPECTED_MIN_LESSONS_VALUE"
+          echo "  expected_min_orca_sessions=$EXPECTED_MIN_ORCA_SESSIONS_VALUE"
+          echo "  expected_min_jackal_sessions=$EXPECTED_MIN_JACKAL_SESSIONS_VALUE"
+
+      - name: Pre-flight status
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import sqlite3
+          from pathlib import Path
+          from orca import state
+
+          state.init_state_db()
+          db = Path("data/orca_state.db")
+          conn = sqlite3.connect(db)
+          candidates = conn.execute("SELECT COUNT(*) FROM candidate_registry WHERE source_event_type='backtest'").fetchone()[0]
+          lessons = conn.execute("SELECT COUNT(*) FROM candidate_lessons").fetchone()[0]
+          orca_sessions = conn.execute("SELECT COUNT(*) FROM backtest_sessions WHERE system='orca'").fetchone()[0]
+          jackal_sessions = conn.execute("SELECT COUNT(*) FROM backtest_sessions WHERE system='jackal'").fetchone()[0]
+          print("Pre-flight:")
+          print(f"  db_mb: {os.path.getsize(db) / 1024 / 1024:.2f}")
+          print(f"  backtest candidates: {candidates}")
+          print(f"  candidate lessons: {lessons}")
+          print(f"  ORCA sessions: {orca_sessions}")
+          print(f"  JACKAL sessions: {jackal_sessions}")
+          conn.close()
+          PY
+
       - name: Run ORCA Backtest
         env:
-          PYTHONIOENCODING: utf-8
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
-          ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
-          USE_UNIFIED_FETCH: "1"
-          USE_FDR_MAIN: "1"
-          YF_RATE_LIMIT_FAST_FAIL: "1"
         run: |
           # Default path remains:
           # python -m orca.backtest --months 13 --walk-forward --fail-on-empty-dynamic-fetch
-          ARGS="--months ${{ inputs.months }} --fail-on-empty-dynamic-fetch"
-          if [ "${{ inputs.walk_forward }}" = "true" ]; then
+          ARGS="--months $ORCA_BACKTEST_MONTHS --fail-on-empty-dynamic-fetch"
+          if [ "$ORCA_BACKTEST_WALK_FORWARD" = "true" ]; then
             ARGS="$ARGS --walk-forward"
           fi
           python -m orca.backtest $ARGS
 
       - name: Run JACKAL Backtest
         env:
-          PYTHONIOENCODING: utf-8
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
-          ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
-          USE_UNIFIED_FETCH: "1"
-          USE_FDR_MAIN: "1"
-          YF_RATE_LIMIT_FAST_FAIL: "1"
-        run: |
-          python -m jackal.backtest --mode full
+        run: python -m jackal.backtest --mode full
 
       - name: Checkpoint ORCA DB
         shell: bash
@@ -93,8 +182,14 @@ jobs:
         shell: bash
         run: |
           python - <<'PY'
+          import os
           import sqlite3
           import sys
+
+          expected_candidates = int(os.environ.get("EXPECTED_MIN_CANDIDATES", "1000"))
+          expected_lessons = int(os.environ.get("EXPECTED_MIN_LESSONS", "1000"))
+          expected_orca_sessions = int(os.environ.get("EXPECTED_MIN_ORCA_SESSIONS", "1"))
+          expected_jackal_sessions = int(os.environ.get("EXPECTED_MIN_JACKAL_SESSIONS", "1"))
 
           conn = sqlite3.connect("data/orca_state.db")
           try:
@@ -105,19 +200,14 @@ jobs:
                   WHERE source_event_type='backtest'
                   """
               ).fetchone()[0]
-              outcomes = conn.execute(
-                  "SELECT COUNT(*) FROM candidate_outcomes"
-              ).fetchone()[0]
-              lessons = conn.execute(
-                  "SELECT COUNT(*) FROM candidate_lessons"
-              ).fetchone()[0]
+              outcomes = conn.execute("SELECT COUNT(*) FROM candidate_outcomes").fetchone()[0]
+              lessons = conn.execute("SELECT COUNT(*) FROM candidate_lessons").fetchone()[0]
               orca_sessions = conn.execute(
                   "SELECT COUNT(*) FROM backtest_sessions WHERE system='orca'"
               ).fetchone()[0]
               jackal_sessions = conn.execute(
                   "SELECT COUNT(*) FROM backtest_sessions WHERE system='jackal'"
               ).fetchone()[0]
-
               all_sessions = list(
                   conn.execute(
                       """
@@ -196,35 +286,21 @@ jobs:
           print("=" * 60)
 
           errors = []
-          if candidate_count < 1000:
-              errors.append(
-                  f"backtest candidates insufficient: {candidate_count} (expected >= 1000)"
-              )
+          if candidate_count < expected_candidates:
+              errors.append(f"backtest candidates {candidate_count} < expected {expected_candidates}")
           if outcomes < candidate_count:
               errors.append(f"outcomes < candidates: {outcomes} < {candidate_count}")
-          if lessons < 1000:
-              errors.append(f"lessons insufficient: {lessons} (expected >= 1000)")
-          if orca_sessions < 1:
-              errors.append("ORCA session missing")
-          if jackal_sessions < 1:
-              errors.append("JACKAL session missing")
+          if lessons < expected_lessons:
+              errors.append(f"lessons {lessons} < expected {expected_lessons}")
+          if orca_sessions < expected_orca_sessions:
+              errors.append(f"ORCA sessions {orca_sessions} < expected {expected_orca_sessions}")
+          if jackal_sessions < expected_jackal_sessions:
+              errors.append(f"JACKAL sessions {jackal_sessions} < expected {expected_jackal_sessions}")
 
           if errors:
               print("FAIL Pre-upload verify FAILED:")
               for error in errors:
                   print(f"  - {error}")
-              print()
-              print("Possible causes:")
-              if candidate_count < 1000 and date_stats[2] and date_stats[2] < 252:
-                  print(f"  - Only {date_stats[2]} days materialized (expected 252)")
-                  print("  - jackal/backtest.py may not be processing all days")
-              if jackal_sessions > 1:
-                  print(f"  - Multiple JACKAL sessions ({jackal_sessions}) suggest merge issue")
-              print()
-              print("Next steps:")
-              print("  1. Review jackal/backtest.py per-day loop")
-              print("  2. Check materialize_backtest_day() return values")
-              print("  3. Verify record_backtest_candidate() call count")
               sys.exit(1)
 
           print("PASS Pre-upload verify PASSED")

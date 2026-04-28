@@ -5,24 +5,33 @@ on:
     inputs:
       dry_run:
         description: "Dry run (no DB write)"
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - "true"
+          - "false"
+        default: "true"
       cluster_run_id:
         description: "Cluster run_id (empty = latest)"
         type: string
         default: ""
       force_rebuild:
         description: "Clear existing archive data before running"
-        type: boolean
-        default: false
+        type: choice
+        options:
+          - "false"
+          - "true"
+        default: "false"
       append_mode:
         description: "Append a new archive run and preserve existing archive rows"
-        type: boolean
-        default: false
+        type: choice
+        options:
+          - "false"
+          - "true"
+        default: "false"
       expected_archive_count:
         description: "Expected archive rows for latest run"
         type: string
-        default: "1260"
+        default: "3864"
 
 concurrency:
   group: orca-repo-state
@@ -35,7 +44,9 @@ jobs:
   archive:
     runs-on: ubuntu-latest
     env:
+      PYTHONIOENCODING: utf-8
       USE_FDR_MAIN: "1"
+      USE_UNIFIED_FETCH: "1"
 
     steps:
       - name: Checkout
@@ -52,10 +63,55 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Resolve inputs
+        shell: bash
+        run: |
+          trim_workflow_input() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
+
+          normalize_bool() {
+            local value
+            value="$(trim_workflow_input "$1")"
+            value="${value,,}"
+            if [ "$value" = "true" ] || [ "$value" = "1" ] || [ "$value" = "yes" ]; then
+              printf 'true'
+            else
+              printf 'false'
+            fi
+          }
+
+          ARCHIVE_DRY_RUN_VALUE="$(normalize_bool "${{ inputs.dry_run }}")"
+          ARCHIVE_FORCE_REBUILD_VALUE="$(normalize_bool "${{ inputs.force_rebuild }}")"
+          ARCHIVE_APPEND_MODE_VALUE="$(normalize_bool "${{ inputs.append_mode }}")"
+          ARCHIVE_CLUSTER_RUN_ID_VALUE="$(trim_workflow_input "${{ inputs.cluster_run_id }}")"
+          EXPECTED_ARCHIVE_COUNT_VALUE="$(trim_workflow_input "${{ inputs.expected_archive_count }}")"
+
+          [ -z "$EXPECTED_ARCHIVE_COUNT_VALUE" ] && EXPECTED_ARCHIVE_COUNT_VALUE="3864"
+
+          echo "ARCHIVE_DRY_RUN=$ARCHIVE_DRY_RUN_VALUE" >> "$GITHUB_ENV"
+          echo "ARCHIVE_FORCE_REBUILD=$ARCHIVE_FORCE_REBUILD_VALUE" >> "$GITHUB_ENV"
+          echo "ARCHIVE_APPEND_MODE=$ARCHIVE_APPEND_MODE_VALUE" >> "$GITHUB_ENV"
+          echo "ARCHIVE_CLUSTER_RUN_ID=$ARCHIVE_CLUSTER_RUN_ID_VALUE" >> "$GITHUB_ENV"
+          echo "EXPECTED_ARCHIVE_COUNT=$EXPECTED_ARCHIVE_COUNT_VALUE" >> "$GITHUB_ENV"
+
+          echo "Resolved inputs:"
+          echo "  dry_run=$ARCHIVE_DRY_RUN_VALUE"
+          echo "  cluster_run_id=${ARCHIVE_CLUSTER_RUN_ID_VALUE:-latest}"
+          echo "  force_rebuild=$ARCHIVE_FORCE_REBUILD_VALUE"
+          echo "  append_mode=$ARCHIVE_APPEND_MODE_VALUE"
+          echo "  expected_archive_count=$EXPECTED_ARCHIVE_COUNT_VALUE"
+
       - name: Pre-flight status
+        shell: bash
         run: |
           python - <<'PY'
+          import os
           import sqlite3
+          from pathlib import Path
           from orca import state
 
           state.init_state_db()
@@ -66,12 +122,6 @@ jobs:
               SELECT COUNT(*)
               FROM candidate_lessons
               WHERE context_snapshot_id IS NOT NULL
-          """).fetchone()[0]
-          clustered_lessons = conn.execute("""
-              SELECT COUNT(*)
-              FROM candidate_lessons l
-              JOIN snapshot_cluster_mapping m
-                ON m.snapshot_id = l.context_snapshot_id
           """).fetchone()[0]
           canonical_clustered_lessons = conn.execute("""
               SELECT COUNT(*)
@@ -92,11 +142,13 @@ jobs:
           archives = conn.execute('SELECT COUNT(*) FROM lesson_archive').fetchone()[0]
           latest_cluster_run = state.get_latest_run_id(conn)
           latest_archive_run = state.get_latest_archive_run_id(conn)
+          cold = Path('data/archive/lesson_archive_cold.db')
           print('Pre-flight:')
+          print(f'  main_db_mb: {os.path.getsize("data/orca_state.db") / 1024 / 1024:.2f}')
+          print(f'  cold_archive_exists: {cold.exists()}')
           print(f'  clusters: {clusters}')
           print(f'  mappings: {mappings}')
           print(f'  lessons with context: {linked_lessons}')
-          print(f'  clustered lessons: {clustered_lessons}')
           print(f'  canonical clustered lessons: {canonical_clustered_lessons}')
           print(f'  existing archive rows: {archives}')
           print(f'  latest cluster run_id: {latest_cluster_run or "(none)"}')
@@ -105,35 +157,39 @@ jobs:
           PY
 
       - name: Run archive build
+        shell: bash
         run: |
-          ARGS="--expected-lessons ${{ inputs.expected_archive_count }}"
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            ARGS="$ARGS --dry-run"
+          ARGS=(--expected-lessons "$EXPECTED_ARCHIVE_COUNT")
+          if [ "$ARCHIVE_DRY_RUN" = "true" ]; then
+            ARGS+=(--dry-run)
           else
-            ARGS="$ARGS --execute"
+            ARGS+=(--execute)
           fi
-          if [ -n "${{ inputs.cluster_run_id }}" ]; then
-            ARGS="$ARGS --cluster-run-id ${{ inputs.cluster_run_id }}"
+          if [ -n "$ARCHIVE_CLUSTER_RUN_ID" ]; then
+            ARGS+=(--cluster-run-id "$ARCHIVE_CLUSTER_RUN_ID")
           fi
-          if [ "${{ inputs.force_rebuild }}" = "true" ]; then
-            ARGS="$ARGS --force-rebuild"
+          if [ "$ARCHIVE_FORCE_REBUILD" = "true" ]; then
+            ARGS+=(--force-rebuild)
           fi
-          if [ "${{ inputs.append_mode }}" = "true" ]; then
-            ARGS="$ARGS --append"
+          if [ "$ARCHIVE_APPEND_MODE" = "true" ]; then
+            ARGS+=(--append)
           fi
-          python scripts/build_lesson_archive.py --verbose $ARGS
+          python scripts/build_lesson_archive.py --verbose "${ARGS[@]}"
 
       - name: Strict verify
-        if: ${{ inputs.dry_run != true }}
-        env:
-          EXPECTED_ARCHIVE_COUNT: ${{ inputs.expected_archive_count }}
+        shell: bash
         run: |
+          if [ "$ARCHIVE_DRY_RUN" = "true" ]; then
+            echo "Strict verify skipped for dry_run=true"
+            exit 0
+          fi
+
           python - <<'PY'
           import os
           import sqlite3
           from orca import state
 
-          expected_archive_count = int(os.environ.get('EXPECTED_ARCHIVE_COUNT', '1260'))
+          expected_archive_count = int(os.environ.get('EXPECTED_ARCHIVE_COUNT', '3864'))
           conn = sqlite3.connect('data/orca_state.db')
           latest_run = state.get_latest_archive_run_id(conn)
           failures = []
@@ -189,8 +245,13 @@ jobs:
           PY
 
       - name: Checkpoint DB
-        if: ${{ inputs.dry_run != true }}
+        shell: bash
         run: |
+          if [ "$ARCHIVE_DRY_RUN" = "true" ]; then
+            echo "Checkpoint skipped for dry_run=true"
+            exit 0
+          fi
+
           python - <<'PY'
           import os
           import sqlite3
@@ -208,11 +269,17 @@ jobs:
           PY
 
       - name: Commit and push
-        if: ${{ inputs.dry_run != true }}
+        shell: bash
         run: |
+          if [ "$ARCHIVE_DRY_RUN" = "true" ]; then
+            echo "Commit skipped for dry_run=true"
+            exit 0
+          fi
+
           git config user.name "Wave F Archive"
           git config user.email "wave-f-archive@orca-agent"
           git add -f data/orca_state.db
+          git add -f data/archive/lesson_archive_cold.db 2>/dev/null || true
           git diff --cached --quiet && {
             echo "No DB changes to commit."
             exit 0

@@ -252,7 +252,10 @@ class MarketFetchFDRPriorityTests(unittest.TestCase):
 
     def test_orca_backtest_run_steps_include_fdr_env(self):
         text = (ROOT / ".github" / "workflows" / "orca_backtest.yml").read_text(encoding="utf-8-sig")
-        self.assertGreaterEqual(text.count('USE_FDR_MAIN: "1"'), 3)
+        self.assertIn('USE_FDR_MAIN: "1"', text)
+        self.assertIn('USE_UNIFIED_FETCH: "1"', text)
+        self.assertIn("Run ORCA Backtest", text)
+        self.assertIn("Run JACKAL Backtest", text)
 
     def test_requirements_include_finance_datareader(self):
         text = (ROOT / "requirements.txt").read_text(encoding="utf-8-sig").lower()

@@ -270,5 +270,58 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         self.assertIn('--materialize-mode "${JACKAL_MATERIALIZE_MODE}"', text)
 
 
+class TestPriorityWorkflowUiContracts(unittest.TestCase):
+    """Phase 3: high-priority ORCA workflows share the safer dispatch UX."""
+
+    PRIORITY_WORKFLOWS = (
+        "orca_backtest.yml",
+        "orca_jackal.yml",
+        "orca_daily.yml",
+        "wave_f_archive.yml",
+    )
+
+    def test_priority_workflows_resolve_and_normalize_inputs(self):
+        for workflow_name in self.PRIORITY_WORKFLOWS:
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                self.assertIn("Resolve inputs", text)
+                self.assertIn("trim_workflow_input()", text)
+                self.assertIn("normalize_bool()", text)
+
+    def test_priority_workflows_use_shared_runtime_env(self):
+        for workflow_name in self.PRIORITY_WORKFLOWS:
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                self.assertIn("PYTHONIOENCODING: utf-8", text)
+                self.assertIn('USE_FDR_MAIN: "1"', text)
+                self.assertIn('USE_UNIFIED_FETCH: "1"', text)
+
+    def test_priority_workflows_have_preflight_strict_verify_and_checkpoint(self):
+        for workflow_name in self.PRIORITY_WORKFLOWS:
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                self.assertIn("Pre-flight status", text)
+                self.assertIn("Strict verify", text)
+                self.assertIn("PRAGMA wal_checkpoint(TRUNCATE);", text)
+
+    def test_priority_dispatch_booleans_are_choices_with_string_defaults(self):
+        for workflow_name in self.PRIORITY_WORKFLOWS:
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                self.assertNotIn("type: boolean", text)
+                if "dry_run:" in text:
+                    self.assertIn('default: "true"', text)
+                if "force_rebuild:" in text:
+                    self.assertIn('default: "false"', text)
+
+    def test_stateful_priority_workflows_commit_after_checkpoint(self):
+        for workflow_name in ("orca_jackal.yml", "orca_daily.yml", "wave_f_archive.yml"):
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                checkpoint_idx = text.find("Checkpoint DB")
+                commit_idx = text.find("Commit and push")
+                self.assertTrue(0 <= checkpoint_idx < commit_idx)
+
+
 if __name__ == "__main__":
     unittest.main()

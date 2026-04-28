@@ -13,15 +13,25 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "MORNING / EVENING / WEEKLY / MONTHLY"
-        required: false
-        default: "MORNING"
+        description: "Report mode"
+        type: choice
+        options:
+          - MORNING
+          - EVENING
+          - WEEKLY
+          - MONTHLY
+        default: MORNING
+      expected_min_reports:
+        description: "Minimum reports files after run"
+        type: string
+        default: "0"
 
 jobs:
   run-orca:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      PYTHONIOENCODING: utf-8
       ORCA_DASHBOARD_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/reports/dashboard.html
       ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
       ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
@@ -44,96 +54,162 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: MORNING Report
-        if: >
-          github.event.schedule == '30 23 * * 0-4' ||
-          (github.event_name == 'workflow_dispatch' &&
-           (github.event.inputs.mode == 'MORNING' || github.event.inputs.mode == ''))
-        env:
-          PYTHONIOENCODING: utf-8
-          ORCA_MODE: MORNING
-          GH_REPO: ${{ github.repository }}
-          ORCA_DASHBOARD_URL: ${{ env.ORCA_DASHBOARD_URL }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          ORCA_MODEL: "claude-sonnet-4-6"
-          ANTHROPIC_MODEL: "claude-sonnet-4-6"
-          MAX_THINKING_TOKENS: "8000"
-          SUBAGENT_MODEL: "claude-haiku-4-5-20251001"
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
-          FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
-        run: python -m orca.main
-
-      - name: EVENING Report
-        if: >
-          github.event.schedule == '0 14 * * 1-5' ||
-          (github.event_name == 'workflow_dispatch' &&
-           github.event.inputs.mode == 'EVENING')
-        env:
-          PYTHONIOENCODING: utf-8
-          ORCA_MODE: EVENING
-          GH_REPO: ${{ github.repository }}
-          ORCA_DASHBOARD_URL: ${{ env.ORCA_DASHBOARD_URL }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          ORCA_MODEL: "claude-sonnet-4-6"
-          ANTHROPIC_MODEL: "claude-sonnet-4-6"
-          MAX_THINKING_TOKENS: "8000"
-          SUBAGENT_MODEL: "claude-haiku-4-5-20251001"
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
-          FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
-        run: python -m orca.main
-
-      - name: WEEKLY Report
-        if: >
-          github.event.schedule == '0 22 * * 6' ||
-          (github.event_name == 'workflow_dispatch' &&
-           github.event.inputs.mode == 'WEEKLY')
-        env:
-          PYTHONIOENCODING: utf-8
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - name: Resolve inputs
+        shell: bash
         run: |
-          python3 -c "
-          from orca.notify import send_weekly_report
-          send_weekly_report()
-          "
+          trim_workflow_input() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
 
-      - name: MONTHLY Report
-        if: >
-          github.event.schedule == '0 21 1 * *' ||
-          (github.event_name == 'workflow_dispatch' &&
-           github.event.inputs.mode == 'MONTHLY')
-        env:
-          PYTHONIOENCODING: utf-8
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          normalize_bool() {
+            local value
+            value="$(trim_workflow_input "$1")"
+            value="${value,,}"
+            if [ "$value" = "true" ] || [ "$value" = "1" ] || [ "$value" = "yes" ]; then
+              printf 'true'
+            else
+              printf 'false'
+            fi
+          }
+
+          INPUT_MODE="$(trim_workflow_input "${{ inputs.mode }}")"
+          EXPECTED_MIN_REPORTS_VALUE="$(trim_workflow_input "${{ inputs.expected_min_reports }}")"
+          EVENT_NAME="${{ github.event_name }}"
+          EVENT_SCHEDULE="${{ github.event.schedule }}"
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            ORCA_RUN_MODE="$INPUT_MODE"
+          elif [ "$EVENT_SCHEDULE" = "30 23 * * 0-4" ]; then
+            ORCA_RUN_MODE="MORNING"
+          elif [ "$EVENT_SCHEDULE" = "0 14 * * 1-5" ]; then
+            ORCA_RUN_MODE="EVENING"
+          elif [ "$EVENT_SCHEDULE" = "0 22 * * 6" ]; then
+            ORCA_RUN_MODE="WEEKLY"
+          elif [ "$EVENT_SCHEDULE" = "0 21 1 * *" ]; then
+            ORCA_RUN_MODE="MONTHLY"
+          else
+            ORCA_RUN_MODE="MORNING"
+          fi
+
+          [ -z "$ORCA_RUN_MODE" ] && ORCA_RUN_MODE="MORNING"
+          [ -z "$EXPECTED_MIN_REPORTS_VALUE" ] && EXPECTED_MIN_REPORTS_VALUE="0"
+
+          echo "ORCA_RUN_MODE=$ORCA_RUN_MODE" >> "$GITHUB_ENV"
+          echo "EXPECTED_MIN_REPORTS=$EXPECTED_MIN_REPORTS_VALUE" >> "$GITHUB_ENV"
+
+          echo "Resolved inputs:"
+          echo "  mode=$ORCA_RUN_MODE"
+          echo "  expected_min_reports=$EXPECTED_MIN_REPORTS_VALUE"
+          echo "  normalize_bool_sanity=$(normalize_bool true)"
+
+      - name: Pre-flight status
+        shell: bash
         run: |
-          python3 -c "
-          import json
-          from orca.notify import send_monthly_report
-          from orca.analysis import extract_monthly_lessons
-          from orca.paths import MEMORY_FILE, ACCURACY_FILE
-          send_monthly_report()
-          memory = json.loads(MEMORY_FILE.read_text(encoding='utf-8')) if MEMORY_FILE.exists() else []
-          accuracy = json.loads(ACCURACY_FILE.read_text(encoding='utf-8')) if ACCURACY_FILE.exists() else {}
-          extract_monthly_lessons(memory, accuracy)
-          "
-
-      - name: Save ORCA state
-        run: |
-          git config user.name "ORCA Bot"
-          git config user.email "orca@github-actions"
-
           python - <<'PY'
+          import os
+          import sqlite3
+          from pathlib import Path
+          from orca import state
+
+          state.init_state_db()
+          db = Path("data/orca_state.db")
+          conn = sqlite3.connect(db)
+          candidates = conn.execute("SELECT COUNT(*) FROM candidate_registry").fetchone()[0]
+          lessons = conn.execute("SELECT COUNT(*) FROM candidate_lessons").fetchone()[0]
+          reports = len(list(Path("reports").glob("*.html"))) if Path("reports").exists() else 0
+          print("Pre-flight:")
+          print(f"  mode: {os.environ.get('ORCA_RUN_MODE')}")
+          print(f"  orca_state_db: {db.exists()} ({os.path.getsize(db) / 1024 / 1024:.2f} MB)")
+          print(f"  jackal_state_db: {Path('data/jackal_state.db').exists()}")
+          print(f"  candidate_registry: {candidates}")
+          print(f"  candidate_lessons: {lessons}")
+          print(f"  reports_html: {reports}")
+          conn.close()
+          PY
+
+      - name: Run ORCA report
+        env:
+          ORCA_MODE: ${{ env.ORCA_RUN_MODE }}
+          GH_REPO: ${{ github.repository }}
+          ORCA_DASHBOARD_URL: ${{ env.ORCA_DASHBOARD_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          ORCA_MODEL: "claude-sonnet-4-6"
+          ANTHROPIC_MODEL: "claude-sonnet-4-6"
+          MAX_THINKING_TOKENS: "8000"
+          SUBAGENT_MODEL: "claude-haiku-4-5-20251001"
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
+          FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
+        shell: bash
+        run: |
+          case "$ORCA_RUN_MODE" in
+            MORNING|EVENING)
+              ORCA_MODE="$ORCA_RUN_MODE" python -m orca.main
+              ;;
+            WEEKLY)
+              python - <<'PY'
+              from orca.notify import send_weekly_report
+              send_weekly_report()
+              PY
+              ;;
+            MONTHLY)
+              python - <<'PY'
+              import json
+              from orca.notify import send_monthly_report
+              from orca.analysis import extract_monthly_lessons
+              from orca.paths import MEMORY_FILE, ACCURACY_FILE
+              send_monthly_report()
+              memory = json.loads(MEMORY_FILE.read_text(encoding='utf-8')) if MEMORY_FILE.exists() else []
+              accuracy = json.loads(ACCURACY_FILE.read_text(encoding='utf-8')) if ACCURACY_FILE.exists() else {}
+              extract_monthly_lessons(memory, accuracy)
+              PY
+              ;;
+            *)
+              echo "Unsupported ORCA_RUN_MODE: $ORCA_RUN_MODE" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Strict verify
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          expected_min_reports = int(os.environ.get("EXPECTED_MIN_REPORTS", "0"))
+          reports = len(list(Path("reports").glob("*.html"))) if Path("reports").exists() else 0
+          failures = []
+          if not Path("data/orca_state.db").exists():
+              failures.append("Missing data/orca_state.db")
+          if reports < expected_min_reports:
+              failures.append(f"reports {reports} < expected {expected_min_reports}")
+
+          print("Strict verify:")
+          print(f"  mode: {os.environ.get('ORCA_RUN_MODE')}")
+          print(f"  data/orca_state.db: {Path('data/orca_state.db').exists()}")
+          print(f"  data/jackal_state.db: {Path('data/jackal_state.db').exists()}")
+          print(f"  reports_html: {reports}")
+
+          if failures:
+              print("FAILURES:")
+              for failure in failures:
+                  print(f"  - {failure}")
+              raise SystemExit(1)
+          print("PASS ORCA report verification complete")
+          PY
+
+      - name: Checkpoint DB
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
           import sqlite3
           from pathlib import Path
           db = Path("data/orca_state.db")
@@ -141,12 +217,22 @@ jobs:
               conn = sqlite3.connect(db)
               conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
               conn.close()
+          for suffix in ("-wal", "-shm"):
+              path = f"data/orca_state.db{suffix}"
+              if os.path.exists(path):
+                  os.remove(path)
           PY
 
           python - <<'PY'
           from orca.state import checkpoint_jackal_db
           checkpoint_jackal_db()
           PY
+
+      - name: Commit and push
+        shell: bash
+        run: |
+          git config user.name "ORCA Bot"
+          git config user.email "orca@github-actions"
 
           git add data/memory.json 2>/dev/null || true
           git add data/memory_archive.json 2>/dev/null || true
@@ -166,7 +252,7 @@ jobs:
           git add reports/ 2>/dev/null || true
           git diff --cached --quiet && exit 0
 
-          git commit -m "ORCA: $(date +'%Y-%m-%d %H:%M') [${ORCA_MODE:-AUTO}] update"
+          git commit -m "ORCA: $(date +'%Y-%m-%d %H:%M') [${ORCA_RUN_MODE:-AUTO}] update"
 
           git push || {
             git pull --rebase origin main || git rebase --abort

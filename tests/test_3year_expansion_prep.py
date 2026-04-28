@@ -150,7 +150,8 @@ class ExpansionWorkflowContractTests(unittest.TestCase):
         self.assertIn("months:", text)
         self.assertIn('default: "13"', text)
         self.assertIn("walk_forward:", text)
-        self.assertIn("--months ${{ inputs.months }}", text)
+        self.assertIn("ORCA_BACKTEST_MONTHS", text)
+        self.assertIn("--months $ORCA_BACKTEST_MONTHS", text)
         self.assertIn("USE_UNIFIED_FETCH", text)
         self.assertIn("ALPHA_VANTAGE_SLEEP_SECONDS: \"0.8\"", text)
 

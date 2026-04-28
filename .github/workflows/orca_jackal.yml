@@ -8,6 +8,7 @@ name: JACKAL Session
 concurrency:
   group: orca-repo-state
   cancel-in-progress: false
+
 on:
   schedule:
     # Korean session
@@ -20,27 +21,40 @@ on:
   workflow_dispatch:
     inputs:
       session_mode:
-        description: "full / scanner_only"
-        required: false
-        default: "full"
+        description: "Session mode"
+        type: choice
+        options:
+          - full
+          - scanner_only
+        default: full
       force_hunt:
         description: "Force Hunter even if market state is unclear"
-        required: false
+        type: choice
+        options:
+          - "false"
+          - "true"
         default: "false"
       force_scan:
         description: "Force Scanner even if market state is unclear"
-        required: false
+        type: choice
+        options:
+          - "false"
+          - "true"
         default: "false"
       force_evolve:
         description: "Force Evolution run even if 24h has not elapsed"
-        required: false
+        type: choice
+        options:
+          - "false"
+          - "true"
         default: "false"
 
 jobs:
   jackal:
     runs-on: ubuntu-latest
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # [Fix] Node.js 20 deprecation workaround
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      PYTHONIOENCODING: utf-8
       ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
       ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
       USE_UNIFIED_FETCH: "1"
@@ -60,35 +74,94 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        # [Bug Fix] jackal_hunter imports pandas via jackal_core, so include it in CI.
-        # Keep anthropic pinned to the version already used elsewhere in the repo.
         run: pip install -r requirements.txt
 
-      - name: Run JACKAL Hunter
-        if: >
-          github.event_name != 'workflow_dispatch' ||
-          github.event.inputs.session_mode != 'scanner_only'
-        env:
-          PYTHONIOENCODING: utf-8
-          ANTHROPIC_API_KEY:   ${{ secrets.ANTHROPIC_API_KEY }}
-          TELEGRAM_TOKEN:      ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
-          ANTHROPIC_MODEL:     "claude-sonnet-4-6"        # [Fix] Keep ARIA on the same model
-          SUBAGENT_MODEL:      "claude-haiku-4-5-20251001"
-          JACKAL_DAILY_BUDGET: "500000"
-          JACKAL_AUTOCOMPACT:  "true"
-          FRED_API_KEY:        ${{ secrets.FRED_API_KEY }}
-          KRX_API_KEY:         ${{ secrets.KRX_API_KEY }}
-          FSCAPI_KEY:          ${{ secrets.FSCAPI_KEY }}
+      - name: Resolve inputs
+        shell: bash
         run: |
+          trim_workflow_input() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
+
+          normalize_bool() {
+            local value
+            value="$(trim_workflow_input "$1")"
+            value="${value,,}"
+            if [ "$value" = "true" ] || [ "$value" = "1" ] || [ "$value" = "yes" ]; then
+              printf 'true'
+            else
+              printf 'false'
+            fi
+          }
+
+          SESSION_MODE_VALUE="$(trim_workflow_input "${{ inputs.session_mode }}")"
+          FORCE_HUNT_VALUE="$(normalize_bool "${{ inputs.force_hunt }}")"
+          FORCE_SCAN_VALUE="$(normalize_bool "${{ inputs.force_scan }}")"
+          FORCE_EVOLVE_VALUE="$(normalize_bool "${{ inputs.force_evolve }}")"
+
+          [ -z "$SESSION_MODE_VALUE" ] && SESSION_MODE_VALUE="full"
+
+          echo "JACKAL_SESSION_MODE=$SESSION_MODE_VALUE" >> "$GITHUB_ENV"
+          echo "JACKAL_FORCE_HUNT=$FORCE_HUNT_VALUE" >> "$GITHUB_ENV"
+          echo "JACKAL_FORCE_SCAN=$FORCE_SCAN_VALUE" >> "$GITHUB_ENV"
+          echo "JACKAL_FORCE_EVOLVE=$FORCE_EVOLVE_VALUE" >> "$GITHUB_ENV"
+
+          echo "Resolved inputs:"
+          echo "  session_mode=$SESSION_MODE_VALUE"
+          echo "  force_hunt=$FORCE_HUNT_VALUE"
+          echo "  force_scan=$FORCE_SCAN_VALUE"
+          echo "  force_evolve=$FORCE_EVOLVE_VALUE"
+
+      - name: Pre-flight status
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import sqlite3
+          from pathlib import Path
+          from orca import state
+
+          state.init_state_db()
+          db = Path("data/orca_state.db")
+          conn = sqlite3.connect(db)
+          candidates = conn.execute("SELECT COUNT(*) FROM candidate_registry").fetchone()[0]
+          lessons = conn.execute("SELECT COUNT(*) FROM candidate_lessons").fetchone()[0]
+          print("Pre-flight:")
+          print(f"  orca_state_db: {db.exists()} ({os.path.getsize(db) / 1024 / 1024:.2f} MB)")
+          print(f"  jackal_state_db: {Path('data/jackal_state.db').exists()}")
+          print(f"  candidate_registry: {candidates}")
+          print(f"  candidate_lessons: {lessons}")
+          conn.close()
+          PY
+
+      - name: Run JACKAL Hunter
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_MODEL: "claude-sonnet-4-6"
+          SUBAGENT_MODEL: "claude-haiku-4-5-20251001"
+          JACKAL_DAILY_BUDGET: "500000"
+          JACKAL_AUTOCOMPACT: "true"
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
+          FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "$JACKAL_SESSION_MODE" = "scanner_only" ]; then
+            echo "Skipping Hunter because session_mode=scanner_only"
+            exit 0
+          fi
+
           ARGS=""
-          [ "${{ github.event.inputs.force_hunt }}"   = "true" ] && ARGS="$ARGS --force-hunt"
-          [ "${{ github.event.inputs.force_evolve }}" = "true" ] && ARGS="$ARGS --force-evolve"
+          [ "$JACKAL_FORCE_HUNT" = "true" ] && ARGS="$ARGS --force-hunt"
+          [ "$JACKAL_FORCE_EVOLVE" = "true" ] && ARGS="$ARGS --force-evolve"
           python -m jackal.core $ARGS
 
       - name: Run JACKAL Scanner
         env:
-          PYTHONIOENCODING: utf-8
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -98,10 +171,67 @@ jobs:
           FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
         run: |
           ARGS=""
-          [ "${{ github.event.inputs.force_scan }}" = "true" ] && ARGS="$ARGS --force"
+          [ "$JACKAL_FORCE_SCAN" = "true" ] && ARGS="$ARGS --force"
           python -m jackal.scanner $ARGS
 
-      - name: Save JACKAL session state
+      - name: Strict verify
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          failures = []
+          required = [Path("data/orca_state.db")]
+          for path in required:
+              if not path.exists():
+                  failures.append(f"Missing required state file: {path}")
+
+          for path in (
+              Path("jackal/hunt_log.json"),
+              Path("jackal/scan_log.json"),
+              Path("data/jackal_watchlist.json"),
+          ):
+              if path.exists():
+                  try:
+                      json.loads(path.read_text(encoding="utf-8"))
+                  except Exception as exc:
+                      failures.append(f"Invalid JSON in {path}: {exc}")
+
+          print("Strict verify:")
+          print(f"  data/orca_state.db: {Path('data/orca_state.db').exists()}")
+          print(f"  data/jackal_state.db: {Path('data/jackal_state.db').exists()}")
+          print(f"  hunt_log: {Path('jackal/hunt_log.json').exists()}")
+          print(f"  scan_log: {Path('jackal/scan_log.json').exists()}")
+
+          if failures:
+              print("FAILURES:")
+              for failure in failures:
+                  print(f"  - {failure}")
+              raise SystemExit(1)
+          print("PASS JACKAL state verification complete")
+          PY
+
+      - name: Checkpoint DB
+        shell: bash
+        run: |
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          db = Path("data/orca_state.db")
+          if db.exists():
+              conn = sqlite3.connect(db)
+              conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+              conn.close()
+          PY
+
+          python - <<'PY'
+          from orca.state import checkpoint_jackal_db
+          checkpoint_jackal_db()
+          PY
+
+      - name: Commit and push
+        shell: bash
         run: |
           set -euo pipefail
 
@@ -111,11 +241,6 @@ jobs:
           # Root fix: PR 5 (persistence boundary).
           git config user.name  "JACKAL Session"
           git config user.email "jackal-session@orca-agent"
-
-          python - <<'PY'
-          from orca.state import checkpoint_jackal_db
-          checkpoint_jackal_db()
-          PY
 
           # Persistent artifacts owned by JACKAL. Safe to reapply after reset.
           JACKAL_FILES=(
@@ -199,7 +324,7 @@ jobs:
               exit 0
             fi
 
-            git commit -m "🦊 JACKAL Session: $(date +'%Y-%m-%d %H:%M') [skip ci]"
+            git commit -m "JACKAL Session: $(date +'%Y-%m-%d %H:%M') [skip ci]"
 
             if git push origin HEAD:main; then
               exit 0
