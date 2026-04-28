@@ -13,6 +13,10 @@ on:
       mode:
         description: "incremental / full"
         required: false
+        type: choice
+        options:
+          - incremental
+          - full
         default: "incremental"
       artifact_run_id:
         description: "orca_backtest.yml success run ID (Mode 1: artifact handoff)"
@@ -33,6 +37,11 @@ on:
       materialize_mode:
         description: "replace / add_missing / fail_on_duplicate"
         required: false
+        type: choice
+        options:
+          - replace
+          - add_missing
+          - fail_on_duplicate
         default: "replace"
       auto_context_snapshot:
         description: "Auto context snapshot per lesson"
@@ -85,6 +94,21 @@ jobs:
           elif [ "${{ github.event.schedule }}" = "30 1 1 * *" ]; then
             MODE="full"
           fi
+
+          trim_workflow_input() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
+
+          MODE="$(trim_workflow_input "$MODE")"
+          ARTIFACT_RUN_ID="$(trim_workflow_input "$ARTIFACT_RUN_ID")"
+          ORCA_MONTHS="$(trim_workflow_input "$ORCA_MONTHS")"
+          JACKAL_BACKTEST_DAYS_VALUE="$(trim_workflow_input "$JACKAL_BACKTEST_DAYS_VALUE")"
+          JACKAL_HISTORY_DAYS_VALUE="$(trim_workflow_input "$JACKAL_HISTORY_DAYS_VALUE")"
+          JACKAL_MATERIALIZE_MODE_VALUE="$(trim_workflow_input "$JACKAL_MATERIALIZE_MODE_VALUE")"
+          JACKAL_AUTO_CONTEXT_SNAPSHOT_VALUE="$(trim_workflow_input "$JACKAL_AUTO_CONTEXT_SNAPSHOT_VALUE")"
 
           if [ "$MODE" = "full" ] && [ -n "$ARTIFACT_RUN_ID" ]; then
             USE_ARTIFACT_HANDOFF="true"

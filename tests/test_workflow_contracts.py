@@ -247,6 +247,8 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
     def test_jackal_backtest_learning_mode1_runs_materialization_after_handoff(self):
         text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
         self.assertNotIn("if: env.USE_ARTIFACT_HANDOFF != 'true'", text)
+        self.assertIn("trim_workflow_input()", text)
+        self.assertIn('MODE="$(trim_workflow_input "$MODE")"', text)
         self.assertIn("Mode 1: Artifact handoff (ORCA refresh skipped)", text)
         self.assertIn("Mode 2: Full rebuild with self-refresh", text)
         self.assertIn("Mode 3: Daily incremental", text)

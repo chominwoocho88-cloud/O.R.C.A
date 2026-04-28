@@ -159,11 +159,20 @@ class ExpansionWorkflowContractTests(unittest.TestCase):
         self.assertIn("backtest_days:", text)
         self.assertIn("history_days:", text)
         self.assertIn("materialize_mode:", text)
+        self.assertIn("type: choice", text)
+        self.assertIn("- add_missing", text)
         self.assertIn("auto_context_snapshot:", text)
         self.assertIn("--backtest-days \"${JACKAL_BACKTEST_DAYS}\"", text)
         self.assertIn("--history-days \"${JACKAL_HISTORY_DAYS}\"", text)
         self.assertIn("--materialize-mode \"${JACKAL_MATERIALIZE_MODE}\"", text)
         self.assertIn("--auto-context-snapshot \"${JACKAL_AUTO_CONTEXT_SNAPSHOT}\"", text)
+
+    def test_jackal_learning_workflow_trims_manual_inputs(self):
+        text = _workflow_text("jackal_backtest_learning.yml")
+        self.assertIn("trim_workflow_input()", text)
+        self.assertIn('MODE="$(trim_workflow_input "$MODE")"', text)
+        self.assertIn('ARTIFACT_RUN_ID="$(trim_workflow_input "$ARTIFACT_RUN_ID")"', text)
+        self.assertIn('JACKAL_MATERIALIZE_MODE_VALUE="$(trim_workflow_input "$JACKAL_MATERIALIZE_MODE_VALUE")"', text)
 
     def test_jackal_learning_artifact_handoff_still_runs_materialization(self):
         text = _workflow_text("jackal_backtest_learning.yml")
