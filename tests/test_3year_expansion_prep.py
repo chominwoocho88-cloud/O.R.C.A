@@ -197,8 +197,14 @@ class ExpansionWorkflowContractTests(unittest.TestCase):
         text = _workflow_text("wave_f_clustering.yml")
         self.assertIn("append_mode:", text)
         self.assertIn("--append", text)
-        self.assertIn("${{ inputs.expected_snapshots }}", text)
-        self.assertIn("${{ inputs.expected_linked_lessons }}", text)
+        self.assertIn("source_event_type:", text)
+        self.assertIn("type: choice", text)
+        self.assertIn("Resolve inputs", text)
+        self.assertIn("trim_workflow_input()", text)
+        self.assertIn("--source-event-type", text)
+        self.assertIn("CLUSTER_SOURCE_EVENT_TYPE", text)
+        self.assertIn("EXPECTED_SNAPSHOTS", text)
+        self.assertIn("EXPECTED_LINKED_LESSONS", text)
 
     def test_wave_f_archive_append_mode(self):
         text = _workflow_text("wave_f_archive.yml")

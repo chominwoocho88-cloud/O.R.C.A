@@ -19,6 +19,14 @@ on:
         description: "Append a new clustering run and preserve existing runs"
         type: boolean
         default: false
+      source_event_type:
+        description: "Snapshot source to cluster"
+        type: choice
+        options:
+          - backtest_backfill
+          - backtest
+          - all
+        default: "backtest_backfill"
       expected_snapshots:
         description: "Expected snapshot assignments"
         type: string
@@ -60,15 +68,94 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Resolve inputs
+        shell: bash
+        run: |
+          trim_workflow_input() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
+
+          normalize_bool() {
+            local value
+            value="$(trim_workflow_input "$1")"
+            value="${value,,}"
+            if [ "$value" = "true" ] || [ "$value" = "1" ] || [ "$value" = "yes" ]; then
+              printf 'true'
+            else
+              printf 'false'
+            fi
+          }
+
+          CLUSTER_DRY_RUN="$(normalize_bool "${{ inputs.dry_run }}")"
+          CLUSTER_N_CLUSTERS="$(trim_workflow_input "${{ inputs.n_clusters }}")"
+          CLUSTER_FORCE_REBUILD="$(normalize_bool "${{ inputs.force_rebuild }}")"
+          CLUSTER_APPEND_MODE="$(normalize_bool "${{ inputs.append_mode }}")"
+          CLUSTER_SOURCE_EVENT_TYPE="$(trim_workflow_input "${{ inputs.source_event_type }}")"
+          EXPECTED_SNAPSHOTS_VALUE="$(trim_workflow_input "${{ inputs.expected_snapshots }}")"
+          EXPECTED_LINKED_LESSONS_VALUE="$(trim_workflow_input "${{ inputs.expected_linked_lessons }}")"
+          MIN_SILHOUETTE_VALUE="$(trim_workflow_input "${{ inputs.min_silhouette }}")"
+
+          if [ -z "$CLUSTER_N_CLUSTERS" ]; then
+            CLUSTER_N_CLUSTERS="8"
+          fi
+          if [ -z "$CLUSTER_SOURCE_EVENT_TYPE" ]; then
+            CLUSTER_SOURCE_EVENT_TYPE="backtest_backfill"
+          fi
+          if [ -z "$EXPECTED_SNAPSHOTS_VALUE" ]; then
+            EXPECTED_SNAPSHOTS_VALUE="252"
+          fi
+          if [ -z "$EXPECTED_LINKED_LESSONS_VALUE" ]; then
+            EXPECTED_LINKED_LESSONS_VALUE="1260"
+          fi
+          if [ -z "$MIN_SILHOUETTE_VALUE" ]; then
+            MIN_SILHOUETTE_VALUE="0.15"
+          fi
+
+          echo "CLUSTER_DRY_RUN=$CLUSTER_DRY_RUN" >> "$GITHUB_ENV"
+          echo "CLUSTER_N_CLUSTERS=$CLUSTER_N_CLUSTERS" >> "$GITHUB_ENV"
+          echo "CLUSTER_FORCE_REBUILD=$CLUSTER_FORCE_REBUILD" >> "$GITHUB_ENV"
+          echo "CLUSTER_APPEND_MODE=$CLUSTER_APPEND_MODE" >> "$GITHUB_ENV"
+          echo "CLUSTER_SOURCE_EVENT_TYPE=$CLUSTER_SOURCE_EVENT_TYPE" >> "$GITHUB_ENV"
+          echo "EXPECTED_SNAPSHOTS=$EXPECTED_SNAPSHOTS_VALUE" >> "$GITHUB_ENV"
+          echo "EXPECTED_LINKED_LESSONS=$EXPECTED_LINKED_LESSONS_VALUE" >> "$GITHUB_ENV"
+          echo "MIN_SILHOUETTE=$MIN_SILHOUETTE_VALUE" >> "$GITHUB_ENV"
+
+          echo "Resolved inputs:"
+          echo "  dry_run=$CLUSTER_DRY_RUN"
+          echo "  n_clusters=$CLUSTER_N_CLUSTERS"
+          echo "  force_rebuild=$CLUSTER_FORCE_REBUILD"
+          echo "  append_mode=$CLUSTER_APPEND_MODE"
+          echo "  source_event_type=$CLUSTER_SOURCE_EVENT_TYPE"
+          echo "  expected_snapshots=$EXPECTED_SNAPSHOTS_VALUE"
+          echo "  expected_linked_lessons=$EXPECTED_LINKED_LESSONS_VALUE"
+          echo "  min_silhouette=$MIN_SILHOUETTE_VALUE"
+
       - name: Pre-flight status
         run: |
           python - <<'PY'
+          import os
           import sqlite3
           from orca import state
 
           state.init_state_db()
           conn = sqlite3.connect('data/orca_state.db')
+          source = os.environ.get('CLUSTER_SOURCE_EVENT_TYPE', 'backtest_backfill').strip()
+          source_filter = "" if source.lower() in {"", "all", "*", "none"} else " AND source_event_type = ?"
+          source_params = () if not source_filter else (source,)
           snapshots = conn.execute('SELECT COUNT(*) FROM lesson_context_snapshot').fetchone()[0]
+          usable = conn.execute(f"""
+              SELECT COUNT(*)
+              FROM lesson_context_snapshot
+              WHERE vix_level IS NOT NULL
+                AND sp500_momentum_5d IS NOT NULL
+                AND sp500_momentum_20d IS NOT NULL
+                AND nasdaq_momentum_5d IS NOT NULL
+                AND nasdaq_momentum_20d IS NOT NULL
+                {source_filter}
+          """, source_params).fetchone()[0]
           linked_lessons = conn.execute("""
               SELECT COUNT(*)
               FROM candidate_lessons
@@ -79,6 +166,8 @@ jobs:
           latest_run = state.get_latest_run_id(conn)
           print('Pre-flight:')
           print(f'  snapshots: {snapshots}')
+          print(f'  clustering source: {source or "all"}')
+          print(f'  usable source snapshots: {usable}')
           print(f'  lessons with context: {linked_lessons}')
           print(f'  existing clusters: {clusters}')
           print(f'  existing mappings: {mappings}')
@@ -88,35 +177,40 @@ jobs:
 
       - name: Run clustering
         run: |
-          ARGS="--n-clusters ${{ inputs.n_clusters }} --expected-snapshots ${{ inputs.expected_snapshots }} --expected-linked-lessons ${{ inputs.expected_linked_lessons }} --min-silhouette ${{ inputs.min_silhouette }}"
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            ARGS="$ARGS --dry-run"
+          ARGS=(
+            --n-clusters "$CLUSTER_N_CLUSTERS"
+            --source-event-type "$CLUSTER_SOURCE_EVENT_TYPE"
+            --expected-snapshots "$EXPECTED_SNAPSHOTS"
+            --expected-linked-lessons "$EXPECTED_LINKED_LESSONS"
+            --min-silhouette "$MIN_SILHOUETTE"
+          )
+          if [ "$CLUSTER_DRY_RUN" = "true" ]; then
+            ARGS+=(--dry-run)
           else
-            ARGS="$ARGS --execute"
+            ARGS+=(--execute)
           fi
-          if [ "${{ inputs.force_rebuild }}" = "true" ]; then
-            ARGS="$ARGS --force-rebuild"
+          if [ "$CLUSTER_FORCE_REBUILD" = "true" ]; then
+            ARGS+=(--force-rebuild)
           fi
-          if [ "${{ inputs.append_mode }}" = "true" ]; then
-            ARGS="$ARGS --append"
+          if [ "$CLUSTER_APPEND_MODE" = "true" ]; then
+            ARGS+=(--append)
           fi
-          python scripts/build_lesson_clusters.py --verbose $ARGS
+          python scripts/build_lesson_clusters.py --verbose "${ARGS[@]}"
 
       - name: Strict verify
         if: ${{ inputs.dry_run != true }}
-        env:
-          EXPECTED_CLUSTERS: ${{ inputs.n_clusters }}
-          EXPECTED_SNAPSHOTS: ${{ inputs.expected_snapshots }}
-          EXPECTED_LINKED_LESSONS: ${{ inputs.expected_linked_lessons }}
         run: |
           python - <<'PY'
           import os
           import sqlite3
           from orca import state
 
-          expected_clusters = int(os.environ['EXPECTED_CLUSTERS'])
+          expected_clusters = int(os.environ['CLUSTER_N_CLUSTERS'])
           expected_snapshots = int(os.environ.get('EXPECTED_SNAPSHOTS', '252'))
           expected_linked_lessons = int(os.environ.get('EXPECTED_LINKED_LESSONS', '1260'))
+          source = os.environ.get('CLUSTER_SOURCE_EVENT_TYPE', 'backtest_backfill').strip()
+          source_filter = "" if source.lower() in {"", "all", "*", "none"} else " AND s.source_event_type = ?"
+          source_params = () if not source_filter else (source,)
           conn = sqlite3.connect('data/orca_state.db')
           latest_run = state.get_latest_run_id(conn)
           failures = []
@@ -132,9 +226,9 @@ jobs:
           ).fetchone()[0] if latest_run else 0
           cached = conn.execute("""
               SELECT COUNT(*)
-              FROM lesson_context_snapshot
-              WHERE context_cluster_id IS NOT NULL
-          """).fetchone()[0]
+              FROM lesson_context_snapshot s
+              WHERE s.context_cluster_id IS NOT NULL
+          """ + source_filter, source_params).fetchone()[0]
           clustered_lessons = conn.execute("""
               SELECT COUNT(*)
               FROM candidate_lessons l
@@ -162,6 +256,7 @@ jobs:
 
           print('Strict verify:')
           print(f'  latest_run: {latest_run}')
+          print(f'  source_event_type: {source or "all"}')
           print(f'  clusters: {clusters}')
           print(f'  mappings: {mappings}')
           print(f'  cached snapshots: {cached}')

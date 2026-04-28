@@ -124,6 +124,38 @@ class BuildLessonClustersCliTests(unittest.TestCase):
         self.assertIn("MODE: DRY RUN", output)
         self.assertEqual(self._cluster_counts(), (0, 0, 0))
 
+    def test_cli_source_event_type_filters_snapshots(self):
+        self._seed_snapshots()
+        state.record_lesson_context_snapshot(
+            {
+                "snapshot_id": "ctx_legacy_backtest",
+                "trading_date": "2026-04-20",
+                "source_event_type": "backtest",
+                "regime": "?꾪뿕?좏샇",
+                "dominant_sectors": ["Technology"],
+                "vix_level": 14.0,
+                "sp500_momentum_5d": 2.0,
+                "sp500_momentum_20d": 5.0,
+                "nasdaq_momentum_5d": 2.5,
+                "nasdaq_momentum_20d": 6.0,
+            }
+        )
+
+        code, output = self._run_cli(
+            [
+                "--n-clusters",
+                "2",
+                "--source-event-type",
+                "backtest_backfill",
+                "--expected-snapshots",
+                "12",
+            ]
+        )
+
+        self.assertEqual(code, 0, output)
+        self.assertIn("clustering source: backtest_backfill", output)
+        self.assertIn("Assignments: 12", output)
+
     def test_cli_execute_creates_clusters_and_backup(self):
         self._seed_snapshots(with_lessons=True)
 
@@ -201,6 +233,10 @@ class BuildLessonClustersCliTests(unittest.TestCase):
         self.assertIn("dry_run", workflow)
         self.assertIn("default: true", workflow)
         self.assertIn("n_clusters", workflow)
+        self.assertIn("source_event_type", workflow)
+        self.assertIn("type: choice", workflow)
+        self.assertIn("CLUSTER_SOURCE_EVENT_TYPE", workflow)
+        self.assertIn("Resolve inputs", workflow)
         self.assertIn("force_rebuild", workflow)
         self.assertIn("scripts/build_lesson_clusters.py", workflow)
 

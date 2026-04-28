@@ -54,6 +54,7 @@ CANONICAL_SECTOR_ORDER = (
     "Technology",
     "Utilities",
 )
+DEFAULT_CLUSTER_SOURCE_EVENT_TYPE = "backtest_backfill"
 
 
 def build_clusters(
@@ -61,6 +62,7 @@ def build_clusters(
     random_seed: int = 42,
     max_iter: int = 100,
     min_cluster_size: int = 5,
+    source_event_type: str | None = DEFAULT_CLUSTER_SOURCE_EVENT_TYPE,
     conn: sqlite3.Connection | None = None,
     run_id: str | None = None,
     dry_run: bool = True,
@@ -74,7 +76,10 @@ def build_clusters(
     assert conn is not None
     try:
         run_id = run_id or f"cluster_run_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{uuid4().hex[:8]}"
-        snapshot_ids, features, metadata = _load_snapshot_features(conn)
+        snapshot_ids, features, metadata = _load_snapshot_features(
+            conn,
+            source_event_type=source_event_type,
+        )
         if len(snapshot_ids) < n_clusters:
             raise ValueError(f"not enough snapshots for {n_clusters} clusters: {len(snapshot_ids)}")
 
@@ -116,6 +121,7 @@ def build_clusters(
 
         if verbose:
             print(f"Wave F clustering dry_run={dry_run} run_id={run_id}")
+            print(f"  source_event_type={metadata.get('source_event_type') or 'all'}")
             print(f"  snapshots={len(snapshot_ids)} clusters={n_clusters}")
             print(f"  silhouette={silhouette:.4f} within_variance={within_variance:.4f}")
             print("  sizes=" + ", ".join(str(c["size"]) for c in cluster_summary))
@@ -173,6 +179,7 @@ def find_nearest_cluster(
     snapshot_features: dict[str, Any],
     conn: sqlite3.Connection | None = None,
     run_id: str | None = None,
+    source_event_type: str | None = DEFAULT_CLUSTER_SOURCE_EVENT_TYPE,
 ) -> tuple[str | None, float]:
     """Find the nearest active cluster for a new snapshot-like feature dict."""
     own_conn = conn is None
@@ -184,7 +191,10 @@ def find_nearest_cluster(
         effective_run_id = run_id or state.get_latest_run_id(conn)
         if not effective_run_id:
             return None, math.inf
-        snapshot_ids, features, metadata = _load_snapshot_features(conn)
+        snapshot_ids, features, metadata = _load_snapshot_features(
+            conn,
+            source_event_type=source_event_type,
+        )
         vector = _transform_snapshot_features(snapshot_features, metadata)
         rows = conn.execute(
             """
@@ -243,20 +253,32 @@ def calculate_silhouette_score(features: np.ndarray, labels: np.ndarray) -> floa
     return float(np.mean(scores))
 
 
-def _load_snapshot_features(conn: sqlite3.Connection) -> tuple[list[str], np.ndarray, dict[str, Any]]:
+def _load_snapshot_features(
+    conn: sqlite3.Connection,
+    source_event_type: str | None = DEFAULT_CLUSTER_SOURCE_EVENT_TYPE,
+) -> tuple[list[str], np.ndarray, dict[str, Any]]:
+    normalized_source = _normalize_source_event_type(source_event_type)
+    source_filter = ""
+    params: tuple[Any, ...] = ()
+    if normalized_source:
+        source_filter = "           AND source_event_type = ?\n"
+        params = (normalized_source,)
     rows = conn.execute(
-        """
+        f"""
         SELECT snapshot_id, trading_date, regime, vix_level,
                sp500_momentum_5d, sp500_momentum_20d,
-               nasdaq_momentum_5d, nasdaq_momentum_20d, dominant_sectors
+               nasdaq_momentum_5d, nasdaq_momentum_20d, dominant_sectors,
+               source_event_type
           FROM lesson_context_snapshot
          WHERE vix_level IS NOT NULL
            AND sp500_momentum_5d IS NOT NULL
            AND sp500_momentum_20d IS NOT NULL
            AND nasdaq_momentum_5d IS NOT NULL
            AND nasdaq_momentum_20d IS NOT NULL
+{source_filter.rstrip()}
          ORDER BY trading_date, snapshot_id
-        """
+        """,
+        params,
     ).fetchall()
     snapshot_dicts = [dict(row) for row in rows]
     snapshot_ids = [row["snapshot_id"] for row in snapshot_dicts]
@@ -273,9 +295,20 @@ def _load_snapshot_features(conn: sqlite3.Connection) -> tuple[list[str], np.nda
         "sector_order": list(CANONICAL_SECTOR_ORDER),
         "numerical_means": means.tolist(),
         "numerical_stds": stds.tolist(),
+        "source_event_type": normalized_source,
         "snapshots": snapshot_dicts,
     }
     return snapshot_ids, standardized, metadata
+
+
+def _normalize_source_event_type(source_event_type: str | None) -> str | None:
+    """Normalize clustering source filter; None/all means no source filter."""
+    if source_event_type is None:
+        return None
+    normalized = str(source_event_type).strip()
+    if not normalized or normalized.lower() in {"all", "*", "none"}:
+        return None
+    return normalized
 
 
 def _build_feature_vector(snapshot: dict[str, Any]) -> np.ndarray:

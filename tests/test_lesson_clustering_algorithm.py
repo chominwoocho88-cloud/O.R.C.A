@@ -219,6 +219,58 @@ class LessonClusteringAlgorithmTests(unittest.TestCase):
         self.assertEqual(len(result["snapshot_assignments"]), 16)
         self.assertGreater(result["silhouette_score"], 0.50)
 
+    def test_load_snapshot_features_defaults_to_backfill_source(self):
+        self._seed_two_cluster_snapshots()
+        state.record_lesson_context_snapshot(
+            {
+                "snapshot_id": "ctx_legacy_backtest",
+                "trading_date": "2026-04-01",
+                "source_event_type": "backtest",
+                "regime": "?꾪뿕?좏샇",
+                "dominant_sectors": ["Technology"],
+                "vix_level": 14.0,
+                "sp500_momentum_5d": 2.0,
+                "sp500_momentum_20d": 5.0,
+                "nasdaq_momentum_5d": 2.5,
+                "nasdaq_momentum_20d": 6.0,
+            }
+        )
+
+        with state._connect_orca() as conn:
+            snapshot_ids, _features, metadata = lesson_clustering._load_snapshot_features(conn)
+
+        self.assertEqual(len(snapshot_ids), 16)
+        self.assertNotIn("ctx_legacy_backtest", snapshot_ids)
+        self.assertEqual(metadata["source_event_type"], "backtest_backfill")
+
+    def test_build_clusters_can_include_all_sources_explicitly(self):
+        self._seed_two_cluster_snapshots()
+        state.record_lesson_context_snapshot(
+            {
+                "snapshot_id": "ctx_all_source_backtest",
+                "trading_date": "2026-04-17",
+                "source_event_type": "backtest",
+                "regime": "?꾪뿕?뚰뵾",
+                "dominant_sectors": ["Utilities"],
+                "vix_level": 29.0,
+                "sp500_momentum_5d": -2.0,
+                "sp500_momentum_20d": -5.0,
+                "nasdaq_momentum_5d": -3.0,
+                "nasdaq_momentum_20d": -6.0,
+            }
+        )
+
+        with state._connect_orca() as conn:
+            result = lesson_clustering.build_clusters(
+                n_clusters=2,
+                conn=conn,
+                dry_run=True,
+                source_event_type="all",
+            )
+
+        self.assertEqual(len(result["snapshot_assignments"]), 17)
+        self.assertIsNone(result["feature_metadata"]["source_event_type"])
+
     def test_build_clusters_default_n_clusters_8(self):
         self._seed_two_cluster_snapshots()
         with state._connect_orca() as conn:

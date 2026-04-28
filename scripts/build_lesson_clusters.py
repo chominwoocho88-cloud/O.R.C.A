@@ -29,14 +29,32 @@ def _create_backup() -> Path:
     return backup_path
 
 
-def _print_preflight(conn: sqlite3.Connection) -> dict[str, Any]:
+def _normalize_source_event_type(source_event_type: str | None) -> str | None:
+    if source_event_type is None:
+        return None
+    normalized = str(source_event_type).strip()
+    if not normalized or normalized.lower() in {"all", "*", "none"}:
+        return None
+    return normalized
+
+
+def _source_filter_sql(source_event_type: str | None, alias: str = "") -> tuple[str, tuple[Any, ...]]:
+    normalized = _normalize_source_event_type(source_event_type)
+    if not normalized:
+        return "", ()
+    prefix = f"{alias}." if alias else ""
+    return f" AND {prefix}source_event_type = ?", (normalized,)
+
+
+def _print_preflight(conn: sqlite3.Connection, source_event_type: str | None) -> dict[str, Any]:
     from orca import state
 
+    source_filter, source_params = _source_filter_sql(source_event_type)
     snapshots = conn.execute(
         "SELECT COUNT(*) FROM lesson_context_snapshot"
     ).fetchone()[0]
     usable_snapshots = conn.execute(
-        """
+        f"""
         SELECT COUNT(*)
           FROM lesson_context_snapshot
          WHERE vix_level IS NOT NULL
@@ -44,8 +62,18 @@ def _print_preflight(conn: sqlite3.Connection) -> dict[str, Any]:
            AND sp500_momentum_20d IS NOT NULL
            AND nasdaq_momentum_5d IS NOT NULL
            AND nasdaq_momentum_20d IS NOT NULL
-        """
+{source_filter}
+        """,
+        source_params,
     ).fetchone()[0]
+    source_distribution = conn.execute(
+        """
+        SELECT COALESCE(source_event_type, '(null)') AS source_event_type, COUNT(*)
+          FROM lesson_context_snapshot
+         GROUP BY COALESCE(source_event_type, '(null)')
+         ORDER BY source_event_type
+        """
+    ).fetchall()
     lessons_linked = conn.execute(
         """
         SELECT COUNT(*)
@@ -60,6 +88,11 @@ def _print_preflight(conn: sqlite3.Connection) -> dict[str, Any]:
     status = {
         "snapshots": snapshots,
         "usable_snapshots": usable_snapshots,
+        "source_event_type": _normalize_source_event_type(source_event_type),
+        "source_distribution": {
+            row[0]: row[1]
+            for row in source_distribution
+        },
         "lessons_linked": lessons_linked,
         "clusters": clusters,
         "mappings": mappings,
@@ -68,6 +101,9 @@ def _print_preflight(conn: sqlite3.Connection) -> dict[str, Any]:
 
     print("Pre-flight:")
     print(f"  snapshots total: {snapshots}")
+    print(f"  clustering source: {status['source_event_type'] or 'all'}")
+    for source, count in status["source_distribution"].items():
+        print(f"  snapshots source[{source}]: {count}")
     print(f"  snapshots usable for clustering: {usable_snapshots}")
     print(f"  lessons linked to context: {lessons_linked}")
     print(f"  existing clusters: {clusters}")
@@ -112,11 +148,13 @@ def _verify_result(
     expected_snapshots: int | None,
     expected_linked_lessons: int | None,
     min_silhouette: float,
+    source_event_type: str | None,
 ) -> dict[str, Any]:
     run_id = result["run_id"]
     n_clusters = int(result["n_clusters"])
     assignment_count = len(result["snapshot_assignments"])
 
+    source_filter, source_params = _source_filter_sql(source_event_type, "s")
     clusters = conn.execute(
         "SELECT COUNT(*) FROM lesson_clusters WHERE run_id = ?",
         (run_id,),
@@ -126,14 +164,15 @@ def _verify_result(
         (run_id,),
     ).fetchone()[0]
     cached = conn.execute(
-        """
+        f"""
         SELECT COUNT(*)
-          FROM lesson_context_snapshot
-         WHERE context_cluster_id IN (
+        FROM lesson_context_snapshot s
+         WHERE s.context_cluster_id IN (
                SELECT cluster_id FROM lesson_clusters WHERE run_id = ?
          )
+{source_filter}
         """,
-        (run_id,),
+        (run_id, *source_params),
     ).fetchone()[0]
     clustered_lessons = conn.execute(
         """
@@ -225,6 +264,16 @@ def main(argv: list[str] | None = None) -> int:
         help="Warn when clusters are smaller than this size (default: 5)",
     )
     parser.add_argument(
+        "--source-event-type",
+        "--canonical-source",
+        dest="source_event_type",
+        default="backtest_backfill",
+        help=(
+            "lesson_context_snapshot source_event_type to cluster "
+            "(default: backtest_backfill; use 'all' to include every source)"
+        ),
+    )
+    parser.add_argument(
         "--run-id",
         default=None,
         help="Optional explicit clustering run_id",
@@ -294,7 +343,7 @@ def main(argv: list[str] | None = None) -> int:
     state.init_state_db()
     conn = state._connect_orca()
     try:
-        preflight = _print_preflight(conn)
+        preflight = _print_preflight(conn, args.source_event_type)
 
         if args.force_rebuild and args.append:
             print()
@@ -335,6 +384,7 @@ def main(argv: list[str] | None = None) -> int:
             random_seed=args.random_seed,
             max_iter=args.max_iter,
             min_cluster_size=args.min_cluster_size,
+            source_event_type=args.source_event_type,
             conn=conn,
             run_id=args.run_id,
             dry_run=args.dry_run,
@@ -348,6 +398,7 @@ def main(argv: list[str] | None = None) -> int:
             expected_snapshots=args.expected_snapshots,
             expected_linked_lessons=args.expected_linked_lessons,
             min_silhouette=args.min_silhouette,
+            source_event_type=args.source_event_type,
         )
         _print_verification(verification)
         return 0 if verification["passed"] else 1
