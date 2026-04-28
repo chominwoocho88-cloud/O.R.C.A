@@ -294,6 +294,43 @@ class LessonClusteringSchemaTests(unittest.TestCase):
         self.assertEqual([row["cluster_id"] for row in remaining_clusters], ["cluster_old"])
         self.assertEqual(cache, "cluster_old")
 
+    def test_clear_clustering_data_specific_run_deletes_dependent_archive_rows(self):
+        snapshot_id = self._seed_snapshot()
+        lesson_id = self._seed_lesson_for_snapshot(snapshot_id)
+        cluster_id = self._seed_cluster("cluster_archive_dep", "run_archive_dep")
+        with state._connect_orca() as conn:
+            state.assign_snapshot_to_cluster(conn, snapshot_id, cluster_id, 0.3, "run_archive_dep")
+            state.record_lesson_archive(
+                conn,
+                archive_id="archive_cluster_dep",
+                lesson_id=lesson_id,
+                cluster_id=cluster_id,
+                run_id="archive_run_dep",
+                quality_tier="high",
+                quality_score=0.9,
+                outcome_percentile=1.0,
+                win_score=1.0,
+                speed_score=1.0,
+                signal_score=1.0,
+                cluster_fit_score=1.0,
+                lesson_value=4.0,
+                peak_pct=4.0,
+                peak_day=3,
+                signal_family="momentum_pullback",
+                ticker="NVDA",
+                analysis_date="2026-04-20",
+            )
+            result = state.clear_clustering_data(conn, "run_archive_dep")
+            conn.commit()
+            archives = conn.execute("SELECT COUNT(*) FROM lesson_archive").fetchone()[0]
+            clusters = conn.execute("SELECT COUNT(*) FROM lesson_clusters").fetchone()[0]
+
+        self.assertEqual(result["archives_deleted"], 1)
+        self.assertEqual(result["mappings_deleted"], 1)
+        self.assertEqual(result["clusters_deleted"], 1)
+        self.assertEqual(archives, 0)
+        self.assertEqual(clusters, 0)
+
     def test_clear_clustering_data_all_runs(self):
         snapshot_id = self._seed_snapshot()
         cluster_id = self._seed_cluster()
@@ -312,6 +349,41 @@ class LessonClusteringSchemaTests(unittest.TestCase):
         self.assertEqual(clusters, 0)
         self.assertEqual(mappings, 0)
         self.assertIsNone(cache)
+
+    def test_clear_clustering_data_all_runs_deletes_dependent_archive_rows(self):
+        snapshot_id = self._seed_snapshot()
+        lesson_id = self._seed_lesson_for_snapshot(snapshot_id)
+        cluster_id = self._seed_cluster("cluster_all_archive", "run_all_archive")
+        with state._connect_orca() as conn:
+            state.assign_snapshot_to_cluster(conn, snapshot_id, cluster_id, 0.3, "run_all_archive")
+            state.record_lesson_archive(
+                conn,
+                archive_id="archive_all_cluster_dep",
+                lesson_id=lesson_id,
+                cluster_id=cluster_id,
+                run_id="archive_run_all_dep",
+                quality_tier="high",
+                quality_score=0.9,
+                outcome_percentile=1.0,
+                win_score=1.0,
+                speed_score=1.0,
+                signal_score=1.0,
+                cluster_fit_score=1.0,
+                lesson_value=4.0,
+                peak_pct=4.0,
+                peak_day=3,
+                signal_family="momentum_pullback",
+                ticker="NVDA",
+                analysis_date="2026-04-20",
+            )
+            result = state.clear_clustering_data(conn)
+            conn.commit()
+            archives = conn.execute("SELECT COUNT(*) FROM lesson_archive").fetchone()[0]
+
+        self.assertEqual(result["archives_deleted"], 1)
+        self.assertEqual(result["mappings_deleted"], 1)
+        self.assertEqual(result["clusters_deleted"], 1)
+        self.assertEqual(archives, 0)
 
     def test_existing_lessons_and_snapshots_unaffected_before_clustering(self):
         snapshot_id = self._seed_snapshot()

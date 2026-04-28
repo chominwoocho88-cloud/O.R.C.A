@@ -1622,18 +1622,31 @@ def get_lessons_in_cluster(conn: sqlite3.Connection, cluster_id: str) -> list[di
 
 def clear_clustering_data(conn: sqlite3.Connection, run_id: str | None = None) -> dict[str, int]:
     """Remove clustering rows and refresh the denormalized snapshot cache."""
+    archive_run_filter = """
+        WHERE cluster_id IN (
+              SELECT cluster_id
+                FROM lesson_clusters
+               WHERE run_id = ?
+        )
+    """
     if run_id is None:
+        archive_deleted = int(clear_lesson_archive(conn).get("archives_deleted", 0))
         mapping_deleted = conn.execute("SELECT COUNT(*) FROM snapshot_cluster_mapping").fetchone()[0]
         cluster_deleted = conn.execute("SELECT COUNT(*) FROM lesson_clusters").fetchone()[0]
         conn.execute("DELETE FROM snapshot_cluster_mapping")
         conn.execute("DELETE FROM lesson_clusters")
         conn.execute("UPDATE lesson_context_snapshot SET context_cluster_id = NULL")
         return {
+            "archives_deleted": archive_deleted,
             "mappings_deleted": mapping_deleted,
             "clusters_deleted": cluster_deleted,
             "cache_refreshed": 0,
         }
 
+    archive_deleted = conn.execute(
+        "SELECT COUNT(*) FROM lesson_archive " + archive_run_filter,
+        (run_id,),
+    ).fetchone()[0]
     mapping_deleted = conn.execute(
         "SELECT COUNT(*) FROM snapshot_cluster_mapping WHERE run_id = ?",
         (run_id,),
@@ -1642,10 +1655,15 @@ def clear_clustering_data(conn: sqlite3.Connection, run_id: str | None = None) -
         "SELECT COUNT(*) FROM lesson_clusters WHERE run_id = ?",
         (run_id,),
     ).fetchone()[0]
+    conn.execute(
+        "DELETE FROM lesson_archive " + archive_run_filter,
+        (run_id,),
+    )
     conn.execute("DELETE FROM snapshot_cluster_mapping WHERE run_id = ?", (run_id,))
     conn.execute("DELETE FROM lesson_clusters WHERE run_id = ?", (run_id,))
     refreshed = _refresh_context_cluster_cache(conn)
     return {
+        "archives_deleted": archive_deleted,
         "mappings_deleted": mapping_deleted,
         "clusters_deleted": cluster_deleted,
         "cache_refreshed": refreshed,
