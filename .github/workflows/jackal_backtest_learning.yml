@@ -252,7 +252,6 @@ jobs:
           python -m orca.backtest --months "${ORCA_BACKTEST_MONTHS}" --walk-forward --fail-on-empty-dynamic-fetch
 
       - name: Run JACKAL backtest learning
-        if: env.USE_ARTIFACT_HANDOFF != 'true'
         env:
           PYTHONIOENCODING: utf-8
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -264,7 +263,8 @@ jobs:
           USE_UNIFIED_FETCH: "1"
           USE_FDR_MAIN: "1"
         run: |
-          # Default path remains: python -m jackal.backtest --mode "${BACKTEST_MODE}"
+          # Artifact handoff promotes the ORCA research DB above; JACKAL still
+          # needs to materialize missing lessons from that promoted state.
           python -m jackal.backtest \
             --mode "${BACKTEST_MODE}" \
             --backtest-days "${JACKAL_BACKTEST_DAYS}" \

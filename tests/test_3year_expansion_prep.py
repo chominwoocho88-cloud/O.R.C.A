@@ -165,6 +165,13 @@ class ExpansionWorkflowContractTests(unittest.TestCase):
         self.assertIn("--materialize-mode \"${JACKAL_MATERIALIZE_MODE}\"", text)
         self.assertIn("--auto-context-snapshot \"${JACKAL_AUTO_CONTEXT_SNAPSHOT}\"", text)
 
+    def test_jackal_learning_artifact_handoff_still_runs_materialization(self):
+        text = _workflow_text("jackal_backtest_learning.yml")
+        self.assertIn("USE_ARTIFACT_HANDOFF", text)
+        self.assertIn("Promote artifact DB", text)
+        self.assertIn("Run JACKAL backtest learning", text)
+        self.assertNotIn("if: env.USE_ARTIFACT_HANDOFF != 'true'", text)
+
     def test_wave_f_backfill_expected_counts_are_dynamic(self):
         text = _workflow_text("wave_f_backfill.yml")
         self.assertIn("expected_snapshots:", text)

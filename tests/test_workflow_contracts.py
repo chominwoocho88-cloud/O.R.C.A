@@ -220,7 +220,8 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
         self.assertIn('cron: "10 0 * * 1-5"', text)
         self.assertIn('cron: "30 1 1 * *"', text)
-        self.assertIn('python -m jackal.backtest --mode "${BACKTEST_MODE}"', text)
+        self.assertIn("python -m jackal.backtest", text)
+        self.assertIn('--mode "${BACKTEST_MODE}"', text)
 
     def test_jackal_backtest_learning_supports_artifact_handoff(self):
         text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
@@ -243,12 +244,13 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         self.assertIn("Promote artifact DB", text)
         self.assertIn("shutil.copy", text)
 
-    def test_jackal_backtest_learning_mode1_skips_jackal_rerun(self):
+    def test_jackal_backtest_learning_mode1_runs_materialization_after_handoff(self):
         text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
-        self.assertIn("if: env.USE_ARTIFACT_HANDOFF != 'true'", text)
+        self.assertNotIn("if: env.USE_ARTIFACT_HANDOFF != 'true'", text)
         self.assertIn("Mode 1: Artifact handoff (ORCA refresh skipped)", text)
         self.assertIn("Mode 2: Full rebuild with self-refresh", text)
         self.assertIn("Mode 3: Daily incremental", text)
+        self.assertIn("Artifact handoff promotes the ORCA research DB above", text)
 
     def test_jackal_backtest_learning_mode1_isolated_path(self):
         text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
@@ -262,7 +264,8 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         self.assertIn("Refresh ORCA research session", text)
         self.assertIn("if: env.RUN_ORCA_REFRESH == 'true'", text)
         self.assertIn("Run JACKAL backtest learning", text)
-        self.assertIn("if: env.USE_ARTIFACT_HANDOFF != 'true'", text)
+        self.assertIn('--backtest-days "${JACKAL_BACKTEST_DAYS}"', text)
+        self.assertIn('--materialize-mode "${JACKAL_MATERIALIZE_MODE}"', text)
 
 
 if __name__ == "__main__":
