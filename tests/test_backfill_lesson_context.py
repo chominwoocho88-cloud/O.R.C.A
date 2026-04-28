@@ -200,6 +200,43 @@ class BackfillLessonContextTests(unittest.TestCase):
         self.assertEqual(result["lessons_processed"], 1)
         self.assertEqual(self._linked_count(), 2)
 
+    def test_backfill_adds_canonical_snapshot_when_lesson_linked_to_backtest_source(self):
+        lesson_id = self._seed_backtest_lesson("2026-03-12", "AAA")
+        with state._connect_orca() as conn:
+            legacy_snapshot_id = state.record_lesson_context_snapshot(
+                {
+                    "trading_date": "2026-03-12",
+                    "source_event_type": "backtest",
+                    "dominant_sectors": [],
+                },
+                conn=conn,
+            )
+            conn.execute(
+                "UPDATE candidate_lessons SET context_snapshot_id = ? WHERE lesson_id = ?",
+                (legacy_snapshot_id, lesson_id),
+            )
+        with patch.object(
+            context_snapshot,
+            "_fetch_historical_market_data_range",
+            return_value=_cached_market_data(),
+        ):
+            result = context_snapshot.backfill_lessons_context(skip_existing=True)
+
+        self.assertEqual(result["snapshots_created"], 1)
+        self.assertEqual(result["lessons_processed"], 1)
+        with state._connect_orca() as conn:
+            row = conn.execute(
+                """
+                SELECT s.source_event_type
+                  FROM candidate_lessons l
+                  JOIN lesson_context_snapshot s
+                    ON s.snapshot_id = l.context_snapshot_id
+                 WHERE l.lesson_id = ?
+                """,
+                (lesson_id,),
+            ).fetchone()
+        self.assertEqual(row["source_event_type"], context_snapshot.BACKFILL_SOURCE_EVENT_TYPE)
+
     def test_backfill_idempotent(self):
         self._seed_backtest_lesson("2026-03-10", "AAA")
         with patch.object(

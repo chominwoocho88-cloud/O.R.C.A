@@ -623,6 +623,20 @@ def _load_backfill_lesson_groups(
     *,
     skip_existing: bool,
 ) -> dict[str, dict[str, Any]]:
+    existing_backfill_dates: set[str] = set()
+    if skip_existing:
+        existing_backfill_dates = {
+            str(row["trading_date"])[:10]
+            for row in conn.execute(
+                """
+                SELECT trading_date
+                  FROM lesson_context_snapshot
+                 WHERE source_event_type = ?
+                """,
+                (BACKFILL_SOURCE_EVENT_TYPE,),
+            ).fetchall()
+            if row["trading_date"]
+        }
     query = """
         SELECT l.lesson_id,
                l.lesson_json,
@@ -634,8 +648,6 @@ def _load_backfill_lesson_groups(
             ON c.candidate_id = l.candidate_id
          WHERE c.source_event_type = 'backtest'
     """
-    if skip_existing:
-        query += " AND l.context_snapshot_id IS NULL"
     query += " ORDER BY c.analysis_date ASC, l.lesson_id ASC"
 
     grouped: dict[str, dict[str, Any]] = {}
@@ -645,6 +657,12 @@ def _load_backfill_lesson_groups(
             payload.get("analysis_date") or row["analysis_date"] or ""
         ).strip()[:10]
         if not trading_date:
+            continue
+        if (
+            skip_existing
+            and row["context_snapshot_id"] is not None
+            and trading_date in existing_backfill_dates
+        ):
             continue
         group = grouped.setdefault(
             trading_date,

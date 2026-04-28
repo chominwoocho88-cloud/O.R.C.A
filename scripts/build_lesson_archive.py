@@ -47,6 +47,24 @@ def _print_preflight(conn: sqlite3.Connection) -> dict[str, Any]:
             ON m.snapshot_id = l.context_snapshot_id
         """
     ).fetchone()[0]
+    canonical_clustered_lessons = conn.execute(
+        """
+        SELECT COUNT(*)
+          FROM candidate_lessons l
+          JOIN candidate_registry c
+            ON c.candidate_id = l.candidate_id
+          JOIN (
+                SELECT trading_date, MIN(snapshot_id) AS snapshot_id
+                  FROM lesson_context_snapshot
+                 WHERE source_event_type = 'backtest_backfill'
+                 GROUP BY trading_date
+          ) canonical
+            ON canonical.trading_date = substr(c.analysis_date, 1, 10)
+          JOIN snapshot_cluster_mapping m
+            ON m.snapshot_id = canonical.snapshot_id
+         WHERE c.source_event_type = 'backtest'
+        """
+    ).fetchone()[0]
     archives = conn.execute("SELECT COUNT(*) FROM lesson_archive").fetchone()[0]
     latest_cluster_run = state.get_latest_run_id(conn)
     latest_archive_run = state.get_latest_archive_run_id(conn)
@@ -56,6 +74,7 @@ def _print_preflight(conn: sqlite3.Connection) -> dict[str, Any]:
         "mappings": mappings,
         "linked_lessons": linked_lessons,
         "clustered_lessons": clustered_lessons,
+        "canonical_clustered_lessons": canonical_clustered_lessons,
         "archives": archives,
         "latest_cluster_run": latest_cluster_run,
         "latest_archive_run": latest_archive_run,
@@ -66,6 +85,7 @@ def _print_preflight(conn: sqlite3.Connection) -> dict[str, Any]:
     print(f"  snapshot mappings: {mappings}")
     print(f"  lessons with context: {linked_lessons}")
     print(f"  clustered lessons: {clustered_lessons}")
+    print(f"  canonical clustered lessons: {canonical_clustered_lessons}")
     print(f"  existing archive rows: {archives}")
     print(f"  latest cluster run_id: {latest_cluster_run or '(none)'}")
     print(f"  latest archive run_id: {latest_archive_run or '(none)'}")

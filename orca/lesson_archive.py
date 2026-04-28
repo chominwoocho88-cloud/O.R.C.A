@@ -265,12 +265,20 @@ def _load_clustered_lessons(conn: sqlite3.Connection, cluster_run_id: str) -> li
         """
         SELECT l.lesson_id, l.lesson_type, l.label, l.lesson_value, l.lesson_json,
                c.ticker, c.analysis_date, c.signal_family,
-               m.cluster_id, m.distance_to_centroid
+               m.cluster_id, m.distance_to_centroid,
+               COALESCE(canonical.snapshot_id, l.context_snapshot_id) AS archive_snapshot_id
           FROM candidate_lessons l
           JOIN candidate_registry c
             ON c.candidate_id = l.candidate_id
+          LEFT JOIN (
+                SELECT trading_date, MIN(snapshot_id) AS snapshot_id
+                  FROM lesson_context_snapshot
+                 WHERE source_event_type = 'backtest_backfill'
+                 GROUP BY trading_date
+          ) canonical
+            ON canonical.trading_date = substr(c.analysis_date, 1, 10)
           JOIN snapshot_cluster_mapping m
-            ON m.snapshot_id = l.context_snapshot_id
+            ON m.snapshot_id = COALESCE(canonical.snapshot_id, l.context_snapshot_id)
            AND m.run_id = ?
          WHERE l.context_snapshot_id IS NOT NULL
          ORDER BY c.analysis_date, c.ticker, l.lesson_timestamp
@@ -289,6 +297,7 @@ def _load_clustered_lessons(conn: sqlite3.Connection, cluster_run_id: str) -> li
             "signal_family": _row_value(row, "signal_family", 7),
             "cluster_id": _row_value(row, "cluster_id", 8),
             "distance_to_centroid": _row_value(row, "distance_to_centroid", 9),
+            "archive_snapshot_id": _row_value(row, "archive_snapshot_id", 10),
         }
         for row in rows
     ]

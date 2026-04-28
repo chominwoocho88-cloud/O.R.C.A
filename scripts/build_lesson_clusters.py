@@ -174,16 +174,38 @@ def _verify_result(
         """,
         (run_id, *source_params),
     ).fetchone()[0]
-    clustered_lessons = conn.execute(
-        """
-        SELECT COUNT(*)
-          FROM candidate_lessons l
-          JOIN snapshot_cluster_mapping m
-            ON m.snapshot_id = l.context_snapshot_id
-         WHERE m.run_id = ?
-        """,
-        (run_id,),
-    ).fetchone()[0]
+    if _normalize_source_event_type(source_event_type) == "backtest_backfill":
+        clustered_lessons = conn.execute(
+            """
+            SELECT COUNT(*)
+              FROM candidate_lessons l
+              JOIN candidate_registry c
+                ON c.candidate_id = l.candidate_id
+              JOIN (
+                    SELECT trading_date, MIN(snapshot_id) AS snapshot_id
+                      FROM lesson_context_snapshot
+                     WHERE source_event_type = 'backtest_backfill'
+                     GROUP BY trading_date
+              ) canonical
+                ON canonical.trading_date = substr(c.analysis_date, 1, 10)
+              JOIN snapshot_cluster_mapping m
+                ON m.snapshot_id = canonical.snapshot_id
+             WHERE c.source_event_type = 'backtest'
+               AND m.run_id = ?
+            """,
+            (run_id,),
+        ).fetchone()[0]
+    else:
+        clustered_lessons = conn.execute(
+            """
+            SELECT COUNT(*)
+              FROM candidate_lessons l
+              JOIN snapshot_cluster_mapping m
+                ON m.snapshot_id = l.context_snapshot_id
+             WHERE m.run_id = ?
+            """,
+            (run_id,),
+        ).fetchone()[0]
 
     failures: list[str] = []
     if not result["dry_run"] and clusters != n_clusters:

@@ -257,6 +257,89 @@ class LessonArchiveTests(unittest.TestCase):
         self.assertGreater(result["avg_quality_score"], 0)
         self.assertTrue(result["cluster_summary"])
 
+    def test_build_archive_uses_canonical_backfill_snapshot_for_legacy_backtest_link(self):
+        run_id = "cluster_run_canonical_archive"
+        state.record_lesson_context_snapshot(
+            {
+                "snapshot_id": "ctx_legacy_direct",
+                "trading_date": "2026-04-03",
+                "source_event_type": "backtest",
+                "dominant_sectors": ["Technology"],
+                "vix_level": 20.0,
+                "sp500_momentum_5d": 1.0,
+                "sp500_momentum_20d": 2.0,
+                "nasdaq_momentum_5d": 1.0,
+                "nasdaq_momentum_20d": 2.0,
+            }
+        )
+        state.record_lesson_context_snapshot(
+            {
+                "snapshot_id": "ctx_canonical_backfill",
+                "trading_date": "2026-04-03",
+                "source_event_type": "backtest_backfill",
+                "dominant_sectors": ["Utilities"],
+                "vix_level": 28.0,
+                "sp500_momentum_5d": -1.0,
+                "sp500_momentum_20d": -2.0,
+                "nasdaq_momentum_5d": -1.0,
+                "nasdaq_momentum_20d": -2.0,
+            }
+        )
+        with state._connect_orca() as conn:
+            state.record_lesson_cluster(
+                conn,
+                {
+                    "cluster_id": "cluster_canonical",
+                    "cluster_label": "canonical",
+                    "size": 1,
+                    "representative_snapshot_id": "ctx_canonical_backfill",
+                    "run_id": run_id,
+                    "algorithm": "kmeans",
+                    "n_clusters_total": 1,
+                    "random_seed": 42,
+                },
+            )
+            state.assign_snapshot_to_cluster(
+                conn,
+                "ctx_canonical_backfill",
+                "cluster_canonical",
+                0.2,
+                run_id,
+            )
+            conn.commit()
+        candidate_id = state.record_candidate(
+            {
+                "ticker": "AAA",
+                "analysis_date": "2026-04-03",
+                "timestamp": "2026-04-03T09:00:00+09:00",
+                "signal_family": "momentum_pullback",
+                "quality_score": 70.0,
+            },
+            source_system="jackal",
+            source_event_type="backtest",
+            source_external_key="canonical-archive",
+            source_session_id="archive_test",
+        )
+        state.record_candidate_lesson(
+            candidate_id,
+            lesson_type="backtest_win",
+            label="backtest win",
+            lesson_value=4.0,
+            lesson={"analysis_date": "2026-04-03", "peak_pct": 4.0, "peak_day": 3},
+            context_snapshot_id="ctx_legacy_direct",
+            auto_context_snapshot=False,
+        )
+
+        with state._connect_orca() as conn:
+            result = lesson_archive.build_lesson_archive(
+                cluster_run_id=run_id,
+                conn=conn,
+                dry_run=True,
+            )
+
+        self.assertEqual(result["archive_count"], 1)
+        self.assertEqual(result["cluster_summary"][0]["cluster_id"], "cluster_canonical")
+
     def test_record_and_get_lesson_archive(self):
         fixture = self._seed_archive_fixture()
         with state._connect_orca() as conn:
