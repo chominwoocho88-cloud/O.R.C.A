@@ -1022,6 +1022,7 @@ def _build_alert_message(
         return " + ".join(sorted_sigs)
 
     signals_display = _format_signals_display(fired_sigs)
+    weights = _load_weights()
     best_info = select_scanner_swing_info(fired_sigs, weights)
     explanation_lines = build_scanner_explanation_lines(
         signal_family=canonical_signal_family,
@@ -1717,6 +1718,9 @@ def run_scan(force: bool = False) -> dict:
         _send_telegram(_build_summary_message(results, macro, aria))
 
     return {"scanned": scanned, "alerted": alerted}
+
+
+run_scan.__wrapped__ = run_scan
 
 
 def main() -> None:

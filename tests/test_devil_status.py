@@ -526,6 +526,66 @@ class ScannerDevilStatusTests(unittest.TestCase):
         loader.assert_called_once()
         self.assertIn("reason_detail", entry)
 
+    def test_build_alert_message_with_failed_analyst(self):
+        if hasattr(self.scanner, "weights"):
+            delattr(self.scanner, "weights")
+        analyst = {
+            "analyst_score": 0,
+            "confidence": "parse_failed",
+            "bull_case": "",
+            "signals_fired": [],
+        }
+        with patch.object(self.scanner, "_load_weights", return_value={}) as loader:
+            alert = self.scanner._build_alert_message(
+                "NVDA",
+                _scanner_info(),
+                _scanner_tech(),
+                analyst,
+                {
+                    "devil_score": 30,
+                    "devil_status": "parse_failed",
+                    "verdict": "neutral",
+                    "objections": [],
+                    "thesis_killer_hit": False,
+                },
+                _scanner_final(),
+                _scanner_quality(),
+                "crash_rebound",
+                _scanner_aria(),
+            )
+
+        loader.assert_called_once()
+        self.assertIn("NVDA", alert)
+        self.assertIn("parse_failed", alert)
+
+    def test_scanner_no_nameerror_on_fallback(self):
+        if hasattr(self.scanner, "weights"):
+            delattr(self.scanner, "weights")
+        with patch.object(self.scanner, "_load_weights", return_value={}):
+            try:
+                self.scanner._build_alert_message(
+                    "NVDA",
+                    _scanner_info(),
+                    _scanner_tech(),
+                    _scanner_analyst(),
+                    {
+                        "devil_score": 30,
+                        "devil_status": "parse_failed",
+                        "verdict": "neutral",
+                        "objections": [],
+                        "thesis_killer_hit": False,
+                    },
+                    _scanner_final(),
+                    _scanner_quality(),
+                    "crash_rebound",
+                    _scanner_aria(),
+                )
+            except NameError as exc:
+                self.fail(f"_build_alert_message raised NameError: {exc}")
+
+    def test_run_scan_exposes_wrapped_for_workflow_probe(self):
+        self.assertIs(self.scanner.run_scan.__wrapped__, self.scanner.run_scan)
+
 
 if __name__ == "__main__":
     unittest.main()
