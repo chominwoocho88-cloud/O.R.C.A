@@ -65,10 +65,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: "pip"
@@ -228,7 +228,7 @@ jobs:
             --output-md "${RUNNER_TEMP}/orca_audit_smoke.md"
 
       - name: Upload smoke quality artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: jackal-session-quality
@@ -270,6 +270,8 @@ jobs:
           # Root fix: PR 5 (persistence boundary).
           git config user.name  "JACKAL Session"
           git config user.email "jackal-session@orca-agent"
+          echo "Git status before staging:"
+          git status --short
 
           # Persistent artifacts owned by JACKAL. Safe to reapply after reset.
           JACKAL_FILES=(
@@ -317,13 +319,19 @@ jobs:
             fi
           done
 
-          [ "$COPIED" -eq 0 ] && exit 0
+          if [ "$COPIED" -eq 0 ]; then
+            echo "no state changes to commit"
+            echo "Git status after push:"
+            git status --short
+            exit 0
+          fi
 
           # Keep a full stash as an extra safety net before destructive reset.
           git stash push -u -m "$STASH_NAME" >/dev/null 2>&1 || true
 
           for attempt in 1 2 3; do
             echo "Save JACKAL session state attempt $attempt/3"
+            echo "Aligning with origin/main before replaying JACKAL-owned state"
 
             # Respect origin/main as source of truth for shared ORCA-owned files.
             git fetch origin main
@@ -347,15 +355,24 @@ jobs:
             done
 
             git add -- "${JACKAL_FILES[@]}" "${JACKAL_DIRS[@]}" 2>/dev/null || true
+            echo "Staged state diff:"
+            git diff --cached --stat
+            git diff --cached --name-status
 
             if git diff --cached --quiet; then
-              echo "No JACKAL-owned changes to save"
+              echo "no state changes to commit"
+              echo "Git status after push:"
+              git status --short
               exit 0
             fi
 
             git commit -m "JACKAL Session: $(date +'%Y-%m-%d %H:%M') [skip ci]"
+            echo "Commit created: $(git rev-parse --short HEAD)"
 
             if git push origin HEAD:main; then
+              echo "Push succeeded"
+              echo "Git status after push:"
+              git status --short
               exit 0
             fi
 

@@ -74,12 +74,16 @@ class TestWorkflowConcurrencyContracts(unittest.TestCase):
 
     EXPECTED_GROUP = "orca-repo-state"
     WORKFLOWS = (
+        "db_vacuum.yml",
         "orca_daily.yml",
         "orca_jackal.yml",
         "jackal_tracker.yml",
         "jackal_scanner.yml",
         "jackal_backtest_learning.yml",
         "orca_reset.yml",
+        "wave_f_archive.yml",
+        "wave_f_backfill.yml",
+        "wave_f_clustering.yml",
     )
 
     def test_concurrency_group_stays_orca_repo_state(self):
@@ -283,6 +287,210 @@ class TestArtifactWorkflowContracts(unittest.TestCase):
         self.assertIn("artifact_name: ${{ needs.policy-eval.outputs.artifact_name }}", text)
 
 
+class TestHighRiskWorkflowNodeRuntimeContracts(unittest.TestCase):
+    HIGH_RISK_WORKFLOWS = {
+        "db_vacuum.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+        ),
+        "jackal_backtest_learning.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+            "uses: actions/download-artifact@v8",
+        ),
+        "jackal_scanner.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+        ),
+        "orca_daily.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+        ),
+        "orca_jackal.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+            "uses: actions/upload-artifact@v6",
+        ),
+        "orca_reset.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+        ),
+        "wave_f_archive.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+        ),
+        "wave_f_backfill.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+        ),
+        "wave_f_clustering.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+        ),
+    }
+
+    LEGACY_NODE20_ACTIONS = (
+        "uses: actions/checkout@v4",
+        "uses: actions/setup-python@v5",
+        "uses: actions/upload-artifact@v4",
+        "uses: actions/download-artifact@v4",
+    )
+
+    def test_high_risk_workflows_use_node24_action_versions(self):
+        for workflow_name, expected_actions in self.HIGH_RISK_WORKFLOWS.items():
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                for action in expected_actions:
+                    self.assertIn(action, text)
+                for legacy_action in self.LEGACY_NODE20_ACTIONS:
+                    self.assertNotIn(
+                        legacy_action,
+                        text,
+                        f"{workflow_name} still references {legacy_action}",
+                    )
+
+
+class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
+    HIGH_RISK_COMMIT_WORKFLOWS = (
+        "db_vacuum.yml",
+        "jackal_backtest_learning.yml",
+        "jackal_scanner.yml",
+        "orca_daily.yml",
+        "orca_jackal.yml",
+        "orca_reset.yml",
+        "wave_f_archive.yml",
+        "wave_f_backfill.yml",
+        "wave_f_clustering.yml",
+    )
+
+    STANDARD_REBASE_WORKFLOWS = (
+        "db_vacuum.yml",
+        "jackal_backtest_learning.yml",
+        "jackal_scanner.yml",
+        "orca_daily.yml",
+        "orca_reset.yml",
+        "wave_f_archive.yml",
+        "wave_f_backfill.yml",
+        "wave_f_clustering.yml",
+    )
+
+    DB_STATE_WORKFLOW_PATHS = {
+        "db_vacuum.yml": ("data/orca_state.db",),
+        "jackal_backtest_learning.yml": ("data/orca_state.db", "data/jackal_state.db"),
+        "jackal_scanner.yml": ("data/orca_state.db", "data/jackal_state.db"),
+        "orca_daily.yml": ("data/orca_state.db", "data/jackal_state.db"),
+        "orca_jackal.yml": ("data/orca_state.db", "data/jackal_state.db"),
+        "wave_f_archive.yml": ("data/orca_state.db",),
+        "wave_f_backfill.yml": ("data/orca_state.db",),
+        "wave_f_clustering.yml": ("data/orca_state.db",),
+    }
+
+    RESET_STATE_PATHS = (
+        "data/accuracy.json",
+        "data/memory.json",
+        "data/orca_lessons.json",
+        "jackal/hunt_log.json",
+    )
+
+    def test_high_risk_commit_workflows_keep_write_permissions(self):
+        for workflow_name in self.HIGH_RISK_COMMIT_WORKFLOWS:
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                self.assertIn("contents: write", text)
+
+    def test_high_risk_commit_workflows_keep_repo_state_concurrency(self):
+        for workflow_name in self.HIGH_RISK_COMMIT_WORKFLOWS:
+            with self.subTest(workflow=workflow_name):
+                group = _extract_concurrency_group(_workflow_path(workflow_name))
+                self.assertEqual(group, "orca-repo-state")
+
+    def test_high_risk_db_state_paths_are_preserved(self):
+        for workflow_name, paths in self.DB_STATE_WORKFLOW_PATHS.items():
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                for path in paths:
+                    self.assertIn(path, text)
+
+    def test_reset_state_paths_are_preserved(self):
+        text = _read_text(_workflow_path("orca_reset.yml"))
+        for path in self.RESET_STATE_PATHS:
+            self.assertIn(path, text)
+
+    def test_standard_commit_workflows_have_push_safety_logs(self):
+        required = (
+            "Git status before staging:",
+            "Staged state diff:",
+            "git diff --cached --name-status",
+            "no state changes to commit",
+            "Commit created:",
+            "git pull --rebase origin main",
+            "Initial push failed; rebasing once and retrying",
+            "Push succeeded",
+            "Git status after push:",
+        )
+        for workflow_name in self.STANDARD_REBASE_WORKFLOWS:
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                for marker in required:
+                    self.assertIn(marker, text)
+
+    def test_standard_db_commit_workflows_checkpoint_before_staging(self):
+        for workflow_name in self.STANDARD_REBASE_WORKFLOWS:
+            if workflow_name == "orca_reset.yml":
+                continue
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                checkpoint_idx = text.find("PRAGMA wal_checkpoint(TRUNCATE);")
+                staging_idx = text.find("Git status before staging:")
+                self.assertTrue(0 <= checkpoint_idx < staging_idx)
+
+    def test_orca_jackal_keeps_replay_push_safety_logs(self):
+        text = _read_text(_workflow_path("orca_jackal.yml"))
+        for marker in (
+            "Git status before staging:",
+            "Aligning with origin/main before replaying JACKAL-owned state",
+            "git fetch origin main",
+            "git reset --hard origin/main",
+            "Staged state diff:",
+            "git diff --cached --name-status",
+            "no state changes to commit",
+            "Commit created:",
+            "git push origin HEAD:main",
+            "Push succeeded",
+            "Push failed on attempt",
+            "Git status after push:",
+        ):
+            self.assertIn(marker, text)
+
+
+class TestHighRiskArtifactContracts(unittest.TestCase):
+    def test_learning_artifact_handoff_contract_is_preserved(self):
+        block = _extract_step_block(
+            _workflow_path("jackal_backtest_learning.yml"),
+            "Download preflight ORCA artifact",
+        )
+        self.assertIn("if: env.USE_ARTIFACT_HANDOFF == 'true'", block)
+        self.assertIn("uses: actions/download-artifact@v8", block)
+        self.assertIn("name: research-state-${{ github.event.inputs.artifact_run_id }}", block)
+        self.assertIn("path: _artifact_handoff/", block)
+        self.assertIn("github-token: ${{ github.token }}", block)
+        self.assertIn("repository: ${{ github.repository }}", block)
+        self.assertIn("run-id: ${{ github.event.inputs.artifact_run_id }}", block)
+
+    def test_jackal_session_quality_artifact_contract_is_preserved(self):
+        block = _extract_step_block(
+            _workflow_path("orca_jackal.yml"),
+            "Upload smoke quality artifacts",
+        )
+        self.assertIn("uses: actions/upload-artifact@v6", block)
+        self.assertIn("if: always()", block)
+        self.assertIn("name: jackal-session-quality", block)
+        self.assertIn("${{ runner.temp }}/requirements_drift.json", block)
+        self.assertIn("${{ runner.temp }}/jackal_operational_intake.json", block)
+        self.assertIn("${{ runner.temp }}/orca_audit_smoke.json", block)
+        self.assertIn("if-no-files-found: ignore", block)
+
+
 class TestWorkflowOrcaStateContracts(unittest.TestCase):
     """Contract 4: stateful workflows must keep handling data/orca_state.db."""
 
@@ -309,6 +517,7 @@ class TestWorkflowPresenceContracts(unittest.TestCase):
     """Contract 5: core workflow file set must remain present."""
 
     REQUIRED_WORKFLOWS = {
+        "db_vacuum.yml",
         "orca_daily.yml",
         "orca_jackal.yml",
         "jackal_tracker.yml",
@@ -319,6 +528,9 @@ class TestWorkflowPresenceContracts(unittest.TestCase):
         "pages_dashboard.yml",
         "policy_eval.yml",
         "policy_promote.yml",
+        "wave_f_archive.yml",
+        "wave_f_backfill.yml",
+        "wave_f_clustering.yml",
     }
 
     def test_required_workflow_files_exist(self):
@@ -392,7 +604,7 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         self.assertIn("artifact_run_id:", text)
         self.assertIn("actions: read", text)
         self.assertIn("USE_ARTIFACT_HANDOFF", text)
-        self.assertIn("uses: actions/download-artifact@v4", text)
+        self.assertIn("uses: actions/download-artifact@v8", text)
         self.assertIn("github-token: ${{ github.token }}", text)
         self.assertIn("repository: ${{ github.repository }}", text)
         self.assertIn("run-id: ${{ github.event.inputs.artifact_run_id }}", text)

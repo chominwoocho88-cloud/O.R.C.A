@@ -30,10 +30,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -85,6 +85,8 @@ jobs:
           git config user.name "ORCA Reset"
           git config user.email "reset@orca-agent"
 
+          echo "Git status before staging:"
+          git status --short
           git add data/accuracy.json 2>/dev/null || true
           git add data/memory.json 2>/dev/null || true
           git add data/orca_lessons.json 2>/dev/null || true
@@ -102,14 +104,39 @@ jobs:
 
           git reset HEAD -- "*.bak" 2>/dev/null || true
 
-          git diff --cached --quiet && echo "No staged reset changes." && exit 0
+          echo "Staged state diff:"
+          git diff --cached --stat
+          git diff --cached --name-status
+
+          git diff --cached --quiet && {
+            echo "no state changes to commit (reset produced no staged changes)"
+            echo "Git status after push:"
+            git status --short
+            exit 0
+          }
 
           ORCA_FLAG="${{ github.event.inputs.reset_orca == 'true' && 'ORCA' || '' }}"
           JACKAL_FLAG="${{ github.event.inputs.reset_jackal == 'true' && 'JACKAL' || '' }}"
 
           git commit -m "Reset: ${ORCA_FLAG} ${JACKAL_FLAG} $(date +'%Y-%m-%d %H:%M')"
+          echo "Commit created: $(git rev-parse --short HEAD)"
 
-          git push || {
-            git pull --rebase origin main || git rebase --abort
-            git push
+          echo "Rebasing committed state on origin/main before push"
+          git pull --rebase origin main || {
+            git rebase --abort || true
+            exit 1
           }
+
+          if git push; then
+            echo "Push succeeded"
+          else
+            echo "Initial push failed; rebasing once and retrying" >&2
+            git pull --rebase origin main || {
+              git rebase --abort || true
+              exit 1
+            }
+            git push
+            echo "Push succeeded after rebase retry"
+          fi
+          echo "Git status after push:"
+          git status --short

@@ -122,7 +122,7 @@ Current risk split:
 
 - Low risk: `quality.yml`, `pages_dashboard.yml`. These are read-only/test/dashboard deploy flows and do not commit repository state.
 - Medium risk: `orca_backtest.yml`, `policy_eval.yml`, `policy_promote.yml`. These use artifacts for research DB/report handoff but do not commit or push.
-- High risk: `db_vacuum.yml`, `jackal_backtest_learning.yml`, `jackal_scanner.yml`, `jackal_tracker.yml`, `orca_daily.yml`, `orca_jackal.yml`, `orca_reset.yml`, `wave_f_archive.yml`, `wave_f_backfill.yml`, `wave_f_clustering.yml`. These can write DB/JSON state or push commits. `jackal_tracker.yml` has already been upgraded and verified, but the remaining high-risk workflows should be handled individually.
+- High risk: `db_vacuum.yml`, `jackal_backtest_learning.yml`, `jackal_scanner.yml`, `jackal_tracker.yml`, `orca_daily.yml`, `orca_jackal.yml`, `orca_reset.yml`, `wave_f_archive.yml`, `wave_f_backfill.yml`, `wave_f_clustering.yml`. These can write DB/JSON state or push commits. They require per-workflow manual verification after action upgrades.
 
 Low/medium manual verification:
 
@@ -131,13 +131,47 @@ Low/medium manual verification:
 - `Policy Eval`: verify primarily through the `ORCA Backtest` reusable call so the artifact is downloaded from the same workflow run. For direct `workflow_dispatch`, leave `artifact_name` empty unless the artifact exists in that same run context.
 - `Policy Promote`: verify primarily through the `Policy Eval` output in the `ORCA Backtest` chain. For direct `workflow_dispatch`, leave `artifact_name` empty unless the policy-eval artifact exists in that same run context.
 
-High-risk follow-up plan:
+High-risk verification plan:
 
-- Upgrade one DB/state commit workflow at a time.
-- Before each change, inspect `permissions`, checkout credential usage, `git pull --rebase`/push retry logic, DB checkpoint steps, and exact `git add` paths.
-- Prefer a dry-run or no-op dispatch first when the workflow supports it.
+- Verify one DB/state commit workflow at a time.
+- Before each run, inspect `permissions`, checkout credential usage, `git pull --rebase`/push retry logic, DB checkpoint steps, and exact `git add` paths.
+- Prefer a dry-run or no-op dispatch first when the workflow supports it. Do not use live LLM, paid API, trading, reset, or state-changing backfill runs just to validate action versions.
 - Confirm the runner version is at least `2.327.1` before relying on Node.js 24 actions on self-hosted runners.
 - After GitHub verification, inspect logs for Node warnings, checkout credential persistence behavior, state checkpoint output, commit/no-op behavior, and push retry behavior.
+
+High-risk workflow settings:
+
+| Workflow | State path | Safe first validation |
+| --- | --- | --- |
+| `db_vacuum.yml` | VACUUM and cold archive DB commit | No no-op mode exists. Do not manually dispatch without separate approval; validate next scheduled or approved maintenance run logs. |
+| `jackal_backtest_learning.yml` | ORCA/JACKAL DB commit and optional artifact handoff | Prefer an approved run with `mode=incremental` first. For handoff, use `mode=full` plus an `artifact_run_id` from a successful `ORCA Backtest` run. |
+| `jackal_scanner.yml` | scanner logs, watchlist, ORCA/JACKAL DB commit | No dry-run mode exists. Use `force=false` only after approval because this can use external provider and notification secrets. |
+| `orca_daily.yml` | ORCA reports, JSON state, ORCA/JACKAL DB commit | No dry-run mode exists. Validate on the next approved scheduled run; use `expected_min_reports=0` unless checking a specific report count. |
+| `orca_jackal.yml` | JACKAL-owned JSON/DB state replay to `main` | Use only after approval. Lower blast radius dispatch is `session_mode=scanner_only`, `force_hunt=false`, `force_scan=false`, `force_evolve=false`, but it can still use external secrets. |
+| `orca_reset.yml` | destructive JSON state reset commit | Do not run with `confirm=RESET` without separate approval. For action smoke only, dispatch with `confirm=DO_NOT_RESET`, `reset_orca=false`, `reset_jackal=false` and expect the validation step to fail before reset. |
+| `wave_f_backfill.yml` | ORCA DB context backfill commit | Dispatch only with `dry_run=true`, `cleanup=false`, `skip_existing=true` until a separate non-dry approval exists. |
+| `wave_f_clustering.yml` | ORCA DB clustering commit | Dispatch only with `dry_run=true`, `force_rebuild=false`, `append_mode=false` until a separate non-dry approval exists. |
+| `wave_f_archive.yml` | ORCA DB/archive DB commit | Dispatch only with `dry_run=true`, `force_rebuild=false`, `append_mode=false` until a separate non-dry approval exists. |
+
+State persistence log interpretation:
+
+- `no state changes to commit`: normal no-op. The workflow reached staging, found no relevant DB/JSON/report changes, and exited without a commit.
+- `Commit created: <sha>` followed by `Push succeeded`: state changes were persisted.
+- `Initial push failed; rebasing once and retrying` followed by `Push succeeded after rebase retry`: first push lost a race, then the workflow rebased on `origin/main` and pushed.
+- `Git status before staging`, `Staged state diff`, and `Git status after push` should be present in every DB/state commit run log.
+- `orca_jackal.yml` is special: it backs up JACKAL-owned outputs, aligns with `origin/main`, reapplies only those files, and pushes `HEAD:main`. Treat `No JACKAL-owned changes to save` or `no state changes to commit` as a normal no-op.
+
+Artifact handoff checks:
+
+- `jackal_backtest_learning.yml` Mode 1 downloads `research-state-${artifact_run_id}` into `_artifact_handoff/` using the same `run-id`, `repository`, and `github-token` inputs. Confirm the log prints `PASS Artifact verified in isolated dir`.
+- The accepted DB path is `_artifact_handoff/data/orca_state.db` or `_artifact_handoff/orca_state.db`.
+- `orca_jackal.yml` uploads `jackal-session-quality` with requirements drift, JACKAL intake, and dry-run quality audit files. Use this artifact to interpret a session before trusting persisted state.
+
+Reset/backfill guardrail:
+
+- `orca_reset.yml` must not be executed with `confirm=RESET` for action-version validation.
+- `wave_f_backfill.yml`, `wave_f_clustering.yml`, and `wave_f_archive.yml` must not be executed with `dry_run=false` until the intended DB mutation has a separate approval and rollback plan.
+- `db_vacuum.yml` has no dry-run switch; treat manual dispatch as a state-changing maintenance operation.
 
 ## JACKAL Tracker Run Interpretation
 

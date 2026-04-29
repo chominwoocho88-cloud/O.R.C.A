@@ -28,12 +28,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -64,15 +64,58 @@ jobs:
               raise SystemExit(f'main DB still above 50MB warning threshold: {main_mb:.2f}MB')
           PY
 
+      - name: Checkpoint DB
+        run: |
+          python - <<'PY'
+          import os
+          import sqlite3
+
+          for db in ("data/orca_state.db", "data/archive/lesson_archive_cold.db"):
+              if not os.path.exists(db):
+                  continue
+              conn = sqlite3.connect(db)
+              conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+              conn.close()
+              for suffix in ("-wal", "-shm"):
+                  path = f"{db}{suffix}"
+                  if os.path.exists(path):
+                      os.remove(path)
+                      print(f"Removed: {path}")
+          print("Checkpoint complete")
+          PY
+
       - name: Commit DB maintenance result
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/orca_state.db data/archive/lesson_archive_cold.db
+          echo "Git status before staging:"
+          git status --short
+          git add -f data/orca_state.db 2>/dev/null || true
+          git add -f data/archive/lesson_archive_cold.db 2>/dev/null || true
+          echo "Staged state diff:"
+          git diff --cached --stat
+          git diff --cached --name-status
           if git diff --cached --quiet; then
-            echo "No DB changes to commit"
+            echo "no state changes to commit"
           else
             git commit -m "chore: vacuum ORCA database"
-            git pull --rebase
-            git push
+            echo "Commit created: $(git rev-parse --short HEAD)"
+            echo "Rebasing committed state on origin/main before push"
+            git pull --rebase origin main || {
+              git rebase --abort || true
+              exit 1
+            }
+            if git push; then
+              echo "Push succeeded"
+            else
+              echo "Initial push failed; rebasing once and retrying" >&2
+              git pull --rebase origin main || {
+                git rebase --abort || true
+                exit 1
+              }
+              git push
+              echo "Push succeeded after rebase retry"
+            fi
           fi
+          echo "Git status after push:"
+          git status --short
