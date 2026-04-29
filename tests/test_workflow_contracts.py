@@ -674,12 +674,19 @@ class TestResearchWorkflowNonCommitContracts(unittest.TestCase):
 
 
 class TestBacktestWorkflowContracts(unittest.TestCase):
-    def test_orca_backtest_uses_13_month_buffer(self):
+    def test_orca_backtest_uses_3year_defaults(self):
         text = _read_text(_workflow_path("orca_backtest.yml"))
         self.assertIn(
-            "python -m orca.backtest --months 13 --walk-forward --fail-on-empty-dynamic-fetch",
+            "python -m orca.backtest --months 36 --walk-forward --fail-on-empty-dynamic-fetch",
             text,
         )
+        self.assertIn('default: "36"', text)
+        self.assertIn('default: "3869"', text)
+        self.assertIn('ORCA_BACKTEST_MONTHS="36"', text)
+        self.assertIn('EXPECTED_MIN_CANDIDATES_VALUE="3869"', text)
+        self.assertIn('EXPECTED_MIN_LESSONS_VALUE="3869"', text)
+        self.assertIn('EXPECTED_MIN_CANDIDATES", "3869"', text)
+        self.assertIn('EXPECTED_MIN_LESSONS", "3869"', text)
 
     def test_orca_backtest_has_upload_verify(self):
         text = _read_text(_workflow_path("orca_backtest.yml"))

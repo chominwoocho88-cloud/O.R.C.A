@@ -13,7 +13,7 @@ on:
         options:
           - "13"
           - "36"
-        default: "13"
+        default: "36"
       walk_forward:
         description: "Walk-forward mode"
         type: choice
@@ -24,11 +24,11 @@ on:
       expected_min_candidates:
         description: "Minimum backtest candidate rows"
         type: string
-        default: "1000"
+        default: "3869"
       expected_min_lessons:
         description: "Minimum backtest lessons"
         type: string
-        default: "1000"
+        default: "3869"
       expected_min_orca_sessions:
         description: "Minimum ORCA sessions"
         type: string
@@ -92,9 +92,9 @@ jobs:
           EXPECTED_MIN_ORCA_SESSIONS_VALUE="$(trim_workflow_input "${{ inputs.expected_min_orca_sessions }}")"
           EXPECTED_MIN_JACKAL_SESSIONS_VALUE="$(trim_workflow_input "${{ inputs.expected_min_jackal_sessions }}")"
 
-          [ -z "$ORCA_BACKTEST_MONTHS" ] && ORCA_BACKTEST_MONTHS="13"
-          [ -z "$EXPECTED_MIN_CANDIDATES_VALUE" ] && EXPECTED_MIN_CANDIDATES_VALUE="1000"
-          [ -z "$EXPECTED_MIN_LESSONS_VALUE" ] && EXPECTED_MIN_LESSONS_VALUE="1000"
+          [ -z "$ORCA_BACKTEST_MONTHS" ] && ORCA_BACKTEST_MONTHS="36"
+          [ -z "$EXPECTED_MIN_CANDIDATES_VALUE" ] && EXPECTED_MIN_CANDIDATES_VALUE="3869"
+          [ -z "$EXPECTED_MIN_LESSONS_VALUE" ] && EXPECTED_MIN_LESSONS_VALUE="3869"
           [ -z "$EXPECTED_MIN_ORCA_SESSIONS_VALUE" ] && EXPECTED_MIN_ORCA_SESSIONS_VALUE="1"
           [ -z "$EXPECTED_MIN_JACKAL_SESSIONS_VALUE" ] && EXPECTED_MIN_JACKAL_SESSIONS_VALUE="1"
 
@@ -145,7 +145,7 @@ jobs:
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
         run: |
           # Default path remains:
-          # python -m orca.backtest --months 13 --walk-forward --fail-on-empty-dynamic-fetch
+          # python -m orca.backtest --months 36 --walk-forward --fail-on-empty-dynamic-fetch
           ARGS="--months $ORCA_BACKTEST_MONTHS --fail-on-empty-dynamic-fetch"
           if [ "$ORCA_BACKTEST_WALK_FORWARD" = "true" ]; then
             ARGS="$ARGS --walk-forward"
@@ -186,8 +186,8 @@ jobs:
           import sqlite3
           import sys
 
-          expected_candidates = int(os.environ.get("EXPECTED_MIN_CANDIDATES", "1000"))
-          expected_lessons = int(os.environ.get("EXPECTED_MIN_LESSONS", "1000"))
+          expected_candidates = int(os.environ.get("EXPECTED_MIN_CANDIDATES", "3869"))
+          expected_lessons = int(os.environ.get("EXPECTED_MIN_LESSONS", "3869"))
           expected_orca_sessions = int(os.environ.get("EXPECTED_MIN_ORCA_SESSIONS", "1"))
           expected_jackal_sessions = int(os.environ.get("EXPECTED_MIN_JACKAL_SESSIONS", "1"))
 

@@ -145,13 +145,14 @@ class MaterializationAddMissingTests(unittest.TestCase):
 
 
 class ExpansionWorkflowContractTests(unittest.TestCase):
-    def test_orca_backtest_workflow_has_dynamic_inputs_with_default_13(self):
+    def test_orca_backtest_workflow_has_3year_inputs_by_default(self):
         text = _workflow_text("orca_backtest.yml")
         self.assertIn("months:", text)
-        self.assertIn('default: "13"', text)
+        self.assertIn('default: "36"', text)
         self.assertIn("walk_forward:", text)
         self.assertIn("ORCA_BACKTEST_MONTHS", text)
         self.assertIn("--months $ORCA_BACKTEST_MONTHS", text)
+        self.assertIn('default: "3869"', text)
         self.assertIn("USE_UNIFIED_FETCH", text)
         self.assertIn("ALPHA_VANTAGE_SLEEP_SECONDS: \"0.8\"", text)
 
