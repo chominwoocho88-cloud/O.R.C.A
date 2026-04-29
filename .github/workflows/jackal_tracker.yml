@@ -42,10 +42,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: "pip"
@@ -227,7 +227,7 @@ jobs:
             --output-md "${RUNNER_TEMP}/orca_audit_smoke.md"
 
       - name: Upload Tracker quality artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: jackal-tracker-quality

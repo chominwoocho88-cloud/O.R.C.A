@@ -124,6 +124,9 @@ class TestTrackerWorkflowQualityContracts(unittest.TestCase):
     def test_tracker_workflow_logs_inputs_and_uploads_quality_artifacts(self):
         text = _read_text(_workflow_path("jackal_tracker.yml"))
         self.assertIn("FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true", text)
+        self.assertIn("uses: actions/checkout@v6", text)
+        self.assertIn("uses: actions/setup-python@v6", text)
+        self.assertIn("uses: actions/upload-artifact@v6", text)
         self.assertIn("Resolve Tracker inputs", text)
         self.assertIn("TRACKER_ARGS", text)
         self.assertIn("TRACKER_WILL_SAVE_RESULTS", text)
@@ -138,6 +141,14 @@ class TestTrackerWorkflowQualityContracts(unittest.TestCase):
         self.assertIn("scripts/check_jackal_operational_intake.py", text)
         self.assertIn("scripts/audit_quality.py --dry-run", text)
         self.assertIn("name: jackal-tracker-quality", text)
+
+
+class TestQualityWorkflowNodeRuntimeContracts(unittest.TestCase):
+    def test_quality_workflow_uses_node24_action_versions(self):
+        text = _read_text(_workflow_path("quality.yml"))
+        self.assertIn("uses: actions/checkout@v6", text)
+        self.assertIn("uses: actions/setup-python@v6", text)
+        self.assertIn("uses: actions/upload-artifact@v6", text)
 
 
 class TestWorkflowOrcaStateContracts(unittest.TestCase):
