@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 FILE_SIZE_BUDGET = {
     # large by design
-    "orca/state.py": 4050,
+    "orca/state.py": 4100,
     "orca/backtest.py": 3200,
     "jackal/scanner.py": 1900,
     "jackal/hunter.py": 2050,

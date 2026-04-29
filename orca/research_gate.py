@@ -27,6 +27,7 @@ DEFAULT_THRESHOLDS = {
     "jackal_total_tracked_min": 100,
     "shadow_rolling_10_min_batches": 10,
     "jackal_projection_rows_min": 1,
+    "jackal_projection_sample_count_min": 100,
 }
 
 
@@ -158,6 +159,24 @@ def _check_sample_count(
     }
 
 
+def _check_projection_count(
+    name: str,
+    value: float | int | None,
+    minimum: float | int,
+    *,
+    missing_reason: str,
+) -> dict[str, Any]:
+    check = _check_sample_count(name, value, minimum)
+    if check["status"] != "pass":
+        try:
+            current = float(value or 0)
+        except (TypeError, ValueError):
+            current = 0.0
+        if current <= 0:
+            check["reason"] = missing_reason
+    return check
+
+
 def _check_boolean(name: str, value: bool, *, warn_if_missing: bool = False) -> dict[str, Any]:
     if warn_if_missing and value is False:
         return {
@@ -189,11 +208,16 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
     jackal_summary = jackal.get("summary", {})
     rolling_shadow = shadow.get("rolling_10", {})
     accuracy_meta = accuracy_view.get("meta", {}) if isinstance(accuracy_view, dict) else {}
-    available_projection_rows = accuracy_meta.get("total_current_rows")
-    if available_projection_rows is None:
+    current_projection_rows = accuracy_meta.get("total_current_rows")
+    if current_projection_rows is None:
         available_rows = accuracy_meta.get("available_rows", {}) if isinstance(accuracy_meta, dict) else {}
         if isinstance(available_rows, dict):
-            available_projection_rows = sum(int(value or 0) for value in available_rows.values())
+            current_projection_rows = sum(int(value or 0) for value in available_rows.values())
+    stored_projection_rows = accuracy_meta.get("total_projection_rows")
+    if stored_projection_rows is None:
+        stored_projection_rows = current_projection_rows
+    max_projection_sample_count = accuracy_meta.get("max_sample_count")
+    missing_reasons = accuracy_meta.get("missing_reasons", []) if isinstance(accuracy_meta, dict) else []
 
     checks = [
         _check_delta(
@@ -235,10 +259,22 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
             rolling_shadow.get("batch_count"),
             cfg["shadow_rolling_10_min_batches"],
         ),
-        _check_sample_count(
+        _check_projection_count(
             "jackal_projection_rows_available",
-            available_projection_rows,
+            stored_projection_rows,
             cfg["jackal_projection_rows_min"],
+            missing_reason="missing_projection_rows",
+        ),
+        _check_projection_count(
+            "jackal_accuracy_current_rows_available",
+            current_projection_rows,
+            cfg["jackal_projection_rows_min"],
+            missing_reason="missing_accuracy_current",
+        ),
+        _check_sample_count(
+            "jackal_projection_sample_count_minimum",
+            max_projection_sample_count,
+            cfg["jackal_projection_sample_count_min"],
         ),
         _check_boolean(
             "jackal_linked_to_latest_orca",
@@ -254,6 +290,18 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
                 "name": "jackal_latest_raw_evaluable",
                 "status": "warn",
                 "reason": str(latest_raw_issue),
+                "current": False,
+            }
+        )
+
+    for reason in missing_reasons:
+        if reason in {"missing_projection_rows", "missing_accuracy_current"}:
+            continue
+        checks.append(
+            {
+                "name": f"jackal_projection_state_{reason}",
+                "status": "warn",
+                "reason": str(reason),
                 "current": False,
             }
         )

@@ -11,6 +11,7 @@ from typing import Any
 
 from .brand import JACKAL_NAME, ORCA_NAME
 from .dual_db_snapshot import collect_dual_db_state
+from .jackal_accuracy_projection import describe_jackal_accuracy_projection_state
 from .paths import REPORTS_DIR, STATE_DB_FILE, atomic_write_json, atomic_write_text
 from .state import (
     list_backtest_days,
@@ -216,6 +217,9 @@ def _rank_accuracy_rows(
 
 def _build_accuracy_snapshot(min_total: int = 3, limit: int = 5) -> dict[str, Any]:
     backfill_rows = rebuild_latest_jackal_accuracy_projection()
+    projection_state = describe_jackal_accuracy_projection_state()
+    system_swing = list_jackal_accuracy_projection(family="system", scope="swing", limit=20)
+    system_d1 = list_jackal_accuracy_projection(family="system", scope="d1", limit=20)
     signal_swing = list_jackal_accuracy_projection(family="signal", scope="swing", limit=200)
     signal_d1 = list_jackal_accuracy_projection(family="signal", scope="d1", limit=200)
     ticker_overall = list_jackal_accuracy_projection(family="ticker", scope="overall", limit=200)
@@ -224,6 +228,8 @@ def _build_accuracy_snapshot(min_total: int = 3, limit: int = 5) -> dict[str, An
     rec_regime = list_jackal_accuracy_projection(family="recommendation", scope="regime", limit=200)
     rec_inflow = list_jackal_accuracy_projection(family="recommendation", scope="inflow", limit=200)
     available_rows = {
+        "system_swing": len(system_swing),
+        "system_d1": len(system_d1),
         "signal_swing": len(signal_swing),
         "signal_d1": len(signal_d1),
         "ticker": len(ticker_overall),
@@ -239,8 +245,23 @@ def _build_accuracy_snapshot(min_total: int = 3, limit: int = 5) -> dict[str, An
             "limit": limit,
             "backfill_rows": backfill_rows,
             "available_rows": available_rows,
-            "total_current_rows": sum(available_rows.values()),
+            "total_current_rows": projection_state.get("current_rows", sum(available_rows.values())),
+            "total_projection_rows": projection_state.get("projection_rows", 0),
+            "snapshot_rows": projection_state.get("snapshot_rows", 0),
+            "max_sample_count": projection_state.get("max_sample_count"),
+            "latest_projection": projection_state.get("latest_projection"),
+            "latest_source": projection_state.get("latest_source"),
+            "latest_captured_at": projection_state.get("latest_captured_at"),
+            "latest_generated_at": projection_state.get("latest_generated_at"),
+            "missing_reasons": projection_state.get("missing_reasons", []),
+            "by_family_scope": projection_state.get("by_family_scope", []),
         },
+        "system_swing_accuracy": _rank_accuracy_rows(
+            system_swing, limit=limit, min_total=min_total, descending=True
+        ),
+        "system_d1_accuracy": _rank_accuracy_rows(
+            system_d1, limit=limit, min_total=min_total, descending=True
+        ),
         "signal_swing_leaders": _rank_accuracy_rows(
             signal_swing, limit=limit, min_total=min_total, descending=True
         ),
@@ -326,11 +347,14 @@ def build_report() -> dict[str, Any]:
         )
     if shadow_roll_10["batch_count"] == 0:
         warnings.append(f"No {JACKAL_NAME} shadow batch history recorded yet.")
-    if not accuracy_view["signal_swing_leaders"]:
-        warnings.append(f"No SQL-projected {JACKAL_NAME} swing signal accuracy snapshot with enough samples yet.")
-    if not accuracy_view["ticker_laggards"]:
+    accuracy_meta = accuracy_view.get("meta", {})
+    for reason in accuracy_meta.get("missing_reasons", []) if isinstance(accuracy_meta, dict) else []:
+        warnings.append(f"{JACKAL_NAME} accuracy projection state is incomplete: {reason}.")
+    if not accuracy_view.get("system_swing_accuracy") and not accuracy_view.get("signal_swing_leaders"):
+        warnings.append(f"No SQL-projected {JACKAL_NAME} swing accuracy snapshot with enough samples yet.")
+    if not accuracy_view.get("ticker_laggards"):
         warnings.append(f"No SQL-projected {JACKAL_NAME} ticker accuracy snapshot with enough samples yet.")
-    if not accuracy_view["recommendation_regime_leaders"]:
+    if not accuracy_view.get("recommendation_regime_leaders"):
         warnings.append(f"No SQL-projected {JACKAL_NAME} recommendation regime accuracy snapshot with enough samples yet.")
 
     orca_section = {
@@ -477,6 +501,14 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Minimum sample filter: `{accuracy_meta.get('minimum_sample', 'n/a')}`",
         f"- Backfilled latest snapshot rows this run: `{accuracy_meta.get('backfill_rows', 0)}`",
         f"- Current projection rows: `{accuracy_meta.get('total_current_rows', 0)}`",
+        f"- Stored projection rows: `{accuracy_meta.get('total_projection_rows', 0)}`",
+        f"- Weight snapshots: `{accuracy_meta.get('snapshot_rows', 0)}`",
+        f"- Latest projection source: `{accuracy_meta.get('latest_source') or 'n/a'}`",
+        f"- Latest projection captured/generated: `{accuracy_meta.get('latest_captured_at') or 'n/a'}` / `{accuracy_meta.get('latest_generated_at') or 'n/a'}`",
+        f"- Max projection sample count: `{accuracy_meta.get('max_sample_count') or 'n/a'}`",
+        f"- Projection missing reasons: `{json.dumps(accuracy_meta.get('missing_reasons', []), ensure_ascii=False)}`",
+        f"- System swing accuracy: `{_fmt_accuracy_entries(accuracy_view.get('system_swing_accuracy', []))}`",
+        f"- System D1 accuracy: `{_fmt_accuracy_entries(accuracy_view.get('system_d1_accuracy', []))}`",
         f"- Best swing signals: `{_fmt_accuracy_entries(accuracy_view.get('signal_swing_leaders', []))}`",
         f"- Best D1 signals: `{_fmt_accuracy_entries(accuracy_view.get('signal_d1_leaders', []))}`",
         f"- Weakest tickers: `{_fmt_accuracy_entries(accuracy_view.get('ticker_laggards', []))}`",

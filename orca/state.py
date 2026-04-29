@@ -2603,6 +2603,26 @@ def _build_jackal_accuracy_projection_rows(
                     metrics=payload,
                 )
 
+    system_accuracy = weights.get("system_accuracy", {})
+    if isinstance(system_accuracy, dict):
+        for scope_name, metrics in system_accuracy.items():
+            if not isinstance(metrics, dict):
+                continue
+            metric_name = str(metrics.get("metric") or scope_name)
+            _append_accuracy_row(
+                rows,
+                snapshot_id=snapshot_id,
+                source=source,
+                captured_at=captured_at,
+                family="system",
+                scope=str(scope_name),
+                entity_key=str(metrics.get("entity_key") or "jackal"),
+                total=metrics.get("sample_count", metrics.get("total")),
+                correct=metrics.get("correct"),
+                accuracy=metrics.get("accuracy"),
+                metrics={**deepcopy(metrics), "metric": metric_name},
+            )
+
     for family_name in ("regime_accuracy", "ticker_accuracy", "devil_accuracy"):
         family_data = weights.get(family_name, {})
         if not isinstance(family_data, dict):
