@@ -1,125 +1,129 @@
 {
   "analysis_date": "2026-04-29",
-  "analysis_time": "08:11 KST",
+  "analysis_time": "13:20 KST",
   "mode": "MORNING",
   "mode_label": "아침 풀분석",
-  "one_line_summary": "S&P500 7138·나스닥 24663 강세 유지 속 Oracle -7.5% AI 캐펙스 균열 신호, 코스피 외국인 재매도 전환에 SK하이닉스 베타 리스크 경계",
+  "one_line_summary": "S&P500 7138·나스닥 24663 연고점권 강세 유지 속 오늘 빅테크 실적(Meta·Microsoft·Alphabet) 발표 앞두고 선반영 피크아웃 리스크 vs 추가 상승 분기점, VIX 17.83 중립·FG 66 탐욕 구간에서 방향성 결정적 이벤트 대기",
   "market_regime": "위험선호(고점 경계)",
   "trend_phase": "상승추세",
   "trend_strategy": {
-    "recommended": "IT/반도체 섹터 기존 포지션 유지하되 신규 추격 매수 자제. 실적 서프라이즈 개별 종목(GM·LendingClub 등) 단기 모멘텀 플레이. 엔비디아 장중 방향 확인 후 반도체 비중 조정 검토.",
-    "caution": "Oracle 쇼크가 AI 인프라 전반 매도로 확산 시 나스닥 -1.5% → SK하이닉스 베타 1.36x 적용 -2.1% 이상 연동 낙폭 현실화 가능. 코스피 외국인 추가 순매도 -500억 이상 확인 시 반도체 비중 축소 대응.",
-    "difficulty": "보통"
+    "recommended": "빅테크 실적 발표 전 기존 포지션 유지, 반도체·AI 섹터 비중 유지. 실적 발표 후 가이던스 확인 전까지 신규 대규모 진입 자제. 나스닥 25,000pt 상향 돌파 확인 시 추가 비중 확대 검토",
+    "caution": "Meta·Microsoft·Alphabet 컨센서스 충족에도 가이던스 보수적 제시 시 '소문에 사고 뉴스에 팔기' 패턴 급락 가능. 엔비디아 Meta-Broadcom 커스텀칩 대체 수요 구체화 발언 시 GPU 섹터 전체 -3%~-5% 리스크. SK하이닉스 베타 1.36x 감안 낙폭 확대 대비",
+    "difficulty": "어려움"
   },
   "confidence_overall": "보통",
   "consensus_level": "보통",
   "top_headlines": [
     {
-      "headline": "Oracle 프리마켓 -7.5% — OpenAI 내부 매출 목표 미달 보도로 AI 캐펙스 수요 지속성 의문 부각",
-      "signal_tag": "AI 내러티브 균열",
+      "headline": "Meta·Microsoft·Alphabet·Amazon Q1 2026 실적 발표 4/29~30, 기술섹터 EPS 성장 45% YoY 컨센서스",
+      "signal_tag": "실적 이벤트",
       "impact": "높음"
     },
     {
-      "headline": "S&P500 Q1 블렌디드 EPS 성장률 15.1% — 6분기 연속 두 자릿수, IT섹터 +45% YoY",
-      "signal_tag": "실적 펀더멘털 강세",
+      "headline": "Oracle -5.2% 급락, OpenAI CFO 현금흐름 지속가능성 우려 발언으로 AI 캐펙스 균열 신호",
+      "signal_tag": "AI 캐펙스 리스크",
       "impact": "높음"
     },
     {
-      "headline": "코스피 외국인 4/28 -2197억 순매도 급반전 — 전일 +8563억 대비 180도 전환",
-      "signal_tag": "외국인 수급 이탈",
+      "headline": "Meta-Broadcom 2nm MTIA 커스텀칩 1기가와트 배포 발표, 엔비디아·AMD GPU 대체 수요 현실화",
+      "signal_tag": "GPU 수요 구조 변화",
       "impact": "높음"
     },
     {
-      "headline": "TSMC 'AI 수요 2028년까지 공급 초과' — 반도체 공급 타이트 프리미엄 유지 전망",
-      "signal_tag": "반도체 수급 강세",
+      "headline": "한국 반도체 수출 152.5% 급증, 외국인 반도체 순매수 4.83조원 AI·HBM 수요 확인",
+      "signal_tag": "반도체 펀더멘털 강세",
+      "impact": "높음"
+    },
+    {
+      "headline": "4/28 외국인 KOSPI 2197억·KOSDAQ 2895억 순매도, 개인이 받아내는 구조 지속",
+      "signal_tag": "수급 경계",
       "impact": "보통"
     },
     {
-      "headline": "VIX 17.83 중립권 안착 — 공포 구간 이탈 후 시장 불안심리 완화",
-      "signal_tag": "변동성 안정",
-      "impact": "보통"
+      "headline": "FOMC 결과 발표 예정(4/29), 금리 동결 컨센서스이나 파월 발언 불확실성 잔존",
+      "signal_tag": "통화정책 이벤트",
+      "impact": "높음"
     }
   ],
   "volatility_index": {
-    "vkospi": "미제공",
+    "vkospi": "데이터 미제공",
     "vix": "17.83",
     "fear_greed": "66 (Greed)",
-    "level": "중립",
-    "interpretation": "VIX 17.83은 공포 구간(20 이상) 이탈 후 중립권 안착. Fear & Greed 66(Greed)은 탐욕 구간 진입으로 단기 과열 경계 신호. 나스닥 연고점권 + Greed 구간 조합은 역발상 관점에서 되돌림 리스크 상승 구간. VIX 단독 방향 예측 신뢰도 32% — 보조 참고 한정."
+    "level": "중립~탐욕",
+    "interpretation": "VIX 17.83은 공포 완화된 중립 구간으로 시장 안정세를 반영하나, FG 66(탐욕) 구간은 단기 과열 신호 병존. 빅테크 실적 발표·FOMC 이벤트 전 변동성 재확대 가능성 상존. 탐욕 구간 FG에서 급반전 확률 역사적으로 상승, 신규 매수 시 주의 필요. VIX 단독 신호 정확도 32% 수준으로 주가 흐름과 병행 판단 필수"
   },
   "retail_reversal_signal": {
-    "retail_behavior": "코스피 개인 4/28 +268.5억 순매수. 외국인 -2197억 급반전 매도 상황에서 하방 지지 역할 수행.",
-    "contrarian_implication": "개인이 외국인 이탈을 흡수하는 구조이나 외국인 매도 지속 시 개인 매수 여력 소진 후 되돌림 가능성 상존. 역발상 관점: 외국인 재유입 확인 전 코스피 단독 추격 매수 자제 권고.",
+    "retail_behavior": "4/28 KOSPI 개인 순매수 2685억원, KOSDAQ 개인 순매수 3099억원. 외국인 이탈 구간에서 개인이 지속적으로 받아내는 패턴 3거래일 연속",
+    "contrarian_implication": "외국인 매도 + 개인 순매수 구조는 단기 반전 선행 신호일 수 있으나 확신 불가. 빅테크 실적 호조 시 외국인 재유입으로 개인·기관 동반 상승 시나리오도 유효. 반대로 실적 실망 시 개인 물량이 트랩으로 전환될 위험",
     "reliability": "보통"
   },
   "outflows": [
     {
-      "zone": "코스피 — 외국인",
-      "reason": "4/27 +8563억 대규모 순매수 이후 4/28 -2197억 급반전. Oracle 쇼크 선제 반영 가능성 및 AI 테마 노출 축소 패턴으로 해석. 단순 차익실현보다 AI 내러티브 균열에 따른 반도체 비중 축소 가능성 높음.",
-      "severity": "높음",
-      "data_point": "외국인 코스피 순매도 -2197억(4/28) vs 전일 +8563억"
+      "zone": "KOSPI·KOSDAQ 단기 차익실현",
+      "reason": "외국인 4/28 KOSPI 2197억, KOSDAQ 2895억 순매도. 빅테크 실적 발표 전 리스크 헤징 포지션 축소 및 단기 차익실현 목적",
+      "severity": "보통",
+      "data_point": "KOSPI 외국인 순매도 2197억원, KOSDAQ 외국인 순매도 2895억원 (4/28 기준)"
     },
     {
-      "zone": "Oracle / AI 인프라 관련주",
-      "reason": "OpenAI 내부 매출 목표 미달 보도 → AI 캐펙스 지속성 의문 → Oracle 프리마켓 -7.5%. AI 수요 내러티브 균열 시그널로 엔비디아·ARM·AI 인프라 전반 연동 매도 리스크.",
+      "zone": "OpenAI 에코시스템 연동 클라우드 인프라주 (Oracle 등)",
+      "reason": "OpenAI CFO 현금흐름 지속가능성 우려 발언으로 AI 컴퓨팅 계약 지불능력 리스크 부각. 클라우드·데이터센터 수요 과대계상 가능성",
       "severity": "높음",
-      "data_point": "Oracle 프리마켓 -7.5%; OpenAI 내부 매출 목표 미달(WSJ/CNBC)"
+      "data_point": "Oracle 주가 5.2% 하락, OpenAI 수익·사용자 증가 목표 미달 확인"
+    },
+    {
+      "zone": "엔비디아·AMD 프리미엄 GPU 수요 일부",
+      "reason": "Meta-Broadcom 2nm MTIA 커스텀칩 1기가와트 배포로 2026 capex $135B 내 GPU 예산 구조 재편. 엔비디아 Meta향 매출 비중 약 19% 대체 리스크",
+      "severity": "높음",
+      "data_point": "Meta-Broadcom 딜 4/14 발표, Meta 2026 capex $135B 계획 내 GPU 비중 축소 시사, 엔비디아 Meta향 매출 비중 약 19% 추정"
     }
   ],
   "inflows": [
     {
-      "zone": "미국 IT/반도체 섹터",
-      "reason": "IT섹터 Q1 EPS +45% YoY, S&P500 매출 성장률 9.7%(2022년 Q3 이후 최고). TSMC 'AI 수요 2028년까지 공급 초과' 전망으로 반도체 공급 타이트 프리미엄 유지.",
-      "momentum": "강함(단기 경계 필요)",
-      "data_point": "IT섹터 Q1 EPS +45% YoY; TSMC AI 수요 전망 유지"
+      "zone": "빅테크·AI 실적 기대 섹터 (Meta, Microsoft, Alphabet, Amazon)",
+      "reason": "Q1 2026 S&P500 기술섹터 EPS 성장 45% YoY 컨센서스. 실적 발표 전 기대 매수세 유입 지속. 위험선호 체제에서 모멘텀 지속",
+      "momentum": "강함",
+      "data_point": "S&P500 Q1 기술섹터 EPS 성장 45% YoY, Meta $55B·Microsoft $70.46B·Alphabet $107B 매출 컨센서스, TSMC FY2026 매출 30%+ 성장 전망"
     },
     {
-      "zone": "실적 호조 개별 종목(GM·Nucor·LendingClub)",
-      "reason": "GM +5%, Nucor +3%, LendingClub +14% 등 Q1 실적 광범위 서프라이즈. AI 테마 외 전통 산업 실적 견고성 확인.",
+      "zone": "한국 반도체·HBM 관련주 (SK하이닉스 등)",
+      "reason": "반도체 수출 152.5% 급증, 외국인 반도체 순매수 4.83조원으로 AI·HBM 글로벌 수요 펀더멘털 확인. 단기 수급 압박에도 구조적 매수 기반 유지",
       "momentum": "보통",
-      "data_point": "GM +5%, Nucor +3%, LendingClub +14% Q1 실적"
+      "data_point": "한국 반도체 수출 152.5% 급증, 외국인 반도체 섹터 순매수 4.83조원 (최근 집계)"
+    },
+    {
+      "zone": "Broadcom·커스텀칩 설계 관련주",
+      "reason": "Meta-Broadcom 2nm MTIA 1기가와트 배포 딜로 커스텀 AI칩 설계 수요 급증. GPU 대체 트렌드 수혜",
+      "momentum": "강함",
+      "data_point": "Meta-Broadcom 커스텀칩 딜 4/14 발표, 2026 capex $135B 내 MTIA 배포 확대"
     }
   ],
   "neutral_waiting": [
     {
-      "zone": "코스피 반도체(삼성전자·SK하이닉스)",
-      "catalyst_needed": "엔비디아 정규장 종가 +1% 이상 + 외국인 코스피 순매수 재전환 확인"
+      "zone": "코스피 2,600pt 레인지 (현 6,653.5 코스피200 환산 기준)",
+      "catalyst_needed": "빅테크 실적 발표 후 외국인 순매수 전환 확인 또는 나스닥 25,000pt 안착 신호"
     },
     {
-      "zone": "나스닥 AI 인프라 섹터 전반",
-      "catalyst_needed": "Oracle 쇼크 개별 종목 격리 확인(나스닥 +0.5% 이상 종가) 또는 엔비디아 독립 강세"
-    }
-  ],
-  "hidden_signals": [
-    {
-      "signal": "외국인 코스피 순매도 패턴이 Oracle 프리마켓 시점과 일치",
-      "implication": "4/28 외국인 -2197억은 Oracle 쇼크 선제 반영 패턴일 가능성. AI 테마 노출 높은 코스피 반도체 선제 매도로 해석 시 오늘 추가 외국인 이탈 가능성 경계.",
-      "confidence": "보통"
+      "zone": "엔비디아·반도체 장비주",
+      "catalyst_needed": "Meta-Broadcom 커스텀칩 GPU 대체 규모 구체화 발표 및 엔비디아 FY2027 가이던스 유지 확인"
     },
     {
-      "signal": "Fear & Greed 66(Greed) + 나스닥 연고점권 + AI 내러티브 균열 삼중 조건",
-      "implication": "역사적으로 Greed 구간에서 악재 노출 시 되돌림 속도 빠름. DeepSeek 쇼크(1월) 패턴 유사 세팅. 60거래일 중 6회 발생한 '상승 3일+ 후 충격' 패턴과 일치.",
-      "confidence": "보통"
-    },
-    {
-      "signal": "S&P500 매출 성장률 9.7% — 2022년 Q3 이후 최고치",
-      "implication": "AI 테마 외 광범위 펀더멘털 개선 확인. Oracle 쇼크가 AI 특정 종목 이슈로 격리될 경우 S&P500 전반 하락 폭 제한 가능.",
-      "confidence": "높음"
+      "zone": "FOMC 관련 금리 민감 섹터 (리츠·유틸리티·채권ETF)",
+      "catalyst_needed": "4/29 FOMC 파월 기자회견에서 금리인하 시그널 또는 매파적 발언 여부 확인"
     }
   ],
   "thesis_killers": [
     {
       "event": "나스닥",
-      "timeframe": "당일 정규장 종가",
-      "confirms_if": "나스닥 +0.5% 이상 종가 → Oracle 쇼크 개별 종목 격리 성공, AI 내러티브 유지",
-      "invalidates_if": "나스닥 -1.5% 이하 종가 → AI 캐펙스 내러티브 전면 붕괴, 위험선호 레짐 종료",
+      "timeframe": "4/29~30 빅테크 실적 발표 당일",
+      "confirms_if": "나스닥 +1.5% 이상 종가 (25,000pt 상향 돌파)",
+      "invalidates_if": "나스닥 -1.5% 이하 종가 (24,293pt 이탈)",
       "quality": "ok"
     },
     {
       "event": "엔비디아",
-      "timeframe": "당일 정규장 종가",
-      "confirms_if": "엔비디아 +1% 이상 종가 → AI 수요 내러티브 Oracle과 차별화 성공",
-      "invalidates_if": "엔비디아 -2% 이하 종가 → AI 인프라 섹터 전반 매도 전환, SK하이닉스 -2.8% 이상 연동 낙폭 현실화",
+      "timeframe": "4/29 장중",
+      "confirms_if": "엔비디아 +2% 이상 (Meta-Broadcom 리스크 소화 확인)",
+      "invalidates_if": "엔비디아 -3% 이하 (GPU 대체 수요 공포 현실화)",
       "quality": "ok"
     }
   ],
@@ -137,7 +141,7 @@
         "peak_pct": 8.98,
         "peak_day": 6,
         "quality_tier": "high",
-        "relevance_score": 0.7577382518764662,
+        "relevance_score": 0.7574720483107218,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -150,7 +154,7 @@
         "peak_pct": 8.86,
         "peak_day": 4,
         "quality_tier": "high",
-        "relevance_score": 0.7569130420995417,
+        "relevance_score": 0.7566475668604715,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -163,7 +167,7 @@
         "peak_pct": 6.46,
         "peak_day": 6,
         "quality_tier": "high",
-        "relevance_score": 0.7499607091274789,
+        "relevance_score": 0.7496966845691556,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -176,7 +180,7 @@
         "peak_pct": 5.18,
         "peak_day": 5,
         "quality_tier": "high",
-        "relevance_score": 0.7489802277690508,
+        "relevance_score": 0.7487154788639704,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -189,7 +193,7 @@
         "peak_pct": 7.51,
         "peak_day": 4,
         "quality_tier": "high",
-        "relevance_score": 0.7484214816901309,
+        "relevance_score": 0.7481552781243864,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -202,7 +206,7 @@
         "peak_pct": 7.51,
         "peak_day": 4,
         "quality_tier": "high",
-        "relevance_score": 0.7481552781243864,
+        "relevance_score": 0.7478898028853163,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -215,7 +219,7 @@
         "peak_pct": 7.18,
         "peak_day": 4,
         "quality_tier": "high",
-        "relevance_score": 0.7457976468520533,
+        "relevance_score": 0.7455314432863089,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -228,7 +232,7 @@
         "peak_pct": 7.18,
         "peak_day": 4,
         "quality_tier": "high",
-        "relevance_score": 0.7455314432863089,
+        "relevance_score": 0.7452659680472388,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -241,7 +245,7 @@
         "peak_pct": 6.53,
         "peak_day": 6,
         "quality_tier": "high",
-        "relevance_score": 0.740176140075224,
+        "relevance_score": 0.7399099365094797,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -254,7 +258,7 @@
         "peak_pct": 6.33,
         "peak_day": 6,
         "quality_tier": "high",
-        "relevance_score": 0.738452537590752,
+        "relevance_score": 0.7381863340250076,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -267,7 +271,7 @@
         "peak_pct": 7.81,
         "peak_day": 1,
         "quality_tier": "high",
-        "relevance_score": 0.7356522635689706,
+        "relevance_score": 0.7355393382106886,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -280,7 +284,7 @@
         "peak_pct": 109.14,
         "peak_day": 7,
         "quality_tier": "high",
-        "relevance_score": 0.7346442641930637,
+        "relevance_score": 0.7346146059306083,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -293,7 +297,7 @@
         "peak_pct": 8.97,
         "peak_day": 7,
         "quality_tier": "high",
-        "relevance_score": 0.7308738302697598,
+        "relevance_score": 0.7307618292612063,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -306,7 +310,7 @@
         "peak_pct": 4.58,
         "peak_day": 6,
         "quality_tier": "high",
-        "relevance_score": 0.7302091563324479,
+        "relevance_score": 0.7299451317741246,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -319,7 +323,7 @@
         "peak_pct": 5.45,
         "peak_day": 5,
         "quality_tier": "high",
-        "relevance_score": 0.7299875762610324,
+        "relevance_score": 0.7297221010219622,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -332,7 +336,7 @@
         "peak_pct": 9.21,
         "peak_day": 7,
         "quality_tier": "high",
-        "relevance_score": 0.7260554100808353,
+        "relevance_score": 0.7259440210981237,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -345,7 +349,7 @@
         "peak_pct": 14.52,
         "peak_day": 6,
         "quality_tier": "high",
-        "relevance_score": 0.7257001648141818,
+        "relevance_score": 0.7256705065517264,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -358,7 +362,7 @@
         "peak_pct": 7.51,
         "peak_day": 5,
         "quality_tier": "high",
-        "relevance_score": 0.7256888352650066,
+        "relevance_score": 0.7255395022056509,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -371,7 +375,7 @@
         "peak_pct": 4.89,
         "peak_day": 5,
         "quality_tier": "high",
-        "relevance_score": 0.7235124209815293,
+        "relevance_score": 0.7232469457424592,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       },
@@ -384,7 +388,7 @@
         "peak_pct": 7.95,
         "peak_day": 7,
         "quality_tier": "high",
-        "relevance_score": 0.7217340282344937,
+        "relevance_score": 0.7216232479332291,
         "cluster_id": "cluster_run_20260428125758_81bb5d55_c01",
         "cluster_label": "low_vix_bullish_riskon_growth"
       }
@@ -396,8 +400,8 @@
   "data_quality": "degraded",
   "jackal_candidate_review": {
     "analysis_date": "2026-04-29",
-    "market_bias": "mixed",
-    "market_bias_label": "혼조/관망",
+    "market_bias": "risk_on",
+    "market_bias_label": "위험선호",
     "reviewed_count": 0,
     "aligned_count": 0,
     "neutral_count": 0,
@@ -419,41 +423,41 @@
   "jackal_probability_summary": {
     "window_days": 90,
     "min_samples": 5,
-    "raw_rows": 345,
-    "deduped_rows": 345,
+    "raw_rows": 350,
+    "deduped_rows": 350,
     "duplicates_skipped": 0,
     "overall": {
-      "wins": 256,
+      "wins": 261,
       "losses": 89,
-      "total": 345,
-      "avg_return": 4.315,
-      "win_rate": 74.2,
-      "effective_win_rate": 73.9,
+      "total": 350,
+      "avg_return": 4.379,
+      "win_rate": 74.6,
+      "effective_win_rate": 74.3,
       "qualified": true
     },
     "trusted_families": [
       {
         "signal_family": "panic_rebound",
         "signal_family_label": "패닉셀반등",
-        "wins": 50,
+        "wins": 54,
         "losses": 14,
-        "total": 64,
-        "avg_return": 5.965,
+        "total": 68,
+        "avg_return": 6.161,
         "source_event_type": "backtest",
-        "win_rate": 78.1,
-        "effective_win_rate": 76.5,
+        "win_rate": 79.4,
+        "effective_win_rate": 77.8,
         "qualified": true
       },
       {
         "signal_family": "momentum_pullback",
         "signal_family_label": "모멘텀눌림목",
-        "wins": 145,
+        "wins": 146,
         "losses": 49,
-        "total": 194,
-        "avg_return": 4.28,
+        "total": 195,
+        "avg_return": 4.296,
         "source_event_type": "backtest",
-        "win_rate": 74.7,
-        "effective_win_rate": 74.2,
+        "win_rate": 74.9,
+        "effective_win_rate": 74.4,
         "qualified": true
       },
       {
@@ -533,36 +537,36 @@
       {
         "signal_family": "momentum_pullback",
         "signal_family_label": "모멘텀눌림목",
-        "wins": 145,
+        "wins": 146,
         "losses": 49,
-        "total": 194,
-        "avg_return": 4.28,
+        "total": 195,
+        "avg_return": 4.296,
         "source_event_type": "backtest",
-        "win_rate": 74.7,
-        "effective_win_rate": 74.2,
+        "win_rate": 74.9,
+        "effective_win_rate": 74.4,
         "qualified": true
       },
       {
         "signal_family": "panic_rebound",
         "signal_family_label": "패닉셀반등",
-        "wins": 50,
+        "wins": 54,
         "losses": 14,
-        "total": 64,
-        "avg_return": 5.965,
+        "total": 68,
+        "avg_return": 6.161,
         "source_event_type": "backtest",
-        "win_rate": 78.1,
-        "effective_win_rate": 76.5,
+        "win_rate": 79.4,
+        "effective_win_rate": 77.8,
         "qualified": true
       }
     ],
     "alignment_summary": {
       "backtest": {
-        "wins": 256,
+        "wins": 261,
         "losses": 89,
-        "total": 345,
-        "avg_return": 4.315,
-        "win_rate": 74.2,
-        "effective_win_rate": 73.9,
+        "total": 350,
+        "avg_return": 4.379,
+        "win_rate": 74.6,
+        "effective_win_rate": 74.3,
         "qualified": true
       }
     },
@@ -661,21 +665,21 @@
     "orca_state_db": {
       "path": "data/orca_state.db",
       "exists": true,
-      "size_bytes": 19677184,
-      "mtime_iso": "2026-04-29T08:11:36.762786+09:00"
+      "size_bytes": 19832832,
+      "mtime_iso": "2026-04-29T13:17:47.246794+09:00"
     },
     "jackal_state_db": {
       "path": "data/jackal_state.db",
       "exists": true,
-      "size_bytes": 135168,
-      "mtime_iso": "2026-04-29T08:08:43.583565+09:00",
+      "size_bytes": 229376,
+      "mtime_iso": "2026-04-29T13:17:25.973238+09:00",
       "tables": {
         "jackal_shadow_signals": 0,
         "jackal_live_events": 10,
         "jackal_shadow_batches": 0,
-        "jackal_weight_snapshots": 0,
+        "jackal_weight_snapshots": 1,
         "jackal_recommendations": 0,
-        "jackal_accuracy_projection": 0,
+        "jackal_accuracy_projection": 89,
         "jackal_cooldowns": 0
       }
     }
