@@ -23,6 +23,7 @@ from .state import (
 KST = timezone(timedelta(hours=9))
 DEFAULT_MD = REPORTS_DIR / "orca_research_comparison.md"
 DEFAULT_JSON = REPORTS_DIR / "orca_research_comparison.json"
+JACKAL_RESEARCH_STATUSES = ("completed", "skipped_no_new_data", "skipped")
 
 
 def _now_iso() -> str:
@@ -82,10 +83,62 @@ def _find_latest_orca_sessions() -> tuple[dict[str, Any] | None, dict[str, Any] 
 
 
 def _find_latest_jackal_sessions() -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
-    sessions = list_backtest_sessions("jackal", label="backtest", limit=2)
+    sessions = [
+        session
+        for session in _list_jackal_backtest_sessions(limit=20)
+        if _jackal_session_evaluation_issue(session) is None
+    ]
     if not sessions:
         return None, None
     return sessions[0], (sessions[1] if len(sessions) > 1 else None)
+
+
+def _session_sort_key(session: dict[str, Any]) -> str:
+    return str(session.get("ended_at") or session.get("started_at") or "")
+
+
+def _list_jackal_backtest_sessions(limit: int = 10) -> list[dict[str, Any]]:
+    sessions: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for status in JACKAL_RESEARCH_STATUSES:
+        for session in list_backtest_sessions("jackal", label="backtest", status=status, limit=limit):
+            session_id = str(session.get("session_id") or "")
+            if session_id and session_id in seen:
+                continue
+            if session_id:
+                seen.add(session_id)
+            sessions.append(session)
+    sessions.sort(key=_session_sort_key, reverse=True)
+    return sessions[:limit]
+
+
+def _find_latest_raw_jackal_session() -> dict[str, Any] | None:
+    sessions = _list_jackal_backtest_sessions(limit=1)
+    return sessions[0] if sessions else None
+
+
+def _jackal_session_evaluation_issue(session: dict[str, Any] | None) -> str | None:
+    if not isinstance(session, dict):
+        return "missing_session"
+    status = session.get("status")
+    if status != "completed":
+        return f"status_{status or 'missing'}"
+    summary = session.get("summary", {})
+    if not isinstance(summary, dict):
+        return "missing_summary"
+    if summary.get("evaluable") is False:
+        return str(summary.get("skip_reason") or "marked_not_evaluable")
+    try:
+        total_tracked = float(summary.get("total_tracked") or 0)
+    except (TypeError, ValueError):
+        return "invalid_total_tracked"
+    if total_tracked <= 0:
+        return "total_tracked_zero"
+    if summary.get("swing_accuracy") is None:
+        return "missing_swing_accuracy"
+    if summary.get("d1_accuracy") is None:
+        return "missing_d1_accuracy"
+    return None
 
 
 def _phase_summary(session_id: str) -> dict[str, Any]:
@@ -170,21 +223,23 @@ def _build_accuracy_snapshot(min_total: int = 3, limit: int = 5) -> dict[str, An
     devil_overall = list_jackal_accuracy_projection(family="devil", scope="overall", limit=50)
     rec_regime = list_jackal_accuracy_projection(family="recommendation", scope="regime", limit=200)
     rec_inflow = list_jackal_accuracy_projection(family="recommendation", scope="inflow", limit=200)
+    available_rows = {
+        "signal_swing": len(signal_swing),
+        "signal_d1": len(signal_d1),
+        "ticker": len(ticker_overall),
+        "regime": len(regime_overall),
+        "devil": len(devil_overall),
+        "recommendation_regime": len(rec_regime),
+        "recommendation_inflow": len(rec_inflow),
+    }
 
     snapshot = {
         "meta": {
             "minimum_sample": min_total,
             "limit": limit,
             "backfill_rows": backfill_rows,
-            "available_rows": {
-                "signal_swing": len(signal_swing),
-                "signal_d1": len(signal_d1),
-                "ticker": len(ticker_overall),
-                "regime": len(regime_overall),
-                "devil": len(devil_overall),
-                "recommendation_regime": len(rec_regime),
-                "recommendation_inflow": len(rec_inflow),
-            },
+            "available_rows": available_rows,
+            "total_current_rows": sum(available_rows.values()),
         },
         "signal_swing_leaders": _rank_accuracy_rows(
             signal_swing, limit=limit, min_total=min_total, descending=True
@@ -234,6 +289,7 @@ def build_report() -> dict[str, Any]:
     orca_latest, orca_prev = _find_latest_orca_sessions()
     orca_latest = _sanitize_orca_session(orca_latest)
     orca_prev = _sanitize_orca_session(orca_prev)
+    jackal_latest_raw = _find_latest_raw_jackal_session()
     jackal_latest, jackal_prev = _find_latest_jackal_sessions()
     shadow_batches = list_jackal_shadow_batches(20)
 
@@ -254,8 +310,16 @@ def build_report() -> dict[str, Any]:
     warnings: list[str] = []
     if not orca_latest:
         warnings.append(f"No completed {ORCA_NAME} research session found.")
+    raw_jackal_issue = _jackal_session_evaluation_issue(jackal_latest_raw)
+    raw_jackal_session_id = (jackal_latest_raw or {}).get("session_id")
+    representative_jackal_session_id = (jackal_latest or {}).get("session_id")
     if not jackal_latest:
-        warnings.append(f"No completed {JACKAL_NAME} research session found.")
+        warnings.append(f"No completed evaluable {JACKAL_NAME} research session found.")
+    if jackal_latest_raw and raw_jackal_issue and raw_jackal_session_id != representative_jackal_session_id:
+        warnings.append(
+            f"Latest raw {JACKAL_NAME} backtest is not used as representative accuracy "
+            f"because it is not evaluable: {raw_jackal_issue}."
+        )
     if orca_latest and jackal_latest and linked_orca_session_id and linked_orca_session_id != orca_latest["session_id"]:
         warnings.append(
             f"Latest {JACKAL_NAME} backtest is linked to an older {ORCA_NAME} research session, not the latest one."
@@ -296,8 +360,16 @@ def build_report() -> dict[str, Any]:
         "orca": orca_section,
         "jackal_backtest": {
             "latest": jackal_latest,
+            "latest_evaluable": jackal_latest,
+            "latest_raw": jackal_latest_raw,
             "previous": jackal_prev,
             "summary": jackal_summary,
+            "latest_raw_evaluation_issue": raw_jackal_issue,
+            "using_latest_raw_as_representative": bool(
+                raw_jackal_session_id
+                and representative_jackal_session_id
+                and raw_jackal_session_id == representative_jackal_session_id
+            ),
             "source_orca_session_id": linked_orca_session_id,
             "linked_to_latest_orca": bool(
                 orca_latest and linked_orca_session_id and linked_orca_session_id == orca_latest["session_id"]
@@ -382,7 +454,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         f"## {JACKAL_NAME} Backtest",
         "",
-        f"- Session: `{(jackal.get('latest') or {}).get('session_id', 'n/a')}`",
+        f"- Representative evaluable session: `{(jackal.get('latest_evaluable') or {}).get('session_id', 'n/a')}`",
+        f"- Latest raw session: `{(jackal.get('latest_raw') or {}).get('session_id', 'n/a')}` "
+        f"(status=`{(jackal.get('latest_raw') or {}).get('status', 'n/a')}`, "
+        f"issue=`{jackal.get('latest_raw_evaluation_issue') or 'none'}`)",
         f"- Source {ORCA_NAME} session: `{jackal.get('source_orca_session_id') or 'n/a'}`",
         f"- Linked to latest {ORCA_NAME}: `{jackal.get('linked_to_latest_orca')}`",
         f"- Pipeline: `{jackal_summary.get('pipeline', 'n/a')}`",
@@ -401,6 +476,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Projection source: `jackal_accuracy_current`",
         f"- Minimum sample filter: `{accuracy_meta.get('minimum_sample', 'n/a')}`",
         f"- Backfilled latest snapshot rows this run: `{accuracy_meta.get('backfill_rows', 0)}`",
+        f"- Current projection rows: `{accuracy_meta.get('total_current_rows', 0)}`",
         f"- Best swing signals: `{_fmt_accuracy_entries(accuracy_view.get('signal_swing_leaders', []))}`",
         f"- Best D1 signals: `{_fmt_accuracy_entries(accuracy_view.get('signal_d1_leaders', []))}`",
         f"- Weakest tickers: `{_fmt_accuracy_entries(accuracy_view.get('ticker_laggards', []))}`",

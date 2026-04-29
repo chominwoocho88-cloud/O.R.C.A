@@ -262,7 +262,7 @@ CREATE TABLE candidate_lessons (
 
 ### 8.1 From `jackal_live_events`
 
-현재 [orca/state.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/orca/state.py:197)의 `jackal_live_events`는 아래처럼 매핑한다.
+현재 [orca/state.py](../orca/state.py:197)의 `jackal_live_events`는 아래처럼 매핑한다.
 
 - `event_type='hunt'` → `candidate_registry.source_event_type='hunt'`
 - `payload_json.final_score` → `candidate_registry.final_score`
@@ -270,7 +270,7 @@ CREATE TABLE candidate_lessons (
 
 ### 8.2 From `jackal_shadow_signals`
 
-현재 [orca/state.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/orca/state.py:165)의 shadow row는 `candidate_registry`에 `source_event_type='shadow'`로 같이 넣는다.
+현재 [orca/state.py](../orca/state.py:165)의 shadow row는 `candidate_registry`에 `source_event_type='shadow'`로 같이 넣는다.
 
 차이는 이렇다.
 
@@ -296,7 +296,7 @@ ORCA는 `portfolio` 대신 `open candidates`를 읽어야 한다.
 
 ### 9.1 New Step in `orca.main`
 
-기존 [orca/main.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/orca/main.py:443) 이후 흐름을 아래처럼 바꾼다.
+기존 [orca/main.py](../orca/main.py:443) 이후 흐름을 아래처럼 바꾼다.
 
 ```text
 Market Data
@@ -345,7 +345,7 @@ review 결과에 아래를 남긴다.
 
 ### 10.1 Hunter
 
-현재 [jackal/hunter.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/jackal/hunter.py:1396) 흐름에서 `top5` 결과를 `hunt_log.json`과 `jackal_live_events`에만 저장한다.
+현재 [jackal/hunter.py](../jackal/hunter.py:1396) 흐름에서 `top5` 결과를 `hunt_log.json`과 `jackal_live_events`에만 저장한다.
 
 v2에서는 여기서 동시에 `candidate_registry`에 기록한다.
 
@@ -363,7 +363,7 @@ v2에서는 여기서 동시에 `candidate_registry`에 기록한다.
 
 ### 10.2 Scanner
 
-현재 [jackal/scanner.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/jackal/scanner.py:1646)와 [jackal/scanner.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/jackal/scanner.py:1754)에서 shadow와 final log를 별도로 남긴다.
+현재 [jackal/scanner.py](../jackal/scanner.py:1646)와 [jackal/scanner.py](../jackal/scanner.py:1754)에서 shadow와 final log를 별도로 남긴다.
 
 v2에서는 둘 다 `candidate_registry`로 들어가야 한다.
 
@@ -372,7 +372,7 @@ v2에서는 둘 다 `candidate_registry`로 들어가야 한다.
 
 ### 10.3 Tracker
 
-현재 [jackal/tracker.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/jackal/tracker.py:443) 이후 로직은 `hunt_log`를 직접 수정한다.
+현재 [jackal/tracker.py](../jackal/tracker.py:443) 이후 로직은 `hunt_log`를 직접 수정한다.
 
 v2에서는:
 
@@ -435,7 +435,7 @@ v2에서는 최소 아래 축이 추가돼야 한다.
 
 파일:
 
-- [orca/state.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/orca/state.py:1)
+- [orca/state.py](../orca/state.py:1)
 
 작업:
 
@@ -449,8 +449,8 @@ v2에서는 최소 아래 축이 추가돼야 한다.
 
 파일:
 
-- [jackal/hunter.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/jackal/hunter.py:1396)
-- [jackal/scanner.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/jackal/scanner.py:1534)
+- [jackal/hunter.py](../jackal/hunter.py:1396)
+- [jackal/scanner.py](../jackal/scanner.py:1534)
 
 작업:
 
@@ -461,7 +461,7 @@ v2에서는 최소 아래 축이 추가돼야 한다.
 
 파일:
 
-- [jackal/tracker.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/jackal/tracker.py:430)
+- [jackal/tracker.py](../jackal/tracker.py:430)
 
 작업:
 
@@ -472,8 +472,8 @@ v2에서는 최소 아래 축이 추가돼야 한다.
 
 파일:
 
-- [orca/main.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/orca/main.py:350)
-- [orca/analysis.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/orca/analysis.py:326)
+- [orca/main.py](../orca/main.py:350)
+- [orca/analysis.py](../orca/analysis.py:326)
 
 작업:
 
@@ -485,8 +485,8 @@ v2에서는 최소 아래 축이 추가돼야 한다.
 
 파일:
 
-- [orca/research_report.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/orca/research_report.py:1)
-- [orca/research_gate.py](/C:/Users/cho.minwoo/Desktop/aria-agent-main/orca/research_gate.py:1)
+- [orca/research_report.py](../orca/research_report.py:1)
+- [orca/research_gate.py](../orca/research_gate.py:1)
 
 작업:
 

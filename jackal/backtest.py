@@ -86,6 +86,7 @@ TRACKING_DAYS = 10
 BACKTEST_MODE_FULL = "full"
 BACKTEST_MODE_INCREMENTAL = "incremental"
 BACKTEST_CURSOR_STATE_KEY = "jackal_materialization_cursor"
+SKIPPED_NO_NEW_DATA_STATUS = "skipped_no_new_data"
 JACKAL_HISTORY_DAYS = _env_int("JACKAL_HISTORY_DAYS", 750)
 YF_HISTORY_PERIOD = f"{JACKAL_HISTORY_DAYS}d"
 
@@ -546,6 +547,8 @@ def run_backtest(
                 "backtest_version": "v3_learning_loop",
                 "backtest_days": 0,
                 "total_tracked": 0,
+                "evaluable": False,
+                "skip_reason": "no_new_incremental_data" if mode == BACKTEST_MODE_INCREMENTAL else "no_backtest_input",
                 "materialized_candidates": 0,
                 "materialized_outcomes": 0,
                 "materialized_lessons": 0,
@@ -559,7 +562,7 @@ def run_backtest(
                 BACKTEST_CURSOR_STATE_KEY,
                 {"last_materialized_analysis_date": source_info.get("incremental_from_analysis_date")},
             )
-            finish_backtest_session(_JACKAL_SESSION_ID, "completed", summary=summary)
+            finish_backtest_session(_JACKAL_SESSION_ID, SKIPPED_NO_NEW_DATA_STATUS, summary=summary)
             print("\nℹ️  신규 incremental 대상이 없어 세션만 기록했습니다.")
             return summary
 
@@ -797,6 +800,8 @@ def run_backtest(
                 "backtest_version": "v3_learning_loop",
                 "backtest_days": len(memory),
                 "total_tracked": 0,
+                "evaluable": False,
+                "skip_reason": "no_trackable_outcomes",
                 "funnel_totals": funnel_totals,
                 "materialized_candidates": materialization_totals["candidates"],
                 "materialized_outcomes": materialization_totals["outcomes"],
@@ -806,7 +811,7 @@ def run_backtest(
                 "auto_context_snapshot": auto_context_snapshot,
                 "last_materialized_analysis_date": last_materialized_analysis_date,
             }
-            finish_backtest_session(_JACKAL_SESSION_ID, "completed", summary=summary)
+            finish_backtest_session(_JACKAL_SESSION_ID, SKIPPED_NO_NEW_DATA_STATUS, summary=summary)
             print("\n⚠️  추적 가능한 결과 없음 (데이터 부족 또는 최근 날짜 전용)")
             print(f"🗃️ Jackal research session saved: {_JACKAL_SESSION_ID}")
             return summary
@@ -873,6 +878,7 @@ def run_backtest(
             "pipeline": "Universe→Stage1(50)→Stage2(25)→Stage3(10)→Stage4(5)",
             "backtest_days": len(memory),
             "total_tracked": total,
+            "evaluable": total > 0,
             "d1_accuracy": round(d1_acc, 1),
             "swing_accuracy": round(sw_acc, 1),
             "bullish_div_accuracy": round(div_acc, 1),

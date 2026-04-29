@@ -23,6 +23,10 @@ DEFAULT_THRESHOLDS = {
     "jackal_swing_accuracy_min_delta": -5.0,
     "jackal_d1_accuracy_min_delta": -5.0,
     "shadow_rolling_10_min_rate": 45.0,
+    "orca_judged_count_min": 100,
+    "jackal_total_tracked_min": 100,
+    "shadow_rolling_10_min_batches": 10,
+    "jackal_projection_rows_min": 1,
 }
 
 
@@ -108,6 +112,52 @@ def _check_minimum(
     }
 
 
+def _check_sample_count(
+    name: str,
+    value: float | int | None,
+    minimum: float | int,
+    *,
+    status_on_shortfall: str = "warn",
+) -> dict[str, Any]:
+    if value is None:
+        return {
+            "name": name,
+            "status": "warn",
+            "reason": "missing_value",
+            "current": value,
+            "threshold": minimum,
+            "sample_count": value,
+        }
+    try:
+        current = float(value)
+    except (TypeError, ValueError):
+        return {
+            "name": name,
+            "status": "warn",
+            "reason": "invalid_value",
+            "current": value,
+            "threshold": minimum,
+            "sample_count": value,
+        }
+    if current < float(minimum):
+        return {
+            "name": name,
+            "status": status_on_shortfall,
+            "reason": "insufficient_sample",
+            "current": value,
+            "threshold": minimum,
+            "sample_count": value,
+        }
+    return {
+        "name": name,
+        "status": "pass",
+        "reason": "ok",
+        "current": value,
+        "threshold": minimum,
+        "sample_count": value,
+    }
+
+
 def _check_boolean(name: str, value: bool, *, warn_if_missing: bool = False) -> dict[str, Any]:
     if warn_if_missing and value is False:
         return {
@@ -132,11 +182,18 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
     orca = report.get("orca", {})
     jackal = report.get("jackal_backtest", {})
     shadow = report.get("jackal_shadow", {})
+    accuracy_view = report.get("jackal_accuracy_view", {})
     warnings = report.get("warnings", [])
 
     orca_summary = orca.get("summary", {})
     jackal_summary = jackal.get("summary", {})
     rolling_shadow = shadow.get("rolling_10", {})
+    accuracy_meta = accuracy_view.get("meta", {}) if isinstance(accuracy_view, dict) else {}
+    available_projection_rows = accuracy_meta.get("total_current_rows")
+    if available_projection_rows is None:
+        available_rows = accuracy_meta.get("available_rows", {}) if isinstance(accuracy_meta, dict) else {}
+        if isinstance(available_rows, dict):
+            available_projection_rows = sum(int(value or 0) for value in available_rows.values())
 
     checks = [
         _check_delta(
@@ -157,11 +214,31 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
             cfg["jackal_d1_accuracy_min_delta"],
             current=jackal_summary.get("d1_accuracy"),
         ),
+        _check_sample_count(
+            "orca_judged_count_minimum",
+            orca_summary.get("judged_count"),
+            cfg["orca_judged_count_min"],
+        ),
+        _check_sample_count(
+            "jackal_total_tracked_minimum",
+            jackal_summary.get("total_tracked"),
+            cfg["jackal_total_tracked_min"],
+        ),
         _check_minimum(
             "jackal_shadow_rolling_10_rate",
             rolling_shadow.get("rate"),
             cfg["shadow_rolling_10_min_rate"],
             sample_count=rolling_shadow.get("batch_count"),
+        ),
+        _check_sample_count(
+            "jackal_shadow_rolling_10_batch_count",
+            rolling_shadow.get("batch_count"),
+            cfg["shadow_rolling_10_min_batches"],
+        ),
+        _check_sample_count(
+            "jackal_projection_rows_available",
+            available_projection_rows,
+            cfg["jackal_projection_rows_min"],
         ),
         _check_boolean(
             "jackal_linked_to_latest_orca",
@@ -169,6 +246,17 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
             warn_if_missing=not bool(jackal.get("latest")) or not bool(orca.get("latest")),
         ),
     ]
+
+    latest_raw_issue = jackal.get("latest_raw_evaluation_issue")
+    if latest_raw_issue and not jackal.get("using_latest_raw_as_representative"):
+        checks.append(
+            {
+                "name": "jackal_latest_raw_evaluable",
+                "status": "warn",
+                "reason": str(latest_raw_issue),
+                "current": False,
+            }
+        )
 
     fail_count = sum(1 for item in checks if item["status"] == "fail")
     warn_count = sum(1 for item in checks if item["status"] == "warn")
@@ -213,6 +301,24 @@ def render_markdown(gate: dict[str, Any]) -> str:
         lines.append(
             f"| {item['name']} | {item['status']} | {current_str} | {delta_str} | {threshold_str} | {item['reason']} |"
         )
+
+    weak_checks = [item for item in gate.get("checks", []) if item.get("status") != "pass"]
+    lines.extend(
+        [
+            "",
+            "## Reliability Notes",
+            "",
+        ]
+    )
+    if weak_checks:
+        lines.extend(
+            [
+                f"- `{item['name']}` is `{item['status']}` because `{item.get('reason', 'unknown')}`."
+                for item in weak_checks
+            ]
+        )
+    else:
+        lines.append("- Minimum sample and dependency checks passed.")
 
     lines.extend(
         [

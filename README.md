@@ -86,13 +86,13 @@ This means the system learns from candidate quality and market alignment, not ju
 ## Documents
 
 - Candidate-registry v2 design:
-  [docs/orca_candidate_registry_v2.md](/C:/Users/cho.minwoo/Desktop/aria-agent-main/docs/orca_candidate_registry_v2.md)
+  [docs/orca_candidate_registry_v2.md](docs/orca_candidate_registry_v2.md)
 - Architecture and migration notes:
-  [docs/orca_v2_architecture.md](/C:/Users/cho.minwoo/Desktop/aria-agent-main/docs/orca_v2_architecture.md)
+  [docs/orca_v2_architecture.md](docs/orca_v2_architecture.md)
 - Backlog:
-  [docs/orca_v2_backlog.md](/C:/Users/cho.minwoo/Desktop/aria-agent-main/docs/orca_v2_backlog.md)
+  [docs/orca_v2_backlog.md](docs/orca_v2_backlog.md)
 - Release readiness and GitHub handoff:
-  [docs/orca_jackal_release_readiness.md](/C:/Users/cho.minwoo/Desktop/aria-agent-main/docs/orca_jackal_release_readiness.md)
+  [docs/orca_jackal_release_readiness.md](docs/orca_jackal_release_readiness.md)
 
 ## Current Caveats
 
