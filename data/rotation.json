@@ -1,66 +1,36 @@
 {
   "ranking": [
     [
-      "미국 IT/반도체 섹터",
+      "빅테크·AI 실적 기대 섹터 (Meta, Microsoft, Alphabet, Amazon)",
+      3
+    ],
+    [
+      "Broadcom·커스텀칩 설계 관련주",
+      3
+    ],
+    [
+      "한국 반도체·HBM 관련주 (SK하이닉스 등)",
       1
     ],
     [
-      "실적 호조 개별 종목(GM·Nucor·LendingClub)",
-      1
+      "KOSPI·KOSDAQ 단기 차익실현",
+      -2
     ],
     [
-      "코스피 — 외국인",
+      "OpenAI 에코시스템 연동 클라우드 인프라주 (Oracle 등)",
       -3
     ],
     [
-      "Oracle / AI 인프라 관련주",
+      "엔비디아·AMD 프리미엄 GPU 수요 일부",
       -3
     ]
   ],
   "rotation_signal": {
-    "from": "Oracle / AI 인프라 관련주",
-    "to": "미국 IT/반도체 섹터",
-    "strength": "보통"
+    "from": "엔비디아·AMD 프리미엄 GPU 수요 일부",
+    "to": "빅테크·AI 실적 기대 섹터 (Meta, Microsoft, Alphabet, Amazon)",
+    "strength": "강함"
   },
   "history": [
-    {
-      "date": "2026-04-18",
-      "ranking": [
-        [
-          "반도체·AI 인프라(글로벌)",
-          3
-        ],
-        [
-          "한국 반도체(SK하이닉스·삼성전자)",
-          1
-        ],
-        [
-          "미국 소형주(Russell 2000)",
-          1
-        ],
-        [
-          "원자재·에너지(원유 수요 측면)",
-          -2
-        ],
-        [
-          "헬스케어 섹터",
-          -3
-        ],
-        [
-          "스트리밍·미디어(넷플릭스 중심)",
-          -3
-        ],
-        [
-          "중동 수출 의존 한국 산업재(자동차·석유화학)",
-          -3
-        ]
-      ],
-      "rotation_signal": {
-        "from": "중동 수출 의존 한국 산업재(자동차·석유화학)",
-        "to": "반도체·AI 인프라(글로벌)",
-        "strength": "강함"
-      }
-    },
     {
       "date": "2026-04-18",
       "ranking": [
@@ -937,6 +907,40 @@
         "from": "Oracle / AI 인프라 관련주",
         "to": "미국 IT/반도체 섹터",
         "strength": "보통"
+      }
+    },
+    {
+      "date": "2026-04-29",
+      "ranking": [
+        [
+          "빅테크·AI 실적 기대 섹터 (Meta, Microsoft, Alphabet, Amazon)",
+          3
+        ],
+        [
+          "Broadcom·커스텀칩 설계 관련주",
+          3
+        ],
+        [
+          "한국 반도체·HBM 관련주 (SK하이닉스 등)",
+          1
+        ],
+        [
+          "KOSPI·KOSDAQ 단기 차익실현",
+          -2
+        ],
+        [
+          "OpenAI 에코시스템 연동 클라우드 인프라주 (Oracle 등)",
+          -3
+        ],
+        [
+          "엔비디아·AMD 프리미엄 GPU 수요 일부",
+          -3
+        ]
+      ],
+      "rotation_signal": {
+        "from": "엔비디아·AMD 프리미엄 GPU 수요 일부",
+        "to": "빅테크·AI 실적 기대 섹터 (Meta, Microsoft, Alphabet, Amazon)",
+        "strength": "강함"
       }
     }
   ],
