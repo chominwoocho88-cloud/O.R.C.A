@@ -266,6 +266,19 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
     max_projection_sample_count = accuracy_meta.get("max_sample_count")
     missing_reasons = accuracy_meta.get("missing_reasons", []) if isinstance(accuracy_meta, dict) else []
     recommendation_projection_rows = recommendation.get("projection_rows")
+    recommendation_missing_reasons = (
+        recommendation.get("missing_reasons", []) if isinstance(recommendation, dict) else []
+    )
+    recommendation_projection_reason = "missing_recommendation_samples"
+    for candidate_reason in (
+        "missing_recommendation_samples",
+        "missing_recommendation_outcomes",
+        "missing_recommendation_projection_rows",
+        "missing_recommendation_current_rows",
+    ):
+        if candidate_reason in recommendation_missing_reasons:
+            recommendation_projection_reason = candidate_reason
+            break
     provider_latest = provider_quality.get("latest_backtest", {}) if isinstance(provider_quality, dict) else {}
     provider_failure_rate = provider_latest.get("failure_rate")
 
@@ -330,7 +343,7 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
             "jackal_recommendation_projection_rows_available",
             recommendation_projection_rows,
             cfg["jackal_recommendation_projection_rows_min"],
-            missing_reason="missing_recommendation_samples",
+            missing_reason=recommendation_projection_reason,
         ),
         _check_maximum(
             "jackal_latest_evaluable_freshness_hours",
@@ -369,6 +382,18 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
         checks.append(
             {
                 "name": f"jackal_projection_state_{reason}",
+                "status": "warn",
+                "reason": str(reason),
+                "current": False,
+            }
+        )
+
+    for reason in recommendation_missing_reasons:
+        if reason == recommendation_projection_reason:
+            continue
+        checks.append(
+            {
+                "name": f"jackal_recommendation_state_{reason}",
                 "status": "warn",
                 "reason": str(reason),
                 "current": False,

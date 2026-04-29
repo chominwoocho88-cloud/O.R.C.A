@@ -116,6 +116,43 @@ class ResearchGateSampleQualityTests(unittest.TestCase):
         self.assertEqual(raw_check["status"], "pass")
         self.assertEqual(raw_check["reason"], "incremental_no_new_data")
 
+    def test_recommendation_projection_reason_distinguishes_missing_outcomes(self) -> None:
+        report = {
+            "generated_at": "2026-04-29T00:00:00+09:00",
+            "orca": {"summary": {"final_accuracy": 55.0, "judged_count": 120}, "deltas": {"final_accuracy": 0.0}, "latest": {"session_id": "orca"}},
+            "jackal_backtest": {
+                "summary": {"swing_accuracy": 70.0, "d1_accuracy": 47.0, "total_tracked": 120},
+                "deltas": {"swing_accuracy": 0.0, "d1_accuracy": 0.0},
+                "latest": {"session_id": "jackal"},
+                "linked_to_latest_orca": True,
+                "latest_evaluable_age_hours": 12,
+            },
+            "jackal_shadow": {"rolling_10": {"rate": 50.0, "batch_count": 10}},
+            "jackal_accuracy_view": {"meta": {"total_current_rows": 1, "total_projection_rows": 1, "max_sample_count": 120, "missing_reasons": []}},
+            "jackal_recommendation_accuracy": {
+                "recommendation_rows": 1,
+                "checked_rows": 0,
+                "projection_rows": 0,
+                "current_rows": 0,
+                "missing_reasons": [
+                    "missing_recommendation_outcomes",
+                    "missing_recommendation_projection_rows",
+                    "missing_recommendation_current_rows",
+                ],
+            },
+            "market_provider_quality": {"latest_backtest": {"failure_rate": 0.0, "fetch_stats": {"total": 8}}},
+            "warnings": [],
+        }
+
+        gate = research_gate.evaluate_report(report)
+        checks = {item["name"]: item for item in gate["checks"]}
+
+        self.assertEqual(checks["jackal_recommendation_projection_rows_available"]["reason"], "missing_recommendation_outcomes")
+        self.assertEqual(
+            checks["jackal_recommendation_state_missing_recommendation_current_rows"]["reason"],
+            "missing_recommendation_current_rows",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

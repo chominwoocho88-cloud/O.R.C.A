@@ -23,6 +23,7 @@ from orca.jackal_quality import (  # noqa: E402
     describe_jackal_shadow_state,
 )
 from orca.market_fetch import get_provider_quality_summary  # noqa: E402
+from scripts.check_requirements_drift import collect_requirements_drift  # noqa: E402
 
 KST = timezone(timedelta(hours=9))
 JSON_SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", "node_modules"}
@@ -289,6 +290,7 @@ def build_audit(*, dry_run: bool = False) -> dict[str, Any]:
 
     json_check = parse_json_files()
     sqlite_checks = sqlite_integrity_checks()
+    requirements_drift = collect_requirements_drift(ROOT / "requirements.txt")
     metrics = collect_state_metrics()
     artifact_checks = run_research_artifacts(dry_run=dry_run)
 
@@ -304,6 +306,8 @@ def build_audit(*, dry_run: bool = False) -> dict[str, Any]:
     warnings = []
     warnings.extend(item for item in [*command_checks, *artifact_checks] if item.get("status") == "skipped")
     warnings.extend(item for item in sqlite_checks if item.get("status") == "warn")
+    if requirements_drift.get("status") == "warn":
+        warnings.append({"name": "requirements_drift", "status": "warn", "reason": requirements_drift.get("reason")})
 
     return {
         "generated_at": _now_iso(),
@@ -314,6 +318,7 @@ def build_audit(*, dry_run: bool = False) -> dict[str, Any]:
             "commands": command_checks,
             "json_parse": json_check,
             "sqlite_integrity": sqlite_checks,
+            "requirements_drift": requirements_drift,
             "research_artifacts": artifact_checks,
         },
         "metrics": metrics,
@@ -338,6 +343,7 @@ def render_markdown(audit: dict[str, Any]) -> str:
     recommendation = metrics.get("jackal_recommendation_accuracy", {})
     provider_quality = metrics.get("market_provider_quality", {})
     provider_latest = provider_quality.get("latest_backtest", {})
+    requirements_drift = audit.get("checks", {}).get("requirements_drift", {})
     lines = [
         "# ORCA/JACKAL Quality Audit",
         "",
@@ -364,6 +370,8 @@ def render_markdown(audit: dict[str, Any]) -> str:
             f"- JSON parse: `{audit['checks']['json_parse']['status']}` "
             f"({audit['checks']['json_parse']['checked']} files, {audit['checks']['json_parse']['error_count']} errors)",
             f"- SQLite integrity: `{json.dumps(audit['checks']['sqlite_integrity'], ensure_ascii=False)}`",
+            f"- Requirements drift: status=`{requirements_drift.get('status')}`, "
+            f"drift=`{requirements_drift.get('drift_count')}`, missing=`{requirements_drift.get('missing_count')}`",
             f"- Research artifact checks: `{json.dumps(audit['checks']['research_artifacts'], ensure_ascii=False)}`",
             "",
             "## Accuracy State",
@@ -379,9 +387,11 @@ def render_markdown(audit: dict[str, Any]) -> str:
             f"- JACKAL projection missing reasons: `{json.dumps(projection_state.get('missing_reasons', []), ensure_ascii=False)}`",
             f"- JACKAL shadow: signals=`{shadow_state.get('signal_rows')}`, batches=`{shadow_state.get('batch_rows')}`, "
             f"missing=`{json.dumps(shadow_state.get('missing_reasons', []), ensure_ascii=False)}`",
+            f"- JACKAL shadow source path: `{shadow_state.get('source_path', 'n/a')}`",
             f"- JACKAL recommendation accuracy: rows=`{recommendation.get('recommendation_rows')}`, checked=`{recommendation.get('checked_rows')}`, "
             f"projection/current=`{recommendation.get('projection_rows')}`/`{recommendation.get('current_rows')}`, "
             f"missing=`{json.dumps(recommendation.get('missing_reasons', []), ensure_ascii=False)}`",
+            f"- JACKAL recommendation source path: `{recommendation.get('source_path', 'n/a')}`",
             f"- Market provider quality: status=`{provider_latest.get('status')}`, "
             f"failure_rate=`{provider_latest.get('failure_rate')}`, stats=`{json.dumps(provider_latest.get('fetch_stats', {}), ensure_ascii=False, sort_keys=True)}`",
             f"- JACKAL row counts: `{json.dumps(metrics.get('jackal_row_counts', {}), ensure_ascii=False, sort_keys=True)}`",

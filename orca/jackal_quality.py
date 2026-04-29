@@ -9,6 +9,26 @@ from . import state
 
 KST = timezone(timedelta(hours=9))
 
+SHADOW_SOURCE_PATH = (
+    "jackal.scanner.run_scan quality skip -> "
+    "jackal.scanner._save_shadow_log -> orca.state.record_jackal_shadow_signal"
+)
+SHADOW_OUTCOME_PATH = (
+    "jackal.evolution.JackalEvolution._learn_from_outcomes -> "
+    "orca.state.resolve_jackal_shadow_signal -> "
+    "orca.state.record_jackal_shadow_accuracy_batch"
+)
+RECOMMENDATION_SOURCE_PATH = (
+    "jackal.scanner._suggest_extra_tickers -> "
+    "jackal.scanner._send_orca_extra_message -> "
+    "jackal.scanner._save_recommendation -> orca.state.sync_jackal_recommendations"
+)
+RECOMMENDATION_OUTCOME_PATH = (
+    "jackal.evolution.JackalEvolution._learn_from_recommendations -> "
+    "orca.state.sync_jackal_recommendations -> "
+    "backfill_recommendation_accuracy_projection"
+)
+
 
 def _now() -> datetime:
     return datetime.now(KST)
@@ -63,6 +83,8 @@ def describe_jackal_shadow_state() -> dict[str, Any]:
         "rolling_10": rolling_10,
         "missing_reasons": missing_reasons,
         "backfill_possible": int(resolved_with_outcome or 0) > 0,
+        "source_path": SHADOW_SOURCE_PATH,
+        "outcome_path": SHADOW_OUTCOME_PATH,
     }
 
 
@@ -112,12 +134,19 @@ def backfill_shadow_batches_from_resolved_signals(*, dry_run: bool = False) -> d
         source_ids.append(row["shadow_id"])
 
     if total == 0:
+        summary = describe_jackal_shadow_state()
+        reason = (
+            "missing_shadow_signals"
+            if int(summary.get("signal_rows") or 0) == 0
+            else "missing_resolved_shadow_outcomes"
+        )
         return {
             "status": "skipped",
-            "reason": "missing_resolved_shadow_outcomes",
+            "reason": reason,
             "total": 0,
             "worked": 0,
             "dry_run": dry_run,
+            "missing_reasons": summary.get("missing_reasons", []),
         }
     if dry_run:
         return {
@@ -182,6 +211,8 @@ def describe_jackal_recommendation_accuracy_state() -> dict[str, Any]:
         "max_sample_count": float(max_sample) if max_sample is not None else None,
         "missing_reasons": missing_reasons,
         "backfill_possible": int(checked or 0) > 0,
+        "source_path": RECOMMENDATION_SOURCE_PATH,
+        "outcome_path": RECOMMENDATION_OUTCOME_PATH,
     }
 
 
@@ -248,11 +279,19 @@ def backfill_recommendation_accuracy_projection(*, dry_run: bool = False) -> dic
     rec = weights.get("recommendation_accuracy", {})
     row_count = sum(len(value) for value in rec.values() if isinstance(value, dict))
     if row_count == 0:
+        summary = describe_jackal_recommendation_accuracy_state()
+        if int(summary.get("recommendation_rows") or 0) == 0:
+            reason = "missing_recommendation_samples"
+        elif int(summary.get("checked_rows") or 0) == 0:
+            reason = "missing_recommendation_outcomes"
+        else:
+            reason = "missing_recommendation_projection_groups"
         return {
             "status": "skipped",
-            "reason": "missing_recommendation_samples",
+            "reason": reason,
             "projection_rows": 0,
             "dry_run": dry_run,
+            "missing_reasons": summary.get("missing_reasons", []),
         }
     if dry_run:
         return {"status": "planned", "reason": "dry_run", "projection_rows": row_count, "dry_run": True}

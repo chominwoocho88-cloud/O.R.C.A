@@ -12,10 +12,12 @@ class AuditQualityScriptTests(unittest.TestCase):
         self.assertTrue(audit["dry_run"])
         self.assertIn(audit["status"], {"pass", "warn", "fail"})
         self.assertTrue(all(item["status"] == "skipped" for item in audit["checks"]["commands"]))
+        self.assertIn("requirements_drift", audit["checks"])
         self.assertIn("jackal_projection_state", audit["metrics"])
         self.assertIn("jackal_shadow_state", audit["metrics"])
         self.assertIn("jackal_recommendation_accuracy", audit["metrics"])
         self.assertIn("market_provider_quality", audit["metrics"])
+        self.assertIn("Requirements drift", markdown)
         self.assertIn("ORCA/JACKAL Quality Audit", markdown)
 
 
