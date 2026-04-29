@@ -128,8 +128,8 @@ Low/medium manual verification:
 
 - `ORCA Dashboard Pages`: run `workflow_dispatch` with no inputs. Confirm there are no Node.js 20 deprecation warnings from `checkout` or `setup-python`, the dashboard build succeeds, the Pages artifact uploads, and `Deploy to GitHub Pages` returns the page URL.
 - `ORCA Backtest`: run `workflow_dispatch` with `months=13`, `walk_forward=true`, `expected_min_candidates=1000`, `expected_min_lessons=1000`, `expected_min_orca_sessions=1`, and `expected_min_jackal_sessions=1` unless a stricter validation target is intended. Confirm the `research-state-${{ github.run_id }}` artifact contains only `data/orca_state.db`, then confirm the reusable `Policy Eval` and `Policy Promote` jobs receive the expected artifact names.
-- `Policy Eval`: verify primarily through the `ORCA Backtest` reusable call so the artifact is downloaded from the same workflow run. For direct `workflow_dispatch`, leave `artifact_name` empty unless the artifact exists in that same run context.
-- `Policy Promote`: verify primarily through the `Policy Eval` output in the `ORCA Backtest` chain. For direct `workflow_dispatch`, leave `artifact_name` empty unless the policy-eval artifact exists in that same run context.
+- `Policy Eval`: verify primarily through the `ORCA Backtest` reusable call so the artifact is downloaded from the same workflow run. For direct `workflow_dispatch`, leave `artifact_name` empty unless the artifact exists in that same run context. Confirm `Install dependencies` runs before `Build Research Comparison Report`; a `ModuleNotFoundError` for `pandas` or another dependency means the clean runner did not install `requirements.txt`.
+- `Policy Promote`: verify primarily through the `Policy Eval` output in the `ORCA Backtest` chain. For direct `workflow_dispatch`, leave `artifact_name` empty unless the policy-eval artifact exists in that same run context. Confirm `Install dependencies` runs before `Build policy promotion decision`.
 
 High-risk verification plan:
 

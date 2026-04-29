@@ -87,6 +87,15 @@ def _extract_workflow_dispatch_block(path: Path) -> str:
     raise AssertionError(f"workflow_dispatch block not found in {path.name}")
 
 
+def _line_number_containing(path: Path, needle: str) -> int:
+    """Return the 1-based line number containing a workflow contract needle."""
+
+    for line_number, line in enumerate(_read_text(path).splitlines(), start=1):
+        if needle in line:
+            return line_number
+    raise AssertionError(f"{needle!r} not found in {path.name}")
+
+
 class TestWorkflowConcurrencyContracts(unittest.TestCase):
     """Contract 1: shared concurrency group for state-preserving workflows."""
 
@@ -303,6 +312,27 @@ class TestArtifactWorkflowContracts(unittest.TestCase):
         text = _read_text(_workflow_path("orca_backtest.yml"))
         self.assertIn("artifact_name: research-state-${{ github.run_id }}", text)
         self.assertIn("artifact_name: ${{ needs.policy-eval.outputs.artifact_name }}", text)
+
+
+class TestPolicyWorkflowDependencyContracts(unittest.TestCase):
+    POLICY_WORKFLOWS = (
+        ("policy_eval.yml", "Build Research Comparison Report"),
+        ("policy_promote.yml", "Build policy promotion decision"),
+    )
+
+    def test_policy_workflows_install_repo_dependencies_before_running_modules(self):
+        for workflow_name, module_step in self.POLICY_WORKFLOWS:
+            with self.subTest(workflow=workflow_name):
+                path = _workflow_path(workflow_name)
+                setup_block = _extract_step_block(path, "Setup Python")
+                install_block = _extract_step_block(path, "Install dependencies")
+                self.assertIn("uses: actions/setup-python@v6", setup_block)
+                self.assertIn("cache: pip", setup_block)
+                self.assertIn("pip install -r requirements.txt", install_block)
+                self.assertLess(
+                    _line_number_containing(path, "- name: Install dependencies"),
+                    _line_number_containing(path, f"- name: {module_step}"),
+                )
 
 
 class TestHighRiskWorkflowNodeRuntimeContracts(unittest.TestCase):
