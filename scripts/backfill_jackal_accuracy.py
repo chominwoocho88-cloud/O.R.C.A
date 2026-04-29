@@ -18,6 +18,10 @@ from orca.jackal_accuracy_projection import (  # noqa: E402
     backfill_jackal_accuracy_projection_from_backtest,
     describe_jackal_accuracy_projection_state,
 )
+from orca.jackal_quality import (  # noqa: E402
+    backfill_recommendation_accuracy_projection,
+    describe_jackal_recommendation_accuracy_state,
+)
 
 KST = timezone(timedelta(hours=9))
 
@@ -43,6 +47,7 @@ def run_backfill(
     dry_run: bool = False,
     make_backup: bool = True,
     backup_dir: Path | None = None,
+    include_recommendations: bool = False,
 ) -> dict[str, Any]:
     backup_path: Path | None = None
     if make_backup and not dry_run:
@@ -52,8 +57,11 @@ def run_backfill(
         session_id=session_id,
         dry_run=dry_run,
     )
+    if include_recommendations:
+        result["recommendation_backfill"] = backfill_recommendation_accuracy_projection(dry_run=dry_run)
     result["backup_path"] = str(backup_path) if backup_path else None
     result["projection_state"] = describe_jackal_accuracy_projection_state()
+    result["recommendation_state"] = describe_jackal_recommendation_accuracy_state()
     return result
 
 
@@ -65,6 +73,7 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", help="Plan rows without writing a snapshot/projection.")
     parser.add_argument("--no-backup", action="store_true", help="Do not backup jackal_state.db before writing.")
     parser.add_argument("--backup-dir", help="Directory for the pre-write JACKAL DB backup.")
+    parser.add_argument("--include-recommendations", action="store_true", help="Also backfill recommendation accuracy when checked samples exist.")
     parser.add_argument("--json-output", help="Optional path to write machine-readable result JSON.")
     args = parser.parse_args()
 
@@ -74,6 +83,7 @@ def main() -> None:
         dry_run=args.dry_run,
         make_backup=not args.no_backup,
         backup_dir=backup_dir,
+        include_recommendations=args.include_recommendations,
     )
 
     text = json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True)

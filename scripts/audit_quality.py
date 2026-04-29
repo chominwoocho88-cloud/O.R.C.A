@@ -18,6 +18,11 @@ if str(ROOT) not in sys.path:
 
 from orca import research_report, state  # noqa: E402
 from orca.jackal_accuracy_projection import describe_jackal_accuracy_projection_state  # noqa: E402
+from orca.jackal_quality import (  # noqa: E402
+    describe_jackal_recommendation_accuracy_state,
+    describe_jackal_shadow_state,
+)
+from orca.market_fetch import get_provider_quality_summary  # noqa: E402
 
 KST = timezone(timedelta(hours=9))
 JSON_SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", "node_modules"}
@@ -194,6 +199,14 @@ def collect_state_metrics() -> dict[str, Any]:
         "jackal_latest_raw_issue": research_report._jackal_session_evaluation_issue(jackal_latest_raw),
         "jackal_latest_evaluable_backtest": jackal_latest_evaluable,
         "jackal_projection_state": describe_jackal_accuracy_projection_state(),
+        "jackal_shadow_state": describe_jackal_shadow_state(),
+        "jackal_recommendation_accuracy": describe_jackal_recommendation_accuracy_state(),
+        "market_provider_quality": {
+            "latest_backtest": research_report._provider_quality_from_orca_summary(
+                (orca_latest or {}).get("summary", {}) if isinstance(orca_latest, dict) else {}
+            ),
+            "session": get_provider_quality_summary(),
+        },
         "jackal_row_counts": jackal_counts,
         "prediction_status_counts": prediction_counts,
         "candidate_counts": candidate_counts,
@@ -321,6 +334,10 @@ def _session_line(session: dict[str, Any] | None, metric_keys: tuple[str, ...]) 
 def render_markdown(audit: dict[str, Any]) -> str:
     metrics = audit.get("metrics", {})
     projection_state = metrics.get("jackal_projection_state", {})
+    shadow_state = metrics.get("jackal_shadow_state", {})
+    recommendation = metrics.get("jackal_recommendation_accuracy", {})
+    provider_quality = metrics.get("market_provider_quality", {})
+    provider_latest = provider_quality.get("latest_backtest", {})
     lines = [
         "# ORCA/JACKAL Quality Audit",
         "",
@@ -360,6 +377,13 @@ def render_markdown(audit: dict[str, Any]) -> str:
             f"`{projection_state.get('current_rows')}`, snapshots=`{projection_state.get('snapshot_rows')}`, "
             f"max_sample=`{projection_state.get('max_sample_count')}`, latest_source=`{projection_state.get('latest_source')}`",
             f"- JACKAL projection missing reasons: `{json.dumps(projection_state.get('missing_reasons', []), ensure_ascii=False)}`",
+            f"- JACKAL shadow: signals=`{shadow_state.get('signal_rows')}`, batches=`{shadow_state.get('batch_rows')}`, "
+            f"missing=`{json.dumps(shadow_state.get('missing_reasons', []), ensure_ascii=False)}`",
+            f"- JACKAL recommendation accuracy: rows=`{recommendation.get('recommendation_rows')}`, checked=`{recommendation.get('checked_rows')}`, "
+            f"projection/current=`{recommendation.get('projection_rows')}`/`{recommendation.get('current_rows')}`, "
+            f"missing=`{json.dumps(recommendation.get('missing_reasons', []), ensure_ascii=False)}`",
+            f"- Market provider quality: status=`{provider_latest.get('status')}`, "
+            f"failure_rate=`{provider_latest.get('failure_rate')}`, stats=`{json.dumps(provider_latest.get('fetch_stats', {}), ensure_ascii=False, sort_keys=True)}`",
             f"- JACKAL row counts: `{json.dumps(metrics.get('jackal_row_counts', {}), ensure_ascii=False, sort_keys=True)}`",
             f"- Prediction status counts: `{json.dumps(metrics.get('prediction_status_counts', {}), ensure_ascii=False, sort_keys=True)}`",
         ]

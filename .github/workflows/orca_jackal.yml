@@ -212,6 +212,13 @@ jobs:
           print("PASS JACKAL state verification complete")
           PY
 
+      - name: Smoke quality audit
+        shell: bash
+        run: |
+          python scripts/audit_quality.py --dry-run \
+            --output-json "${RUNNER_TEMP}/orca_audit_smoke.json" \
+            --output-md "${RUNNER_TEMP}/orca_audit_smoke.md"
+
       - name: Checkpoint DB
         shell: bash
         run: |

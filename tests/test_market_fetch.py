@@ -210,6 +210,17 @@ class MarketFetchTests(unittest.TestCase):
 
         self.assertEqual(market_fetch._last_fetch_source("AAPL"), "yfinance_ticker")
 
+    def test_provider_quality_summary_flags_degraded_sources(self):
+        market_fetch._record_provider_issue("yfinance_rate_limited")
+        market_fetch._record_fetch_source("AAPL", None)
+
+        summary = market_fetch.get_provider_quality_summary()
+
+        self.assertEqual(summary["status"], "degraded")
+        self.assertTrue(summary["rate_limited"])
+        self.assertEqual(summary["failure_rate"], 100.0)
+        self.assertIn("yfinance_rate_limited", summary["warnings"])
+
 
 if __name__ == "__main__":
     unittest.main()

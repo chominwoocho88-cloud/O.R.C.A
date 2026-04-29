@@ -12,6 +12,12 @@ from typing import Any
 from .brand import JACKAL_NAME, ORCA_NAME
 from .dual_db_snapshot import collect_dual_db_state
 from .jackal_accuracy_projection import describe_jackal_accuracy_projection_state
+from .jackal_quality import (
+    classify_latest_raw_jackal_session,
+    describe_jackal_recommendation_accuracy_state,
+    describe_jackal_shadow_state,
+)
+from .market_fetch import get_provider_quality_summary
 from .paths import REPORTS_DIR, STATE_DB_FILE, atomic_write_json, atomic_write_text
 from .state import (
     list_backtest_days,
@@ -50,6 +56,30 @@ def _fmt_value(value: Any, suffix: str = "") -> str:
     if isinstance(value, float):
         return f"{value:.1f}{suffix}"
     return f"{value}{suffix}"
+
+
+def _provider_quality_from_orca_summary(summary: dict[str, Any]) -> dict[str, Any]:
+    dynamic = summary.get("dynamic_fetch", {}) if isinstance(summary, dict) else {}
+    if not isinstance(dynamic, dict):
+        dynamic = {}
+    stats = dynamic.get("fetch_stats", {}) if isinstance(dynamic.get("fetch_stats"), dict) else {}
+    failures = int(stats.get("failed") or 0)
+    total = int(stats.get("total") or 0)
+    failure_rate = round(failures / total * 100, 1) if total else None
+    warning = str(dynamic.get("warning") or "")
+    status = "no_history"
+    if total:
+        status = "degraded" if failures or dynamic.get("empty_extension_warning") or warning else "ok"
+    return {
+        "status": status,
+        "source": "latest_orca_backtest.dynamic_fetch" if dynamic else "missing",
+        "fetch_stats": stats,
+        "fetch_sources": dynamic.get("fetch_sources", {}),
+        "failure_rate": failure_rate,
+        "warning": warning,
+        "data_source": summary.get("data_source") or dynamic.get("data_source"),
+        "effective_trading_days": summary.get("effective_trading_days") or dynamic.get("effective_trading_days"),
+    }
 
 
 def _sanitize_orca_summary(summary: dict[str, Any] | None) -> dict[str, Any]:
@@ -326,9 +356,17 @@ def build_report() -> dict[str, Any]:
 
     shadow_latest = shadow_batches[0] if shadow_batches else None
     shadow_roll_10 = _rolling_shadow_stats(shadow_batches, 10)
+    shadow_state = describe_jackal_shadow_state()
+    recommendation_state = describe_jackal_recommendation_accuracy_state()
+    raw_issue_classification = classify_latest_raw_jackal_session(jackal_latest_raw, jackal_latest)
+    provider_quality = {
+        "latest_backtest": _provider_quality_from_orca_summary(orca_summary),
+        "session": get_provider_quality_summary(),
+    }
     accuracy_view = _build_accuracy_snapshot()
 
     warnings: list[str] = []
+    notes: list[str] = []
     if not orca_latest:
         warnings.append(f"No completed {ORCA_NAME} research session found.")
     raw_jackal_issue = _jackal_session_evaluation_issue(jackal_latest_raw)
@@ -337,16 +375,24 @@ def build_report() -> dict[str, Any]:
     if not jackal_latest:
         warnings.append(f"No completed evaluable {JACKAL_NAME} research session found.")
     if jackal_latest_raw and raw_jackal_issue and raw_jackal_session_id != representative_jackal_session_id:
-        warnings.append(
+        raw_message = (
             f"Latest raw {JACKAL_NAME} backtest is not used as representative accuracy "
-            f"because it is not evaluable: {raw_jackal_issue}."
+            f"because it is not evaluable: {raw_issue_classification.get('reason') or raw_jackal_issue}."
         )
+        if raw_issue_classification.get("severity") == "info":
+            notes.append(raw_message)
+        else:
+            warnings.append(raw_message)
     if orca_latest and jackal_latest and linked_orca_session_id and linked_orca_session_id != orca_latest["session_id"]:
         warnings.append(
             f"Latest {JACKAL_NAME} backtest is linked to an older {ORCA_NAME} research session, not the latest one."
         )
-    if shadow_roll_10["batch_count"] == 0:
-        warnings.append(f"No {JACKAL_NAME} shadow batch history recorded yet.")
+    for reason in shadow_state.get("missing_reasons", []):
+        warnings.append(f"{JACKAL_NAME} shadow state is incomplete: {reason}.")
+    for reason in recommendation_state.get("missing_reasons", []):
+        warnings.append(f"{JACKAL_NAME} recommendation accuracy state is incomplete: {reason}.")
+    if provider_quality["latest_backtest"].get("status") == "degraded":
+        warnings.append(f"Market provider quality is degraded: {provider_quality['latest_backtest'].get('warning') or 'provider failures recorded'}.")
     accuracy_meta = accuracy_view.get("meta", {})
     for reason in accuracy_meta.get("missing_reasons", []) if isinstance(accuracy_meta, dict) else []:
         warnings.append(f"{JACKAL_NAME} accuracy projection state is incomplete: {reason}.")
@@ -389,6 +435,9 @@ def build_report() -> dict[str, Any]:
             "previous": jackal_prev,
             "summary": jackal_summary,
             "latest_raw_evaluation_issue": raw_jackal_issue,
+            "latest_raw_issue_classification": raw_issue_classification,
+            "latest_evaluable_age_hours": raw_issue_classification.get("latest_evaluable_age_hours"),
+            "latest_evaluable_stale": raw_issue_classification.get("latest_evaluable_stale"),
             "using_latest_raw_as_representative": bool(
                 raw_jackal_session_id
                 and representative_jackal_session_id
@@ -417,9 +466,13 @@ def build_report() -> dict[str, Any]:
             "latest_batch": shadow_latest,
             "rolling_10": shadow_roll_10,
             "batch_count_available": len(shadow_batches),
+            "state": shadow_state,
         },
+        "jackal_recommendation_accuracy": recommendation_state,
         "jackal_accuracy_view": accuracy_view,
+        "market_provider_quality": provider_quality,
         "warnings": warnings,
+        "notes": notes,
     }
     return report
 
@@ -428,6 +481,8 @@ def render_markdown(report: dict[str, Any]) -> str:
     orca = report["orca"]
     jackal = report["jackal_backtest"]
     shadow = report["jackal_shadow"]
+    recommendation = report.get("jackal_recommendation_accuracy", {})
+    provider_quality = report.get("market_provider_quality", {})
     accuracy_view = report.get("jackal_accuracy_view", {})
     dual_db_state = report.get("dual_db_state", {})
     warnings = report["warnings"]
@@ -437,6 +492,9 @@ def render_markdown(report: dict[str, Any]) -> str:
     phase_summary = orca.get("phase_summary", {})
     latest_shadow = shadow.get("latest_batch") or {}
     rolling_10 = shadow.get("rolling_10") or {}
+    shadow_state = shadow.get("state", {})
+    provider_latest = provider_quality.get("latest_backtest", {})
+    provider_session = provider_quality.get("session", {})
     accuracy_meta = accuracy_view.get("meta", {})
     orca_db = dual_db_state.get("orca_state_db", {})
     jackal_db = dual_db_state.get("jackal_state_db", {})
@@ -481,7 +539,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Representative evaluable session: `{(jackal.get('latest_evaluable') or {}).get('session_id', 'n/a')}`",
         f"- Latest raw session: `{(jackal.get('latest_raw') or {}).get('session_id', 'n/a')}` "
         f"(status=`{(jackal.get('latest_raw') or {}).get('status', 'n/a')}`, "
-        f"issue=`{jackal.get('latest_raw_evaluation_issue') or 'none'}`)",
+        f"issue=`{jackal.get('latest_raw_evaluation_issue') or 'none'}`, "
+        f"classification=`{(jackal.get('latest_raw_issue_classification') or {}).get('reason', 'n/a')}`)",
+        f"- Latest evaluable age: `{jackal.get('latest_evaluable_age_hours', 'n/a')}` hours "
+        f"(stale=`{jackal.get('latest_evaluable_stale')}`)",
         f"- Source {ORCA_NAME} session: `{jackal.get('source_orca_session_id') or 'n/a'}`",
         f"- Linked to latest {ORCA_NAME}: `{jackal.get('linked_to_latest_orca')}`",
         f"- Pipeline: `{jackal_summary.get('pipeline', 'n/a')}`",
@@ -494,6 +555,23 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Latest batch outcome: `{latest_shadow.get('worked', 'n/a')}/{latest_shadow.get('total', 'n/a')}`",
         f"- Rolling 10 batches: `{rolling_10.get('worked', 0)}/{rolling_10.get('total', 0)}`",
         f"- Batch count available: `{shadow.get('batch_count_available', 0)}`",
+        f"- Shadow signal rows: `{shadow_state.get('signal_rows', 0)}`",
+        f"- Shadow missing reasons: `{json.dumps(shadow_state.get('missing_reasons', []), ensure_ascii=False)}`",
+        "",
+        f"## {JACKAL_NAME} Recommendation Accuracy",
+        "",
+        f"- Recommendation rows: `{recommendation.get('recommendation_rows', 0)}`",
+        f"- Checked recommendation rows: `{recommendation.get('checked_rows', 0)}`",
+        f"- Recommendation projection/current rows: `{recommendation.get('projection_rows', 0)}` / `{recommendation.get('current_rows', 0)}`",
+        f"- Recommendation missing reasons: `{json.dumps(recommendation.get('missing_reasons', []), ensure_ascii=False)}`",
+        "",
+        "## Market Provider Quality",
+        "",
+        f"- Latest backtest provider status: `{provider_latest.get('status', 'n/a')}`",
+        f"- Latest backtest fetch stats: `{json.dumps(provider_latest.get('fetch_stats', {}), ensure_ascii=False, sort_keys=True)}`",
+        f"- Latest backtest fetch sources: `{json.dumps(provider_latest.get('fetch_sources', {}), ensure_ascii=False, sort_keys=True)}`",
+        f"- Current process provider status: `{provider_session.get('status', 'n/a')}`",
+        f"- Current process provider stats: `{json.dumps(provider_session.get('stats', {}), ensure_ascii=False, sort_keys=True)}`",
         "",
         f"## {JACKAL_NAME} Accuracy View",
         "",
@@ -526,6 +604,11 @@ def render_markdown(report: dict[str, Any]) -> str:
         lines.extend([f"- {warning}" for warning in warnings])
     else:
         lines.append("- No structural warnings in the latest research snapshot.")
+
+    notes = report.get("notes", [])
+    if notes:
+        lines.extend(["", "## Notes", ""])
+        lines.extend([f"- {note}" for note in notes])
 
     return "\n".join(lines) + "\n"
 

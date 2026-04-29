@@ -25,14 +25,21 @@ _fetch_with_fallback = _context_market_data._fetch_with_fallback
 
 
 _GLOBAL_FETCH_STATS: dict[str, int] = {
+    "fdr_attempts": 0,
     "fdr_success": 0,
+    "fdr_failed": 0,
+    "alpha_vantage_attempts": 0,
     "yfinance_batch_success": 0,
     "yfinance_ticker_success": 0,
     "alpha_vantage_success": 0,
+    "alpha_vantage_missing_key": 0,
+    "yfinance_rate_limited": 0,
+    "fallback_used": 0,
     "failed": 0,
     "total": 0,
 }
 _LAST_FETCH_SOURCE: dict[str, str] = {}
+_LAST_PROVIDER_WARNINGS: list[str] = []
 
 
 def fetch_daily_history(
@@ -64,17 +71,23 @@ def fetch_daily_history(
     if _resolve_use_fallback(use_fallback):
         _context_market_data.reset_last_yfinance_status()
         if _use_fdr_main():
+            _record_provider_attempt("fdr")
             fdr_frame = _try_fdr_history(ticker, start, end)
             if fdr_frame is not None and not fdr_frame.empty:
                 _record_fetch_source(ticker, "fdr")
                 return fdr_frame
+            _record_provider_issue("fdr_failed")
 
             av_api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
             if av_api_key and not _is_korean_market_ticker(ticker):
+                _record_provider_attempt("alpha_vantage")
                 av_frame = _try_alpha_vantage_history(ticker, start, end, av_api_key)
                 if av_frame is not None and not av_frame.empty:
                     _record_fetch_source(ticker, "alpha_vantage")
                     return av_frame
+                _record_provider_issue("fallback_used")
+            elif not av_api_key and not _is_korean_market_ticker(ticker):
+                _record_provider_issue("alpha_vantage_missing_key")
 
             if _skip_yfinance:
                 _record_fetch_source(ticker, None)
@@ -174,6 +187,9 @@ def fetch_daily_history_batch(
                 )
             ):
                 av_only = True
+                _record_provider_issue("fallback_used")
+                if _context_market_data.was_last_yfinance_rate_limited():
+                    _record_provider_issue("yfinance_rate_limited")
                 sys.stderr.write(
                     "WARN: yfinance batch rate-limit/degradation detected; "
                     "switching remaining tickers to Alpha Vantage-only fallback\n"
@@ -327,20 +343,55 @@ def get_fetch_stats() -> dict[str, int]:
     return dict(_GLOBAL_FETCH_STATS)
 
 
+def get_provider_quality_summary() -> dict[str, Any]:
+    """Return structured provider quality telemetry for reports and audits."""
+    stats = get_fetch_stats()
+    total = int(stats.get("total", 0) or 0)
+    failed = int(stats.get("failed", 0) or 0)
+    success = max(total - failed, 0)
+    failure_rate = round(failed / total * 100, 1) if total else None
+    degraded = bool(
+        failed
+        or stats.get("yfinance_rate_limited", 0)
+        or stats.get("alpha_vantage_missing_key", 0)
+        or stats.get("fdr_failed", 0)
+    )
+    return {
+        "status": "no_activity" if total == 0 else "degraded" if degraded else "ok",
+        "stats": stats,
+        "sources": dict(_LAST_FETCH_SOURCE),
+        "success_count": success,
+        "failure_rate": failure_rate,
+        "missing_rate": failure_rate,
+        "fallback_used": int(stats.get("fallback_used", 0) or 0) > 0,
+        "rate_limited": int(stats.get("yfinance_rate_limited", 0) or 0) > 0,
+        "alpha_vantage_key_set": bool(os.getenv("ALPHA_VANTAGE_API_KEY")),
+        "fdr_main_enabled": _use_fdr_main(),
+        "warnings": list(_LAST_PROVIDER_WARNINGS[-20:]),
+    }
+
+
 def reset_fetch_stats() -> None:
     """Clear session-level source counters and last-source map."""
     _GLOBAL_FETCH_STATS.clear()
     _GLOBAL_FETCH_STATS.update(
         {
+            "fdr_attempts": 0,
+            "fdr_failed": 0,
+            "alpha_vantage_attempts": 0,
             "yfinance_batch_success": 0,
             "yfinance_ticker_success": 0,
             "alpha_vantage_success": 0,
             "fdr_success": 0,
+            "alpha_vantage_missing_key": 0,
+            "yfinance_rate_limited": 0,
+            "fallback_used": 0,
             "failed": 0,
             "total": 0,
         }
     )
     _LAST_FETCH_SOURCE.clear()
+    _LAST_PROVIDER_WARNINGS.clear()
 
 
 def _resolve_use_fallback(use_fallback: bool | None) -> bool:
@@ -368,6 +419,18 @@ def _record_fetch_source(ticker: str, source: str | None) -> None:
         normalized_source = "failed"
     _GLOBAL_FETCH_STATS[key] = _GLOBAL_FETCH_STATS.get(key, 0) + 1
     _LAST_FETCH_SOURCE[str(ticker)] = normalized_source
+    if normalized_source == "alpha_vantage":
+        _record_provider_issue("fallback_used")
+
+
+def _record_provider_attempt(provider: str) -> None:
+    key = f"{provider}_attempts"
+    _GLOBAL_FETCH_STATS[key] = _GLOBAL_FETCH_STATS.get(key, 0) + 1
+
+
+def _record_provider_issue(issue: str) -> None:
+    _GLOBAL_FETCH_STATS[issue] = _GLOBAL_FETCH_STATS.get(issue, 0) + 1
+    _LAST_PROVIDER_WARNINGS.append(issue)
 
 
 def _last_fetch_source(ticker: str) -> str | None:

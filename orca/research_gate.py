@@ -28,6 +28,9 @@ DEFAULT_THRESHOLDS = {
     "shadow_rolling_10_min_batches": 10,
     "jackal_projection_rows_min": 1,
     "jackal_projection_sample_count_min": 100,
+    "jackal_recommendation_projection_rows_min": 1,
+    "jackal_evaluable_max_age_hours": 168,
+    "market_provider_failure_rate_max": 25.0,
 }
 
 
@@ -110,6 +113,48 @@ def _check_minimum(
         "current": value,
         "threshold": minimum,
         "sample_count": sample_count,
+    }
+
+
+def _check_maximum(
+    name: str,
+    value: float | int | None,
+    maximum: float | int,
+    *,
+    status_on_exceeded: str = "warn",
+) -> dict[str, Any]:
+    if value is None:
+        return {
+            "name": name,
+            "status": "warn",
+            "reason": "missing_value",
+            "current": value,
+            "threshold": maximum,
+        }
+    try:
+        current = float(value)
+    except (TypeError, ValueError):
+        return {
+            "name": name,
+            "status": "warn",
+            "reason": "invalid_value",
+            "current": value,
+            "threshold": maximum,
+        }
+    if current > float(maximum):
+        return {
+            "name": name,
+            "status": status_on_exceeded,
+            "reason": "above_ceiling",
+            "current": value,
+            "threshold": maximum,
+        }
+    return {
+        "name": name,
+        "status": "pass",
+        "reason": "ok",
+        "current": value,
+        "threshold": maximum,
     }
 
 
@@ -201,7 +246,9 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
     orca = report.get("orca", {})
     jackal = report.get("jackal_backtest", {})
     shadow = report.get("jackal_shadow", {})
+    recommendation = report.get("jackal_recommendation_accuracy", {})
     accuracy_view = report.get("jackal_accuracy_view", {})
+    provider_quality = report.get("market_provider_quality", {})
     warnings = report.get("warnings", [])
 
     orca_summary = orca.get("summary", {})
@@ -218,6 +265,9 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
         stored_projection_rows = current_projection_rows
     max_projection_sample_count = accuracy_meta.get("max_sample_count")
     missing_reasons = accuracy_meta.get("missing_reasons", []) if isinstance(accuracy_meta, dict) else []
+    recommendation_projection_rows = recommendation.get("projection_rows")
+    provider_latest = provider_quality.get("latest_backtest", {}) if isinstance(provider_quality, dict) else {}
+    provider_failure_rate = provider_latest.get("failure_rate")
 
     checks = [
         _check_delta(
@@ -276,6 +326,22 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
             max_projection_sample_count,
             cfg["jackal_projection_sample_count_min"],
         ),
+        _check_projection_count(
+            "jackal_recommendation_projection_rows_available",
+            recommendation_projection_rows,
+            cfg["jackal_recommendation_projection_rows_min"],
+            missing_reason="missing_recommendation_samples",
+        ),
+        _check_maximum(
+            "jackal_latest_evaluable_freshness_hours",
+            jackal.get("latest_evaluable_age_hours"),
+            cfg["jackal_evaluable_max_age_hours"],
+        ),
+        _check_maximum(
+            "market_provider_failure_rate",
+            provider_failure_rate,
+            cfg["market_provider_failure_rate_max"],
+        ),
         _check_boolean(
             "jackal_linked_to_latest_orca",
             bool(jackal.get("linked_to_latest_orca")),
@@ -285,11 +351,14 @@ def evaluate_report(report: dict[str, Any], thresholds: dict[str, float] | None 
 
     latest_raw_issue = jackal.get("latest_raw_evaluation_issue")
     if latest_raw_issue and not jackal.get("using_latest_raw_as_representative"):
+        classification = jackal.get("latest_raw_issue_classification", {}) or {}
+        severity = classification.get("severity")
+        status = "pass" if severity == "info" else "warn"
         checks.append(
             {
                 "name": "jackal_latest_raw_evaluable",
-                "status": "warn",
-                "reason": str(latest_raw_issue),
+                "status": status,
+                "reason": str(classification.get("reason") or latest_raw_issue),
                 "current": False,
             }
         )
