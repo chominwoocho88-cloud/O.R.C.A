@@ -5,28 +5,37 @@ on:
     inputs:
       dry_run:
         description: "Dry run (no DB write)"
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - "true"
+          - "false"
+        default: "true"
       limit:
         description: "Max distinct trading dates (empty = all)"
         type: string
         default: ""
       skip_existing:
         description: "Skip dates with existing snapshot"
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - "true"
+          - "false"
+        default: "true"
       cleanup:
         description: "Cleanup backfill data BEFORE running (recovery mode)"
-        type: boolean
-        default: false
+        type: choice
+        options:
+          - "false"
+          - "true"
+        default: "false"
       expected_snapshots:
         description: "Expected snapshots count"
         type: string
-        default: "252"
+        default: "756"
       expected_linked_lessons:
         description: "Expected linked backtest lessons"
         type: string
-        default: "1260"
+        default: "3869"
 
 concurrency:
   group: orca-repo-state
@@ -85,10 +94,10 @@ jobs:
           EXPECTED_LINKED_LESSONS_VALUE="$(trim_workflow_input "${{ inputs.expected_linked_lessons }}")"
 
           if [ -z "$EXPECTED_SNAPSHOTS_VALUE" ]; then
-            EXPECTED_SNAPSHOTS_VALUE="252"
+            EXPECTED_SNAPSHOTS_VALUE="756"
           fi
           if [ -z "$EXPECTED_LINKED_LESSONS_VALUE" ]; then
-            EXPECTED_LINKED_LESSONS_VALUE="1260"
+            EXPECTED_LINKED_LESSONS_VALUE="3869"
           fi
 
           echo "BACKFILL_DRY_RUN=$BACKFILL_DRY_RUN" >> "$GITHUB_ENV"
@@ -184,8 +193,8 @@ jobs:
           from orca.context_snapshot import verify_backfill_completeness
 
           result = verify_backfill_completeness(
-              expected_snapshots=int(os.environ.get('EXPECTED_SNAPSHOTS', '252')),
-              expected_linked_lessons=int(os.environ.get('EXPECTED_LINKED_LESSONS', '1260')),
+              expected_snapshots=int(os.environ.get('EXPECTED_SNAPSHOTS', '756')),
+              expected_linked_lessons=int(os.environ.get('EXPECTED_LINKED_LESSONS', '3869')),
               require_market_metrics=True,
           )
           print('Verify result:')

@@ -11,12 +11,18 @@ on:
         description: "Reset ORCA runtime state"
         required: false
         default: "true"
-        type: boolean
+        type: choice
+        options:
+          - "true"
+          - "false"
       reset_jackal:
         description: "Reset JACKAL runtime state"
         required: false
         default: "false"
-        type: boolean
+        type: choice
+        options:
+          - "false"
+          - "true"
       confirm:
         description: "Type RESET to continue"
         required: true

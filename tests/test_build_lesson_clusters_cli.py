@@ -231,13 +231,16 @@ class BuildLessonClustersCliTests(unittest.TestCase):
 
         self.assertIn("workflow_dispatch", workflow)
         self.assertIn("dry_run", workflow)
-        self.assertIn("default: true", workflow)
+        self.assertNotIn("type: boolean", workflow)
+        self.assertIn('default: "true"', workflow)
         self.assertIn("n_clusters", workflow)
         self.assertIn("source_event_type", workflow)
         self.assertIn("type: choice", workflow)
         self.assertIn("CLUSTER_SOURCE_EVENT_TYPE", workflow)
         self.assertIn("Resolve inputs", workflow)
         self.assertIn("force_rebuild", workflow)
+        self.assertIn('default: "756"', workflow)
+        self.assertIn('default: "3864"', workflow)
         self.assertIn("scripts/build_lesson_clusters.py", workflow)
 
 

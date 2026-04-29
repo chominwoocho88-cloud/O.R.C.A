@@ -5,20 +5,29 @@ on:
     inputs:
       dry_run:
         description: "Dry run (no DB write)"
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - "true"
+          - "false"
+        default: "true"
       n_clusters:
         description: "Number of clusters"
         type: string
         default: "8"
       force_rebuild:
         description: "Clear existing clustering data before running"
-        type: boolean
-        default: false
+        type: choice
+        options:
+          - "false"
+          - "true"
+        default: "false"
       append_mode:
         description: "Append a new clustering run and preserve existing runs"
-        type: boolean
-        default: false
+        type: choice
+        options:
+          - "false"
+          - "true"
+        default: "false"
       source_event_type:
         description: "Snapshot source to cluster"
         type: choice
@@ -30,11 +39,11 @@ on:
       expected_snapshots:
         description: "Expected snapshot assignments"
         type: string
-        default: "252"
+        default: "756"
       expected_linked_lessons:
         description: "Expected lessons reachable through cluster mappings"
         type: string
-        default: "1260"
+        default: "3864"
       min_silhouette:
         description: "Minimum acceptable silhouette"
         type: string
@@ -105,10 +114,10 @@ jobs:
             CLUSTER_SOURCE_EVENT_TYPE="backtest_backfill"
           fi
           if [ -z "$EXPECTED_SNAPSHOTS_VALUE" ]; then
-            EXPECTED_SNAPSHOTS_VALUE="252"
+            EXPECTED_SNAPSHOTS_VALUE="756"
           fi
           if [ -z "$EXPECTED_LINKED_LESSONS_VALUE" ]; then
-            EXPECTED_LINKED_LESSONS_VALUE="1260"
+            EXPECTED_LINKED_LESSONS_VALUE="3864"
           fi
           if [ -z "$MIN_SILHOUETTE_VALUE" ]; then
             MIN_SILHOUETTE_VALUE="0.15"
@@ -198,7 +207,7 @@ jobs:
           python scripts/build_lesson_clusters.py --verbose "${ARGS[@]}"
 
       - name: Strict verify
-        if: ${{ inputs.dry_run != true }}
+        if: env.CLUSTER_DRY_RUN != 'true'
         run: |
           python - <<'PY'
           import os
@@ -206,8 +215,8 @@ jobs:
           from orca import state
 
           expected_clusters = int(os.environ['CLUSTER_N_CLUSTERS'])
-          expected_snapshots = int(os.environ.get('EXPECTED_SNAPSHOTS', '252'))
-          expected_linked_lessons = int(os.environ.get('EXPECTED_LINKED_LESSONS', '1260'))
+          expected_snapshots = int(os.environ.get('EXPECTED_SNAPSHOTS', '756'))
+          expected_linked_lessons = int(os.environ.get('EXPECTED_LINKED_LESSONS', '3864'))
           source = os.environ.get('CLUSTER_SOURCE_EVENT_TYPE', 'backtest_backfill').strip()
           source_filter = "" if source.lower() in {"", "all", "*", "none"} else " AND s.source_event_type = ?"
           source_params = () if not source_filter else (source,)
@@ -295,7 +304,7 @@ jobs:
           PY
 
       - name: Checkpoint DB
-        if: ${{ inputs.dry_run != true }}
+        if: env.CLUSTER_DRY_RUN != 'true'
         run: |
           python - <<'PY'
           import os
@@ -314,7 +323,7 @@ jobs:
           PY
 
       - name: Commit and push
-        if: ${{ inputs.dry_run != true }}
+        if: env.CLUSTER_DRY_RUN != 'true'
         run: |
           git config user.name "Wave F Clustering"
           git config user.email "wave-f-clustering@orca-agent"

@@ -5,8 +5,11 @@ on:
     inputs:
       migrate_cold:
         description: "Move cold archive/log/backtest rows before VACUUM"
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - "true"
+          - "false"
+        default: "true"
       threshold_runs:
         description: "Archive runs to keep in hot DB"
         type: string

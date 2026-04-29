@@ -30,8 +30,11 @@ on:
       strict:
         description: Fail the workflow when the gate status is fail.
         required: false
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - "true"
+          - "false"
+        default: "true"
 
 jobs:
   evaluate:
@@ -101,7 +104,7 @@ jobs:
             reports/orca_research_gate.json
 
       - name: Enforce strict gate
-        if: ${{ inputs.strict && steps.capture.outputs.gate_status == 'fail' }}
+        if: ${{ (inputs.strict == true || inputs.strict == 'true') && steps.capture.outputs.gate_status == 'fail' }}
         run: |
           echo "Research gate failed in strict mode."
           exit 1

@@ -69,6 +69,24 @@ def _extract_step_block(path: Path, step_name: str) -> str:
     raise AssertionError(f"Step {step_name!r} not found in {path.name}")
 
 
+def _extract_workflow_dispatch_block(path: Path) -> str:
+    """Return the workflow_dispatch block for UI contract checks."""
+
+    lines = _read_text(path).splitlines()
+    for index, line in enumerate(lines):
+        if line.strip() != "workflow_dispatch:":
+            continue
+        indent = len(line) - len(line.lstrip())
+        block = [line]
+        for nested in lines[index + 1 :]:
+            nested_indent = len(nested) - len(nested.lstrip())
+            if nested.strip() and nested_indent <= indent:
+                break
+            block.append(nested)
+        return "\n".join(block)
+    raise AssertionError(f"workflow_dispatch block not found in {path.name}")
+
+
 class TestWorkflowConcurrencyContracts(unittest.TestCase):
     """Contract 1: shared concurrency group for state-preserving workflows."""
 
@@ -489,6 +507,62 @@ class TestHighRiskArtifactContracts(unittest.TestCase):
         self.assertIn("${{ runner.temp }}/jackal_operational_intake.json", block)
         self.assertIn("${{ runner.temp }}/orca_audit_smoke.json", block)
         self.assertIn("if-no-files-found: ignore", block)
+
+
+class TestWorkflowDispatchUiContracts(unittest.TestCase):
+    WORKFLOWS_WITH_DISPATCH = (
+        "db_vacuum.yml",
+        "jackal_backtest_learning.yml",
+        "jackal_scanner.yml",
+        "jackal_tracker.yml",
+        "orca_backtest.yml",
+        "orca_daily.yml",
+        "orca_jackal.yml",
+        "orca_reset.yml",
+        "pages_dashboard.yml",
+        "policy_eval.yml",
+        "policy_promote.yml",
+        "quality.yml",
+        "wave_f_archive.yml",
+        "wave_f_backfill.yml",
+        "wave_f_clustering.yml",
+    )
+
+    def test_manual_workflow_ui_uses_choice_instead_of_boolean_toggles(self):
+        for workflow_name in self.WORKFLOWS_WITH_DISPATCH:
+            with self.subTest(workflow=workflow_name):
+                block = _extract_workflow_dispatch_block(_workflow_path(workflow_name))
+                self.assertNotIn("type: boolean", block)
+
+    def test_policy_eval_dispatch_strict_handles_choice_and_workflow_call_bool(self):
+        text = _read_text(_workflow_path("policy_eval.yml"))
+        dispatch = _extract_workflow_dispatch_block(_workflow_path("policy_eval.yml"))
+        self.assertIn("type: choice", dispatch)
+        self.assertIn('default: "true"', dispatch)
+        self.assertIn("inputs.strict == true || inputs.strict == 'true'", text)
+
+    def test_wave_f_three_year_dispatch_defaults_are_current(self):
+        backfill = _read_text(_workflow_path("wave_f_backfill.yml"))
+        clustering = _read_text(_workflow_path("wave_f_clustering.yml"))
+        archive = _read_text(_workflow_path("wave_f_archive.yml"))
+
+        self.assertIn('default: "756"', backfill)
+        self.assertIn('default: "3869"', backfill)
+        self.assertIn("EXPECTED_SNAPSHOTS_VALUE=\"756\"", backfill)
+        self.assertIn("EXPECTED_LINKED_LESSONS_VALUE=\"3869\"", backfill)
+        self.assertIn("EXPECTED_SNAPSHOTS', '756'", backfill)
+        self.assertIn("EXPECTED_LINKED_LESSONS', '3869'", backfill)
+
+        self.assertIn('default: "756"', clustering)
+        self.assertIn('default: "3864"', clustering)
+        self.assertIn("EXPECTED_SNAPSHOTS_VALUE=\"756\"", clustering)
+        self.assertIn("EXPECTED_LINKED_LESSONS_VALUE=\"3864\"", clustering)
+        self.assertIn("EXPECTED_SNAPSHOTS', '756'", clustering)
+        self.assertIn("EXPECTED_LINKED_LESSONS', '3864'", clustering)
+        self.assertIn("if: env.CLUSTER_DRY_RUN != 'true'", clustering)
+        self.assertNotIn("inputs.dry_run != true", clustering)
+
+        self.assertIn('default: "3864"', archive)
 
 
 class TestWorkflowOrcaStateContracts(unittest.TestCase):

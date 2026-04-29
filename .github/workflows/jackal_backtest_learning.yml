@@ -45,8 +45,11 @@ on:
         default: "replace"
       auto_context_snapshot:
         description: "Auto context snapshot per lesson"
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - "true"
+          - "false"
+        default: "true"
 
 jobs:
   learn:
