@@ -50,6 +50,25 @@ def _extract_concurrency_group(path: Path) -> str | None:
     return None
 
 
+def _extract_step_block(path: Path, step_name: str) -> str:
+    """Return one workflow step block by its display name."""
+
+    lines = _read_text(path).splitlines()
+    marker = f"- name: {step_name}"
+    for index, line in enumerate(lines):
+        if line.strip() != marker:
+            continue
+        indent = len(line) - len(line.lstrip())
+        block = [line]
+        for nested in lines[index + 1 :]:
+            nested_indent = len(nested) - len(nested.lstrip())
+            if nested_indent == indent and nested.strip().startswith("- name:"):
+                break
+            block.append(nested)
+        return "\n".join(block)
+    raise AssertionError(f"Step {step_name!r} not found in {path.name}")
+
+
 class TestWorkflowConcurrencyContracts(unittest.TestCase):
     """Contract 1: shared concurrency group for state-preserving workflows."""
 
@@ -149,6 +168,119 @@ class TestQualityWorkflowNodeRuntimeContracts(unittest.TestCase):
         self.assertIn("uses: actions/checkout@v6", text)
         self.assertIn("uses: actions/setup-python@v6", text)
         self.assertIn("uses: actions/upload-artifact@v6", text)
+
+
+class TestLowMediumWorkflowNodeRuntimeContracts(unittest.TestCase):
+    LOW_MEDIUM_WORKFLOWS = {
+        "pages_dashboard.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+        ),
+        "orca_backtest.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+            "uses: actions/upload-artifact@v6",
+        ),
+        "policy_eval.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+            "uses: actions/download-artifact@v8",
+            "uses: actions/upload-artifact@v6",
+        ),
+        "policy_promote.yml": (
+            "uses: actions/checkout@v6",
+            "uses: actions/setup-python@v6",
+            "uses: actions/download-artifact@v8",
+            "uses: actions/upload-artifact@v6",
+        ),
+    }
+
+    LEGACY_NODE20_ACTIONS = (
+        "uses: actions/checkout@v4",
+        "uses: actions/setup-python@v5",
+        "uses: actions/upload-artifact@v4",
+        "uses: actions/download-artifact@v4",
+    )
+
+    def test_low_medium_workflows_use_node24_action_versions(self):
+        for workflow_name, expected_actions in self.LOW_MEDIUM_WORKFLOWS.items():
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                for action in expected_actions:
+                    self.assertIn(action, text)
+                for legacy_action in self.LEGACY_NODE20_ACTIONS:
+                    self.assertNotIn(
+                        legacy_action,
+                        text,
+                        f"{workflow_name} still references {legacy_action}",
+                    )
+
+
+class TestArtifactWorkflowContracts(unittest.TestCase):
+    def test_orca_backtest_upload_artifact_contract_is_preserved(self):
+        block = _extract_step_block(_workflow_path("orca_backtest.yml"), "Upload research state")
+        self.assertIn("uses: actions/upload-artifact@v6", block)
+        self.assertIn("name: research-state-${{ github.run_id }}", block)
+        self.assertIn("if-no-files-found: warn", block)
+        self.assertIn("path: data/orca_state.db", block)
+        self.assertIn("retention-days: 90", block)
+        self.assertNotIn("data/orca_state.db-wal", block)
+        self.assertNotIn("data/orca_state.db-shm", block)
+
+    def test_policy_eval_download_artifact_contract_is_preserved(self):
+        block = _extract_step_block(
+            _workflow_path("policy_eval.yml"),
+            "Download research state artifact",
+        )
+        self.assertIn("if: ${{ inputs.artifact_name != '' }}", block)
+        self.assertIn("uses: actions/download-artifact@v8", block)
+        self.assertIn("name: ${{ inputs.artifact_name }}", block)
+        self.assertIn("path: .", block)
+        self.assertNotIn("run-id:", block)
+
+    def test_policy_eval_upload_artifact_contract_is_preserved(self):
+        text = _read_text(_workflow_path("policy_eval.yml"))
+        block = _extract_step_block(_workflow_path("policy_eval.yml"), "Upload evaluation artifacts")
+        self.assertIn("artifact_name = f\"policy-eval-{os.environ['GITHUB_RUN_ID']}\"", text)
+        self.assertIn("uses: actions/upload-artifact@v6", block)
+        self.assertIn("name: policy-eval-${{ github.run_id }}", block)
+        self.assertIn("if-no-files-found: warn", block)
+        for artifact_path in (
+            "data/orca_state.db",
+            "data/orca_state.db-shm",
+            "data/orca_state.db-wal",
+            "reports/orca_research_comparison.md",
+            "reports/orca_research_comparison.json",
+            "reports/orca_research_gate.md",
+            "reports/orca_research_gate.json",
+        ):
+            self.assertIn(artifact_path, block)
+
+    def test_policy_promote_download_artifact_contract_is_preserved(self):
+        block = _extract_step_block(
+            _workflow_path("policy_promote.yml"),
+            "Download policy-eval artifact",
+        )
+        self.assertIn("if: ${{ inputs.artifact_name != '' }}", block)
+        self.assertIn("uses: actions/download-artifact@v8", block)
+        self.assertIn("name: ${{ inputs.artifact_name }}", block)
+        self.assertIn("path: .", block)
+        self.assertNotIn("run-id:", block)
+
+    def test_policy_promote_upload_artifact_contract_is_preserved(self):
+        text = _read_text(_workflow_path("policy_promote.yml"))
+        block = _extract_step_block(_workflow_path("policy_promote.yml"), "Upload promotion artifacts")
+        self.assertIn("artifact_name = f\"policy-promote-{os.environ['GITHUB_RUN_ID']}\"", text)
+        self.assertIn("uses: actions/upload-artifact@v6", block)
+        self.assertIn("name: policy-promote-${{ github.run_id }}", block)
+        self.assertIn("if-no-files-found: warn", block)
+        self.assertIn("reports/orca_policy_promotion.md", block)
+        self.assertIn("reports/orca_policy_promotion.json", block)
+
+    def test_backtest_policy_handoff_names_are_preserved(self):
+        text = _read_text(_workflow_path("orca_backtest.yml"))
+        self.assertIn("artifact_name: research-state-${{ github.run_id }}", text)
+        self.assertIn("artifact_name: ${{ needs.policy-eval.outputs.artifact_name }}", text)
 
 
 class TestWorkflowOrcaStateContracts(unittest.TestCase):

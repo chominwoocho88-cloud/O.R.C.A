@@ -108,6 +108,37 @@ python -m unittest discover -s tests
 python scripts\audit_quality.py --output-json "$env:TEMP\orca_audit_full.json" --output-md "$env:TEMP\orca_audit_full.md"
 ```
 
+## GitHub Actions Node 20 Warning Response
+
+Use the Tracker and Quality upgrade as the reference pattern for Node.js 20 deprecation warnings:
+
+1. Classify each workflow before changing action versions.
+2. Upgrade low-risk read-only/test/dashboard workflows first.
+3. Upgrade medium-risk artifact-only or artifact handoff workflows after locking artifact names and paths in `tests/test_workflow_contracts.py`.
+4. Leave DB/state commit workflows for a separate session with per-workflow rollback and push-conflict validation.
+5. After each batch, run the local contract tests and the basic validation commands from this runbook before starting GitHub Actions verification.
+
+Current risk split:
+
+- Low risk: `quality.yml`, `pages_dashboard.yml`. These are read-only/test/dashboard deploy flows and do not commit repository state.
+- Medium risk: `orca_backtest.yml`, `policy_eval.yml`, `policy_promote.yml`. These use artifacts for research DB/report handoff but do not commit or push.
+- High risk: `db_vacuum.yml`, `jackal_backtest_learning.yml`, `jackal_scanner.yml`, `jackal_tracker.yml`, `orca_daily.yml`, `orca_jackal.yml`, `orca_reset.yml`, `wave_f_archive.yml`, `wave_f_backfill.yml`, `wave_f_clustering.yml`. These can write DB/JSON state or push commits. `jackal_tracker.yml` has already been upgraded and verified, but the remaining high-risk workflows should be handled individually.
+
+Low/medium manual verification:
+
+- `ORCA Dashboard Pages`: run `workflow_dispatch` with no inputs. Confirm there are no Node.js 20 deprecation warnings from `checkout` or `setup-python`, the dashboard build succeeds, the Pages artifact uploads, and `Deploy to GitHub Pages` returns the page URL.
+- `ORCA Backtest`: run `workflow_dispatch` with `months=13`, `walk_forward=true`, `expected_min_candidates=1000`, `expected_min_lessons=1000`, `expected_min_orca_sessions=1`, and `expected_min_jackal_sessions=1` unless a stricter validation target is intended. Confirm the `research-state-${{ github.run_id }}` artifact contains only `data/orca_state.db`, then confirm the reusable `Policy Eval` and `Policy Promote` jobs receive the expected artifact names.
+- `Policy Eval`: verify primarily through the `ORCA Backtest` reusable call so the artifact is downloaded from the same workflow run. For direct `workflow_dispatch`, leave `artifact_name` empty unless the artifact exists in that same run context.
+- `Policy Promote`: verify primarily through the `Policy Eval` output in the `ORCA Backtest` chain. For direct `workflow_dispatch`, leave `artifact_name` empty unless the policy-eval artifact exists in that same run context.
+
+High-risk follow-up plan:
+
+- Upgrade one DB/state commit workflow at a time.
+- Before each change, inspect `permissions`, checkout credential usage, `git pull --rebase`/push retry logic, DB checkpoint steps, and exact `git add` paths.
+- Prefer a dry-run or no-op dispatch first when the workflow supports it.
+- Confirm the runner version is at least `2.327.1` before relying on Node.js 24 actions on self-hosted runners.
+- After GitHub verification, inspect logs for Node warnings, checkout credential persistence behavior, state checkpoint output, commit/no-op behavior, and push retry behavior.
+
 ## JACKAL Tracker Run Interpretation
 
 Tracker runs write three quality artifacts after each run:
