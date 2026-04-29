@@ -107,3 +107,22 @@ Full unittest and full audit remain local/manual checks:
 python -m unittest discover -s tests
 python scripts\audit_quality.py --output-json "$env:TEMP\orca_audit_full.json" --output-md "$env:TEMP\orca_audit_full.md"
 ```
+
+## JACKAL Tracker Run Interpretation
+
+Tracker runs write three quality artifacts after each run:
+
+- `requirements_drift.json` / `.md`
+- `jackal_operational_intake.json` / `.md`
+- `orca_audit_smoke.json` / `.md`
+
+Use the Actions artifact named `jackal-tracker-quality` to inspect intake and audit state after a Tracker run.
+
+Run log interpretation:
+
+- `Dry-run persistence skipped` with `TRACKER_WILL_SAVE_RESULTS=false`: normal. The run used `dry_run=true`, so state persistence was intentionally skipped.
+- `Save Tracker results` success plus `no tracker state changes to commit`: normal when Tracker ran but did not resolve new outcomes or change state files.
+- `Save Tracker results` success plus `Commit created` and `Push succeeded`: Tracker persisted outcome/state changes.
+- `Save Tracker results` failure: inspect `git status --short`, staged diff output, and push/rebase messages in the step log.
+
+The `Resolve Tracker inputs` step logs `event_name`, raw and normalized `all_entries`, `dry_run`, `notify`, final `TRACKER_ARGS`, and `TRACKER_WILL_SAVE_RESULTS`. This is the first place to check when a workflow_dispatch run behaves differently than expected.

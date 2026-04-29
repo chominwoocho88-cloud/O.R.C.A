@@ -120,6 +120,26 @@ class TestWorkflowJackalStateContracts(unittest.TestCase):
                 )
 
 
+class TestTrackerWorkflowQualityContracts(unittest.TestCase):
+    def test_tracker_workflow_logs_inputs_and_uploads_quality_artifacts(self):
+        text = _read_text(_workflow_path("jackal_tracker.yml"))
+        self.assertIn("FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true", text)
+        self.assertIn("Resolve Tracker inputs", text)
+        self.assertIn("TRACKER_ARGS", text)
+        self.assertIn("TRACKER_WILL_SAVE_RESULTS", text)
+        self.assertIn("python -m jackal.tracker ${TRACKER_ARGS}", text)
+        self.assertIn("Dry-run persistence skipped", text)
+        self.assertIn("state persistence intentionally skipped", text)
+        self.assertIn("if: env.TRACKER_WILL_SAVE_RESULTS == 'true'", text)
+        self.assertIn("no tracker state changes to commit", text)
+        self.assertIn("Commit created:", text)
+        self.assertIn("Push succeeded", text)
+        self.assertIn("scripts/check_requirements_drift.py", text)
+        self.assertIn("scripts/check_jackal_operational_intake.py", text)
+        self.assertIn("scripts/audit_quality.py --dry-run", text)
+        self.assertIn("name: jackal-tracker-quality", text)
+
+
 class TestWorkflowOrcaStateContracts(unittest.TestCase):
     """Contract 4: stateful workflows must keep handling data/orca_state.db."""
 

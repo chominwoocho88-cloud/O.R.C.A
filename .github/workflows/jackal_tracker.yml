@@ -1,31 +1,29 @@
 name: JACKAL Tracker
 
-# Jackal Outcome Tracker — hunt_log 결과 추적 전용
-# 역할: outcome_checked=False 항목의 실제 가격 조회 → 결과 기록 → 가중치 업데이트
-# Evolution과 독립 실행: Tracker가 outcome을 채워야 Evolution이 실제 데이터로 학습 가능
-# 비용: $0 (yfinance만 사용, Claude API 호출 없음)
+# JACKAL outcome tracker.
+# Cost profile: no LLM calls; yfinance/market data only.
 
 concurrency:
   group: orca-repo-state
   cancel-in-progress: false
+
 on:
   schedule:
-    # 하루 2회 추적 — 점심/새벽에 outcome 정리
     - cron: "0 3  * * *"   # UTC 03:00 = KST 12:00
     - cron: "0 21 * * *"   # UTC 21:00 = KST 06:00
 
   workflow_dispatch:
     inputs:
       all_entries:
-        description: "alerted 여부 무관 전체 처리 (true 입력 시)"
+        description: "Process all entries regardless of alerted flag"
         required: false
         default: "false"
       dry_run:
-        description: "저장 없이 결과 미리보기 (true 입력 시)"
+        description: "Preview tracker results without state persistence"
         required: false
         default: "false"
       notify:
-        description: "완료 후 텔레그램 발송 (true 입력 시)"
+        description: "Send completion Telegram notification"
         required: false
         default: "false"
 
@@ -33,6 +31,7 @@ jobs:
   track:
     runs-on: ubuntu-latest
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
       ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
       USE_UNIFIED_FETCH: "1"
@@ -54,22 +53,97 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Resolve Tracker inputs
+        shell: bash
+        run: |
+          trim_workflow_input() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
+
+          normalize_bool() {
+            local value
+            value="$(trim_workflow_input "$1")"
+            value="${value,,}"
+            if [ "$value" = "true" ] || [ "$value" = "1" ] || [ "$value" = "yes" ]; then
+              printf 'true'
+            else
+              printf 'false'
+            fi
+          }
+
+          EVENT_NAME="${{ github.event_name }}"
+          RAW_ALL_ENTRIES="$(trim_workflow_input "${{ github.event.inputs.all_entries }}")"
+          RAW_DRY_RUN="$(trim_workflow_input "${{ github.event.inputs.dry_run }}")"
+          RAW_NOTIFY="$(trim_workflow_input "${{ github.event.inputs.notify }}")"
+
+          [ -z "$RAW_ALL_ENTRIES" ] && RAW_ALL_ENTRIES="false"
+          [ -z "$RAW_DRY_RUN" ] && RAW_DRY_RUN="false"
+          [ -z "$RAW_NOTIFY" ] && RAW_NOTIFY="false"
+
+          NORM_ALL_ENTRIES="$(normalize_bool "$RAW_ALL_ENTRIES")"
+          NORM_DRY_RUN="$(normalize_bool "$RAW_DRY_RUN")"
+          NORM_NOTIFY="$(normalize_bool "$RAW_NOTIFY")"
+
+          TRACKER_ARGS=""
+          [ "$EVENT_NAME" = "schedule" ] && TRACKER_ARGS="$TRACKER_ARGS --notify"
+          [ "$NORM_ALL_ENTRIES" = "true" ] && TRACKER_ARGS="$TRACKER_ARGS --all"
+          [ "$NORM_DRY_RUN" = "true" ] && TRACKER_ARGS="$TRACKER_ARGS --dry-run"
+          [ "$NORM_NOTIFY" = "true" ] && TRACKER_ARGS="$TRACKER_ARGS --notify"
+          TRACKER_ARGS="$(trim_workflow_input "$TRACKER_ARGS")"
+
+          TRACKER_WILL_SAVE_RESULTS="true"
+          [ "$NORM_DRY_RUN" = "true" ] && TRACKER_WILL_SAVE_RESULTS="false"
+
+          {
+            echo "TRACKER_EVENT_NAME=$EVENT_NAME"
+            echo "TRACKER_RAW_ALL_ENTRIES=$RAW_ALL_ENTRIES"
+            echo "TRACKER_NORMALIZED_ALL_ENTRIES=$NORM_ALL_ENTRIES"
+            echo "TRACKER_RAW_DRY_RUN=$RAW_DRY_RUN"
+            echo "TRACKER_NORMALIZED_DRY_RUN=$NORM_DRY_RUN"
+            echo "TRACKER_RAW_NOTIFY=$RAW_NOTIFY"
+            echo "TRACKER_NORMALIZED_NOTIFY=$NORM_NOTIFY"
+            echo "TRACKER_ARGS=$TRACKER_ARGS"
+            echo "TRACKER_WILL_SAVE_RESULTS=$TRACKER_WILL_SAVE_RESULTS"
+          } >> "$GITHUB_ENV"
+
+          echo "Resolved Tracker inputs:"
+          echo "  event_name=$EVENT_NAME"
+          echo "  raw_all_entries=$RAW_ALL_ENTRIES"
+          echo "  normalized_all_entries=$NORM_ALL_ENTRIES"
+          echo "  raw_dry_run=$RAW_DRY_RUN"
+          echo "  normalized_dry_run=$NORM_DRY_RUN"
+          echo "  raw_notify=$RAW_NOTIFY"
+          echo "  normalized_notify=$NORM_NOTIFY"
+          echo "  TRACKER_ARGS=${TRACKER_ARGS:-<none>}"
+          echo "  TRACKER_WILL_SAVE_RESULTS=$TRACKER_WILL_SAVE_RESULTS"
+
       - name: Run Tracker
         env:
           PYTHONIOENCODING: utf-8
-          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          ARGS=""
-          [ "${{ github.event_name }}"           = "schedule" ] && ARGS="$ARGS --notify"
-          [ "${{ github.event.inputs.all_entries }}" = "true" ] && ARGS="$ARGS --all"
-          [ "${{ github.event.inputs.dry_run }}"    = "true" ] && ARGS="$ARGS --dry-run"
-          [ "${{ github.event.inputs.notify }}"     = "true" ] && ARGS="$ARGS --notify"
-          python -m jackal.tracker $ARGS
+          echo "Running tracker with TRACKER_ARGS=${TRACKER_ARGS:-<none>}"
+          python -m jackal.tracker ${TRACKER_ARGS}
+
+      - name: Dry-run persistence skipped
+        if: env.TRACKER_WILL_SAVE_RESULTS != 'true'
+        run: |
+          echo "state persistence intentionally skipped"
+          echo "TRACKER_WILL_SAVE_RESULTS=$TRACKER_WILL_SAVE_RESULTS"
+          echo "TRACKER_NORMALIZED_DRY_RUN=$TRACKER_NORMALIZED_DRY_RUN"
 
       - name: Save Tracker results
-        if: github.event.inputs.dry_run != 'true'
+        if: env.TRACKER_WILL_SAVE_RESULTS == 'true'
         run: |
+          echo "Tracker state persistence enabled: TRACKER_WILL_SAVE_RESULTS=$TRACKER_WILL_SAVE_RESULTS"
+          echo "Tracker args used: ${TRACKER_ARGS:-<none>}"
+          echo "Git status before checkpoint:"
+          git status --short
+
           git config user.name  "JACKAL Tracker"
           git config user.email "tracker@orca-agent"
 
@@ -93,9 +167,16 @@ jobs:
           git add -f data/orca_state.db      2>/dev/null || true
           git add -f data/jackal_state.db    2>/dev/null || true
 
-          git stash
+          echo "Git status after initial staging:"
+          git status --short
+
+          git stash push -u -m "jackal-tracker-save-before-rebase" >/dev/null 2>&1 || true
           git fetch origin main
-          git pull --rebase origin main || git rebase --abort
+          git pull --rebase origin main || {
+            git rebase --abort || true
+            echo "git pull --rebase failed before tracker state commit" >&2
+            exit 1
+          }
           git stash pop 2>/dev/null || true
 
           git add jackal/hunt_log.json       2>/dev/null || true
@@ -103,6 +184,58 @@ jobs:
           git add -f data/orca_state.db      2>/dev/null || true
           git add -f data/jackal_state.db    2>/dev/null || true
 
-          git diff --cached --quiet || \
-            git commit -m "📍 JACKAL Tracker: outcome 추적 $(date +'%Y-%m-%d %H:%M') [skip ci]"
-          git push || (git pull --rebase origin main && git push)
+          echo "Git status after rebase/restage:"
+          git status --short
+
+          if git diff --cached --quiet; then
+            echo "No staged tracker state changes detected"
+            echo "no tracker state changes to commit"
+            exit 0
+          fi
+
+          echo "Staged tracker state changes detected"
+          git diff --cached --stat
+          git commit -m "JACKAL Tracker: outcome tracking $(date +'%Y-%m-%d %H:%M') [skip ci]"
+          echo "Commit created: $(git rev-parse --short HEAD)"
+
+          if git push; then
+            echo "Push succeeded"
+          else
+            echo "Initial push failed; rebasing once and retrying" >&2
+            git pull --rebase origin main
+            git push
+            echo "Push succeeded after rebase retry"
+          fi
+
+          echo "Git status after push:"
+          git status --short
+
+      - name: Tracker quality audit
+        shell: bash
+        if: always()
+        run: |
+          python scripts/check_requirements_drift.py \
+            --output-json "${RUNNER_TEMP}/requirements_drift.json" \
+            --output-md "${RUNNER_TEMP}/requirements_drift.md"
+
+          python scripts/check_jackal_operational_intake.py \
+            --output-json "${RUNNER_TEMP}/jackal_operational_intake.json" \
+            --output-md "${RUNNER_TEMP}/jackal_operational_intake.md"
+
+          python scripts/audit_quality.py --dry-run \
+            --output-json "${RUNNER_TEMP}/orca_audit_smoke.json" \
+            --output-md "${RUNNER_TEMP}/orca_audit_smoke.md"
+
+      - name: Upload Tracker quality artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jackal-tracker-quality
+          path: |
+            ${{ runner.temp }}/requirements_drift.json
+            ${{ runner.temp }}/requirements_drift.md
+            ${{ runner.temp }}/jackal_operational_intake.json
+            ${{ runner.temp }}/jackal_operational_intake.md
+            ${{ runner.temp }}/orca_audit_smoke.json
+            ${{ runner.temp }}/orca_audit_smoke.md
+          if-no-files-found: ignore
