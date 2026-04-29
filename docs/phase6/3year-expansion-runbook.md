@@ -72,8 +72,11 @@ GitHub Actions:
 
 - Workflow: `ORCA Backtest`
 - Inputs:
+  - `run_mode=live_backtest`
   - `months=36`
   - `walk_forward=true`
+
+Node/action and artifact handoff verification should use `run_mode=artifact_verify_only` instead. That mode verifies the committed 3-year DB and uploads `research-state-${run_id}` without live LLM calls.
 
 산출물:
 
@@ -291,7 +294,7 @@ conn.close()
 
 ## 권장 실행 순서
 
-1. ORCA Backtest workflow: `months=36`
+1. ORCA Backtest workflow: `run_mode=live_backtest`, `months=36`
 2. JACKAL Backtest Learning workflow: artifact handoff + `add_missing` + `auto_context_snapshot=false`
 3. Wave F Backfill workflow: `expected_snapshots=756`, `expected_linked_lessons=3869`
 4. Wave F Clustering workflow: `append_mode=true`, `n_clusters=12`부터 dry-run

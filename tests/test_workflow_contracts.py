@@ -680,6 +680,12 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
             "python -m orca.backtest --months 36 --walk-forward --fail-on-empty-dynamic-fetch",
             text,
         )
+        self.assertIn("run_mode:", text)
+        self.assertIn("- artifact_verify_only", text)
+        self.assertIn("- live_backtest", text)
+        self.assertIn("default: artifact_verify_only", text)
+        self.assertIn('ORCA_BACKTEST_RUN_MODE="artifact_verify_only"', text)
+        self.assertIn("if: env.ORCA_BACKTEST_RUN_MODE == 'live_backtest'", text)
         self.assertIn('default: "36"', text)
         self.assertIn('default: "3869"', text)
         self.assertIn('ORCA_BACKTEST_MONTHS="36"', text)

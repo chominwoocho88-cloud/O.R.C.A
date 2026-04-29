@@ -7,6 +7,13 @@ concurrency:
 on:
   workflow_dispatch:
     inputs:
+      run_mode:
+        description: "Execution mode"
+        type: choice
+        options:
+          - artifact_verify_only
+          - live_backtest
+        default: artifact_verify_only
       months:
         description: "Backtest months"
         type: choice
@@ -85,6 +92,7 @@ jobs:
             fi
           }
 
+          ORCA_BACKTEST_RUN_MODE="$(trim_workflow_input "${{ inputs.run_mode }}")"
           ORCA_BACKTEST_MONTHS="$(trim_workflow_input "${{ inputs.months }}")"
           ORCA_BACKTEST_WALK_FORWARD="$(normalize_bool "${{ inputs.walk_forward }}")"
           EXPECTED_MIN_CANDIDATES_VALUE="$(trim_workflow_input "${{ inputs.expected_min_candidates }}")"
@@ -92,12 +100,14 @@ jobs:
           EXPECTED_MIN_ORCA_SESSIONS_VALUE="$(trim_workflow_input "${{ inputs.expected_min_orca_sessions }}")"
           EXPECTED_MIN_JACKAL_SESSIONS_VALUE="$(trim_workflow_input "${{ inputs.expected_min_jackal_sessions }}")"
 
+          [ -z "$ORCA_BACKTEST_RUN_MODE" ] && ORCA_BACKTEST_RUN_MODE="artifact_verify_only"
           [ -z "$ORCA_BACKTEST_MONTHS" ] && ORCA_BACKTEST_MONTHS="36"
           [ -z "$EXPECTED_MIN_CANDIDATES_VALUE" ] && EXPECTED_MIN_CANDIDATES_VALUE="3869"
           [ -z "$EXPECTED_MIN_LESSONS_VALUE" ] && EXPECTED_MIN_LESSONS_VALUE="3869"
           [ -z "$EXPECTED_MIN_ORCA_SESSIONS_VALUE" ] && EXPECTED_MIN_ORCA_SESSIONS_VALUE="1"
           [ -z "$EXPECTED_MIN_JACKAL_SESSIONS_VALUE" ] && EXPECTED_MIN_JACKAL_SESSIONS_VALUE="1"
 
+          echo "ORCA_BACKTEST_RUN_MODE=$ORCA_BACKTEST_RUN_MODE" >> "$GITHUB_ENV"
           echo "ORCA_BACKTEST_MONTHS=$ORCA_BACKTEST_MONTHS" >> "$GITHUB_ENV"
           echo "ORCA_BACKTEST_WALK_FORWARD=$ORCA_BACKTEST_WALK_FORWARD" >> "$GITHUB_ENV"
           echo "EXPECTED_MIN_CANDIDATES=$EXPECTED_MIN_CANDIDATES_VALUE" >> "$GITHUB_ENV"
@@ -106,6 +116,7 @@ jobs:
           echo "EXPECTED_MIN_JACKAL_SESSIONS=$EXPECTED_MIN_JACKAL_SESSIONS_VALUE" >> "$GITHUB_ENV"
 
           echo "Resolved inputs:"
+          echo "  run_mode=$ORCA_BACKTEST_RUN_MODE"
           echo "  months=$ORCA_BACKTEST_MONTHS"
           echo "  walk_forward=$ORCA_BACKTEST_WALK_FORWARD"
           echo "  expected_min_candidates=$EXPECTED_MIN_CANDIDATES_VALUE"
@@ -139,6 +150,7 @@ jobs:
           PY
 
       - name: Run ORCA Backtest
+        if: env.ORCA_BACKTEST_RUN_MODE == 'live_backtest'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
@@ -153,6 +165,7 @@ jobs:
           python -m orca.backtest $ARGS
 
       - name: Run JACKAL Backtest
+        if: env.ORCA_BACKTEST_RUN_MODE == 'live_backtest'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}

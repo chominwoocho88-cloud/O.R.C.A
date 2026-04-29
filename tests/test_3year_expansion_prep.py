@@ -147,6 +147,9 @@ class MaterializationAddMissingTests(unittest.TestCase):
 class ExpansionWorkflowContractTests(unittest.TestCase):
     def test_orca_backtest_workflow_has_3year_inputs_by_default(self):
         text = _workflow_text("orca_backtest.yml")
+        self.assertIn("run_mode:", text)
+        self.assertIn("artifact_verify_only", text)
+        self.assertIn("live_backtest", text)
         self.assertIn("months:", text)
         self.assertIn('default: "36"', text)
         self.assertIn("walk_forward:", text)
