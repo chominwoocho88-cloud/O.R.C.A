@@ -1,6 +1,6 @@
-anthropic==0.94.0
-rich==14.3.4
+anthropic>=0.94.0,<1.0
+rich>=14.3.4,<16.0
 httpx==0.28.1
-yfinance==0.2.55
+yfinance>=0.2.55,<2.0
 finance-datareader>=0.9.110
-pandas
+pandas>=2.0,<3.0

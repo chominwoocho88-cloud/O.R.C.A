@@ -23,6 +23,7 @@ from orca.jackal_quality import (  # noqa: E402
     describe_jackal_shadow_state,
 )
 from orca.market_fetch import get_provider_quality_summary  # noqa: E402
+from scripts.check_jackal_operational_intake import collect_operational_intake  # noqa: E402
 from scripts.check_requirements_drift import collect_requirements_drift  # noqa: E402
 
 KST = timezone(timedelta(hours=9))
@@ -208,6 +209,7 @@ def collect_state_metrics() -> dict[str, Any]:
             ),
             "session": get_provider_quality_summary(),
         },
+        "jackal_operational_intake": collect_operational_intake(),
         "jackal_row_counts": jackal_counts,
         "prediction_status_counts": prediction_counts,
         "candidate_counts": candidate_counts,
@@ -341,6 +343,7 @@ def render_markdown(audit: dict[str, Any]) -> str:
     projection_state = metrics.get("jackal_projection_state", {})
     shadow_state = metrics.get("jackal_shadow_state", {})
     recommendation = metrics.get("jackal_recommendation_accuracy", {})
+    operational_intake = metrics.get("jackal_operational_intake", {})
     provider_quality = metrics.get("market_provider_quality", {})
     provider_latest = provider_quality.get("latest_backtest", {})
     requirements_drift = audit.get("checks", {}).get("requirements_drift", {})
@@ -392,6 +395,7 @@ def render_markdown(audit: dict[str, Any]) -> str:
             f"projection/current=`{recommendation.get('projection_rows')}`/`{recommendation.get('current_rows')}`, "
             f"missing=`{json.dumps(recommendation.get('missing_reasons', []), ensure_ascii=False)}`",
             f"- JACKAL recommendation source path: `{recommendation.get('source_path', 'n/a')}`",
+            f"- JACKAL operational intake status: `{operational_intake.get('status', 'n/a')}`",
             f"- Market provider quality: status=`{provider_latest.get('status')}`, "
             f"failure_rate=`{provider_latest.get('failure_rate')}`, stats=`{json.dumps(provider_latest.get('fetch_stats', {}), ensure_ascii=False, sort_keys=True)}`",
             f"- JACKAL row counts: `{json.dumps(metrics.get('jackal_row_counts', {}), ensure_ascii=False, sort_keys=True)}`",

@@ -13,7 +13,8 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-REQ_RE = re.compile(r"^\s*([A-Za-z0-9_.-]+)\s*([=<>!~]{1,2})?\s*([^;\s#]+)?")
+REQ_RE = re.compile(r"^\s*([A-Za-z0-9_.-]+)\s*([^;\s#]+)?")
+SPEC_RE = re.compile(r"(==|>=|<=|!=|~=|>|<)\s*([^,]+)")
 
 
 def _normalize_name(name: str) -> str:
@@ -27,20 +28,21 @@ def _parse_requirement_line(line: str) -> dict[str, Any] | None:
     match = REQ_RE.match(clean)
     if not match:
         return {"raw": clean, "name": clean, "operator": None, "expected": None, "parse_warning": True}
-    name, operator, expected = match.groups()
+    name, specifier = match.groups()
+    specifier = (specifier or "").strip()
+    first_spec = SPEC_RE.match(specifier)
     return {
         "raw": clean,
         "name": name,
         "normalized_name": _normalize_name(name),
-        "operator": operator,
-        "expected": expected,
+        "specifier": specifier,
+        "operator": first_spec.group(1) if first_spec else None,
+        "expected": first_spec.group(2).strip() if first_spec else None,
         "parse_warning": False,
     }
 
 
-def _version_satisfies(installed: str, operator: str | None, expected: str | None) -> bool:
-    if not operator or not expected:
-        return True
+def _single_version_satisfies(installed: str, operator: str, expected: str) -> bool:
     if operator == "==":
         return installed == expected
     try:
@@ -57,6 +59,8 @@ def _version_satisfies(installed: str, operator: str | None, expected: str | Non
             return installed > expected
         if operator == "<":
             return installed < expected
+        if operator in {"!=", "<>"}:
+            return installed != expected
         return installed == expected
     if operator == ">=":
         return current_v >= expected_v
@@ -71,6 +75,20 @@ def _version_satisfies(installed: str, operator: str | None, expected: str | Non
     if operator == "~=":
         return current_v >= expected_v
     return True
+
+
+def _version_satisfies(installed: str, specifier: str | None) -> bool:
+    if not specifier:
+        return True
+    try:
+        from packaging.specifiers import SpecifierSet
+
+        return installed in SpecifierSet(specifier)
+    except Exception:
+        specs = SPEC_RE.findall(specifier)
+        if not specs:
+            return True
+        return all(_single_version_satisfies(installed, op, expected.strip()) for op, expected in specs)
 
 
 def collect_requirements_drift(requirements_path: Path | None = None) -> dict[str, Any]:
@@ -104,7 +122,7 @@ def collect_requirements_drift(requirements_path: Path | None = None) -> dict[st
         elif installed is None:
             status = "warn"
             reason = "package_not_installed"
-        elif not _version_satisfies(installed, parsed.get("operator"), parsed.get("expected")):
+        elif not _version_satisfies(installed, parsed.get("specifier")):
             status = "warn"
             reason = "version_drift"
         items.append(
@@ -145,7 +163,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "| --- | --- | --- | --- | --- |",
     ]
     for item in report.get("items", []):
-        requirement = f"{item.get('operator') or ''}{item.get('expected') or ''}" or "unpinned"
+        requirement = item.get("specifier") or "unpinned"
         lines.append(
             f"| {item.get('name')} | {requirement} | {item.get('installed') or 'n/a'} | "
             f"{item.get('status')} | {item.get('reason')} |"

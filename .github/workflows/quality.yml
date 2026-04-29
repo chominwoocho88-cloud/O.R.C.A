@@ -1,0 +1,114 @@
+name: ORCA Quality Smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONIOENCODING: utf-8
+      USE_UNIFIED_FETCH: "1"
+      YF_RATE_LIMIT_FAST_FAIL: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Compile Python
+        run: python -m compileall -q orca jackal scripts tests
+
+      - name: Parse JSON
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          skip = {".git", ".venv", "venv", "__pycache__", "node_modules"}
+          checked = 0
+          errors = []
+          for path in Path(".").rglob("*.json"):
+              if any(part in skip for part in path.parts):
+                  continue
+              checked += 1
+              try:
+                  json.loads(path.read_text(encoding="utf-8"))
+              except Exception as exc:
+                  errors.append(f"{path}: {exc}")
+          print(f"JSON parse checked={checked} errors={len(errors)}")
+          for error in errors:
+              print(error)
+          raise SystemExit(1 if errors else 0)
+          PY
+
+      - name: SQLite integrity if present
+        shell: bash
+        run: |
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+
+          failed = False
+          for path in (
+              Path("data/orca_state.db"),
+              Path("data/jackal_state.db"),
+              Path("data/archive/lesson_archive_cold.db"),
+          ):
+              if not path.exists():
+                  print(f"{path}: missing (skipped)")
+                  continue
+              conn = sqlite3.connect(path)
+              try:
+                  result = conn.execute("PRAGMA integrity_check").fetchone()[0]
+              finally:
+                  conn.close()
+              print(f"{path}: {result}")
+              failed = failed or result != "ok"
+          raise SystemExit(1 if failed else 0)
+          PY
+
+      - name: Requirements drift
+        run: |
+          python scripts/check_requirements_drift.py \
+            --output-json "${RUNNER_TEMP}/requirements_drift.json" \
+            --output-md "${RUNNER_TEMP}/requirements_drift.md"
+
+      - name: Operational intake
+        run: |
+          python scripts/check_jackal_operational_intake.py \
+            --output-json "${RUNNER_TEMP}/jackal_operational_intake.json" \
+            --output-md "${RUNNER_TEMP}/jackal_operational_intake.md"
+
+      - name: Audit dry run
+        run: |
+          python scripts/audit_quality.py --dry-run \
+            --output-json "${RUNNER_TEMP}/orca_audit_smoke.json" \
+            --output-md "${RUNNER_TEMP}/orca_audit_smoke.md"
+
+      - name: Upload quality artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality-smoke
+          path: |
+            ${{ runner.temp }}/requirements_drift.json
+            ${{ runner.temp }}/requirements_drift.md
+            ${{ runner.temp }}/jackal_operational_intake.json
+            ${{ runner.temp }}/jackal_operational_intake.md
+            ${{ runner.temp }}/orca_audit_smoke.json
+            ${{ runner.temp }}/orca_audit_smoke.md
+          if-no-files-found: ignore

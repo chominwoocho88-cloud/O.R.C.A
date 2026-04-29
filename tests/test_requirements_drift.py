@@ -27,6 +27,18 @@ class RequirementsDriftTests(unittest.TestCase):
         self.assertEqual(report["missing_count"], 0)
         self.assertEqual(report["items"][0]["reason"], "version_drift")
 
+    def test_collect_requirements_drift_accepts_compatible_ranges(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            req = Path(tmpdir) / "requirements.txt"
+            req.write_text("examplepkg>=1.0.0,<3.0\n", encoding="utf-8")
+
+            with patch.object(check_requirements_drift.metadata, "version", return_value="2.0.0"):
+                report = check_requirements_drift.collect_requirements_drift(req)
+
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["drift_count"], 0)
+        self.assertEqual(report["items"][0]["specifier"], ">=1.0.0,<3.0")
+
 
 if __name__ == "__main__":
     unittest.main()
