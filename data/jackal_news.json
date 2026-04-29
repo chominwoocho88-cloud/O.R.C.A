@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-28 23:38 KST",
+  "collected_at": "2026-04-29 08:11 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,46 +12,64 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia stock up 3.6% on Qualcomm-OpenAI on-device AI deal sentiment",
+      "headline": "Nvidia reaches all-time high amid AI demand momentum and major tech earnings week",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "NVDA",
-      "headline": "Nvidia reaches $5.3 trillion market cap on strong AI data center demand",
+      "headline": "Tech futures sell off on OpenAI report; Broadcom, Micron, Nvidia tumble in latest session",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK hynix posts 400% profit rise with strong Q1 2026 earnings expectations surpassing consensus",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix hits all-time high with 7% surge on Intel earnings and AI demand optimism",
+      "headline": "SK hynix stock up 7.36% in past 24 hours with strong buy technical signals",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics gains 2.5% but faces potential labor disruption concerns",
+      "headline": "Samsung Electronics faces China market challenges with TV market share declining to 3.62%",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics withdraws sale of home appliances and TV business",
       "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom experiencing momentum through Meta and Google AI infrastructure partnerships",
+      "headline": "Broadcom stock surges on AI partnerships with Google Cloud and Meta deal announcements",
       "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom experiences correction as market digests stretched valuation concerns",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp partners with OpenAI for AI expansion in South Korea",
-      "impact": "bullish",
+      "headline": "Kakao faces analyst downgrades amid AI disappointment and slowing business growth",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
-      "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF attracts 174.5 billion won from retail investors as top-ranked dividend ETF",
+      "ticker": "035720.KS",
+      "headline": "Kakao up 2.69% with 51.10% upside potential according to analyst consensus",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 7
+  "total": 11
 }
