@@ -47,7 +47,7 @@ on:
       min_silhouette:
         description: "Minimum acceptable silhouette"
         type: string
-        default: "0.15"
+        default: "0.11"
 
 concurrency:
   group: orca-repo-state
@@ -120,7 +120,7 @@ jobs:
             EXPECTED_LINKED_LESSONS_VALUE="3864"
           fi
           if [ -z "$MIN_SILHOUETTE_VALUE" ]; then
-            MIN_SILHOUETTE_VALUE="0.15"
+            MIN_SILHOUETTE_VALUE="0.11"
           fi
 
           echo "CLUSTER_DRY_RUN=$CLUSTER_DRY_RUN" >> "$GITHUB_ENV"

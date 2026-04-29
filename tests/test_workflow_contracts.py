@@ -561,6 +561,8 @@ class TestWorkflowDispatchUiContracts(unittest.TestCase):
         self.assertIn("EXPECTED_LINKED_LESSONS', '3864'", clustering)
         self.assertIn("if: env.CLUSTER_DRY_RUN != 'true'", clustering)
         self.assertNotIn("inputs.dry_run != true", clustering)
+        self.assertIn('default: "0.11"', clustering)
+        self.assertIn('MIN_SILHOUETTE_VALUE="0.11"', clustering)
 
         self.assertIn('default: "3864"', archive)
 

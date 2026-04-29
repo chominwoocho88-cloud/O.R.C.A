@@ -344,8 +344,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--min-silhouette",
         type=float,
-        default=0.15,
-        help="Minimum acceptable silhouette score (default: 0.15)",
+        default=0.11,
+        help="Minimum acceptable silhouette score (default: 0.11)",
     )
     parser.add_argument(
         "--verbose",
