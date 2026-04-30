@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-29 13:20 KST",
+  "collected_at": "2026-04-30 09:15 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,64 +12,40 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia achieved fiscal 2026 revenue of $215.9 billion, a 65% increase driven by strong AI adoption and CUDA platform growth",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "Nvidia Q revenue topped $68B, up 73% YoY on data center demand; company guided ~$78B for next quarter, beating analyst forecasts",
+      "headline": "Nvidia shares surged 20% in April and 92% year-over-year, fueled by strong fundamentals and AI demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix gained as AI demand boosted memory-chip stocks, driving Kospi higher amid strong semiconductor momentum",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK hynix Q1 2026 revenue was KRW 52.6 trillion with 71.5% operating margin, representing 60% sequential growth",
+      "headline": "SK Hynix gained as AI demand boosted memory-chip stocks, with earnings up 400% and strong analyst support",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics forecasts Q1 operating profit near $38 billion, about eight times year-earlier levels",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics earnings will be released on Apr 30, 2026; company flagged stronger-than-expected Q1 profit",
-      "impact": "bullish",
+      "headline": "Samsung Electronics launched new heat pump boiler technology but faces AI disappointment concerns",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom experiencing significant momentum driven by strong AI demand and strategic partnerships with Google, Meta, and Anthropic",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom stock surged 45% since March 30, flipping bearish setup into powerful bullish trend on AI accelerator demand",
-      "impact": "bullish",
+      "headline": "Broadcom targets $100 billion in AI chips by 2027 but faces OpenAI demand concerns and recent sell-offs",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao signed partnership deal with OpenAI as part of ChatGPT developer's expansion of Stargate initiative",
-      "impact": "bullish",
+      "headline": "Kakao faces AI rating downgrades from major brokerages due to lack of tangible AI results",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
-      "ticker": "035720.KS",
-      "headline": "Kakao Corp earnings report scheduled for Apr 30, 2026; analysts recommend buy with 51.10% upside potential",
+      "ticker": "466920.KS",
+      "headline": "SOL Korea High Dividend ETF surpassed 4 trillion won in assets with strong performance from financial stocks",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 11
+  "total": 6
 }
