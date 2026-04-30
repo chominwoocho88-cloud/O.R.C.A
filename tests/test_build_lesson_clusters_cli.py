@@ -239,8 +239,8 @@ class BuildLessonClustersCliTests(unittest.TestCase):
         self.assertIn("CLUSTER_SOURCE_EVENT_TYPE", workflow)
         self.assertIn("Resolve inputs", workflow)
         self.assertIn("force_rebuild", workflow)
-        self.assertIn('default: "756"', workflow)
-        self.assertIn('default: "3864"', workflow)
+        self.assertIn('default: "757"', workflow)
+        self.assertIn('default: "3869"', workflow)
         self.assertIn('default: "0.11"', workflow)
         self.assertIn("scripts/build_lesson_clusters.py", workflow)
 

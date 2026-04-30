@@ -576,25 +576,25 @@ class TestWorkflowDispatchUiContracts(unittest.TestCase):
         clustering = _read_text(_workflow_path("wave_f_clustering.yml"))
         archive = _read_text(_workflow_path("wave_f_archive.yml"))
 
-        self.assertIn('default: "756"', backfill)
+        self.assertIn('default: "757"', backfill)
         self.assertIn('default: "3869"', backfill)
-        self.assertIn("EXPECTED_SNAPSHOTS_VALUE=\"756\"", backfill)
+        self.assertIn("EXPECTED_SNAPSHOTS_VALUE=\"757\"", backfill)
         self.assertIn("EXPECTED_LINKED_LESSONS_VALUE=\"3869\"", backfill)
-        self.assertIn("EXPECTED_SNAPSHOTS', '756'", backfill)
+        self.assertIn("EXPECTED_SNAPSHOTS', '757'", backfill)
         self.assertIn("EXPECTED_LINKED_LESSONS', '3869'", backfill)
 
-        self.assertIn('default: "756"', clustering)
-        self.assertIn('default: "3864"', clustering)
-        self.assertIn("EXPECTED_SNAPSHOTS_VALUE=\"756\"", clustering)
-        self.assertIn("EXPECTED_LINKED_LESSONS_VALUE=\"3864\"", clustering)
-        self.assertIn("EXPECTED_SNAPSHOTS', '756'", clustering)
-        self.assertIn("EXPECTED_LINKED_LESSONS', '3864'", clustering)
+        self.assertIn('default: "757"', clustering)
+        self.assertIn('default: "3869"', clustering)
+        self.assertIn("EXPECTED_SNAPSHOTS_VALUE=\"757\"", clustering)
+        self.assertIn("EXPECTED_LINKED_LESSONS_VALUE=\"3869\"", clustering)
+        self.assertIn("EXPECTED_SNAPSHOTS', '757'", clustering)
+        self.assertIn("EXPECTED_LINKED_LESSONS', '3869'", clustering)
         self.assertIn("if: env.CLUSTER_DRY_RUN != 'true'", clustering)
         self.assertNotIn("inputs.dry_run != true", clustering)
         self.assertIn('default: "0.11"', clustering)
         self.assertIn('MIN_SILHOUETTE_VALUE="0.11"', clustering)
 
-        self.assertIn('default: "3864"', archive)
+        self.assertIn('default: "3869"', archive)
 
 
 class TestWorkflowOrcaStateContracts(unittest.TestCase):

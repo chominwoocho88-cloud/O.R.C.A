@@ -31,7 +31,7 @@ on:
       expected_snapshots:
         description: "Expected snapshots count"
         type: string
-        default: "756"
+        default: "757"
       expected_linked_lessons:
         description: "Expected linked backtest lessons"
         type: string
@@ -94,7 +94,7 @@ jobs:
           EXPECTED_LINKED_LESSONS_VALUE="$(trim_workflow_input "${{ inputs.expected_linked_lessons }}")"
 
           if [ -z "$EXPECTED_SNAPSHOTS_VALUE" ]; then
-            EXPECTED_SNAPSHOTS_VALUE="756"
+            EXPECTED_SNAPSHOTS_VALUE="757"
           fi
           if [ -z "$EXPECTED_LINKED_LESSONS_VALUE" ]; then
             EXPECTED_LINKED_LESSONS_VALUE="3869"
@@ -193,7 +193,7 @@ jobs:
           from orca.context_snapshot import verify_backfill_completeness
 
           result = verify_backfill_completeness(
-              expected_snapshots=int(os.environ.get('EXPECTED_SNAPSHOTS', '756')),
+              expected_snapshots=int(os.environ.get('EXPECTED_SNAPSHOTS', '757')),
               expected_linked_lessons=int(os.environ.get('EXPECTED_LINKED_LESSONS', '3869')),
               require_market_metrics=True,
           )

@@ -59,13 +59,13 @@ Tier:
 Dry-run:
 
 ```bash
-python scripts/build_lesson_archive.py --dry-run --expected-lessons 1260 --verbose
+python scripts/build_lesson_archive.py --dry-run --expected-lessons 3869 --verbose
 ```
 
 Execute:
 
 ```bash
-python scripts/build_lesson_archive.py --execute --force-rebuild --expected-lessons 1260 --verbose
+python scripts/build_lesson_archive.py --execute --append --expected-lessons 3869 --verbose
 ```
 
 특정 cluster run 을 지정하려면:
@@ -97,8 +97,8 @@ Workflow: `.github/workflows/wave_f_archive.yml`
 
 1. `dry_run=true` 로 먼저 실행한다.
 2. archive count, tier distribution, average quality 를 확인한다.
-3. `dry_run=false`, `force_rebuild=true` 로 실제 실행한다.
-4. Strict verify 가 `1260` archive rows 를 확인한 뒤에만 DB commit/push 된다.
+3. `dry_run=false`, `append_mode=true`, `force_rebuild=false` 로 실제 실행한다.
+4. Strict verify 가 `3869` archive rows 를 확인한 뒤에만 DB commit/push 된다.
 
 ## Retrieval 연동
 
@@ -113,7 +113,7 @@ Archive 가 없으면 기존 Phase 3 STEP 2-A 방식대로 lesson_value percenti
 가장 안전한 rollback:
 
 ```bash
-python scripts/build_lesson_archive.py --execute --force-rebuild --expected-lessons 1260
+python scripts/build_lesson_archive.py --execute --append --expected-lessons 3869
 ```
 
 Archive 만 제거하려면 Python 에서:

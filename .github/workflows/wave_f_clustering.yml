@@ -39,11 +39,11 @@ on:
       expected_snapshots:
         description: "Expected snapshot assignments"
         type: string
-        default: "756"
+        default: "757"
       expected_linked_lessons:
         description: "Expected lessons reachable through cluster mappings"
         type: string
-        default: "3864"
+        default: "3869"
       min_silhouette:
         description: "Minimum acceptable silhouette"
         type: string
@@ -114,10 +114,10 @@ jobs:
             CLUSTER_SOURCE_EVENT_TYPE="backtest_backfill"
           fi
           if [ -z "$EXPECTED_SNAPSHOTS_VALUE" ]; then
-            EXPECTED_SNAPSHOTS_VALUE="756"
+            EXPECTED_SNAPSHOTS_VALUE="757"
           fi
           if [ -z "$EXPECTED_LINKED_LESSONS_VALUE" ]; then
-            EXPECTED_LINKED_LESSONS_VALUE="3864"
+            EXPECTED_LINKED_LESSONS_VALUE="3869"
           fi
           if [ -z "$MIN_SILHOUETTE_VALUE" ]; then
             MIN_SILHOUETTE_VALUE="0.11"
@@ -215,8 +215,8 @@ jobs:
           from orca import state
 
           expected_clusters = int(os.environ['CLUSTER_N_CLUSTERS'])
-          expected_snapshots = int(os.environ.get('EXPECTED_SNAPSHOTS', '756'))
-          expected_linked_lessons = int(os.environ.get('EXPECTED_LINKED_LESSONS', '3864'))
+          expected_snapshots = int(os.environ.get('EXPECTED_SNAPSHOTS', '757'))
+          expected_linked_lessons = int(os.environ.get('EXPECTED_LINKED_LESSONS', '3869'))
           source = os.environ.get('CLUSTER_SOURCE_EVENT_TYPE', 'backtest_backfill').strip()
           source_filter = "" if source.lower() in {"", "all", "*", "none"} else " AND s.source_event_type = ?"
           source_params = () if not source_filter else (source,)
