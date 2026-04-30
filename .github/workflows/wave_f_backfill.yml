@@ -31,11 +31,11 @@ on:
       expected_snapshots:
         description: "Expected snapshots count"
         type: string
-        default: "757"
+        default: "758"
       expected_linked_lessons:
         description: "Expected linked backtest lessons"
         type: string
-        default: "3869"
+        default: "3874"
       confirm_apply:
         description: "Required for dry_run=false. Type APPLY_WAVE_F"
         type: string
@@ -99,10 +99,10 @@ jobs:
           BACKFILL_CONFIRM_APPLY="$(trim_workflow_input "${{ inputs.confirm_apply }}")"
 
           if [ -z "$EXPECTED_SNAPSHOTS_VALUE" ]; then
-            EXPECTED_SNAPSHOTS_VALUE="757"
+            EXPECTED_SNAPSHOTS_VALUE="758"
           fi
           if [ -z "$EXPECTED_LINKED_LESSONS_VALUE" ]; then
-            EXPECTED_LINKED_LESSONS_VALUE="3869"
+            EXPECTED_LINKED_LESSONS_VALUE="3874"
           fi
 
           echo "BACKFILL_DRY_RUN=$BACKFILL_DRY_RUN" >> "$GITHUB_ENV"
@@ -217,8 +217,8 @@ jobs:
           from orca.context_snapshot import verify_backfill_completeness
 
           result = verify_backfill_completeness(
-              expected_snapshots=int(os.environ.get('EXPECTED_SNAPSHOTS', '757')),
-              expected_linked_lessons=int(os.environ.get('EXPECTED_LINKED_LESSONS', '3869')),
+              expected_snapshots=int(os.environ.get('EXPECTED_SNAPSHOTS', '758')),
+              expected_linked_lessons=int(os.environ.get('EXPECTED_LINKED_LESSONS', '3874')),
               require_market_metrics=True,
           )
           print('Verify result:')

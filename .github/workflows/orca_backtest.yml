@@ -31,11 +31,11 @@ on:
       expected_min_candidates:
         description: "Minimum backtest candidate rows"
         type: string
-        default: "3869"
+        default: "3874"
       expected_min_lessons:
         description: "Minimum backtest lessons"
         type: string
-        default: "3869"
+        default: "3874"
       expected_min_orca_sessions:
         description: "Minimum ORCA sessions"
         type: string
@@ -102,8 +102,8 @@ jobs:
 
           [ -z "$ORCA_BACKTEST_RUN_MODE" ] && ORCA_BACKTEST_RUN_MODE="artifact_verify_only"
           [ -z "$ORCA_BACKTEST_MONTHS" ] && ORCA_BACKTEST_MONTHS="36"
-          [ -z "$EXPECTED_MIN_CANDIDATES_VALUE" ] && EXPECTED_MIN_CANDIDATES_VALUE="3869"
-          [ -z "$EXPECTED_MIN_LESSONS_VALUE" ] && EXPECTED_MIN_LESSONS_VALUE="3869"
+          [ -z "$EXPECTED_MIN_CANDIDATES_VALUE" ] && EXPECTED_MIN_CANDIDATES_VALUE="3874"
+          [ -z "$EXPECTED_MIN_LESSONS_VALUE" ] && EXPECTED_MIN_LESSONS_VALUE="3874"
           [ -z "$EXPECTED_MIN_ORCA_SESSIONS_VALUE" ] && EXPECTED_MIN_ORCA_SESSIONS_VALUE="1"
           [ -z "$EXPECTED_MIN_JACKAL_SESSIONS_VALUE" ] && EXPECTED_MIN_JACKAL_SESSIONS_VALUE="1"
 
@@ -199,8 +199,8 @@ jobs:
           import sqlite3
           import sys
 
-          expected_candidates = int(os.environ.get("EXPECTED_MIN_CANDIDATES", "3869"))
-          expected_lessons = int(os.environ.get("EXPECTED_MIN_LESSONS", "3869"))
+          expected_candidates = int(os.environ.get("EXPECTED_MIN_CANDIDATES", "3874"))
+          expected_lessons = int(os.environ.get("EXPECTED_MIN_LESSONS", "3874"))
           expected_orca_sessions = int(os.environ.get("EXPECTED_MIN_ORCA_SESSIONS", "1"))
           expected_jackal_sessions = int(os.environ.get("EXPECTED_MIN_JACKAL_SESSIONS", "1"))
 

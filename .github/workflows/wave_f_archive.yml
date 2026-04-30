@@ -31,7 +31,7 @@ on:
       expected_archive_count:
         description: "Expected archive rows for latest run"
         type: string
-        default: "3869"
+        default: "3874"
       confirm_apply:
         description: "Required for dry_run=false. Type APPLY_WAVE_F"
         type: string
@@ -95,7 +95,7 @@ jobs:
           EXPECTED_ARCHIVE_COUNT_VALUE="$(trim_workflow_input "${{ inputs.expected_archive_count }}")"
           ARCHIVE_CONFIRM_APPLY="$(trim_workflow_input "${{ inputs.confirm_apply }}")"
 
-          [ -z "$EXPECTED_ARCHIVE_COUNT_VALUE" ] && EXPECTED_ARCHIVE_COUNT_VALUE="3869"
+          [ -z "$EXPECTED_ARCHIVE_COUNT_VALUE" ] && EXPECTED_ARCHIVE_COUNT_VALUE="3874"
 
           echo "ARCHIVE_DRY_RUN=$ARCHIVE_DRY_RUN_VALUE" >> "$GITHUB_ENV"
           echo "ARCHIVE_FORCE_REBUILD=$ARCHIVE_FORCE_REBUILD_VALUE" >> "$GITHUB_ENV"
@@ -241,7 +241,7 @@ jobs:
           import sqlite3
           from orca import state
 
-          expected_archive_count = int(os.environ.get('EXPECTED_ARCHIVE_COUNT', '3869'))
+          expected_archive_count = int(os.environ.get('EXPECTED_ARCHIVE_COUNT', '3874'))
           conn = sqlite3.connect('data/orca_state.db')
           latest_run = state.get_latest_archive_run_id(conn)
           failures = []
