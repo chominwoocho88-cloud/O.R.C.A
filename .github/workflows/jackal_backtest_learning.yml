@@ -25,7 +25,11 @@ on:
       orca_months:
         description: "ORCA refresh months (Mode 2 only)"
         required: false
-        default: "13"
+        type: choice
+        options:
+          - "36"
+          - "13"
+        default: "36"
       backtest_days:
         description: "JACKAL backtest days"
         required: false
@@ -85,7 +89,7 @@ jobs:
           RUN_ORCA_REFRESH="false"
           USE_ARTIFACT_HANDOFF="false"
           ARTIFACT_RUN_ID=""
-          ORCA_MONTHS="${{ github.event.inputs.orca_months || '13' }}"
+          ORCA_MONTHS="${{ github.event.inputs.orca_months || '36' }}"
           JACKAL_BACKTEST_DAYS_VALUE="${{ github.event.inputs.backtest_days || '252' }}"
           JACKAL_HISTORY_DAYS_VALUE="${{ github.event.inputs.history_days || '750' }}"
           JACKAL_MATERIALIZE_MODE_VALUE="${{ github.event.inputs.materialize_mode || 'replace' }}"
@@ -133,6 +137,16 @@ jobs:
           echo "JACKAL_HISTORY_DAYS=$JACKAL_HISTORY_DAYS_VALUE" >> "$GITHUB_ENV"
           echo "JACKAL_MATERIALIZE_MODE=$JACKAL_MATERIALIZE_MODE_VALUE" >> "$GITHUB_ENV"
           echo "JACKAL_AUTO_CONTEXT_SNAPSHOT=$JACKAL_AUTO_CONTEXT_SNAPSHOT_VALUE" >> "$GITHUB_ENV"
+
+          echo "Resolved learning inputs:"
+          echo "  mode=$MODE"
+          echo "  use_artifact_handoff=$USE_ARTIFACT_HANDOFF"
+          echo "  artifact_run_id=${ARTIFACT_RUN_ID:-<empty>}"
+          echo "  orca_months=$ORCA_MONTHS"
+          echo "  backtest_days=$JACKAL_BACKTEST_DAYS_VALUE"
+          echo "  history_days=$JACKAL_HISTORY_DAYS_VALUE"
+          echo "  materialize_mode=$JACKAL_MATERIALIZE_MODE_VALUE"
+          echo "  auto_context_snapshot=$JACKAL_AUTO_CONTEXT_SNAPSHOT_VALUE"
 
       - name: Download preflight ORCA artifact
         if: env.USE_ARTIFACT_HANDOFF == 'true'
@@ -221,9 +235,9 @@ jobs:
           print(f"  JACKAL sessions: {jackal_sessions}")
           print("=" * 50)
 
-          assert candidate_count >= 1000, f"backtest candidates insufficient: {candidate_count}"
+          assert candidate_count >= 3874, f"backtest candidates insufficient: {candidate_count}"
           assert outcomes >= candidate_count, f"outcomes < candidates: {outcomes} < {candidate_count}"
-          assert lessons >= 1000, f"lessons insufficient: {lessons}"
+          assert lessons >= 3874, f"lessons insufficient: {lessons}"
           assert orca_sessions >= 1, "ORCA session missing"
           assert jackal_sessions >= 1, "JACKAL session missing"
 

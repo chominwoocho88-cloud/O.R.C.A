@@ -206,6 +206,9 @@ class TestLowMediumWorkflowNodeRuntimeContracts(unittest.TestCase):
         "pages_dashboard.yml": (
             "uses: actions/checkout@v6",
             "uses: actions/setup-python@v6",
+            "uses: actions/configure-pages@v6",
+            "uses: actions/upload-pages-artifact@v5",
+            "uses: actions/deploy-pages@v5",
         ),
         "orca_backtest.yml": (
             "uses: actions/checkout@v6",
@@ -231,6 +234,9 @@ class TestLowMediumWorkflowNodeRuntimeContracts(unittest.TestCase):
         "uses: actions/setup-python@v5",
         "uses: actions/upload-artifact@v4",
         "uses: actions/download-artifact@v4",
+        "uses: actions/configure-pages@v5",
+        "uses: actions/upload-pages-artifact@v3",
+        "uses: actions/deploy-pages@v4",
     )
 
     def test_low_medium_workflows_use_node24_action_versions(self):
@@ -571,6 +577,21 @@ class TestWorkflowDispatchUiContracts(unittest.TestCase):
         self.assertIn('default: "true"', dispatch)
         self.assertIn("inputs.strict == true || inputs.strict == 'true'", text)
 
+    def test_jackal_manual_dispatch_booleans_are_choice_inputs(self):
+        scanner = _extract_workflow_dispatch_block(_workflow_path("jackal_scanner.yml"))
+        tracker = _extract_workflow_dispatch_block(_workflow_path("jackal_tracker.yml"))
+
+        self.assertIn("force:", scanner)
+        self.assertIn("type: choice", scanner)
+        self.assertIn('default: "false"', scanner)
+        self.assertIn("Resolve Scanner inputs", _read_text(_workflow_path("jackal_scanner.yml")))
+        self.assertIn("JACKAL_SCANNER_FORCE", _read_text(_workflow_path("jackal_scanner.yml")))
+
+        for input_name in ("all_entries:", "dry_run:", "notify:"):
+            self.assertIn(input_name, tracker)
+        self.assertGreaterEqual(tracker.count("type: choice"), 3)
+        self.assertGreaterEqual(tracker.count('default: "false"'), 3)
+
     def test_wave_f_three_year_dispatch_defaults_are_current(self):
         backfill = _read_text(_workflow_path("wave_f_backfill.yml"))
         clustering = _read_text(_workflow_path("wave_f_clustering.yml"))
@@ -758,9 +779,21 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         self.assertIn('Found artifact DB: {path}', text)
         self.assertIn("ARTIFACT_DB_PATH", text)
         self.assertIn("candidate_registry(backtest):", text)
-        self.assertIn("assert candidate_count >= 1000", text)
+        self.assertIn("assert candidate_count >= 3874", text)
+        self.assertIn("assert lessons >= 3874", text)
         self.assertIn("Promote artifact DB", text)
         self.assertIn("shutil.copy", text)
+
+    def test_jackal_backtest_learning_uses_3year_orca_refresh_default(self):
+        text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
+        dispatch = _extract_workflow_dispatch_block(_workflow_path("jackal_backtest_learning.yml"))
+        self.assertIn("orca_months:", dispatch)
+        self.assertIn("type: choice", dispatch)
+        self.assertIn('- "36"', dispatch)
+        self.assertIn('- "13"', dispatch)
+        self.assertIn('default: "36"', dispatch)
+        self.assertIn("orca_months=$ORCA_MONTHS", text)
+        self.assertIn("Resolved learning inputs:", text)
 
     def test_jackal_backtest_learning_mode1_runs_materialization_after_handoff(self):
         text = _read_text(_workflow_path("jackal_backtest_learning.yml"))

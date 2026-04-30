@@ -17,14 +17,26 @@ on:
       all_entries:
         description: "Process all entries regardless of alerted flag"
         required: false
+        type: choice
+        options:
+          - "false"
+          - "true"
         default: "false"
       dry_run:
         description: "Preview tracker results without state persistence"
         required: false
+        type: choice
+        options:
+          - "false"
+          - "true"
         default: "false"
       notify:
         description: "Send completion Telegram notification"
         required: false
+        type: choice
+        options:
+          - "false"
+          - "true"
         default: "false"
 
 jobs:

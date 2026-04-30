@@ -126,7 +126,7 @@ Current risk split:
 
 Low/medium manual verification:
 
-- `ORCA Dashboard Pages`: run `workflow_dispatch` with no inputs. Confirm there are no Node.js 20 deprecation warnings from `checkout` or `setup-python`, the dashboard build succeeds, the Pages artifact uploads, and `Deploy to GitHub Pages` returns the page URL.
+- `ORCA Dashboard Pages`: run `workflow_dispatch` with no inputs. Confirm there are no Node.js 20 deprecation warnings from `checkout`, `setup-python`, `configure-pages`, `upload-pages-artifact`, or `deploy-pages`; the dashboard build succeeds; the Pages artifact uploads; and `Deploy to GitHub Pages` returns the page URL.
 - `ORCA Backtest`: for action/artifact handoff verification, run `workflow_dispatch` with `run_mode=artifact_verify_only`, `months=36`, `walk_forward=true`, `expected_min_candidates=3874`, `expected_min_lessons=3874`, `expected_min_orca_sessions=1`, and `expected_min_jackal_sessions=1` for the current 3-year baseline. Confirm the `research-state-${{ github.run_id }}` artifact contains only `data/orca_state.db`, then confirm the reusable `Policy Eval` and `Policy Promote` jobs receive the expected artifact names. Use `months=13` and `expected_min_* = 1000` only as a lighter smoke run when explicitly intended. Do not use `run_mode=live_backtest` for action-version validation; it can invoke live Anthropic and market-provider calls and needs separate approval.
 - `Policy Eval`: verify primarily through the `ORCA Backtest` reusable call so the artifact is downloaded from the same workflow run. For direct `workflow_dispatch`, leave `artifact_name` empty unless the artifact exists in that same run context. Confirm `Install dependencies` runs before `Build Research Comparison Report`; a `ModuleNotFoundError` for `pandas` or another dependency means the clean runner did not install `requirements.txt`.
 - `Policy Promote`: verify primarily through the `Policy Eval` output in the `ORCA Backtest` chain. For direct `workflow_dispatch`, leave `artifact_name` empty unless the policy-eval artifact exists in that same run context. Confirm `Install dependencies` runs before `Build policy promotion decision`.
@@ -144,8 +144,8 @@ High-risk workflow settings:
 | Workflow | State path | Safe first validation |
 | --- | --- | --- |
 | `db_vacuum.yml` | VACUUM and cold archive DB commit | No no-op mode exists. Do not manually dispatch without separate approval; validate next scheduled or approved maintenance run logs. |
-| `jackal_backtest_learning.yml` | ORCA/JACKAL DB commit and optional artifact handoff | Prefer an approved run with `mode=incremental` first. For handoff, use `mode=full` plus an `artifact_run_id` from a successful `ORCA Backtest` run. |
-| `jackal_scanner.yml` | scanner logs, watchlist, ORCA/JACKAL DB commit | No dry-run mode exists. Use `force=false` only after approval because this can use external provider and notification secrets. |
+| `jackal_backtest_learning.yml` | ORCA/JACKAL DB commit and optional artifact handoff | Prefer Mode 1 artifact handoff after approval: `mode=full`, `artifact_run_id=<successful ORCA Backtest run_id>`, `orca_months=36`, `backtest_days=252`, `history_days=750`, `materialize_mode=add_missing`, `auto_context_snapshot=true`. Avoid Mode 2 self-refresh unless separately approved because it can use live providers. |
+| `jackal_scanner.yml` | scanner logs, watchlist, ORCA/JACKAL DB commit | No dry-run mode exists. Use `force=false` only after approval because this can use external provider and notification secrets. The manual UI uses a `false`/`true` choice and logs `JACKAL_SCANNER_FORCE` in `Resolve Scanner inputs`. |
 | `orca_daily.yml` | ORCA reports, JSON state, ORCA/JACKAL DB commit | No dry-run mode exists. Validate on the next approved scheduled run; use `expected_min_reports=0` unless checking a specific report count. |
 | `orca_jackal.yml` | JACKAL-owned JSON/DB state replay to `main` | Use only after approval. Lower blast radius dispatch is `session_mode=scanner_only`, `force_hunt=false`, `force_scan=false`, `force_evolve=false`, but it can still use external secrets. |
 | `orca_reset.yml` | destructive JSON state reset commit | Do not run with `confirm=RESET` without separate approval. For action smoke only, dispatch with `confirm=DO_NOT_RESET`, `reset_orca=false`, `reset_jackal=false` and expect the validation step to fail before reset. |
@@ -193,3 +193,5 @@ Run log interpretation:
 - `Save Tracker results` failure: inspect `git status --short`, staged diff output, and push/rebase messages in the step log.
 
 The `Resolve Tracker inputs` step logs `event_name`, raw and normalized `all_entries`, `dry_run`, `notify`, final `TRACKER_ARGS`, and `TRACKER_WILL_SAVE_RESULTS`. This is the first place to check when a workflow_dispatch run behaves differently than expected.
+
+Manual Tracker inputs are choice fields. For a safe smoke run, use `all_entries=false`, `dry_run=true`, and `notify=false`; this must produce `TRACKER_ARGS=--dry-run` and `TRACKER_WILL_SAVE_RESULTS=false`.

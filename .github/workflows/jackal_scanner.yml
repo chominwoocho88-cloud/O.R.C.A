@@ -8,14 +8,19 @@ on:
   workflow_dispatch:
     inputs:
       force:
-        description: "시장 개장 여부와 무관하게 스캔 실행"
+        description: "Run scanner even if market state is unclear"
         required: false
+        type: choice
+        options:
+          - "false"
+          - "true"
         default: "false"
 
 jobs:
   scanner:
     runs-on: ubuntu-latest
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
       ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
       USE_UNIFIED_FETCH: "1"
@@ -37,6 +42,38 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Resolve Scanner inputs
+        shell: bash
+        run: |
+          trim_workflow_input() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
+
+          normalize_bool() {
+            local value
+            value="$(trim_workflow_input "$1")"
+            value="${value,,}"
+            if [ "$value" = "true" ] || [ "$value" = "1" ] || [ "$value" = "yes" ]; then
+              printf 'true'
+            else
+              printf 'false'
+            fi
+          }
+
+          RAW_FORCE="$(trim_workflow_input "${{ github.event.inputs.force }}")"
+          [ -z "$RAW_FORCE" ] && RAW_FORCE="false"
+          JACKAL_SCANNER_FORCE="$(normalize_bool "$RAW_FORCE")"
+
+          echo "JACKAL_SCANNER_RAW_FORCE=$RAW_FORCE" >> "$GITHUB_ENV"
+          echo "JACKAL_SCANNER_FORCE=$JACKAL_SCANNER_FORCE" >> "$GITHUB_ENV"
+
+          echo "Resolved Scanner inputs:"
+          echo "  raw_force=$RAW_FORCE"
+          echo "  normalized_force=$JACKAL_SCANNER_FORCE"
+
       - name: Run JACKAL Scanner
         env:
           PYTHONIOENCODING: utf-8
@@ -49,7 +86,8 @@ jobs:
           FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
         run: |
           ARGS=""
-          [ "${{ github.event.inputs.force }}" = "true" ] && ARGS="$ARGS --force"
+          [ "$JACKAL_SCANNER_FORCE" = "true" ] && ARGS="$ARGS --force"
+          echo "Running scanner with ARGS=${ARGS:-<none>}"
           python -m jackal.scanner $ARGS
 
       - name: Save JACKAL Scanner state
@@ -92,7 +130,7 @@ jobs:
             exit 0
           }
 
-          git commit -m "📡 JACKAL Scanner: $(date +'%Y-%m-%d %H:%M') [skip ci]"
+          git commit -m "JACKAL Scanner: $(date +'%Y-%m-%d %H:%M') [skip ci]"
 
           echo "Commit created: $(git rev-parse --short HEAD)"
 
