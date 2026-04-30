@@ -48,6 +48,10 @@ on:
         description: "Minimum acceptable silhouette"
         type: string
         default: "0.11"
+      confirm_apply:
+        description: "Required for dry_run=false. Type APPLY_WAVE_F"
+        type: string
+        default: ""
 
 concurrency:
   group: orca-repo-state
@@ -106,6 +110,7 @@ jobs:
           EXPECTED_SNAPSHOTS_VALUE="$(trim_workflow_input "${{ inputs.expected_snapshots }}")"
           EXPECTED_LINKED_LESSONS_VALUE="$(trim_workflow_input "${{ inputs.expected_linked_lessons }}")"
           MIN_SILHOUETTE_VALUE="$(trim_workflow_input "${{ inputs.min_silhouette }}")"
+          CLUSTER_CONFIRM_APPLY="$(trim_workflow_input "${{ inputs.confirm_apply }}")"
 
           if [ -z "$CLUSTER_N_CLUSTERS" ]; then
             CLUSTER_N_CLUSTERS="8"
@@ -131,6 +136,7 @@ jobs:
           echo "EXPECTED_SNAPSHOTS=$EXPECTED_SNAPSHOTS_VALUE" >> "$GITHUB_ENV"
           echo "EXPECTED_LINKED_LESSONS=$EXPECTED_LINKED_LESSONS_VALUE" >> "$GITHUB_ENV"
           echo "MIN_SILHOUETTE=$MIN_SILHOUETTE_VALUE" >> "$GITHUB_ENV"
+          echo "CLUSTER_CONFIRM_APPLY=$CLUSTER_CONFIRM_APPLY" >> "$GITHUB_ENV"
 
           echo "Resolved inputs:"
           echo "  dry_run=$CLUSTER_DRY_RUN"
@@ -141,6 +147,24 @@ jobs:
           echo "  expected_snapshots=$EXPECTED_SNAPSHOTS_VALUE"
           echo "  expected_linked_lessons=$EXPECTED_LINKED_LESSONS_VALUE"
           echo "  min_silhouette=$MIN_SILHOUETTE_VALUE"
+          if [ -n "$CLUSTER_CONFIRM_APPLY" ]; then
+            echo "  confirm_apply=provided"
+          else
+            echo "  confirm_apply=empty"
+          fi
+
+      - name: Validate non-dry confirmation
+        shell: bash
+        run: |
+          if [ "$CLUSTER_DRY_RUN" != "true" ] && [ "$CLUSTER_CONFIRM_APPLY" != "APPLY_WAVE_F" ]; then
+            echo "::error::dry_run=false requires confirm_apply=APPLY_WAVE_F"
+            exit 1
+          fi
+          if [ "$CLUSTER_DRY_RUN" = "true" ]; then
+            echo "Dry-run confirmation not required"
+          else
+            echo "Non-dry confirmation accepted"
+          fi
 
       - name: Pre-flight status
         run: |
@@ -173,14 +197,24 @@ jobs:
           clusters = conn.execute('SELECT COUNT(*) FROM lesson_clusters').fetchone()[0]
           mappings = conn.execute('SELECT COUNT(*) FROM snapshot_cluster_mapping').fetchone()[0]
           latest_run = state.get_latest_run_id(conn)
+          latest_clusters = conn.execute(
+              'SELECT COUNT(*) FROM lesson_clusters WHERE run_id = ?',
+              (latest_run,),
+          ).fetchone()[0] if latest_run else 0
+          latest_mappings = conn.execute(
+              'SELECT COUNT(*) FROM snapshot_cluster_mapping WHERE run_id = ?',
+              (latest_run,),
+          ).fetchone()[0] if latest_run else 0
           print('Pre-flight:')
           print(f'  snapshots: {snapshots}')
           print(f'  clustering source: {source or "all"}')
           print(f'  usable source snapshots: {usable}')
           print(f'  lessons with context: {linked_lessons}')
-          print(f'  existing clusters: {clusters}')
-          print(f'  existing mappings: {mappings}')
+          print(f'  existing clusters total: {clusters}')
+          print(f'  existing mappings total: {mappings}')
           print(f'  latest run_id: {latest_run or "(none)"}')
+          print(f'  latest run clusters: {latest_clusters}')
+          print(f'  latest run mappings: {latest_mappings}')
           conn.close()
           PY
 

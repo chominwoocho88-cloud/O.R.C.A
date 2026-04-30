@@ -596,6 +596,29 @@ class TestWorkflowDispatchUiContracts(unittest.TestCase):
 
         self.assertIn('default: "3869"', archive)
 
+    def test_wave_f_non_dry_runs_require_confirmation(self):
+        for workflow_name in (
+            "wave_f_backfill.yml",
+            "wave_f_clustering.yml",
+            "wave_f_archive.yml",
+        ):
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                self.assertIn("confirm_apply:", text)
+                self.assertIn("Validate non-dry confirmation", text)
+                self.assertIn("APPLY_WAVE_F", text)
+                self.assertIn("dry_run=false requires confirm_apply=APPLY_WAVE_F", text)
+
+    def test_wave_f_preflight_distinguishes_cumulative_and_latest_run_counts(self):
+        clustering = _read_text(_workflow_path("wave_f_clustering.yml"))
+        archive = _read_text(_workflow_path("wave_f_archive.yml"))
+
+        self.assertIn("existing clusters total", clustering)
+        self.assertIn("latest run mappings", clustering)
+        self.assertIn("canonical clustered lessons total", archive)
+        self.assertIn("latest cluster run canonical lessons", archive)
+        self.assertIn("latest archive run rows", archive)
+
 
 class TestWorkflowOrcaStateContracts(unittest.TestCase):
     """Contract 4: stateful workflows must keep handling data/orca_state.db."""

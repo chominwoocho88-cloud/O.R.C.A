@@ -92,12 +92,13 @@ Workflow: `.github/workflows/wave_f_archive.yml`
 - `dry_run`: 기본 `true`
 - `cluster_run_id`: 비우면 latest cluster run
 - `force_rebuild`: 기본 `false`
+- `confirm_apply`: `dry_run=false`일 때 `APPLY_WAVE_F` 입력
 
 권장 실행 순서:
 
 1. `dry_run=true` 로 먼저 실행한다.
 2. archive count, tier distribution, average quality 를 확인한다.
-3. `dry_run=false`, `append_mode=true`, `force_rebuild=false` 로 실제 실행한다.
+3. `dry_run=false`, `append_mode=true`, `force_rebuild=false`, `confirm_apply=APPLY_WAVE_F` 로 실제 실행한다.
 4. Strict verify 가 `3869` archive rows 를 확인한 뒤에만 DB commit/push 된다.
 
 ## Retrieval 연동

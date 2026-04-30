@@ -190,6 +190,8 @@ class ExpansionWorkflowContractTests(unittest.TestCase):
         text = _workflow_text("wave_f_backfill.yml")
         self.assertIn("expected_snapshots:", text)
         self.assertIn("expected_linked_lessons:", text)
+        self.assertIn("confirm_apply:", text)
+        self.assertIn("APPLY_WAVE_F", text)
         self.assertIn("EXPECTED_SNAPSHOTS", text)
         self.assertIn("EXPECTED_LINKED_LESSONS", text)
         self.assertIn("Resolve inputs", text)
@@ -210,6 +212,9 @@ class ExpansionWorkflowContractTests(unittest.TestCase):
         self.assertIn("CLUSTER_SOURCE_EVENT_TYPE", text)
         self.assertIn("EXPECTED_SNAPSHOTS", text)
         self.assertIn("EXPECTED_LINKED_LESSONS", text)
+        self.assertIn("confirm_apply:", text)
+        self.assertIn("APPLY_WAVE_F", text)
+        self.assertIn("latest run mappings", text)
 
     def test_wave_f_archive_append_mode(self):
         text = _workflow_text("wave_f_archive.yml")
@@ -217,6 +222,9 @@ class ExpansionWorkflowContractTests(unittest.TestCase):
         self.assertIn("expected_archive_count:", text)
         self.assertIn("--append", text)
         self.assertIn("EXPECTED_ARCHIVE_COUNT", text)
+        self.assertIn("confirm_apply:", text)
+        self.assertIn("APPLY_WAVE_F", text)
+        self.assertIn("latest cluster run canonical lessons", text)
 
 
 class ExpansionCliContractTests(unittest.TestCase):

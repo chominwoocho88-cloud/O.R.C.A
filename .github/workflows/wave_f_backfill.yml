@@ -36,6 +36,10 @@ on:
         description: "Expected linked backtest lessons"
         type: string
         default: "3869"
+      confirm_apply:
+        description: "Required for dry_run=false. Type APPLY_WAVE_F"
+        type: string
+        default: ""
 
 concurrency:
   group: orca-repo-state
@@ -92,6 +96,7 @@ jobs:
           BACKFILL_CLEANUP="$(normalize_bool "${{ inputs.cleanup }}")"
           EXPECTED_SNAPSHOTS_VALUE="$(trim_workflow_input "${{ inputs.expected_snapshots }}")"
           EXPECTED_LINKED_LESSONS_VALUE="$(trim_workflow_input "${{ inputs.expected_linked_lessons }}")"
+          BACKFILL_CONFIRM_APPLY="$(trim_workflow_input "${{ inputs.confirm_apply }}")"
 
           if [ -z "$EXPECTED_SNAPSHOTS_VALUE" ]; then
             EXPECTED_SNAPSHOTS_VALUE="757"
@@ -106,6 +111,7 @@ jobs:
           echo "BACKFILL_CLEANUP=$BACKFILL_CLEANUP" >> "$GITHUB_ENV"
           echo "EXPECTED_SNAPSHOTS=$EXPECTED_SNAPSHOTS_VALUE" >> "$GITHUB_ENV"
           echo "EXPECTED_LINKED_LESSONS=$EXPECTED_LINKED_LESSONS_VALUE" >> "$GITHUB_ENV"
+          echo "BACKFILL_CONFIRM_APPLY=$BACKFILL_CONFIRM_APPLY" >> "$GITHUB_ENV"
 
           echo "Resolved inputs:"
           echo "  dry_run=$BACKFILL_DRY_RUN"
@@ -114,6 +120,24 @@ jobs:
           echo "  cleanup=$BACKFILL_CLEANUP"
           echo "  expected_snapshots=$EXPECTED_SNAPSHOTS_VALUE"
           echo "  expected_linked_lessons=$EXPECTED_LINKED_LESSONS_VALUE"
+          if [ -n "$BACKFILL_CONFIRM_APPLY" ]; then
+            echo "  confirm_apply=provided"
+          else
+            echo "  confirm_apply=empty"
+          fi
+
+      - name: Validate non-dry confirmation
+        shell: bash
+        run: |
+          if [ "$BACKFILL_DRY_RUN" != "true" ] && [ "$BACKFILL_CONFIRM_APPLY" != "APPLY_WAVE_F" ]; then
+            echo "::error::dry_run=false requires confirm_apply=APPLY_WAVE_F"
+            exit 1
+          fi
+          if [ "$BACKFILL_DRY_RUN" = "true" ]; then
+            echo "Dry-run confirmation not required"
+          else
+            echo "Non-dry confirmation accepted"
+          fi
 
       - name: Pre-flight status
         run: |

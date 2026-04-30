@@ -147,6 +147,7 @@ WHERE context_snapshot_id IS NULL;
 - `skip_existing=true`
 - `expected_snapshots=757`
 - `expected_linked_lessons=3869`
+- `confirm_apply=APPLY_WAVE_F`
 
 동작:
 
@@ -175,6 +176,7 @@ Clustering 권장 입력:
 - `expected_snapshots=757`
 - `expected_linked_lessons=3869`
 - `min_silhouette=0.11`부터 시작 후 결과 확인
+- `confirm_apply=APPLY_WAVE_F`
 
 CLI:
 
@@ -194,6 +196,7 @@ Archive 권장 입력:
 - `dry_run=false`
 - `append_mode=true`
 - `expected_archive_count=3869`
+- `confirm_apply=APPLY_WAVE_F`
 
 CLI:
 
@@ -296,9 +299,9 @@ conn.close()
 
 1. ORCA Backtest workflow: `run_mode=live_backtest`, `months=36`
 2. JACKAL Backtest Learning workflow: artifact handoff + `add_missing` + `auto_context_snapshot=false`
-3. Wave F Backfill workflow: `expected_snapshots=757`, `expected_linked_lessons=3869`
-4. Wave F Clustering workflow: `append_mode=true`, `n_clusters=8`, `expected_snapshots=757`, `expected_linked_lessons=3869`
-5. Wave F Archive workflow: `append_mode=true`, `expected_archive_count=3869`
+3. Wave F Backfill workflow: `expected_snapshots=757`, `expected_linked_lessons=3869`, `confirm_apply=APPLY_WAVE_F`
+4. Wave F Clustering workflow: `append_mode=true`, `n_clusters=8`, `expected_snapshots=757`, `expected_linked_lessons=3869`, `confirm_apply=APPLY_WAVE_F`
+5. Wave F Archive workflow: `append_mode=true`, `expected_archive_count=3869`, `confirm_apply=APPLY_WAVE_F`
 6. 전체 tests와 retrieval smoke test
 
 ## 다음 단계

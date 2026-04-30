@@ -149,9 +149,9 @@ High-risk workflow settings:
 | `orca_daily.yml` | ORCA reports, JSON state, ORCA/JACKAL DB commit | No dry-run mode exists. Validate on the next approved scheduled run; use `expected_min_reports=0` unless checking a specific report count. |
 | `orca_jackal.yml` | JACKAL-owned JSON/DB state replay to `main` | Use only after approval. Lower blast radius dispatch is `session_mode=scanner_only`, `force_hunt=false`, `force_scan=false`, `force_evolve=false`, but it can still use external secrets. |
 | `orca_reset.yml` | destructive JSON state reset commit | Do not run with `confirm=RESET` without separate approval. For action smoke only, dispatch with `confirm=DO_NOT_RESET`, `reset_orca=false`, `reset_jackal=false` and expect the validation step to fail before reset. |
-| `wave_f_backfill.yml` | ORCA DB context backfill commit | Dispatch dry-run with `dry_run=true`, `cleanup=false`, `skip_existing=true`, `expected_snapshots=757`, `expected_linked_lessons=3869`. Non-dry should keep `skip_existing=true` and requires separate approval. |
-| `wave_f_clustering.yml` | ORCA DB clustering commit | Dispatch dry-run with `dry_run=true`, `force_rebuild=false`, `append_mode=false`, `source_event_type=backtest_backfill`, `expected_snapshots=757`, `expected_linked_lessons=3869`, `min_silhouette=0.11`. Approved non-dry append runs should set `append_mode=true`. |
-| `wave_f_archive.yml` | ORCA DB/archive DB commit | Dispatch dry-run with `dry_run=true`, `force_rebuild=false`, `append_mode=false`, `expected_archive_count=3869`. Approved non-dry append runs should set `append_mode=true`. |
+| `wave_f_backfill.yml` | ORCA DB context backfill commit | Dispatch dry-run with `dry_run=true`, `cleanup=false`, `skip_existing=true`, `expected_snapshots=757`, `expected_linked_lessons=3869`, `confirm_apply` empty. Approved non-dry should keep `skip_existing=true` and set `confirm_apply=APPLY_WAVE_F`. |
+| `wave_f_clustering.yml` | ORCA DB clustering commit | Dispatch dry-run with `dry_run=true`, `force_rebuild=false`, `append_mode=false`, `source_event_type=backtest_backfill`, `expected_snapshots=757`, `expected_linked_lessons=3869`, `min_silhouette=0.11`, `confirm_apply` empty. Approved non-dry append runs should set `append_mode=true` and `confirm_apply=APPLY_WAVE_F`. |
+| `wave_f_archive.yml` | ORCA DB/archive DB commit | Dispatch dry-run with `dry_run=true`, `force_rebuild=false`, `append_mode=false`, `expected_archive_count=3869`, `confirm_apply` empty. Approved non-dry append runs should set `append_mode=true` and `confirm_apply=APPLY_WAVE_F`. |
 
 State persistence log interpretation:
 
@@ -171,6 +171,7 @@ Reset/backfill guardrail:
 
 - `orca_reset.yml` must not be executed with `confirm=RESET` for action-version validation.
 - `wave_f_backfill.yml`, `wave_f_clustering.yml`, and `wave_f_archive.yml` must not be executed with `dry_run=false` until the intended DB mutation has a separate approval and rollback plan.
+- Wave F non-dry dispatches fail before DB mutation unless `confirm_apply=APPLY_WAVE_F` is provided.
 - `db_vacuum.yml` has no dry-run switch; treat manual dispatch as a state-changing maintenance operation.
 - Current 3-year Wave F inventory baseline is `757` backfill snapshots, `3869` linked backtest lessons, `757` clustered snapshots, and `3869` archived lessons. The latest approved append run produced `cluster_run_20260430025742_3dc1cba2` and `archive_run_20260430030232_7607253d`. The current 8-cluster silhouette is about `0.1206`, so the action smoke threshold remains `0.11`.
 

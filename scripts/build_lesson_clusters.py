@@ -84,6 +84,22 @@ def _print_preflight(conn: sqlite3.Connection, source_event_type: str | None) ->
     clusters = conn.execute("SELECT COUNT(*) FROM lesson_clusters").fetchone()[0]
     mappings = conn.execute("SELECT COUNT(*) FROM snapshot_cluster_mapping").fetchone()[0]
     latest_run_id = state.get_latest_run_id(conn)
+    latest_clusters = (
+        conn.execute(
+            "SELECT COUNT(*) FROM lesson_clusters WHERE run_id = ?",
+            (latest_run_id,),
+        ).fetchone()[0]
+        if latest_run_id
+        else 0
+    )
+    latest_mappings = (
+        conn.execute(
+            "SELECT COUNT(*) FROM snapshot_cluster_mapping WHERE run_id = ?",
+            (latest_run_id,),
+        ).fetchone()[0]
+        if latest_run_id
+        else 0
+    )
 
     status = {
         "snapshots": snapshots,
@@ -97,6 +113,8 @@ def _print_preflight(conn: sqlite3.Connection, source_event_type: str | None) ->
         "clusters": clusters,
         "mappings": mappings,
         "latest_run_id": latest_run_id,
+        "latest_clusters": latest_clusters,
+        "latest_mappings": latest_mappings,
     }
 
     print("Pre-flight:")
@@ -106,9 +124,11 @@ def _print_preflight(conn: sqlite3.Connection, source_event_type: str | None) ->
         print(f"  snapshots source[{source}]: {count}")
     print(f"  snapshots usable for clustering: {usable_snapshots}")
     print(f"  lessons linked to context: {lessons_linked}")
-    print(f"  existing clusters: {clusters}")
-    print(f"  existing mappings: {mappings}")
+    print(f"  existing clusters total: {clusters}")
+    print(f"  existing mappings total: {mappings}")
     print(f"  latest run_id: {latest_run_id or '(none)'}")
+    print(f"  latest run clusters: {latest_clusters}")
+    print(f"  latest run mappings: {latest_mappings}")
     return status
 
 

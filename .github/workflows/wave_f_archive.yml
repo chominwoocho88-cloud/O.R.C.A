@@ -32,6 +32,10 @@ on:
         description: "Expected archive rows for latest run"
         type: string
         default: "3869"
+      confirm_apply:
+        description: "Required for dry_run=false. Type APPLY_WAVE_F"
+        type: string
+        default: ""
 
 concurrency:
   group: orca-repo-state
@@ -89,6 +93,7 @@ jobs:
           ARCHIVE_APPEND_MODE_VALUE="$(normalize_bool "${{ inputs.append_mode }}")"
           ARCHIVE_CLUSTER_RUN_ID_VALUE="$(trim_workflow_input "${{ inputs.cluster_run_id }}")"
           EXPECTED_ARCHIVE_COUNT_VALUE="$(trim_workflow_input "${{ inputs.expected_archive_count }}")"
+          ARCHIVE_CONFIRM_APPLY="$(trim_workflow_input "${{ inputs.confirm_apply }}")"
 
           [ -z "$EXPECTED_ARCHIVE_COUNT_VALUE" ] && EXPECTED_ARCHIVE_COUNT_VALUE="3869"
 
@@ -97,6 +102,7 @@ jobs:
           echo "ARCHIVE_APPEND_MODE=$ARCHIVE_APPEND_MODE_VALUE" >> "$GITHUB_ENV"
           echo "ARCHIVE_CLUSTER_RUN_ID=$ARCHIVE_CLUSTER_RUN_ID_VALUE" >> "$GITHUB_ENV"
           echo "EXPECTED_ARCHIVE_COUNT=$EXPECTED_ARCHIVE_COUNT_VALUE" >> "$GITHUB_ENV"
+          echo "ARCHIVE_CONFIRM_APPLY=$ARCHIVE_CONFIRM_APPLY" >> "$GITHUB_ENV"
 
           echo "Resolved inputs:"
           echo "  dry_run=$ARCHIVE_DRY_RUN_VALUE"
@@ -104,6 +110,24 @@ jobs:
           echo "  force_rebuild=$ARCHIVE_FORCE_REBUILD_VALUE"
           echo "  append_mode=$ARCHIVE_APPEND_MODE_VALUE"
           echo "  expected_archive_count=$EXPECTED_ARCHIVE_COUNT_VALUE"
+          if [ -n "$ARCHIVE_CONFIRM_APPLY" ]; then
+            echo "  confirm_apply=provided"
+          else
+            echo "  confirm_apply=empty"
+          fi
+
+      - name: Validate non-dry confirmation
+        shell: bash
+        run: |
+          if [ "$ARCHIVE_DRY_RUN" != "true" ] && [ "$ARCHIVE_CONFIRM_APPLY" != "APPLY_WAVE_F" ]; then
+            echo "::error::dry_run=false requires confirm_apply=APPLY_WAVE_F"
+            exit 1
+          fi
+          if [ "$ARCHIVE_DRY_RUN" = "true" ]; then
+            echo "Dry-run confirmation not required"
+          else
+            echo "Non-dry confirmation accepted"
+          fi
 
       - name: Pre-flight status
         shell: bash
@@ -142,17 +166,45 @@ jobs:
           archives = conn.execute('SELECT COUNT(*) FROM lesson_archive').fetchone()[0]
           latest_cluster_run = state.get_latest_run_id(conn)
           latest_archive_run = state.get_latest_archive_run_id(conn)
+          latest_mappings = conn.execute(
+              'SELECT COUNT(*) FROM snapshot_cluster_mapping WHERE run_id = ?',
+              (latest_cluster_run,),
+          ).fetchone()[0] if latest_cluster_run else 0
+          latest_canonical_clustered_lessons = conn.execute("""
+              SELECT COUNT(*)
+              FROM candidate_lessons l
+              JOIN candidate_registry c
+                ON c.candidate_id = l.candidate_id
+              JOIN (
+                    SELECT trading_date, MIN(snapshot_id) AS snapshot_id
+                    FROM lesson_context_snapshot
+                    WHERE source_event_type = 'backtest_backfill'
+                    GROUP BY trading_date
+              ) canonical
+                ON canonical.trading_date = substr(c.analysis_date, 1, 10)
+              JOIN snapshot_cluster_mapping m
+                ON m.snapshot_id = canonical.snapshot_id
+              WHERE c.source_event_type = 'backtest'
+                AND m.run_id = ?
+          """, (latest_cluster_run,)).fetchone()[0] if latest_cluster_run else 0
+          latest_archive_rows = conn.execute(
+              'SELECT COUNT(*) FROM lesson_archive WHERE run_id = ?',
+              (latest_archive_run,),
+          ).fetchone()[0] if latest_archive_run else 0
           cold = Path('data/archive/lesson_archive_cold.db')
           print('Pre-flight:')
           print(f'  main_db_mb: {os.path.getsize("data/orca_state.db") / 1024 / 1024:.2f}')
           print(f'  cold_archive_exists: {cold.exists()}')
-          print(f'  clusters: {clusters}')
-          print(f'  mappings: {mappings}')
+          print(f'  clusters total: {clusters}')
+          print(f'  mappings total: {mappings}')
           print(f'  lessons with context: {linked_lessons}')
-          print(f'  canonical clustered lessons: {canonical_clustered_lessons}')
-          print(f'  existing archive rows: {archives}')
+          print(f'  canonical clustered lessons total: {canonical_clustered_lessons}')
+          print(f'  existing archive rows total: {archives}')
           print(f'  latest cluster run_id: {latest_cluster_run or "(none)"}')
+          print(f'  latest cluster run mappings: {latest_mappings}')
+          print(f'  latest cluster run canonical lessons: {latest_canonical_clustered_lessons}')
           print(f'  latest archive run_id: {latest_archive_run or "(none)"}')
+          print(f'  latest archive run rows: {latest_archive_rows}')
           conn.close()
           PY
 

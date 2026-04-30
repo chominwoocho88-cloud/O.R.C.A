@@ -68,6 +68,46 @@ def _print_preflight(conn: sqlite3.Connection) -> dict[str, Any]:
     archives = conn.execute("SELECT COUNT(*) FROM lesson_archive").fetchone()[0]
     latest_cluster_run = state.get_latest_run_id(conn)
     latest_archive_run = state.get_latest_archive_run_id(conn)
+    latest_mappings = (
+        conn.execute(
+            "SELECT COUNT(*) FROM snapshot_cluster_mapping WHERE run_id = ?",
+            (latest_cluster_run,),
+        ).fetchone()[0]
+        if latest_cluster_run
+        else 0
+    )
+    latest_canonical_clustered_lessons = (
+        conn.execute(
+            """
+            SELECT COUNT(*)
+              FROM candidate_lessons l
+              JOIN candidate_registry c
+                ON c.candidate_id = l.candidate_id
+              JOIN (
+                    SELECT trading_date, MIN(snapshot_id) AS snapshot_id
+                      FROM lesson_context_snapshot
+                     WHERE source_event_type = 'backtest_backfill'
+                     GROUP BY trading_date
+              ) canonical
+                ON canonical.trading_date = substr(c.analysis_date, 1, 10)
+              JOIN snapshot_cluster_mapping m
+                ON m.snapshot_id = canonical.snapshot_id
+             WHERE c.source_event_type = 'backtest'
+               AND m.run_id = ?
+            """,
+            (latest_cluster_run,),
+        ).fetchone()[0]
+        if latest_cluster_run
+        else 0
+    )
+    latest_archive_rows = (
+        conn.execute(
+            "SELECT COUNT(*) FROM lesson_archive WHERE run_id = ?",
+            (latest_archive_run,),
+        ).fetchone()[0]
+        if latest_archive_run
+        else 0
+    )
 
     status = {
         "clusters": clusters,
@@ -78,17 +118,23 @@ def _print_preflight(conn: sqlite3.Connection) -> dict[str, Any]:
         "archives": archives,
         "latest_cluster_run": latest_cluster_run,
         "latest_archive_run": latest_archive_run,
+        "latest_mappings": latest_mappings,
+        "latest_canonical_clustered_lessons": latest_canonical_clustered_lessons,
+        "latest_archive_rows": latest_archive_rows,
     }
 
     print("Pre-flight:")
-    print(f"  clusters: {clusters}")
-    print(f"  snapshot mappings: {mappings}")
+    print(f"  clusters total: {clusters}")
+    print(f"  snapshot mappings total: {mappings}")
     print(f"  lessons with context: {linked_lessons}")
-    print(f"  clustered lessons: {clustered_lessons}")
-    print(f"  canonical clustered lessons: {canonical_clustered_lessons}")
-    print(f"  existing archive rows: {archives}")
+    print(f"  clustered lessons total: {clustered_lessons}")
+    print(f"  canonical clustered lessons total: {canonical_clustered_lessons}")
+    print(f"  existing archive rows total: {archives}")
     print(f"  latest cluster run_id: {latest_cluster_run or '(none)'}")
+    print(f"  latest cluster run mappings: {latest_mappings}")
+    print(f"  latest cluster run canonical lessons: {latest_canonical_clustered_lessons}")
     print(f"  latest archive run_id: {latest_archive_run or '(none)'}")
+    print(f"  latest archive run rows: {latest_archive_rows}")
     return status
 
 
