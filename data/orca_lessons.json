@@ -1,6 +1,16 @@
 {
-  "lessons": [],
-  "total_lessons": 0,
-  "last_updated": "2026-04-17",
+  "lessons": [
+    {
+      "date": "2026-05-02",
+      "source": "monthly",
+      "category": "monthly_strength",
+      "lesson": "Monthly review 2026-04: accuracy reached 84.6%. Keep the regime filters that worked, but do not treat one good month as a permanent edge.",
+      "severity": "low",
+      "applied": 0,
+      "reinforced": 0
+    }
+  ],
+  "total_lessons": 1,
+  "last_updated": "2026-05-02",
   "_reset_at": "2026-04-16T16:44:01.994734+09:00"
 }
