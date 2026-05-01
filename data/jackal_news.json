@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-04-30 09:15 KST",
+  "collected_at": "2026-05-01 09:14 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,38 +12,38 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia shares surged 20% in April and 92% year-over-year, fueled by strong fundamentals and AI demand",
-      "impact": "bullish",
+      "headline": "NVIDIA stock tumbled more than 4% as investors weigh rising competition from Google and Amazon custom chips",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix gained as AI demand boosted memory-chip stocks, with earnings up 400% and strong analyst support",
+      "headline": "SK Hynix rises on strong U.S. big tech earnings supporting semiconductor demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics launched new heat pump boiler technology but faces AI disappointment concerns",
-      "impact": "neutral",
+      "headline": "Samsung Electronics achieves record quarterly operating profit driven by AI technology innovations",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom targets $100 billion in AI chips by 2027 but faces OpenAI demand concerns and recent sell-offs",
-      "impact": "neutral",
+      "headline": "Broadcom targets $100 billion in AI chips by 2027, supported by partnerships with Google, Meta and OpenAI",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao faces AI rating downgrades from major brokerages due to lack of tangible AI results",
-      "impact": "bearish",
+      "headline": "Kakao partners with OpenAI as part of Stargate initiative expansion in South Korea",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF surpassed 4 trillion won in assets with strong performance from financial stocks",
-      "impact": "bullish",
+      "headline": "Shinhan SOL Shipbuilding TOP3 Plus ETF shows strong sell technical signal amid market volatility",
+      "impact": "bearish",
       "source": "web_search"
     }
   ],
