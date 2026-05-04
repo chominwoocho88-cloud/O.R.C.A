@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-01 09:14 KST",
+  "collected_at": "2026-05-04 09:10 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA stock tumbled more than 4% as investors weigh rising competition from Google and Amazon custom chips",
-      "impact": "bearish",
+      "headline": "Analysts predict sustained high demand for advanced chips, particularly benefiting NVIDIA as AI-driven growth continues",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix rises on strong U.S. big tech earnings supporting semiconductor demand",
+      "headline": "SK Hynix honored at 2026 IEEE Awards for leading AI technology innovation with HBM; analysts recommend strong buy with 31.31% upside potential",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics achieves record quarterly operating profit driven by AI technology innovations",
+      "headline": "Samsung achieved record quarterly profit driven by AI technology innovations; Samsung quadruples monthly DRAM supply to Tesla",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom targets $100 billion in AI chips by 2027, supported by partnerships with Google, Meta and OpenAI",
+      "headline": "Broadcom AI semiconductor revenue surged 106% year-over-year with $73 billion backlog; stock hit $2 trillion market cap with expanded partnerships through 2031",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao partners with OpenAI as part of Stargate initiative expansion in South Korea",
+      "headline": "Kakao achieves highest ever quarterly revenue with record operating profit; ChatGPT for Kakao gains 2 million users within 10 days of launch",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "Shinhan SOL Shipbuilding TOP3 Plus ETF shows strong sell technical signal amid market volatility",
+      "headline": "Shinhan SOL Shipbuilding TOP3 Plus ETF shows strong sell signal with -4.30% daily decline and -6.30% monthly NAV decline",
       "impact": "bearish",
       "source": "web_search"
     }
