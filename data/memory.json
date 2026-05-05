@@ -5344,100 +5344,139 @@
   },
   {
     "analysis_date": "2026-05-05",
-    "analysis_time": "00:02 KST",
-    "mode": "EVENING",
-    "mode_label": "저녁 마감",
-    "one_line_summary": "나스닥 25,123·코스피 6,936 연고점 경신 속 SK하이닉스 +12.52%·삼성전자 +5.44% 반도체 쌍끌이 급등, 외국인 역대 2위 순매수 3.018조원 유입에도 마진론 36조 사상 최고·VIX 17.29로 과열 경고 혼재",
+    "analysis_time": "09:15 KST",
+    "mode": "MORNING",
+    "mode_label": "아침 풀분석",
+    "one_line_summary": "나스닥 25,067·S&P500 7,200 연고점권 유지 속 SK하이닉스 +12.52% 급등 여진으로 코스피 6,937 역대 신고점 경신, VIX 18.29 정상화됐으나 마진론 36조 사상 최고·Forward P/E 20.9x 밸류 부담에 차익실현 경계 필요",
     "market_regime": "위험선호",
     "trend_phase": "상승추세",
     "trend_strategy": {
-      "recommended": "반도체·AI 섹터 모멘텀 추종, 외국인 순매수 기조 편승. SK하이닉스·삼성전자 중심 포지션 유지하되 단계적 익절 병행",
-      "caution": "마진론 잔고 36.07조원 사상 최고 + SK하이닉스 하루 +12.52% 급등 이후 단기 차익실현 매물 압력 상존. 연속 3일 이상 급등 후 블랙스완 패턴 6회 반복 이력 경계. 외국인 이탈 전환 시 마진콜 연쇄 하락 위험",
+      "recommended": "반도체·AI 섹터 모멘텀 추종 유지, 코스피 외국인 순매수 연속 확인 시 한국 대형주(SK하이닉스·삼성전자) 비중 점진적 확대. 나스닥 25,300pt 신고점 돌파 시 추가 진입 신호 확인.",
+      "caution": "SK하이닉스 3일+ 연속 급등(베타 1.36x)·나스닥 연고점 동시 경신 구간 → 단기 차익실현 압력 경계. 마진론 36조 강제청산 트리거 임계점 근접. Forward P/E 20.9x·ERP 48bp로 밸류에이션 쿠션 부재. 블랙스완(관세 재확대·FOMC 매파 발언) 시 당일 낙폭 극대화 가능.",
       "difficulty": "보통"
     },
     "confidence_overall": "보통",
     "consensus_level": "보통",
     "top_headlines": [
       {
-        "headline": "SK하이닉스 단일 세션 +12.52% 급등, 삼성전자 +5.44% 동반 — 외국인 역대 2위 순매수 3.018조원 집중",
-        "signal_tag": "BULLISH",
+        "headline": "SK하이닉스 +12.52%·코스피 +5.12% 단일 세션 급등, 외국인 12거래일 만에 순매수 전환(역대 2위 3.018조원)",
+        "signal_tag": "강세 수급 재개",
         "impact": "높음"
       },
       {
-        "headline": "나스닥 25,123·S&P500 7,226 연고점 경신 지속 — AI 칩 시장 $500B 상향 모멘텀",
-        "signal_tag": "BULLISH",
+        "headline": "나스닥 25,067·S&P500 7,200 연고점권 유지, 1분기 EPS 비트율 84%·블렌디드 성장률 27.1%로 실적 서프라이즈 지속",
+        "signal_tag": "실적 서프라이즈 모멘텀",
         "impact": "높음"
       },
       {
-        "headline": "마진론 잔고 36.07조원 사상 최고, 공매도 잔고 20.51조원 신기록 병존 — 과열 경고 신호",
-        "signal_tag": "WARNING",
-        "impact": "높음"
-      },
-      {
-        "headline": "WTI $101·브렌트 $108 고공행진, 호르무즈 봉쇄 속 공급 9Mbpd 차단 — 스태그플레이션 리스크",
-        "signal_tag": "BEARISH",
+        "headline": "Chevron 매출 $48.61B vs 예상 $52.1B 미달, 에너지 섹터 전반 EPS 하향 조정 리스크 부상",
+        "signal_tag": "에너지 섹터 약세 경고",
         "impact": "보통"
       },
       {
-        "headline": "VIX 17.29 중립권 안착 — 극단 공포 탈출 확인, Fear & Greed 69(탐욕 구간) 진입",
-        "signal_tag": "NEUTRAL",
+        "headline": "마진론 잔액 36조원 사상 최고치, 강제청산 트리거 임계점 근접 경고",
+        "signal_tag": "레버리지 리스크",
+        "impact": "높음"
+      },
+      {
+        "headline": "FOMC 8-4 비둘기파 균열 신호, 금리 3.50-3.75% 동결 장기화 시 ERP 역사적 최저 수준 위협",
+        "signal_tag": "통화정책 불확실성",
         "impact": "보통"
       }
     ],
     "volatility_index": {
-      "vkospi": "N/A",
-      "vix": "17.29",
-      "fear_greed": "69 (Greed)",
-      "level": "중립",
-      "interpretation": "VIX 17.29는 극단 공포 구간 완전 탈출 후 중립권 안착. Fear & Greed 69(탐욕 구간)는 과열 경계선 접근 신호. 백테스트 상 VIX 단독 방향 신뢰도 32%로 낮으므로 주가 흐름 중심 판단 필요. 반도체 급등 국면에서 VIX 하락 안정화는 위험선호 전환 지속 가능성 지지하나, FG=69 구간 정확도 17% 감안 시 과신 금물"
+      "vkospi": "데이터 미제공",
+      "vix": "18.29",
+      "fear_greed": "64 (Greed)",
+      "level": "중립~탐욕",
+      "interpretation": "VIX 18.29는 극단공포(25+)에서 완전 정상화된 수준. Fear & Greed 64(탐욕)는 시장 낙관론 우위를 반영하나 극단탐욕(80+) 미도달로 추가 상승 여지 존재. 코스피·SK하이닉스의 단일 세션 급등은 공포 해소 후 수급 공백 메우기 패턴으로 해석. 다만 연속 고점 경신 구간에서 VIX 재상승(21 이상) 시 추세 피로 신호로 재평가 필요."
     },
     "retail_reversal_signal": {
-      "retail_behavior": "마진론 잔고 36.07조원 사상 최고치 경신 — 4거래일 만에 1조원 증가 속도로 개인 레버리지 추격 매수 가속화. 외국인 급등장에 편승한 개인 추격 매수 집중",
-      "contrarian_implication": "개인 레버리지 극한 확장 국면은 역발상 관점에서 단기 고점 경고 신호. 외국인 대규모 순매수와 방향이 일치하는 동안은 유효하나, 외국인 이탈 전환 시 마진콜 연쇄 하락 위험. 공매도 잔고 20.51조원 신기록과의 병존은 시장 내 방향성 극단 대립 구조",
+      "retail_behavior": "3월 외국인 코스피 -35조원 대규모 매도 구간에서 국내 개인투자자 저점 매수 대응 추정. 4월 3일 외국인 +8,145억원 순매수 전환 이후 외국인 비중 36.45%로 여전히 축소된 상태.",
+      "contrarian_implication": "외국인 재매수 여력 충분하나, 개인 과매수 포지션 누적 시 단기 차익실현 출회 가능. 코스피 +5.12% 급등 이후 숨고르기 구간 진입 가능성 높음. 역대급 외국인 순매수 당일·익일 역외 헤지 포지션 구축 가능성 배제 불가.",
       "reliability": "보통"
     },
     "outflows": [
       {
-        "zone": "에너지 직접 노출 섹터 (정유·항공·운송)",
-        "reason": "WTI $101·브렌트 $108 고유가 지속, 호르무즈 봉쇄로 공급 9Mbpd 차단 — 원가 압박 직격탄",
-        "severity": "높음",
-        "data_point": "WTI +78% YTD 2026, 브렌트 $108.17"
+        "zone": "에너지 섹터 (Chevron·Valero·Phillips66)",
+        "reason": "Chevron 매출 $3.5B 미달. WTI $68 이하 이탈 시 리파이닝 마진 동반 압축, EPS 하향 조정 도미노 가능",
+        "severity": "보통~높음",
+        "data_point": "Chevron EPS $1.41 beat, revenue $48.61B vs 예상 $52.1B (미달 $3.5B)"
       },
       {
-        "zone": "KOSPI 고PBR 비반도체 중소형주",
-        "reason": "외국인 자금이 삼성전자·SK하이닉스 등 반도체 대형주에 집중 → 여타 섹터 소외 심화, 유동성 빨대 효과 발생",
+        "zone": "소비자전자·일반 DRAM",
+        "reason": "AI 데이터센터가 DRAM 생산 잠식. Micron Crucial 브랜드 소비자 시장 철수. 소비자전자향 메모리 공급 구조적 감소.",
         "severity": "보통",
-        "data_point": "외국인 3.018조원 순매수 중 반도체 대형주 집중, 비반도체 중소형 상대적 소외"
+        "data_point": "IDC: AI 데이터센터가 DRAM 생산 cannibalize, Micron exits Crucial consumer brand"
+      },
+      {
+        "zone": "고밸류에이션 비성장주 (S&P500 전반)",
+        "reason": "Forward P/E 20.9x, 10년 평균 18.9x 대비 +2x 프리미엄. 이익수익률 4.78% vs 10년물 4.45%로 ERP 스프레드 33bp에 불과. 금리 동결 장기화 시 멀티플 급수축 리스크.",
+        "severity": "보통",
+        "data_point": "FactSet: Forward P/E 20.9x vs 5yr avg 19.9x, 10yr avg 18.9x. US 10Y 4.45%"
       }
     ],
     "inflows": [
       {
-        "zone": "KOSPI 반도체 (삼성전자·SK하이닉스)",
-        "reason": "HBM4 출시·EUV 8조원 발주·AI 칩 시장 $500B 상향 → 펀더멘털·모멘텀 동시 작동. 외국인 역대급 순매수 집중",
+        "zone": "HBM·AI 메모리 반도체 (SK하이닉스·삼성전자)",
+        "reason": "HBM3E 독점 공급 구조·엔비디아 GB200 수요 가시성 확보. 외국인 대규모 순매수 재개로 수급 모멘텀 강화.",
         "momentum": "강함",
-        "data_point": "SK하이닉스 +12.52%, 삼성전자 +5.44%, 외국인 순매수 역대 2위 3.018조원"
+        "data_point": "SK하이닉스 +12.52%, 삼성전자 +5.44%, 외국인 순매수 3.018조원(역대 2위)"
+      },
+      {
+        "zone": "미국 빅테크·AI 인프라 (나스닥 중심)",
+        "reason": "1분기 EPS 비트율 84%(5년 평균 78% 상회), 블렌디드 성장률 27.1%. AI 인프라 capex 가이던스 상향 지속.",
+        "momentum": "강함",
+        "data_point": "나스닥 25,067.8, S&P500 7,200.75, 1Q25 EPS 블렌디드 성장률 27.1%"
+      },
+      {
+        "zone": "코스피 대형주 (외국인 수급 재개 테마)",
+        "reason": "12거래일 만의 외국인 순매수 전환. 원/달러 1,475원대 안정화. 외국인 비중 36.45% → 재매수 여력 충분.",
+        "momentum": "보통",
+        "data_point": "코스피 6,936.99, KRW/USD 1,475.23, 외국인 비중 36.45%"
+      }
+    ],
+    "neutral_waiting": [
+      {
+        "zone": "코스피 중소형주·코스닥",
+        "catalyst_needed": "외국인 순매수 코스닥까지 확산 및 개인 차익실현 물량 소화 완료 확인"
+      },
+      {
+        "zone": "미국 금융·은행주",
+        "catalyst_needed": "FOMC 금리 방향성 명확화(인하 신호) 또는 장단기 금리차 역전 해소"
+      },
+      {
+        "zone": "글로벌 리츠·부동산",
+        "catalyst_needed": "US 10Y 수익률 4.2% 이하 안착 및 금리 인하 사이클 재개 확인"
+      }
+    ],
+    "hidden_signals": [
+      {
+        "signal": "마진론 잔액 36조원 사상 최고치 경신",
+        "implication": "레버리지 포지션 집중으로 단일 충격 이벤트 시 강제청산 연쇄 발동 가능. 코스피 6,700pt 이탈 시 마진콜 도미노 트리거 임계점. 급등 후 급락 변동성 확대 구조 내재.",
+        "confidence": "높음"
       }
     ],
     "thesis_killers": [
       {
-        "event": "나스닥",
+        "event": "SK하이닉스",
         "timeframe": "향후 2거래일",
-        "confirms_if": "나스닥 +1% 이상 종가 유지(25,365pt 이상)",
-        "invalidates_if": "나스닥 -1.5% 이하 종가(24,737pt 이하) — 빅테크 캐펙스 실망 또는 고용 쇼크 트리거",
+        "confirms_if": "SK하이닉스 종가 +2% 이상 유지 및 나스닥 25,200pt 이상 안착",
+        "invalidates_if": "SK하이닉스 -4% 이하 단일 세션 하락 (나스닥 -3% 연동 베타 1.36x 실현)",
         "quality": "ok"
       },
       {
-        "event": "SK하이닉스",
+        "event": "나스닥",
         "timeframe": "향후 3거래일",
-        "confirms_if": "SK하이닉스 +2% 이상 추가 상승(12.52% 랠리 이후 연속 강세 확인)",
-        "invalidates_if": "SK하이닉스 -3% 이하 이탈 — 연속 상승 3일+ 후 블랙스완 패턴 발동 신호",
+        "confirms_if": "나스닥 25,300pt 이상 신고점 경신 종가",
+        "invalidates_if": "나스닥 24,500pt 이하 이탈 (연고점 대비 -2.5% 조정)",
         "quality": "ok"
       },
       {
         "event": "코스피",
         "timeframe": "향후 2거래일",
-        "confirms_if": "코스피 2,850pt 이상 종가 유지",
-        "invalidates_if": "코스피 2,780pt 이하 이탈 — 외국인 순매수 포지션 청산 본격화 신호",
+        "confirms_if": "코스피 6,900pt 이상 유지 및 외국인 순매수 5,000억원 이상 연속",
+        "invalidates_if": "코스피 6,700pt 이하 이탈 (마진론 강제청산 트리거 확인)",
         "quality": "ok"
       }
     ],
@@ -5455,7 +5494,7 @@
           "peak_pct": 42.98,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7544512854729754,
+          "relevance_score": 0.7542994773362353,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5468,7 +5507,7 @@
           "peak_pct": 10.46,
           "peak_day": 3,
           "quality_tier": "high",
-          "relevance_score": 0.7511088338363842,
+          "relevance_score": 0.7509989603264988,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5481,7 +5520,7 @@
           "peak_pct": 11.92,
           "peak_day": 4,
           "quality_tier": "high",
-          "relevance_score": 0.7384186030840455,
+          "relevance_score": 0.7382700860503004,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5494,7 +5533,7 @@
           "peak_pct": 13.04,
           "peak_day": 3,
           "quality_tier": "high",
-          "relevance_score": 0.7299709956236315,
+          "relevance_score": 0.7299209453274157,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5507,7 +5546,7 @@
           "peak_pct": 7.45,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7239571218946054,
+          "relevance_score": 0.7238413774625605,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5520,7 +5559,7 @@
           "peak_pct": 18.4,
           "peak_day": 6,
           "quality_tier": "high",
-          "relevance_score": 0.7231441521703678,
+          "relevance_score": 0.7231044997610125,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5533,7 +5572,7 @@
           "peak_pct": 21.62,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7227493722734453,
+          "relevance_score": 0.7226911822829314,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5546,7 +5585,7 @@
           "peak_pct": 9.21,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7226968745328028,
+          "relevance_score": 0.7225873016342479,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5559,7 +5598,7 @@
           "peak_pct": 8.97,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7209375437665039,
+          "relevance_score": 0.7208273688205663,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5572,7 +5611,7 @@
           "peak_pct": 16.84,
           "peak_day": 2,
           "quality_tier": "high",
-          "relevance_score": 0.7207184969084016,
+          "relevance_score": 0.7206943474657589,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5585,7 +5624,7 @@
           "peak_pct": 18.63,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.719581320851406,
+          "relevance_score": 0.7195232900673331,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5598,7 +5637,7 @@
           "peak_pct": 18.79,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7187822072503965,
+          "relevance_score": 0.7187391580570702,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5611,7 +5650,7 @@
           "peak_pct": 20.06,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7180397902396259,
+          "relevance_score": 0.7179963857592295,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5624,7 +5663,7 @@
           "peak_pct": 19.48,
           "peak_day": 5,
           "quality_tier": "high",
-          "relevance_score": 0.7173104969477303,
+          "relevance_score": 0.7172707357526837,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5637,7 +5676,7 @@
           "peak_pct": 19.31,
           "peak_day": 5,
           "quality_tier": "high",
-          "relevance_score": 0.717124642533688,
+          "relevance_score": 0.7170848813386415,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5650,7 +5689,7 @@
           "peak_pct": 16.9,
           "peak_day": 6,
           "quality_tier": "high",
-          "relevance_score": 0.7159825926498645,
+          "relevance_score": 0.715931433250702,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5663,7 +5702,7 @@
           "peak_pct": 9.04,
           "peak_day": 3,
           "quality_tier": "high",
-          "relevance_score": 0.7129511956568763,
+          "relevance_score": 0.712908264245127,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5676,7 +5715,7 @@
           "peak_pct": 8.02,
           "peak_day": 1,
           "quality_tier": "high",
-          "relevance_score": 0.7126869869542447,
+          "relevance_score": 0.7126358275550821,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5689,7 +5728,7 @@
           "peak_pct": 14.79,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7111613028947561,
+          "relevance_score": 0.7111322080014587,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -5702,7 +5741,7 @@
           "peak_pct": 7.73,
           "peak_day": 3,
           "quality_tier": "high",
-          "relevance_score": 0.7111190137214431,
+          "relevance_score": 0.7110742812505088,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         }
