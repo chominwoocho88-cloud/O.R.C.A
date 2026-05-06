@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-05 09:15 KST",
+  "collected_at": "2026-05-06 09:13 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia to invest up to $500 billion in U.S. manufacturing, signaling strong AI infrastructure demand",
-      "impact": "bullish",
+      "headline": "Quantum computing AI models and memory supply concerns amid China export restrictions impact pricing",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK hynix market cap surpasses 1 trillion won as stock surges on record operating profit",
+      "headline": "SK Hynix Q1 2026 revenue surged 144% YoY to 52.1T won with 72% operating margin, targets higher shareholder returns amid capital expenditure constraints",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung posts record Q1 operating profit on surging AI chip demand and memory pricing",
+      "headline": "Samsung Electronics hits record high with operating profit jump, HBM4 memory development on track, potential May-June union strikes and profit forecast cuts concern analysts",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom's AI semiconductor revenue surges 106% YoY, Q2 fiscal 2026 results scheduled for June 3",
+      "headline": "Broadcom hits 52-week high on VMware Cloud Foundation 9.1 launch and AI infrastructure deals with Google and Meta; Q2 earnings guidance June 3",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao launches AI education program for seniors; targets 10%+ revenue growth and 10% operating margin in 2026",
+      "headline": "Kakao launches AI education program for seniors; stock trades below analyst targets despite ChatGPT partnership expansion and AI ecosystem growth",
       "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "Shinhan SOL Shipbuilding Top3 Plus ETF - no significant recent news",
+      "headline": "Shinhan SOL Shipbuilding TOP3 Plus ETF trades at 32,120 won with 0.13% dividend yield; limited recent trading activity and news",
       "impact": "neutral",
       "source": "web_search"
     }
