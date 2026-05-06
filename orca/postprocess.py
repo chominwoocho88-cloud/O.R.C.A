@@ -253,6 +253,7 @@ def collect_jackal_news(hunter_data: dict) -> None:
                 use_search=True,
                 model=MODEL_HUNTER,
                 max_tokens=800,
+                call_site="orca.postprocess",
             )
             import re as _re, json as _json
             cleaned = _re.sub(r"```(?:json)?|```", "", raw).strip()
