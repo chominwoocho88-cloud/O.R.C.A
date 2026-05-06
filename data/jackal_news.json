@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-06 09:13 KST",
+  "collected_at": "2026-05-06 23:07 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,38 +12,38 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Quantum computing AI models and memory supply concerns amid China export restrictions impact pricing",
+      "headline": "ServiceNow partnership expansion on agentic AI governance; Google enters AI hardware market creating competition",
       "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix Q1 2026 revenue surged 144% YoY to 52.1T won with 72% operating margin, targets higher shareholder returns amid capital expenditure constraints",
+      "headline": "SK Hynix surges 13% to record high on foreign buying; HBM leadership driving strong momentum with AI memory demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics hits record high with operating profit jump, HBM4 memory development on track, potential May-June union strikes and profit forecast cuts concern analysts",
+      "headline": "Samsung Electronics surpasses $1 trillion market valuation milestone; reaches 11th global ranking with 15% daily surge",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom hits 52-week high on VMware Cloud Foundation 9.1 launch and AI infrastructure deals with Google and Meta; Q2 earnings guidance June 3",
+      "headline": "Broadcom reaches record high above $430 on Google and Meta AI partnerships; 29% YoY revenue growth in Q1",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao launches AI education program for seniors; stock trades below analyst targets despite ChatGPT partnership expansion and AI ecosystem growth",
-      "impact": "neutral",
+      "headline": "Kakao signs partnership with OpenAI for Stargate initiative expansion; maintains analyst consensus Buy rating",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "Shinhan SOL Shipbuilding TOP3 Plus ETF trades at 32,120 won with 0.13% dividend yield; limited recent trading activity and news",
-      "impact": "neutral",
+      "headline": "SOL Korea High Dividend ETF surpasses 1 trillion won AUM; leads dividend ETF inflows with 6.68% expected yield",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
