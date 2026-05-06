@@ -1,132 +1,138 @@
 {
   "analysis_date": "2026-05-06",
-  "analysis_time": "09:13 KST",
+  "analysis_time": "23:07 KST",
   "mode": "MORNING",
   "mode_label": "아침 풀분석",
-  "one_line_summary": "나스닥 25,326·S&P500 7,259 신고점 경신 속 VIX 17.38 안정, 코스피 6,937 역대 신고점 도달했으나 마진론 36조·엔비디아 중국 매출 리스크로 블랙스완 경계 필요",
-  "market_regime": "위험선호(고점 경계)",
+  "one_line_summary": "나스닥 25564·S&P500 7318 사상권 유지 속 코스피 +6.45% 서킷브레이커급 급등 후 기관·개인 차익실현 3.1조 집중, 마진론 36조 사상최고로 블랙스완 경계 최고조",
+  "market_regime": "위험선호",
   "trend_phase": "상승추세",
   "trend_strategy": {
-    "recommended": "추세 추종 롱 포지션 유지. 반도체·AI 섹터 비중 확대 유효하나 코스피 6,937 신고점 구간에서 신규 진입 시 분할 매수 원칙 준수. S&P500 7,259·나스닥 25,326 지지 여부 확인 후 추격 매수",
-    "caution": "연속 3일 이상 상승 구간 진입 → 블랙스완 패턴 발동 리스크. 마진론 36조 사상 최고치로 강제청산 트리거 발동 시 낙폭 증폭 구조. 5월 8일 고용보고서(예상 +5만, 전월 -17.8만) 충격 가능성, 5월 20일 엔비디아 실적 발표 전 불확실성 프리미엄 상존",
-    "difficulty": "보통"
+    "recommended": "추세 추종 유지 + 반도체/AI 섹터 비중 유지. 코스피 외국인 순매수 흐름 편승. 단기 급등 구간에서 신규 진입보다 기존 포지션 유지 우선.",
+    "caution": "FG 67(탐욕) 구간에서 방향 정확도 17% 수준. 코스피 +6.45% 단일일 급등 후 기관 2.2조·개인 9,288억 순매도 차익실현 집중. 마진론 36조 사상최고로 급락 시 강제청산 연쇄 리스크 상시 경계. 상승 3일+ 후 블랙스완 6회 패턴 조건 충족 구간.",
+    "difficulty": "어려움"
   },
   "confidence_overall": "보통",
   "consensus_level": "보통",
   "top_headlines": [
     {
-      "headline": "S&P500 7,259·나스닥 25,326 동반 신고점 경신 — Q1 어닝 비트율 84%로 2021 Q2 이후 최고",
-      "signal_tag": "강세 촉매",
+      "headline": "코스피 +6.45% 서킷브레이커 수준 급등, 외국인 3.53조 순매수로 6,937 역대 신고점 달성",
+      "signal_tag": "강세신호",
       "impact": "높음"
     },
     {
-      "headline": "엔비디아 FY2026 Q1 중국 매출 사실상 제로 예상 — CEO 젠슨황 중국 시장점유율 제로 발언",
-      "signal_tag": "하방 리스크",
+      "headline": "나스닥 25,564·S&P500 7,318 사상 최고권 유지, S&P500 Q1 EPS 성장 27.1%로 2021년 이후 최고치",
+      "signal_tag": "강세신호",
       "impact": "높음"
     },
     {
-      "headline": "Fed 금리 동결(3.50~3.75%) 유지, 완화 편향 언어 삽입 — 1992년 이후 최다 반대표(8-4)",
-      "signal_tag": "중립·혼조",
+      "headline": "카타르 라스라판 미사일 공격으로 글로벌 LNG 공급 20% 차질, 한국 CPI 4월 2.6% YoY 21개월 최고",
+      "signal_tag": "인플레·지정학 리스크",
+      "impact": "높음"
+    },
+    {
+      "headline": "국내 마진론 잔고 36조 사상최고·예탁금 130조, 개인 ETF AUM 400조 돌파",
+      "signal_tag": "과열경고",
       "impact": "보통"
     },
     {
-      "headline": "코스피 6,937 역대 신고점 도달 — 외국인 4월 순매수 전환 814.5억원 확인",
-      "signal_tag": "강세 촉매",
-      "impact": "높음"
-    },
-    {
-      "headline": "마진론 36조 사상 최고치 — 강제청산 트리거 발동 시 낙폭 증폭 구조 경고",
-      "signal_tag": "꼬리 리스크",
-      "impact": "높음"
-    },
-    {
-      "headline": "5월 8일 미국 고용보고서 — 예상 +5만으로 전월 -17.8만 대비 급반등 기대, 미달 시 충격",
-      "signal_tag": "이벤트 리스크",
-      "impact": "높음"
+      "headline": "Fear&Greed 67 탐욕 구간 진입, VIX 17.27로 하락 지속",
+      "signal_tag": "과열경고",
+      "impact": "보통"
     }
   ],
   "volatility_index": {
     "vkospi": "데이터 미제공",
-    "vix": "17.38",
-    "fear_greed": "67 (Greed)",
-    "level": "중립~탐욕",
-    "interpretation": "VIX 17.38은 4월 고점 대비 크게 진정된 수준으로 공포 국면 완전 탈출. Fear & Greed 67(Greed) 구간은 과열 진입 직전 단계. 다만 FG 67 수준에서 단기 차익실현 압력이 증가하는 구간이며, 5월 8일 고용지표·5월 20일 엔비디아 실적이 변동성 재확대 촉매로 잠재. VIX 20 이상 돌파 여부가 추세 지속의 핵심 방어선"
+    "vix": "17.27",
+    "fear_greed": "67 (탐욕)",
+    "level": "탐욕",
+    "interpretation": "FG 67은 탐욕 구간 진입. 백테스트 기준 FG>=20 구간에서 방향 정확도 17%에 불과. VIX 17.27은 안정 구간이나 코스피 단일일 +6.45% 급등은 단기 과열 조건 충족. 낙관 과잉 신호로 해석 필요하며 이틀 연속 3% 초과 시 되돌림 확률 높음."
   },
   "retail_reversal_signal": {
-    "retail_behavior": "3월 말~4월 초 코스피 외국인 12일 연속 매도 후 4월부터 순매수 전환. 외국인 보유비중 36.45%(2월 고점 38.10% 대비 -1.65%p). 개인투자자는 외국인 이탈 구간에서 저가 매수 진행, 현재 외국인 복귀 초기 국면",
-    "contrarian_implication": "외국인 매도 극단 이후 복귀 초기 → 단기 역발상 매수 시그널 유효. 코스피 컨센서스 목표 7,200p 대비 현재 6,937p는 약 3.8% 추가 상승 여력 존재. 외국인 보유비중 완전 회복(38.1%)까지 추가 매수 여력 약 1.65%p 상존. 단, 역대 신고점 구간에서 개인 추격 매수 과열 시 역발상 매도 시그널로 전환 가능",
+    "retail_behavior": "코스피 급등일(+6.45%) 개인투자자 9,288억 순매도로 차익실현. 그러나 YTD 누적 개인 순매수 16.89조 + ETF AUM 400조(3개월 100조 증가) + 마진론 36조 사상최고로 중장기 매수 구조 유지 중.",
+    "contrarian_implication": "급등 당일 개인 차익실현은 단기 과열 진정 신호. 그러나 마진론 36조·예탁금 130조는 잠재적 강제청산 압력으로 급락 시 연쇄 메커니즘 작동 위험. 외국인 수익률(+57.3%) vs 개인(+18.3%) 격차로 개인 추격매수 유인은 지속.",
     "reliability": "보통"
   },
   "outflows": [
     {
-      "zone": "엔비디아 / 중국 노출 반도체",
-      "reason": "엔비디아 FY2026 Q1 중국 매출 제로 예상(전년도 196.7억 달러 → 0). CEO 젠슨황 중국 시장점유율 제로 발언. 5월 20일 실적 발표 전 불확실성 프리미엄 확대",
-      "severity": "높음",
-      "data_point": "중국·홍콩 포함 연간 매출 $19.67B → Q1 FY2026 추정 $0 (CNBC May 5)"
+      "zone": "코스피 기관·개인 단기 포지션",
+      "reason": "코스피 +6.45% 급등 당일 기관 2.21조 + 개인 9,288억 집중 차익실현. 급등 후 수급 공백 우려.",
+      "severity": "보통",
+      "data_point": "기관 순매도 2.2062조, 개인 순매도 9,288억 (2026-05-06)"
     },
     {
-      "zone": "미국 국채 / 안전자산",
-      "reason": "어닝 서프라이즈 및 위험선호 강화로 안전자산 이탈 지속. 채권 대비 주식 상대 매력도 강화",
+      "zone": "전통 경기민감주·에너지 고비용 피해 섹터",
+      "reason": "카타르 LNG 공급 20% 차질 + 한국 CPI 2.6% 21개월 최고로 에너지 비용 상승 피해 섹터 회피 압력.",
       "severity": "보통",
-      "data_point": "미 10년물 4.42%, 위험자산 대비 상대 언더퍼폼 지속"
-    },
-    {
-      "zone": "코스피 고점 차익실현 압력",
-      "reason": "6,937 역대 신고점 구간에서 기관·외국인 차익실현 물량 출회 가능. 마진론 36조 최고치에서 담보 부족 시 강제청산 연쇄 리스크",
-      "severity": "보통",
-      "data_point": "마진론 잔고 36조원 사상 최고, Forward P/E 20.9x 고평가 구간"
+      "data_point": "카타르 라스라판 미사일 공격, 한국 CPI 4월 2.6% YoY"
     }
   ],
   "inflows": [
     {
-      "zone": "반도체·AI 섹터 (SK하이닉스, HBM)",
-      "reason": "HBM·DDR5 가격 50% 상승 전망, 엔비디아 수요 지속. SK하이닉스 +12.52% 급등 여진 및 HBM 공급 구조적 강세",
+      "zone": "반도체·HBM·AI 인프라 섹터 (SK하이닉스, 삼성전자)",
+      "reason": "HBM 구조적 공급부족 지속 + AI 하이퍼스케일러 660B+ 설비투자 확정. 외국인 3.53조 순매수의 핵심 수혜 섹터.",
       "momentum": "강함",
-      "data_point": "SK하이닉스 +12.52% 급등(5월 5일 기준), HBM 단가 50% 상승 전망"
+      "data_point": "외국인 코스피 순매수 3.53조, SK하이닉스 나스닥 베타 1.36x"
     },
     {
-      "zone": "Mag-7 / 미국 빅테크",
-      "reason": "Q1 어닝 비트율 84%(5년 평균 78% 상회), EPS 성장률 27.1% 폭발적 개선. Mag-7 실적 서프라이즈가 나스닥 25,326 견인",
+      "zone": "나스닥·S&P500 빅테크·AI 테마",
+      "reason": "S&P500 Q1 어닝 비트율 84%(5년 평균 78% 상회) + EPS 성장 27.1%로 펀더멘털 뒷받침. 사상 최고권 안착.",
       "momentum": "강함",
-      "data_point": "S&P500 Q1 어닝 비트율 84%, EPS 성장률 +27.1% YoY"
+      "data_point": "나스닥 25,564 / S&P500 7,318 신고점권"
     },
     {
-      "zone": "코스피 외국인 수급",
-      "reason": "외국인 4월 순매수 전환(814.5억원), 신흥국 위험선호 복귀 확인. 외국인 보유비중 회복 진행 중",
+      "zone": "에너지·방산 섹터 단기 강세",
+      "reason": "카타르 LNG 공급 차질에 따른 지정학 프리미엄으로 에너지 가격 급등 1차 수혜. 방산 동반 부각.",
       "momentum": "보통",
-      "data_point": "외국인 4월 순매수 814.5억원, 보유비중 36.45% (회복 중)"
+      "data_point": "글로벌 LNG 공급 20% 일시 제거 충격"
     }
   ],
   "neutral_waiting": [
     {
-      "zone": "미국 에너지 / 중동 LNG 관련주",
-      "catalyst_needed": "중동발 LNG 공급 제약 해소 또는 유가 방향성 명확화. 현재 지정학 리스크로 중립 관망"
+      "zone": "코스피 6,700~6,900pt 구간 관망 포지션",
+      "catalyst_needed": "다음 거래일 외국인 순매수 지속 확인 및 코스피 6,900pt 이상 유지 여부. 기관 매도세 전환 신호 필요."
     },
     {
-      "zone": "코스피 내수·금융주",
-      "catalyst_needed": "GDP 2.0%(예상 2.2% 하회) 개선 지표 또는 한국은행 추가 완화 시그널 필요"
+      "zone": "국내 금리 민감 섹터 (리츠·유틸리티)",
+      "catalyst_needed": "Fed 금리 동결 기조 명확화 및 한국 CPI 하향 안정 확인 후 진입 여부 판단."
     }
   ],
   "hidden_signals": [
     {
-      "signal": "Fed 8-4 금리 동결 찬반 — 1992년 이후 최다 반대표",
-      "implication": "Fed 내부 완화파 비중 급증. 단기적으로 완화 기대 강화이나, 반대표 확산은 정책 불확실성 증대 신호. 향후 1~2회 FOMC에서 인하 기조 전환 가능성 상승",
+      "signal": "기관 2.2조 순매도에도 코스피 신고점 유지 = 외국인 압도적 수급 소화",
+      "implication": "스마트머니(외국인) vs 국내 기관 고점 인식 간 견해 충돌. 외국인이 실제 고점 인식인지 구조적 저평가 해소인지가 핵심 판단 변수.",
+      "confidence": "보통"
+    },
+    {
+      "signal": "마진론 36조 사상최고 + 연속 3일 이상 상승 = 블랙스완 6회 패턴 조건 충족",
+      "implication": "과거 60거래일 중 동일 조건에서 블랙스완 충격 6회 발생. 급락 시 마진콜 연쇄청산으로 하락 가속화 메커니즘 내재.",
+      "confidence": "높음"
+    },
+    {
+      "signal": "개인 ETF 거래비중 60%(전년 44%) + AUM 400조 = 패시브 자금 급팽창",
+      "implication": "개인의 직접 투자 대신 ETF 경유 집중은 지수 변동성 확대 및 급락 시 동반 출금 리스크 구조 형성.",
       "confidence": "보통"
     }
   ],
   "thesis_killers": [
     {
+      "event": "코스피",
+      "timeframe": "당일 장중",
+      "confirms_if": "코스피 6,900pt 이상 유지 + 외국인 순매수 전환 확인",
+      "invalidates_if": "코스피 6,700pt 이하 이탈 시 급반전 시나리오 현실화",
+      "quality": "ok"
+    },
+    {
       "event": "나스닥",
-      "timeframe": "5월 20일 엔비디아 실적 발표 후 2거래일",
-      "confirms_if": "나스닥 종가 +1% 이상 유지 (25,317pt 이상)",
-      "invalidates_if": "나스닥 종가 -1.5% 이하 이탈 (24,692pt 이하) — 엔비디아 가이던스 실망 반영",
+      "timeframe": "미국 당일 종가",
+      "confirms_if": "나스닥 +0.5% 이상 종가 유지로 신고점 구간 안착",
+      "invalidates_if": "나스닥 -1.5% 이하 종가 시 블랙스완 충격 시퀀스 개시 신호",
       "quality": "ok"
     },
     {
       "event": "SK하이닉스",
-      "timeframe": "향후 3거래일",
-      "confirms_if": "SK하이닉스 +2% 이상 추가 상승 유지",
-      "invalidates_if": "SK하이닉스 -3% 이하 하락 — 연속 상승 후 급반전 블랙스완 패턴 발동",
+      "timeframe": "당일 종가",
+      "confirms_if": "SK하이닉스 +2% 이상 종가 — 나스닥 베타 1.36x 정상 작동 확인",
+      "invalidates_if": "SK하이닉스 -3% 이하 종가 시 나스닥 대비 초과 하락, 반도체 섹터 디커플링 경보",
       "quality": "ok"
     }
   ],
@@ -426,41 +432,41 @@
   "jackal_probability_summary": {
     "window_days": 90,
     "min_samples": 5,
-    "raw_rows": 340,
-    "deduped_rows": 340,
+    "raw_rows": 345,
+    "deduped_rows": 345,
     "duplicates_skipped": 0,
     "overall": {
-      "wins": 262,
-      "losses": 78,
-      "total": 340,
-      "avg_return": 4.701,
-      "win_rate": 77.1,
-      "effective_win_rate": 76.7,
+      "wins": 265,
+      "losses": 80,
+      "total": 345,
+      "avg_return": 4.685,
+      "win_rate": 76.8,
+      "effective_win_rate": 76.5,
       "qualified": true
     },
     "trusted_families": [
       {
         "signal_family": "momentum_pullback",
         "signal_family_label": "모멘텀눌림목",
-        "wins": 151,
-        "losses": 42,
-        "total": 193,
-        "avg_return": 4.564,
+        "wins": 152,
+        "losses": 44,
+        "total": 196,
+        "avg_return": 4.561,
         "source_event_type": "backtest",
-        "win_rate": 78.2,
-        "effective_win_rate": 77.7,
+        "win_rate": 77.6,
+        "effective_win_rate": 77.0,
         "qualified": true
       },
       {
         "signal_family": "panic_rebound",
         "signal_family_label": "패닉셀반등",
-        "wins": 52,
+        "wins": 54,
         "losses": 15,
-        "total": 67,
-        "avg_return": 6.227,
+        "total": 69,
+        "avg_return": 6.135,
         "source_event_type": "backtest",
-        "win_rate": 77.6,
-        "effective_win_rate": 76.1,
+        "win_rate": 78.3,
+        "effective_win_rate": 76.7,
         "qualified": true
       },
       {
@@ -540,36 +546,36 @@
       {
         "signal_family": "panic_rebound",
         "signal_family_label": "패닉셀반등",
-        "wins": 52,
+        "wins": 54,
         "losses": 15,
-        "total": 67,
-        "avg_return": 6.227,
+        "total": 69,
+        "avg_return": 6.135,
         "source_event_type": "backtest",
-        "win_rate": 77.6,
-        "effective_win_rate": 76.1,
+        "win_rate": 78.3,
+        "effective_win_rate": 76.7,
         "qualified": true
       },
       {
         "signal_family": "momentum_pullback",
         "signal_family_label": "모멘텀눌림목",
-        "wins": 151,
-        "losses": 42,
-        "total": 193,
-        "avg_return": 4.564,
+        "wins": 152,
+        "losses": 44,
+        "total": 196,
+        "avg_return": 4.561,
         "source_event_type": "backtest",
-        "win_rate": 78.2,
-        "effective_win_rate": 77.7,
+        "win_rate": 77.6,
+        "effective_win_rate": 77.0,
         "qualified": true
       }
     ],
     "alignment_summary": {
       "backtest": {
-        "wins": 262,
-        "losses": 78,
-        "total": 340,
-        "avg_return": 4.701,
-        "win_rate": 77.1,
-        "effective_win_rate": 76.7,
+        "wins": 265,
+        "losses": 80,
+        "total": 345,
+        "avg_return": 4.685,
+        "win_rate": 76.8,
+        "effective_win_rate": 76.5,
         "qualified": true
       }
     },
@@ -661,14 +667,14 @@
     "orca_state_db": {
       "path": "data/orca_state.db",
       "exists": true,
-      "size_bytes": 21377024,
-      "mtime_iso": "2026-05-06T09:11:05.763097+09:00"
+      "size_bytes": 21417984,
+      "mtime_iso": "2026-05-06T23:05:20.495679+09:00"
     },
     "jackal_state_db": {
       "path": "data/jackal_state.db",
       "exists": true,
       "size_bytes": 229376,
-      "mtime_iso": "2026-05-06T09:10:16.396908+09:00",
+      "mtime_iso": "2026-05-06T23:04:56.180122+09:00",
       "tables": {
         "jackal_shadow_signals": 0,
         "jackal_live_events": 10,
