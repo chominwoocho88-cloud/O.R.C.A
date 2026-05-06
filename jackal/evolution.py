@@ -10,6 +10,9 @@ Jackal Evolution — 강화된 자체 학습
   - 주간 패턴 리뷰: Claude Sonnet이 전체 데이터 분석 → Skill/Instinct 생성
 """
 
+# TODO(2026-05): orca.llm_client.LLMClient으로 마이그레이션 예정.
+# 현재 직접 anthropic SDK 사용 중.
+
 import json
 import re
 import logging

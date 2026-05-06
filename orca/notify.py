@@ -6,13 +6,13 @@ import os
 import sys
 import json
 import re
-import anthropic
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from .analysis import get_active_lessons, load_lessons
 from .brand import ORCA_FULL_NAME, ORCA_NAME
 from .compat import get_orca_env
+from .llm_client import LLMClient
 from .notify_transport import _format_accuracy_display, send_message
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
@@ -28,7 +28,7 @@ from .paths import (
 
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 MODEL_S = "claude-haiku-4-5-20251001"   # 캘린더/속보용 가벼운 모델
-client  = anthropic.Anthropic(api_key=API_KEY)
+client  = LLMClient(API_KEY, fail_fast=False)
 
 
 def _now() -> datetime:
@@ -563,18 +563,16 @@ def check_breaking_news():
         print("Daily breaking news limit reached (5)"); return
 
     print("Checking breaking news at " + now_str)
-    full = ""
-    with client.messages.stream(
-        model=MODEL_S, max_tokens=1000, system=_BREAKING_SYS,
-        tools=[{"type": "web_search_20250305", "name": "web_search"}],
-        messages=[{"role": "user",
-                   "content": "Search major financial breaking news in last 2 hours: " + now_str + ". Return JSON."}]
-    ) as s:
-        for ev in s:
-            if getattr(ev, "type", "") == "content_block_delta":
-                d = getattr(ev, "delta", None)
-                if d and getattr(d, "type", "") == "text_delta":
-                    full += d.text
+    response = client.call(
+        model=MODEL_S,
+        max_tokens=1000,
+        system=_BREAKING_SYS,
+        user="Search major financial breaking news in last 2 hours: " + now_str + ". Return JSON.",
+        use_search=True,
+        max_retries=2,
+        call_site="orca.breaking",
+    )
+    full = response.text
 
     if not full.strip(): return
     m = re.search(r"\{[\s\S]*\}", re.sub(r"```json|```","",full).strip())
@@ -622,23 +620,16 @@ def send_calendar_report():
     week_str = _now().strftime("%Y-%m-%d")
     print("Fetching economic calendar for week of " + week_str)
 
-    full = ""
-    with client.messages.stream(
-        model=MODEL_S, max_tokens=2000, system=_CALENDAR_SYS,
-        tools=[{"type": "web_search_20250305", "name": "web_search"}],
-        messages=[{"role": "user",
-                   "content": "Search economic calendar events for week of " + week_str + ". Include US and Korea. Return JSON."}]
-    ) as s:
-        for ev in s:
-            t = getattr(ev, "type", "")
-            if t == "content_block_start":
-                blk = getattr(ev, "content_block", None)
-                if blk and getattr(blk, "type","") == "tool_use":
-                    print("  Search: " + getattr(blk, "input", {}).get("query",""))
-            elif t == "content_block_delta":
-                d = getattr(ev, "delta", None)
-                if d and getattr(d, "type","") == "text_delta":
-                    full += d.text
+    response = client.call(
+        model=MODEL_S,
+        max_tokens=2000,
+        system=_CALENDAR_SYS,
+        user="Search economic calendar events for week of " + week_str + ". Include US and Korea. Return JSON.",
+        use_search=True,
+        max_retries=2,
+        call_site="orca.calendar",
+    )
+    full = response.text
 
     raw = re.sub(r"```json|```","",full).strip()
     m   = re.search(r"\{[\s\S]*\}", raw)

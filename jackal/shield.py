@@ -227,6 +227,9 @@ class JackalShield:
 # Hunter / Scanner / Evolution?먯꽌 import?댁꽌 API ?몄텧 ???ㅽ뻾
 # ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
 
+# TODO(2026-05): orca.llm_client.LLMClient으로 통합 예정.
+# 현재 LLMClient가 자체 JSONL 로그를 가지므로 log_usage()는 점진적 deprecate 예정.
+
 def log_usage(caller: str, input_tokens: int, output_tokens: int,
               model: str = "unknown") -> None:
     """

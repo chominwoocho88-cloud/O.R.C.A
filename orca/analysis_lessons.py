@@ -7,17 +7,16 @@ import os
 import re
 from datetime import datetime, timedelta
 
-import anthropic
-
 from ._analysis_common import _load, _now, _save, _today
 from .compat import get_orca_env
 from .data import load_market_data
+from .llm_client import LLMClient
 from .paths import LESSONS_FILE
 
 
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 MODEL = get_orca_env("ORCA_MODEL", os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"))
-client = anthropic.Anthropic(api_key=API_KEY)
+client = LLMClient(API_KEY, fail_fast=False)
 
 
 def load_lessons() -> dict:
@@ -180,31 +179,22 @@ def extract_dawn_lessons(today_analyses: list, actual_news: str):
 Compare today's predictions against actual market data.
 Return JSON: {"has_lessons": true/false, "lessons": [{"category":"","lesson":"","severity":"high/medium/low"}]}"""
 
-    full = ""
-    with client.messages.stream(
+    response = client.call(
         model=MODEL,
         max_tokens=800,
         system=_DAWN_LESSON_SYS,
-        messages=[
-            {
-                "role": "user",
-                "content": "오늘 실제 시장 데이터:\n"
-                + json.dumps(market_snapshot, ensure_ascii=False)
-                + "\n\nARIA 예측:\n"
-                + json.dumps(summary, ensure_ascii=False)
-                + "\n\n로컬에서 이미 감지한 오판: "
-                + str(len(local_lessons))
-                + "개"
-                + "\n\n추가로 놓친 오판이 있으면 JSON으로 반환. 없으면 has_lessons:false.",
-            }
-        ],
-    ) as s:
-        for ev in s:
-            t = getattr(ev, "type", "")
-            if t == "content_block_delta":
-                d = getattr(ev, "delta", None)
-                if d and getattr(d, "type", "") == "text_delta":
-                    full += d.text
+        user="오늘 실제 시장 데이터:\n"
+        + json.dumps(market_snapshot, ensure_ascii=False)
+        + "\n\nARIA 예측:\n"
+        + json.dumps(summary, ensure_ascii=False)
+        + "\n\n로컬에서 이미 감지한 오판: "
+        + str(len(local_lessons))
+        + "개"
+        + "\n\n추가로 놓친 오판이 있으면 JSON으로 반환. 없으면 has_lessons:false.",
+        max_retries=2,
+        call_site="orca.lessons",
+    )
+    full = response.text
 
     raw = re.sub(r"```json|```", "", full).strip()
     m = re.search(r"\{[\s\S]*\}", raw)

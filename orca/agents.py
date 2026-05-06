@@ -14,8 +14,9 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
 
-import anthropic
 from rich.console import Console
+
+from .llm_client import LLMClient
 
 KST     = timezone(timedelta(hours=9))
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
@@ -38,7 +39,7 @@ _TOK = {
 }
 
 console = Console()
-client  = anthropic.Anthropic(api_key=API_KEY)
+_llm_client = LLMClient(API_KEY, fail_fast=False)
 
 _THESIS_KILLER_BLOCKED_EVENTS = {"vix", "환율", "원달러", "달러", "달러/원", "금리", "국채",
                                  "달러인덱스", "dxy", "엔화", "위안", "통화", "fx", "원화"}
@@ -104,43 +105,18 @@ def _normalize_thesis_killers(thesis_killers: list | None, *, source_label: str)
 
 def call_api(system: str, user: str, use_search: bool = False,
              model: str = MODEL_ANALYST, max_tokens: int = 2000,
-             max_retries: int = 2) -> str:
-    """Anthropic API 호출 — 루프 방식 재시도"""
-    import anthropic as _ac
-    import time as _t
-    kwargs = dict(
-        model=model, max_tokens=max_tokens,
+             max_retries: int = 2, call_site: str = "orca.unknown") -> str:
+    """Anthropic API 호출 — LLMClient adapter 경유."""
+    response = _llm_client.call(
         system=system,
-        messages=[{"role": "user", "content": user}],
+        user=user,
+        model=model,
+        max_tokens=max_tokens,
+        use_search=use_search,
+        max_retries=max_retries,
+        call_site=call_site,
     )
-    if use_search:
-        kwargs["tools"] = [{"type": "web_search_20250305", "name": "web_search"}]
-    _DELAYS = {_ac.InternalServerError: 20, _ac.RateLimitError: 60}
-    last_exc = None
-    for attempt in range(max_retries):
-        full = ""; sc = 0
-        try:
-            with client.messages.stream(**kwargs) as s:
-                for ev in s:
-                    t = getattr(ev, "type", "")
-                    if t == "content_block_start":
-                        blk = getattr(ev, "content_block", None)
-                        if blk and getattr(blk, "type", "") == "tool_use":
-                            sc += 1
-                            q = getattr(blk, "input", {}).get("query", "")
-                            console.print("    [dim]Search [" + str(sc) + "]: " + q + "[/dim]")
-                    elif t == "content_block_delta":
-                        d = getattr(ev, "delta", None)
-                        if d and getattr(d, "type", "") == "text_delta":
-                            full += d.text
-            return full
-        except tuple(_DELAYS.keys()) as e:
-            last_exc = e
-            delay = _DELAYS.get(type(e), 30)
-            if attempt < max_retries - 1:
-                console.print(f"  [yellow]⚠️ {type(e).__name__} — {delay}s 후 재시도[/yellow]")
-                _t.sleep(delay)
-    raise last_exc
+    return response.text
 
 
 def get_mode_context(mode: str, lessons_prompt: str = "") -> str:
@@ -259,6 +235,7 @@ def agent_hunter(date_str: str, mode: str, market_data: dict = None, memory: lis
         + search_instruction
         + "\nReturn JSON.",
         use_search=True, model=MODEL_HUNTER, max_tokens=_TOK["HUNTER"],  # _TOK 통일
+        call_site="orca.hunter",
     )
     result = parse_json(raw)
     result["mode"] = mode
@@ -361,6 +338,7 @@ def agent_analyst(hunter_data: dict, mode: str, lessons_prompt: str = "", memory
         mode_ctx + "\n\n" + ANALYST_SYSTEM_BASE,
         "Hunter data:\n" + json.dumps(slim, ensure_ascii=False) + "\n\nReturn JSON.",
         model=MODEL_ANALYST, max_tokens=_TOK["ANALYST"],
+        call_site="orca.analyst",
     )
     result = parse_json(raw)
     console.print("  [green]Done: " + str(result.get("market_regime", ""))
@@ -427,6 +405,7 @@ def agent_devil(analyst_data: dict, memory: list, mode: str) -> dict:
         DEVIL_SYSTEM,
         "Analyst:\n" + json.dumps(slim, ensure_ascii=False) + past + "\n\nReturn JSON.",
         model=MODEL_DEVIL, max_tokens=_TOK["DEVIL"],
+        call_site="orca.devil",
     )
     result = parse_json(raw)
 
@@ -571,6 +550,7 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
         + "\nData:\n" + json.dumps(payload, ensure_ascii=False)
         + past_ctx + acc_ctx + real_data_ctx + devil_override + "\n\nReturn JSON.",
         model=reporter_model, max_tokens=max_tok,
+        call_site="orca.reporter",
     )
     result = parse_json(raw)
     result["mode"] = mode

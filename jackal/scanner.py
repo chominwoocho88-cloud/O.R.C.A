@@ -13,6 +13,9 @@ Jackal Scanner — Analyst → Devil → Final 3단계 타점 분석
   5. 결과 저장 (Evolution 학습용 — 신호·레짐·Devil 정확도 포함)
 """
 
+# TODO(2026-05): orca.llm_client.LLMClient으로 마이그레이션 예정.
+# 현재 직접 anthropic SDK 사용 중.
+
 import os
 import sys
 import json

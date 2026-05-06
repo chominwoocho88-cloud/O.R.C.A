@@ -150,33 +150,21 @@ def _ai_verify_impl(
     client,
     model: str,
     verifier_system: str,
+    call_site: str = "orca.verification",
 ) -> list:
     if not unclear:
         return []
 
-    full = ""
-    with client.messages.stream(
+    response = client.call(
         model=model,
         max_tokens=1000,
         system=verifier_system,
-        tools=[{"type": "web_search_20250305", "name": "web_search"}],
-        messages=[
-            {
-                "role": "user",
-                "content": "Search and verify:\n" + json.dumps(unclear, ensure_ascii=False) + "\nReturn JSON.",
-            }
-        ],
-    ) as s:
-        for ev in s:
-            t = getattr(ev, "type", "")
-            if t == "content_block_start":
-                blk = getattr(ev, "content_block", None)
-                if blk and getattr(blk, "type", "") == "tool_use":
-                    print("  Search: " + getattr(blk, "input", {}).get("query", ""))
-            elif t == "content_block_delta":
-                d = getattr(ev, "delta", None)
-                if d and getattr(d, "type", "") == "text_delta":
-                    full += d.text
+        user="Search and verify:\n" + json.dumps(unclear, ensure_ascii=False) + "\nReturn JSON.",
+        use_search=True,
+        max_retries=2,
+        call_site=call_site,
+    )
+    full = response.text
     raw = re.sub(r"```json|```", "", full).strip()
     m = re.search(r"\{[\s\S]*\}", raw)
     try:

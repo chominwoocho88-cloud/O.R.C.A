@@ -13,6 +13,9 @@ Jackal Hunter — 100→50→25→10→5 단계별 스윙 타점 탐색
 포트폴리오 종목 제외 — 항상 새 종목만 발굴
 """
 
+# TODO(2026-05): orca.llm_client.LLMClient으로 마이그레이션 예정.
+# 현재 직접 anthropic SDK 사용 중.
+
 import os
 import sys
 import json

@@ -1170,8 +1170,8 @@ def generate_analysis(date, market_data, dry=False, strict_json=False):
             "debug_lessons_present": bool(lessons_ctx.strip()),
         }
 
-    import anthropic
-    client = anthropic.Anthropic(api_key=API_KEY)
+    from .llm_client import LLMClient
+    client = LLMClient(API_KEY, fail_fast=False)
     d = market_data
 
     # 컨텍스트 경고 신호 계산
@@ -1273,16 +1273,15 @@ def generate_analysis(date, market_data, dry=False, strict_json=False):
         f"{signal_str}\n"
         f"thesis_killers는 내일 주가/지수 수치로 검증 가능하게 작성. JSON 반환:"
     )
-    full = ""
-    with client.messages.stream(
-        model=MODEL, max_tokens=1500, system=ANALYST_PROMPT,
-        messages=[{"role":"user","content":user_msg}]
-    ) as s:
-        for ev in s:
-            if getattr(ev,"type","") == "content_block_delta":
-                d2 = getattr(ev,"delta",None)
-                if d2 and getattr(d2,"type","") == "text_delta":
-                    full += d2.text
+    response = client.call(
+        model=MODEL,
+        max_tokens=1500,
+        system=ANALYST_PROMPT,
+        user=user_msg,
+        max_retries=2,
+        call_site="orca.backtest",
+    )
+    full = response.text
 
     result, failure_detail = _parse_analysis_json(full)
     if result is None:

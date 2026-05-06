@@ -11,6 +11,9 @@ Jackal Compact - Context Rot 諛⑹? ?먮룞 ?뺤텞 ?쒖뒪??
   ?섏젙: current_tokens=0?대㈃ jackal_usage_log.json?먯꽌 ?ㅻ뒛 ?ㅼ궗?⑸웾 ?⑹궛
 """
 
+# TODO(2026-05): orca.llm_client.LLMClient으로 마이그레이션 예정.
+# 현재 직접 anthropic SDK 사용 중.
+
 import json
 import logging
 import os

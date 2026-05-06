@@ -15,8 +15,6 @@ from __future__ import annotations
 import os
 import sys
 
-import anthropic
-
 from ._analysis_common import KST, _load, _now, _save, _today
 from .analysis_lessons import (
     add_lesson,
@@ -63,6 +61,7 @@ from .analysis_verification import (
 from .compat import get_orca_env, get_orca_flag
 from .data import load_market_data
 from .learning_policy import MIN_SAMPLES, suggest_weight_delta
+from .llm_client import LLMClient
 from .notify_transport import _format_accuracy_display, send_message
 from .paths import ACCURACY_FILE, MEMORY_FILE, WEIGHTS_FILE
 from .state import resolve_verification_outcomes
@@ -75,7 +74,7 @@ sys.stderr.reconfigure(encoding="utf-8")
 
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 MODEL = get_orca_env("ORCA_MODEL", os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"))
-client = anthropic.Anthropic(api_key=API_KEY)
+client = LLMClient(API_KEY, fail_fast=False)
 
 
 def update_weights_from_accuracy(accuracy_data: dict) -> list:
@@ -99,6 +98,7 @@ def _ai_verify(unclear: list) -> list:
         client=client,
         model=MODEL,
         verifier_system=_VERIFIER_SYSTEM,
+        call_site="orca.verification",
     )
 
 
