@@ -460,7 +460,7 @@ def _load_schd_regime_signal() -> float:
     Doc7/9 부분 수용: 기각 유지 + 새 용도 추가, 충돌 없음.
     """
     try:
-        from orca.market_fetch import fetch_daily_history
+        from shared.market_data.fetch import fetch_daily_history
 
         end = (datetime.now(KST) + timedelta(days=1)).date().isoformat()
         start = (datetime.now(KST) - timedelta(days=int(_SCANNER_SCHD["period_days"]) * 2)).date().isoformat()
@@ -1081,7 +1081,7 @@ def _save_recommendation(extra: dict, aria: dict):
     for ticker, info in extra.items():
         price_now = None
         try:
-            from orca.market_fetch import fetch_latest_close
+            from shared.market_data.fetch import fetch_latest_close
 
             latest = fetch_latest_close(ticker, lookback_days=3)
             if latest:

@@ -129,7 +129,7 @@ def _fetch_post_hunt_closes(ticker: str, hunt_ts: str,
     end_date   = (dt + timedelta(days=max_days * 2 + 5)).date()
 
     try:
-        from orca.market_fetch import fetch_daily_history
+        from shared.market_data.fetch import fetch_daily_history
 
         df = fetch_daily_history(ticker, str(start_date), str(end_date))
     except Exception as e:

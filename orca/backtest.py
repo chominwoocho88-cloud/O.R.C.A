@@ -1865,7 +1865,7 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
     - 앞(과거) + 뒤(미래) 양방향 확장
     """
     from datetime import date as _date
-    from orca.market_fetch import fetch_daily_history_batch
+    from shared.market_data.fetch import fetch_daily_history_batch
 
     today = _date.today()
     start = today - timedelta(days=int(months * 30.5) + 10)
@@ -1920,7 +1920,7 @@ def _fetch_dynamic_hist(months: int = 6) -> dict[str, object]:
     try:
         closes_map: dict[str, object] = {}
         all_dates: set[str] = set()
-        from orca.market_fetch import get_fetch_stats, _last_fetch_source
+        from shared.market_data.fetch import get_fetch_stats, _last_fetch_source
 
         data_map = fetch_daily_history_batch(
             list(YF_MAP.keys()),

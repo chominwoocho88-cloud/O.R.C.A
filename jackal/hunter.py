@@ -388,7 +388,7 @@ def _fetch_macro_gate(aria: dict) -> dict:
     Returns:
         {risk_level, score_penalty, vix, yield_curve, hy_stress, reason}
     """
-    from orca.market_fetch import fetch_daily_history
+    from shared.market_data.fetch import fetch_daily_history
 
     today = datetime.now(KST).date()
     end_date = (today + timedelta(days=1)).isoformat()
@@ -481,7 +481,7 @@ def _fetch_macro_gate(aria: dict) -> dict:
 
 def _fetch_etf_returns() -> dict:
     """섹터 ETF 5일 수익률 가져오기 (상대강도 계산용)."""
-    from orca.market_fetch import fetch_daily_history_batch
+    from shared.market_data.fetch import fetch_daily_history_batch
 
     etfs = list(set(SECTOR_ETF.values()))
     ret  = {}
@@ -517,7 +517,7 @@ def _batch_technicals(tickers: list) -> dict:
     """
     log.info(f"  market_fetch 다운로드: {len(tickers)}종목...")
     result = {}
-    from orca.market_fetch import fetch_daily_history_batch
+    from shared.market_data.fetch import fetch_daily_history_batch
 
     today = datetime.now(KST).date()
     try:

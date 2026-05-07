@@ -17,7 +17,7 @@ from .jackal_quality import (
     describe_jackal_recommendation_accuracy_state,
     describe_jackal_shadow_state,
 )
-from .market_fetch import get_provider_quality_summary
+from shared.market_data.fetch import get_provider_quality_summary
 from .paths import REPORTS_DIR, STATE_DB_FILE, atomic_write_json, atomic_write_text
 from .state import (
     list_backtest_days,

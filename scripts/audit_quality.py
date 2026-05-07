@@ -22,7 +22,7 @@ from orca.jackal_quality import (  # noqa: E402
     describe_jackal_recommendation_accuracy_state,
     describe_jackal_shadow_state,
 )
-from orca.market_fetch import get_provider_quality_summary  # noqa: E402
+from shared.market_data.fetch import get_provider_quality_summary  # noqa: E402
 from scripts.check_jackal_operational_intake import collect_operational_intake  # noqa: E402
 from scripts.check_requirements_drift import collect_requirements_drift  # noqa: E402
 

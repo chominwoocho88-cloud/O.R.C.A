@@ -791,7 +791,7 @@ def _fetch_history_points(
         return []
     start_date = end_date - timedelta(days=max(_LOOKBACK_BUFFER_DAYS, lookback_days * 4))
     try:
-        from .market_fetch import fetch_daily_history
+        from shared.market_data.fetch import fetch_daily_history
 
         history = fetch_daily_history(
             ticker,

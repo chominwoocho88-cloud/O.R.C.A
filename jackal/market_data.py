@@ -424,7 +424,7 @@ def fetch_technicals(ticker: str) -> dict | None:
     """Compute the technical snapshot used by the JACKAL scanner."""
     last_exc: Exception | None = None
     try:
-        from orca.market_fetch import fetch_daily_history
+        from shared.market_data.fetch import fetch_daily_history
 
         end_date = datetime.now(KST).date()
         start_date = end_date - timedelta(days=400)

@@ -326,8 +326,8 @@ class WaveGMigrationGuardTests(unittest.TestCase):
 
     def test_non_wrapper_python_files_have_no_direct_yfinance_calls(self):
         allowed = {
-            str(ROOT / "orca" / "market_fetch.py"),
             str(ROOT / "orca" / "context_market_data.py"),
+            str(ROOT / "shared" / "market_data" / "fetch.py"),
         }
         offenders: list[str] = []
         for path in ROOT.rglob("*.py"):

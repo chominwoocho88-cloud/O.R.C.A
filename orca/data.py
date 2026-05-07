@@ -5,7 +5,7 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
 KST=timezone(timedelta(hours=9))
-from .market_fetch import fetch_latest_close, fetch_put_call_ratio_summary
+from shared.market_data.fetch import fetch_latest_close, fetch_put_call_ratio_summary
 from .notify_transport import send_message
 from .paths import COST_FILE, DATA_FILE
 _CORE={"sp500","nasdaq","vix","kospi"}

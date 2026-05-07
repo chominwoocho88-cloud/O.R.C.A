@@ -10,7 +10,7 @@ if getattr(sys.modules.get("pandas"), "__file__", None) is None:
     sys.modules.pop("pandas", None)
 pd = importlib.import_module("pandas")
 
-from orca import market_fetch
+from shared.market_data import fetch as market_fetch
 
 
 def _frame(values: list[float]) -> pd.DataFrame:

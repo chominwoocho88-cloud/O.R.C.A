@@ -49,7 +49,7 @@ LESSONS_DIR.mkdir(exist_ok=True)
 def _fetch_history(ticker: str, lookback_days: int):
     """Fetch daily history through the unified ORCA/JACKAL market wrapper."""
     try:
-        from orca.market_fetch import fetch_daily_history
+        from shared.market_data.fetch import fetch_daily_history
 
         end = (datetime.now(timezone.utc) + timedelta(days=1)).date().isoformat()
         start = (datetime.now(timezone.utc) - timedelta(days=max(lookback_days, 1) * 2)).date().isoformat()

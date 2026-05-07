@@ -23,7 +23,7 @@
 ### Stage 1: 기반 구조 (Day 5~10) — 1주
 
 - Day 5: modules/ 빈 골격 + 본 문서 (이번 commit)
-- Day 6: shared/market_data/ 분리 — orca.market_fetch 이동, alias 유지
+- ✅ Day 6: shared/market_data/ 분리 — orca.market_fetch 이동, alias 유지
 - Day 7: modules/orca/pipeline/ 분리 — agents, run_cycle, pipeline
 - Day 8: modules/orca/lessons/ + state.py 분리 검토 (lessons 먼저)
 - Day 9: modules/jackal/pipeline/ 분리

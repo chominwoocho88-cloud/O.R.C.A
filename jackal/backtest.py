@@ -481,7 +481,7 @@ def _fetch_yf_cached(ticker: str):
     start_date = (datetime.now() - timedelta(days=JACKAL_HISTORY_DAYS)).strftime("%Y-%m-%d")
 
     try:
-        from orca.market_fetch import fetch_daily_history
+        from shared.market_data.fetch import fetch_daily_history
 
         df = fetch_daily_history(ticker, start_date, end_date)
         if df is None or df.empty:

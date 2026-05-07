@@ -13,7 +13,7 @@ pd = importlib.import_module("pandas")
 
 from orca import context_snapshot
 from orca import data as orca_data
-from orca import market_fetch
+from shared.market_data import fetch as market_fetch
 
 
 def _history(values: list[float]) -> pd.DataFrame:
@@ -81,7 +81,7 @@ class WaveGStep24MigrationTests(unittest.TestCase):
         market_fetch.pd = pd
 
     def test_context_snapshot_fetch_history_uses_market_fetch(self):
-        with patch("orca.market_fetch.fetch_daily_history", return_value=_history([100.0, 101.0])) as mocked:
+        with patch("shared.market_data.fetch.fetch_daily_history", return_value=_history([100.0, 101.0])) as mocked:
             points = context_snapshot._fetch_history_points("AAPL", "2026-04-03", lookback_days=20)
 
         self.assertEqual(points[-1], ("2026-04-02", 101.0))
@@ -89,7 +89,7 @@ class WaveGStep24MigrationTests(unittest.TestCase):
         self.assertEqual(mocked.call_args.args[0], "AAPL")
 
     def test_context_snapshot_fetch_history_returns_empty_on_failure(self):
-        with patch("orca.market_fetch.fetch_daily_history", side_effect=RuntimeError("provider down")):
+        with patch("shared.market_data.fetch.fetch_daily_history", side_effect=RuntimeError("provider down")):
             points = context_snapshot._fetch_history_points("AAPL", "2026-04-03", lookback_days=20)
 
         self.assertEqual(points, [])
