@@ -25,7 +25,7 @@ from pathlib import Path
 
 import httpx
 import pandas as pd
-from orca.llm_client import LLMClient
+from shared.llm.client import LLMClient
 from orca.paths import atomic_write_json
 from orca.state import (
     record_jackal_weight_snapshot,

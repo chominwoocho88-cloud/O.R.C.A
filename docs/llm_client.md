@@ -102,8 +102,9 @@ LLM credential is missing.
 
 - JACKAL direct Anthropic SDK calls migrated to `LLMClient` (Day 2 commit).
 - shared/llm/ split completed (Day 3 commit).
+- Call-site migration completed (Day 4). All ORCA and JACKAL callers import
+  `shared.llm.client` directly.
 - Create `shared/broker/kis.py`.
-- Gradually migrate call sites from `orca.llm_client` to `shared.llm.client`.
 - Review deprecation of `jackal.shield.log_usage()` after JACKAL JSONL logging
   settles in production.
 - Build a dashboard comparing estimated cost in `orca_cost.json` with observed

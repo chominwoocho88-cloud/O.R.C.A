@@ -12,7 +12,7 @@ from pathlib import Path
 from .analysis import get_active_lessons, load_lessons
 from .brand import ORCA_FULL_NAME, ORCA_NAME
 from .compat import get_orca_env
-from .llm_client import LLMClient
+from shared.llm.client import LLMClient
 from .notify_transport import _format_accuracy_display, send_message
 
 os.environ["PYTHONIOENCODING"] = "utf-8"

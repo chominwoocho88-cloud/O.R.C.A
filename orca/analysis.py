@@ -61,7 +61,7 @@ from .analysis_verification import (
 from .compat import get_orca_env, get_orca_flag
 from .data import load_market_data
 from .learning_policy import MIN_SAMPLES, suggest_weight_delta
-from .llm_client import LLMClient
+from shared.llm.client import LLMClient
 from .notify_transport import _format_accuracy_display, send_message
 from .paths import ACCURACY_FILE, MEMORY_FILE, WEIGHTS_FILE
 from .state import resolve_verification_outcomes

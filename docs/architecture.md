@@ -86,7 +86,7 @@ Strangler Fig 패턴을 따른다.
 
 - shared/ 골격 생성 (이번 commit)
 - docs/architecture.md 비전 명문화 (이번 commit)
-- LLMClient는 shared/llm/client.py에 있음 (Day 3에 이동 완료). orca/llm_client.py는 backward-compatible alias로 유지 중. 호출부 마이그레이션은 다음 sprint.
+- LLMClient는 shared/llm/client.py에 있음 (Day 4에 호출부 마이그레이션 완료). 모든 호출부가 shared.llm.client 직접 사용. orca/llm_client.py alias는 외부 호환성 위해 유지.
 - KIS API client는 미구현 (KIS 가입 완료, 다음 단계에서 shared/broker/kis.py로 신규 생성 예정)
 - orca/, jackal/ 코드는 모두 기존 위치 유지
 - modules/, integrations/, tools/ 폴더는 미생성 (필요 시점에 만듦)
@@ -94,6 +94,6 @@ Strangler Fig 패턴을 따른다.
 ## 다음 단계 후보
 
 1. JACKAL LLMClient 통합 (5월 1번 작업 마무리)
-2. 호출부 점진 마이그레이션 (orca.llm_client → shared.llm.client)
+2. orca/llm_client.py alias 제거 검토 (외부 호환성 확인 후)
 3. shared/broker/kis.py 신규 작성 (KIS API 가입 완료 후)
 4. 비용 가시성 대시보드 (data/llm_log.jsonl 분석)

@@ -24,7 +24,7 @@ from pathlib import Path
 
 import httpx
 
-from orca.llm_client import LLMClient
+from shared.llm.client import LLMClient
 from orca.paths import DATA_FILE, atomic_write_json
 from orca.state import (
     list_jackal_recommendations,

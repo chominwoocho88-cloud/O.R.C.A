@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from ._analysis_common import _load, _now, _save, _today
 from .compat import get_orca_env
 from .data import load_market_data
-from .llm_client import LLMClient
+from shared.llm.client import LLMClient
 from .paths import LESSONS_FILE
 
 

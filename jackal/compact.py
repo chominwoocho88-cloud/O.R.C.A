@@ -17,7 +17,7 @@ import os
 from datetime import datetime, date
 from pathlib import Path
 
-from orca.llm_client import LLMClient
+from shared.llm.client import LLMClient
 
 log = logging.getLogger("jackal_compact")
 

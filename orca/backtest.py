@@ -1170,7 +1170,7 @@ def generate_analysis(date, market_data, dry=False, strict_json=False):
             "debug_lessons_present": bool(lessons_ctx.strip()),
         }
 
-    from .llm_client import LLMClient
+    from shared.llm.client import LLMClient
     client = LLMClient(API_KEY, fail_fast=False)
     d = market_data
 

@@ -133,7 +133,7 @@ def _patched_anthropic(module):
 
 class LLMClientTests(unittest.TestCase):
     def _client_module(self):
-        return importlib.import_module("orca.llm_client")
+        return importlib.import_module("shared.llm.client")
 
     def test_fail_fast_missing_key(self):
         llm = self._client_module()

@@ -11,7 +11,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from jackal import evolution, hunter, scanner
-from orca.llm_client import LLMClient
+from shared.llm.client import LLMClient
 
 
 class _FakeLLMClient:

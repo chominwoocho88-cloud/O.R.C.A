@@ -16,7 +16,7 @@ sys.stderr.reconfigure(encoding="utf-8")
 
 from rich.console import Console
 
-from .llm_client import LLMClient
+from shared.llm.client import LLMClient
 
 KST     = timezone(timedelta(hours=9))
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")

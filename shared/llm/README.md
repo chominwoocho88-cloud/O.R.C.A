@@ -3,6 +3,7 @@
 LLM 클라이언트와 prompt 관리.
 
 현재 상태: shared/llm/client.py로 이동 완료 (Day 3 commit).
+Day 4: 모든 호출부가 새 경로로 마이그레이션 완료.
 
 ## 사용
 

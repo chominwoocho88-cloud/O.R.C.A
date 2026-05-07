@@ -18,7 +18,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from collections import defaultdict
 
-from orca.llm_client import LLMClient
+from shared.llm.client import LLMClient
 from orca.paths import atomic_write_json
 from orca.state import (
     list_jackal_recommendations,
