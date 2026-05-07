@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-07 09:12 KST",
+  "collected_at": "2026-05-08 08:42 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,40 +12,58 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA Strikes Massive Partnership with Corning for AI Infrastructure; Stock Up 4.4% on Strong Earnings Momentum",
+      "headline": "Nvidia partners with Corning for $3.2B optical fiber manufacturing investment; stock gains 5.41%",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Goldman Sachs says Nvidia stock is meaningfully undervalued ahead of May 20 earnings report",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix Surges 10%+ as Market Cap Exceeds 1 Trillion Won; HBM Demand Drives Record Profitability",
+      "headline": "SK Hynix hits record highs driven by foreign buying and chip price increases; 80.7% return over past 30 days",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics Crosses 1 Trillion Dollar Market Cap, Surges 15% on Record Q1 Results and HBM4 Launch",
+      "headline": "Samsung Electronics reaches $1 trillion market cap valuation; stock up 2.07% to record high",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "SK Securities raises Samsung Electronics price target to 500,000 won; memory company revaluation just beginning",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom Reaches Record High Above $430 with VMware Cloud Foundation 9.1 Launch; Q2 AI Revenue Guidance at $10.7B",
+      "headline": "Broadcom experiencing significant momentum from strong AI demand and strategic partnerships",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Stock Remains Stalled Despite Solid Earnings; AI Strategy Implementation and Global Expansion Needed to Reignite Growth",
+      "headline": "OpenAI CEO Sam Altman signs partnership deal with Kakao for AI expansion",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "Kakao trading at 45,250 KRW; technical indicators show Strong Sell signal; analyst target price 73,160 KRW",
       "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF Assets Surge to 5 Trillion Won; Maintains Top Position Among Domestic High-Dividend ETFs",
+      "headline": "SOL Korea High Dividend ETF reaches 5 billion won net assets; financial stocks drive growth",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 6
+  "total": 9
 }
