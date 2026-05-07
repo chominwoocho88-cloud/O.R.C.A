@@ -91,6 +91,7 @@ Strangler Fig 패턴을 따른다.
 - Day 6: shared/market_data/ 분리 완료. orca.market_fetch alias 유지. JACKAL 단방향 의존성 회복.
 - Day 7: pipeline.py를 modules/orca/pipeline/로 이동 (alias 유지). 작은 파일로 modules/ 이동 패턴 첫 검증.
 - Day 8: agents.py 이동 (modules/orca/pipeline/agents.py). mock.patch 호환성 패턴 적용.
+- Day 9: run_cycle.py 이동. Stage 1 핵심 ORCA pipeline 3 파일 (pipeline + agents + run_cycle) 모두 modules/orca/pipeline/ 입주 완료.
 - 마이그레이션 계획: docs/migration_plan.md 참조
 - KIS API client는 미구현 (KIS 가입 완료, 다음 단계에서 shared/broker/kis.py로 신규 생성 예정)
 - orca/, jackal/ 코드는 모두 기존 위치 유지
@@ -104,4 +105,5 @@ Strangler Fig 패턴을 따른다.
 4. shared/market_data/ 분리 (완료 - Day 6)
 5. modules/orca/pipeline/pipeline.py 이동 (완료 - Day 7)
 6. modules/orca/pipeline/agents.py 이동 (완료 - Day 8)
-7. run_cycle.py 분리 (다음 sprint)
+7. modules/orca/pipeline/run_cycle.py 이동 (완료 - Day 9)
+8. modules/jackal/pipeline/ 분리 (다음 sprint)

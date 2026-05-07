@@ -27,7 +27,7 @@
 1. shared/market_data/ 분리 (Day 6) 완료
 2. pipeline.py 이동 (Day 7) 완료 - 작은 파일 먼저 검증
 3. agents.py 이동 (Day 8) 완료
-4. run_cycle.py 이동 (다음 sprint)
+4. run_cycle.py 이동 (Day 9) 완료 - ORCA pipeline 핵심 3 파일 모두 이동
 5. modules/orca/regime/ - analysis_market (후속)
-6. modules/orca/lessons/ - lesson_*, retrieval (Day 8)
-7. modules/orca/state/ - state.py 분리 검토 (Day 8 또는 별도)
+6. modules/orca/lessons/ - lesson_*, retrieval (다음 sprint)
+7. modules/orca/state/ - state.py 4069줄 분할 검토 (별도 sprint)
