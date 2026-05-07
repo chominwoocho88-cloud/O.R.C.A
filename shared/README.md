@@ -10,7 +10,7 @@
 
 ## 구조
 
-- llm/         LLM 클라이언트 + prompt 관리
+- llm/         LLM 클라이언트 + prompt 관리 (활성)
 - market_data/ 시장 데이터 수집기 (yfinance, FRED 등)
 - broker/      증권사 API (KIS, 키움 등)
 - db/          SQLite wrapper

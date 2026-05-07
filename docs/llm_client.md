@@ -1,13 +1,13 @@
-# ORCA LLMClient
+# Shared LLMClient
 
-`orca.llm_client.LLMClient` is the provider adapter boundary for ORCA LLM calls.
-It preserves existing caller behavior while adding fail-fast credential checks,
-usage capture, and append-only JSONL audit logs.
+`shared.llm.client.LLMClient` is the provider adapter boundary for ORCA and
+JACKAL LLM calls. It preserves existing caller behavior while adding fail-fast
+credential checks, usage capture, and append-only JSONL audit logs.
 
 ## Basic Usage
 
 ```python
-from orca.llm_client import LLMClient
+from shared.llm.client import LLMClient, LLMResponse, LLMFailure
 
 client = LLMClient(api_key=os.environ.get("ANTHROPIC_API_KEY"), fail_fast=True)
 response = client.call(
@@ -20,6 +20,12 @@ response = client.call(
     call_site="orca.analyst",
 )
 text = response.text
+```
+
+The old `orca.llm_client` path remains as a backward-compatible alias:
+
+```python
+from orca.llm_client import LLMClient, LLMResponse, LLMFailure
 ```
 
 `orca.agents.call_api()` still returns `str` so existing ORCA agent callers do
@@ -95,6 +101,9 @@ LLM credential is missing.
 ## Next Sprint
 
 - JACKAL direct Anthropic SDK calls migrated to `LLMClient` (Day 2 commit).
+- shared/llm/ split completed (Day 3 commit).
+- Create `shared/broker/kis.py`.
+- Gradually migrate call sites from `orca.llm_client` to `shared.llm.client`.
 - Review deprecation of `jackal.shield.log_usage()` after JACKAL JSONL logging
   settles in production.
 - Build a dashboard comparing estimated cost in `orca_cost.json` with observed
