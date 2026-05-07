@@ -1,0 +1,663 @@
+{
+  "analysis_date": "2026-05-08",
+  "analysis_time": "01:07 KST",
+  "mode": "EVENING",
+  "mode_label": "저녁 마감",
+  "one_line_summary": "코스피 7,490 신고가 경신에도 외국인 7.15조 순매도 급반전, 개인이 역대 4위 순매수로 방어하며 단기 천장 경계 신호 점등",
+  "market_regime": "위험선호 (단기 급반전 경계 병행)",
+  "trend_phase": "상승추세",
+  "trend_strategy": {
+    "recommended": "AI·반도체 섹터 코어 보유 유지, 신고가 구간 분할 익절 병행. 외국인 순매수 전환 여부 확인 후 추가 진입 검토",
+    "caution": "코스피 75.2% YTD 급등 + 마진론 36조 과열 + 외국인 7.15조 순매도 급반전 동시 발생 → 7/60일 급반전 패턴 트리거 조건 충족. 코스피 7,200pt 이하 이탈 시 마진론 연쇄 반대매매 가능성 상시 점검",
+    "difficulty": "어려움"
+  },
+  "confidence_overall": "보통",
+  "consensus_level": "낮음",
+  "top_headlines": [
+    {
+      "headline": "코스피 7,490 신고가 경신, 외국인 7.15조 순매도 vs 개인 5.99조 순매수 역대 4위",
+      "signal_tag": "단기 천장 경계",
+      "impact": "높음"
+    },
+    {
+      "headline": "TSMC Q1 순이익 +58% 어닝 서프라이즈, 2nm 2026년 매진 확인",
+      "signal_tag": "AI 반도체 구조적 수요",
+      "impact": "높음"
+    },
+    {
+      "headline": "나스닥 25,873·S&P500 7,356 신고가 권역 유지, VIX 17.3 안정",
+      "signal_tag": "미국 위험선호 지속",
+      "impact": "높음"
+    },
+    {
+      "headline": "코스피 마진론 36조 과열, 외국인 급반전으로 연쇄 청산 리스크 부각",
+      "signal_tag": "블랙스완 리스크",
+      "impact": "높음"
+    },
+    {
+      "headline": "미국 CPI 3.3% YoY (2024년 5월 이후 최고), Fed 동결 기조 유지",
+      "signal_tag": "인플레 재부각",
+      "impact": "보통"
+    }
+  ],
+  "volatility_index": {
+    "vkospi": "VI 발동 2026년 7,239건 (+62% YoY) — 구조적 변동성 상승",
+    "vix": "17.3",
+    "fear_greed": "추정 불가 (데이터 미제공)",
+    "level": "중립",
+    "interpretation": "VIX 17.3은 단독 방향 판단 금지(정확도 32%). 코스피 VI 발동 급증은 개별 종목 단기 진폭 확대를 의미하며 지수 방향성과 별개. 참고 지표로만 활용. FG 20 이상 구간 방향 정확도 17% 수준으로 확신 금지"
+  },
+  "retail_reversal_signal": {
+    "retail_behavior": "코스피 개인 5.99조 순매수(역대 4위) — 외국인 7.15조 순매도를 흡수하며 지수 +1.43% 방어",
+    "contrarian_implication": "개인이 역대급 순매수로 외국인 매도를 받아내는 구조는 단기 천장 확인 신호 가능성. 과거 패턴상 개인 대량 매수 후 외국인 연속 이탈 시 하락 전환 위험 증가. 단, 외국인 1일 순매도 후 재유입 시 추가 상승 여지 존재 — 방향 불명확",
+    "reliability": "보통"
+  },
+  "outflows": [
+    {
+      "zone": "코스피 외국인 자금",
+      "reason": "전일 3.13조 순매수에서 당일 7.15조 순매도로 급반전. 75.2% YTD 급등 후 차익실현 + 마진론 36조 과열 회피 가능성. 순 -10.28조 스윙은 단순 차익실현 규모 초과, 구조적 청산 가능성 배제 불가",
+      "severity": "높음",
+      "data_point": "외국인 순매도 7.154조 원 (2026-05-07), 전일 대비 순매매 스윙 -10.28조"
+    },
+    {
+      "zone": "에너지·소비재 섹터",
+      "reason": "CPI 3.3%(휘발유 +21.2% YoY) → 실질 구매력 압박 + Fed 동결 지속 시 소비 위축 우려",
+      "severity": "보통",
+      "data_point": "CPI Mar 2026: 3.3% YoY — 2024년 5월 이후 최고"
+    }
+  ],
+  "inflows": [
+    {
+      "zone": "AI 반도체·파운드리 (미국·대만)",
+      "reason": "TSMC 순이익 +58%, 2nm 2026년 매진. AMD 아젠틱 AI CPU 수요 급증. Deloitte AI칩 시장 $500B 상향. 구조적 수요 확인",
+      "momentum": "강함",
+      "data_point": "TSMC Q1 순이익 NT$572.48B vs 예상 NT$543.32B; AMD Q1 어닝 비트 + 전망 상향"
+    },
+    {
+      "zone": "코스피 개인 투자자",
+      "reason": "외국인 매도 물량 흡수 목적 역대급 순매수. 지수 방어 성공했으나 지속성 불확실",
+      "momentum": "보통",
+      "data_point": "개인 순매수 5.99조 원 (역대 4위, 2026-05-07)"
+    }
+  ],
+  "thesis_killers": [
+    {
+      "event": "나스닥",
+      "timeframe": "당일 종가",
+      "confirms_if": "나스닥 +1% 이상 종가 유지 (25,838 기준 26,096pt 이상)",
+      "invalidates_if": "나스닥 -1% 이하 종가 (25,838 기준 25,580pt 이하)",
+      "quality": "ok"
+    },
+    {
+      "event": "코스피",
+      "timeframe": "익일 장중",
+      "confirms_if": "코스피 7,300pt 이상 유지 + 외국인 순매수 전환",
+      "invalidates_if": "코스피 7,100pt 이하 이탈 (마진론 반대매매 가속 구간)",
+      "quality": "ok"
+    },
+    {
+      "event": "SK하이닉스",
+      "timeframe": "당일 종가",
+      "confirms_if": "SK하이닉스 +2% 이상 (AI 반도체 inflow thesis 유효)",
+      "invalidates_if": "SK하이닉스 -2% 이하 (나스닥 -1% × 1.4 베타 발동 확인)",
+      "quality": "ok"
+    }
+  ],
+  "historical_context": {
+    "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+    "cluster_label": "medium_vix_bullish_riskon_defensive",
+    "cluster_size": 512,
+    "top_lessons": [
+      {
+        "lesson_id": "lesson_0de680585b744e2f81e892005c502b4d",
+        "ticker": "247540.KS",
+        "analysis_date": "2025-10-01",
+        "signal_family": "divergence",
+        "lesson_value": 42.98,
+        "peak_pct": 42.98,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7539971059568251,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_92d6c660542a46e0b8218a730b2bdfa5",
+        "ticker": "INTC",
+        "analysis_date": "2025-06-05",
+        "signal_family": "rotation",
+        "lesson_value": 10.46,
+        "peak_pct": 10.46,
+        "peak_day": 3,
+        "quality_tier": "high",
+        "relevance_score": 0.7507801143182539,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_01db88044a224f919ff4c6112ed07532",
+        "ticker": "010950.KS",
+        "analysis_date": "2025-09-23",
+        "signal_family": "divergence",
+        "lesson_value": 11.92,
+        "peak_pct": 11.92,
+        "peak_day": 4,
+        "quality_tier": "high",
+        "relevance_score": 0.7379742698883756,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_b94cdfab18f147c1bed713a6a6f1b53b",
+        "ticker": "RIVN",
+        "analysis_date": "2024-08-22",
+        "signal_family": "divergence",
+        "lesson_value": 13.04,
+        "peak_pct": 13.04,
+        "peak_day": 3,
+        "quality_tier": "high",
+        "relevance_score": 0.7298212551696175,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_2ed9dfe1eee042e7bdff4be4264c6a1d",
+        "ticker": "BA",
+        "analysis_date": "2025-06-24",
+        "signal_family": "oversold_rebound",
+        "lesson_value": 7.45,
+        "peak_pct": 7.45,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7236108377541627,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_00cb460c50ed4821a5037e70b775a4e4",
+        "ticker": "247540.KS",
+        "analysis_date": "2024-05-29",
+        "signal_family": "divergence",
+        "lesson_value": 18.4,
+        "peak_pct": 18.4,
+        "peak_day": 6,
+        "quality_tier": "high",
+        "relevance_score": 0.7230255201096504,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_3e0efdb468754331b5532fe6e65ca8d5",
+        "ticker": "TSLA",
+        "analysis_date": "2024-10-16",
+        "signal_family": "momentum_pullback",
+        "lesson_value": 21.62,
+        "peak_pct": 21.62,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7225752794856414,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_08a14d0c4b0c4424a31fcc274129b35b",
+        "ticker": "SLB",
+        "analysis_date": "2025-06-04",
+        "signal_family": "oversold_rebound",
+        "lesson_value": 9.21,
+        "peak_pct": 9.21,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7223690543835174,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_f16836b7806a4186b08d5df976df83e6",
+        "ticker": "LUNR",
+        "analysis_date": "2023-11-30",
+        "signal_family": "divergence",
+        "lesson_value": 16.84,
+        "peak_pct": 16.84,
+        "peak_day": 2,
+        "quality_tier": "high",
+        "relevance_score": 0.7206462466166169,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_acc7d8a5dd0c44d089a2ae1cf1c11101",
+        "ticker": "PSX",
+        "analysis_date": "2025-06-06",
+        "signal_family": "oversold_rebound",
+        "lesson_value": 8.97,
+        "peak_pct": 8.97,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.720607922412126,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_0e2e6c88f1984965b28498911f8f8b9b",
+        "ticker": "TSLA",
+        "analysis_date": "2024-10-15",
+        "signal_family": "momentum_pullback",
+        "lesson_value": 18.63,
+        "peak_pct": 18.63,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7194077043773616,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_f55256c13edf4468b8c251057052065e",
+        "ticker": "LUNR",
+        "analysis_date": "2024-06-28",
+        "signal_family": "divergence",
+        "lesson_value": 18.79,
+        "peak_pct": 18.79,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7186534126929012,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_f9fe1e297b2b4c849572ff34f04f3948",
+        "ticker": "LUNR",
+        "analysis_date": "2024-07-01",
+        "signal_family": "divergence",
+        "lesson_value": 20.06,
+        "peak_pct": 20.06,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7179099327344322,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_7a5ff9baba434d8da0f6095d9edb80fb",
+        "ticker": "247540.KS",
+        "analysis_date": "2024-05-30",
+        "signal_family": "divergence",
+        "lesson_value": 19.48,
+        "peak_pct": 19.48,
+        "peak_day": 5,
+        "quality_tier": "high",
+        "relevance_score": 0.7171915394220297,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_82b65be5b2574ebe98dedf27edb6d149",
+        "ticker": "086520.KS",
+        "analysis_date": "2024-05-30",
+        "signal_family": "divergence",
+        "lesson_value": 19.31,
+        "peak_pct": 19.31,
+        "peak_day": 5,
+        "quality_tier": "high",
+        "relevance_score": 0.7170056850079874,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_1349f7e3365545d6b0f835723a6a3495",
+        "ticker": "LUNR",
+        "analysis_date": "2024-08-30",
+        "signal_family": "panic_rebound",
+        "lesson_value": 16.9,
+        "peak_pct": 16.9,
+        "peak_day": 6,
+        "quality_tier": "high",
+        "relevance_score": 0.7158295339821464,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_e0f44cd994fe4216855462265e67250d",
+        "ticker": "LUNR",
+        "analysis_date": "2024-06-27",
+        "signal_family": "divergence",
+        "lesson_value": 9.04,
+        "peak_pct": 9.04,
+        "peak_day": 3,
+        "quality_tier": "high",
+        "relevance_score": 0.712822753478251,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_b9f421f4a7934801829099d6fd534194",
+        "ticker": "247540.KS",
+        "analysis_date": "2024-08-30",
+        "signal_family": "momentum_pullback",
+        "lesson_value": 8.02,
+        "peak_pct": 8.02,
+        "peak_day": 1,
+        "quality_tier": "high",
+        "relevance_score": 0.7125339282865266,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_5d33a1595d744fae9c71f2a7f5733534",
+        "ticker": "RKLB",
+        "analysis_date": "2024-02-06",
+        "signal_family": "momentum_pullback",
+        "lesson_value": 14.79,
+        "peak_pct": 14.79,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7110742568058965,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      },
+      {
+        "lesson_id": "lesson_bd89f75a248444dfa20e8e9f07bf1fef",
+        "ticker": "WFC",
+        "analysis_date": "2024-07-12",
+        "signal_family": "panic_rebound",
+        "lesson_value": 7.73,
+        "peak_pct": 7.73,
+        "peak_day": 3,
+        "quality_tier": "high",
+        "relevance_score": 0.7109851831347469,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
+        "cluster_label": "medium_vix_bullish_riskon_defensive"
+      }
+    ],
+    "win_rate": 1.0,
+    "avg_value": 15.681999999999999,
+    "high_quality_count": 20
+  },
+  "data_quality": "degraded",
+  "jackal_candidate_review": {
+    "analysis_date": "2026-05-08",
+    "market_bias": "risk_on",
+    "market_bias_label": "위험선호",
+    "reviewed_count": 0,
+    "aligned_count": 0,
+    "neutral_count": 0,
+    "opposed_count": 0,
+    "follow_count": 0,
+    "watch_count": 0,
+    "avoid_count": 0,
+    "review_verdict_breakdown": {
+      "strong_aligned": 0,
+      "aligned": 0,
+      "neutral": 0,
+      "opposed": 0,
+      "strong_opposed": 0
+    },
+    "average_review_confidence": "low",
+    "reason_code_frequency": {},
+    "highlights": []
+  },
+  "jackal_probability_summary": {
+    "window_days": 90,
+    "min_samples": 5,
+    "raw_rows": 340,
+    "deduped_rows": 340,
+    "duplicates_skipped": 0,
+    "overall": {
+      "wins": 259,
+      "losses": 81,
+      "total": 340,
+      "avg_return": 4.607,
+      "win_rate": 76.2,
+      "effective_win_rate": 75.9,
+      "qualified": true
+    },
+    "trusted_families": [
+      {
+        "signal_family": "panic_rebound",
+        "signal_family_label": "패닉셀반등",
+        "wins": 56,
+        "losses": 14,
+        "total": 70,
+        "avg_return": 6.145,
+        "source_event_type": "backtest",
+        "win_rate": 80.0,
+        "effective_win_rate": 78.4,
+        "qualified": true
+      },
+      {
+        "signal_family": "momentum_pullback",
+        "signal_family_label": "모멘텀눌림목",
+        "wins": 149,
+        "losses": 46,
+        "total": 195,
+        "avg_return": 4.376,
+        "source_event_type": "backtest",
+        "win_rate": 76.4,
+        "effective_win_rate": 75.9,
+        "qualified": true
+      },
+      {
+        "signal_family": "oversold_rebound",
+        "signal_family_label": "기술적과매도",
+        "wins": 10,
+        "losses": 3,
+        "total": 13,
+        "avg_return": 4.006,
+        "source_event_type": "backtest",
+        "win_rate": 76.9,
+        "effective_win_rate": 70.6,
+        "qualified": true
+      },
+      {
+        "signal_family": "divergence",
+        "signal_family_label": "강세다이버전스",
+        "wins": 31,
+        "losses": 12,
+        "total": 43,
+        "avg_return": 3.27,
+        "source_event_type": "backtest",
+        "win_rate": 72.1,
+        "effective_win_rate": 70.2,
+        "qualified": true
+      },
+      {
+        "signal_family": "rotation",
+        "signal_family_label": "섹터로테이션",
+        "wins": 11,
+        "losses": 5,
+        "total": 16,
+        "avg_return": 5.438,
+        "source_event_type": "backtest",
+        "win_rate": 68.8,
+        "effective_win_rate": 65.0,
+        "qualified": true
+      }
+    ],
+    "cautious_families": [
+      {
+        "signal_family": "rotation",
+        "signal_family_label": "섹터로테이션",
+        "wins": 11,
+        "losses": 5,
+        "total": 16,
+        "avg_return": 5.438,
+        "source_event_type": "backtest",
+        "win_rate": 68.8,
+        "effective_win_rate": 65.0,
+        "qualified": true
+      },
+      {
+        "signal_family": "divergence",
+        "signal_family_label": "강세다이버전스",
+        "wins": 31,
+        "losses": 12,
+        "total": 43,
+        "avg_return": 3.27,
+        "source_event_type": "backtest",
+        "win_rate": 72.1,
+        "effective_win_rate": 70.2,
+        "qualified": true
+      },
+      {
+        "signal_family": "oversold_rebound",
+        "signal_family_label": "기술적과매도",
+        "wins": 10,
+        "losses": 3,
+        "total": 13,
+        "avg_return": 4.006,
+        "source_event_type": "backtest",
+        "win_rate": 76.9,
+        "effective_win_rate": 70.6,
+        "qualified": true
+      },
+      {
+        "signal_family": "momentum_pullback",
+        "signal_family_label": "모멘텀눌림목",
+        "wins": 149,
+        "losses": 46,
+        "total": 195,
+        "avg_return": 4.376,
+        "source_event_type": "backtest",
+        "win_rate": 76.4,
+        "effective_win_rate": 75.9,
+        "qualified": true
+      },
+      {
+        "signal_family": "panic_rebound",
+        "signal_family_label": "패닉셀반등",
+        "wins": 56,
+        "losses": 14,
+        "total": 70,
+        "avg_return": 6.145,
+        "source_event_type": "backtest",
+        "win_rate": 80.0,
+        "effective_win_rate": 78.4,
+        "qualified": true
+      }
+    ],
+    "alignment_summary": {
+      "backtest": {
+        "wins": 259,
+        "losses": 81,
+        "total": 340,
+        "avg_return": 4.607,
+        "win_rate": 76.2,
+        "effective_win_rate": 75.9,
+        "qualified": true
+      }
+    },
+    "best_aligned_families": [],
+    "best_opposed_families": []
+  },
+  "learning_policy": {
+    "version": "v1",
+    "policy_source": "orca/learning_policy.py",
+    "min_samples": 5,
+    "prior_wins": 2,
+    "prior_total": 4,
+    "trusted_threshold": 0.58,
+    "cautious_threshold": 0.46,
+    "weight_adjustment_ladder": [
+      {
+        "threshold": 0.7,
+        "delta": 0.05
+      },
+      {
+        "threshold": 0.4,
+        "delta": -0.05
+      }
+    ],
+    "probability_score_adjustment_ladder": [
+      {
+        "min_samples": 12,
+        "threshold": 0.68,
+        "delta": 4.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.62,
+        "delta": 2.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.58,
+        "delta": 1.0
+      },
+      {
+        "min_samples": 12,
+        "threshold": 0.38,
+        "delta": -5.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.43,
+        "delta": -3.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.46,
+        "delta": -1.5
+      }
+    ]
+  },
+  "health": {
+    "status": "degraded",
+    "degraded_reasons": [
+      "cost_alert_failed",
+      "external_data_degraded"
+    ],
+    "counters": {
+      "warnings": 2,
+      "soft_fails": 2
+    },
+    "details": [
+      {
+        "code": "cost_alert_failed",
+        "where": "orca/main.py::main",
+        "exception_type": "ModuleNotFoundError",
+        "message": "월 API 비용 경고 발송 실패"
+      },
+      {
+        "code": "external_data_degraded",
+        "where": "orca/run_cycle.py::run_orca_cycle",
+        "exception_type": "",
+        "message": "partial data failure: KRX_API, KOREA_NEWS"
+      }
+    ]
+  },
+  "failed_sources": [
+    {
+      "source": "KRX_API",
+      "error": "unavailable",
+      "category": "primary"
+    },
+    {
+      "source": "KOREA_NEWS",
+      "error": "no_headlines",
+      "category": "secondary"
+    }
+  ],
+  "dual_db_state": {
+    "orca_state_db": {
+      "path": "data/orca_state.db",
+      "exists": true,
+      "size_bytes": 21471232,
+      "mtime_iso": "2026-05-08T01:05:32.627301+09:00"
+    },
+    "jackal_state_db": {
+      "path": "data/jackal_state.db",
+      "exists": true,
+      "size_bytes": 229376,
+      "mtime_iso": "2026-05-08T01:05:11.379277+09:00",
+      "tables": {
+        "jackal_shadow_signals": 0,
+        "jackal_live_events": 10,
+        "jackal_shadow_batches": 0,
+        "jackal_weight_snapshots": 1,
+        "jackal_recommendations": 0,
+        "jackal_accuracy_projection": 89,
+        "jackal_cooldowns": 0
+      }
+    }
+  }
+}
