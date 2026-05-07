@@ -10,6 +10,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 import importlib
 import json
+import os
 from pathlib import Path
 import time
 from typing import Any
@@ -51,7 +52,11 @@ class LLMClient:
             raise RuntimeError("ANTHROPIC_API_KEY missing - LLM client requires API key")
         self.api_key = api_key or ""
         self.fail_fast = fail_fast
-        self.log_path = Path(log_path) if log_path is not None else Path("data/llm_log.jsonl")
+        if log_path is None:
+            env_log_path = os.environ.get("ORCA_LLM_LOG_PATH")
+            log_path = Path(env_log_path) if env_log_path else Path("data/llm_log.jsonl")
+        self.log_path = Path(log_path)
+        self._log_path = self.log_path
         self._client = None
 
     def call(

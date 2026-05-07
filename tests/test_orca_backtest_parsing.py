@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import io
+import os
 import sys
+import tempfile
 import types
 import unittest
 from contextlib import redirect_stdout
@@ -141,6 +143,16 @@ class ParseAnalysisJsonTests(unittest.TestCase):
 
 
 class GenerateAnalysisModeTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._tmpdir = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        log_path = str(Path(self._tmpdir.name) / "llm.jsonl")
+        self._env_patch = patch.dict(os.environ, {"ORCA_LLM_LOG_PATH": log_path})
+        self._env_patch.start()
+
+    def tearDown(self) -> None:
+        self._env_patch.stop()
+        self._tmpdir.cleanup()
+
     def test_generate_analysis_graceful_returns_failure_marker(self) -> None:
         market_data = _sample_market_data()
         fake_module = _anthropic_module('{"analysis_date":')

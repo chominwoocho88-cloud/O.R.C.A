@@ -3,11 +3,13 @@ from __future__ import annotations
 import contextlib
 import importlib
 import json
+import os
 import sys
 import tempfile
 import types
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 class _FakeTextDelta:
@@ -142,6 +144,24 @@ class LLMClientTests(unittest.TestCase):
         llm = self._client_module()
         client = llm.LLMClient("", fail_fast=False)
         self.assertEqual(client.api_key, "")
+
+    def test_env_log_path_override(self):
+        llm = self._client_module()
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
+            log_path = Path(tmpdir) / "env-llm.jsonl"
+            with patch.dict(os.environ, {"ORCA_LLM_LOG_PATH": str(log_path)}):
+                client = llm.LLMClient("test-key", fail_fast=False)
+            self.assertEqual(client.log_path, log_path)
+            self.assertEqual(client._log_path, log_path)
+
+    def test_explicit_log_path_overrides_env(self):
+        llm = self._client_module()
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
+            env_path = Path(tmpdir) / "env-llm.jsonl"
+            explicit_path = Path(tmpdir) / "explicit-llm.jsonl"
+            with patch.dict(os.environ, {"ORCA_LLM_LOG_PATH": str(env_path)}):
+                client = llm.LLMClient("test-key", fail_fast=False, log_path=explicit_path)
+            self.assertEqual(client.log_path, explicit_path)
 
     def test_call_success_logs_usage(self):
         llm = self._client_module()
