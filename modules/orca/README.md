@@ -24,8 +24,10 @@
 - Day 7~8에 코드 이동 예정.
 
 ## 마이그레이션 순서 (계획)
-1. shared/market_data/ 분리 (Day 6)
-2. modules/orca/pipeline/ - agents, run_cycle, pipeline (Day 7)
-3. modules/orca/regime/ - analysis_market (Day 7)
-4. modules/orca/lessons/ - lesson_*, retrieval (Day 8)
-5. modules/orca/state/ - state.py 분리 검토 (Day 8 또는 별도)
+1. shared/market_data/ 분리 (Day 6) 완료
+2. pipeline.py 이동 (Day 7) 완료 - 작은 파일 먼저 검증
+3. agents.py 이동 (다음 sprint)
+4. run_cycle.py 이동 (다음 sprint)
+5. modules/orca/regime/ - analysis_market (후속)
+6. modules/orca/lessons/ - lesson_*, retrieval (Day 8)
+7. modules/orca/state/ - state.py 분리 검토 (Day 8 또는 별도)
