@@ -6,12 +6,12 @@ Stage: Step 2-2 (body copy)
 
 Hunter -> Analyst -> Devil -> Reporter pipeline composition.
 """
-# Allowed imports: orca.agents
+# Allowed imports: modules.orca.pipeline.agents
 # Forbidden imports: orca.analysis, orca.state, orca.persist, orca.present, orca.notify, orca.dashboard
 
 from __future__ import annotations
 
-from orca.agents import agent_analyst, agent_devil, agent_hunter, agent_reporter
+from modules.orca.pipeline.agents import agent_analyst, agent_devil, agent_hunter, agent_reporter
 
 
 def run_agent_pipeline(

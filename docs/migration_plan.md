@@ -26,7 +26,9 @@
 - ✅ Day 6: shared/market_data/ 분리 — orca.market_fetch 이동, alias 유지
 - ✅ Day 7: modules/orca/pipeline/ 분리 — pipeline.py(46줄)만 이동, alias 유지
   - Day 7 안전 버전: agents.py, run_cycle.py는 별도 sprint에서 이동
-- Day 8: modules/orca/lessons/ + state.py 분리 검토 (lessons 먼저)
+- ✅ Day 8: modules/orca/pipeline/agents.py 분리 — 4-agent LLM 정의 이동, alias 유지
+  - Day 7-8 학습: alias는 module 객체 wildcard re-export 패턴 필요 (mock.patch 호환성)
+- Day 8 후속: modules/orca/lessons/ + state.py 분리 검토 (lessons 먼저)
 - Day 9: modules/jackal/pipeline/ 분리
 - Day 10: 검증 + 운영 안정성
 
