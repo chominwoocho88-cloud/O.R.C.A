@@ -10,9 +10,6 @@ Jackal Evolution — 강화된 자체 학습
   - 주간 패턴 리뷰: Claude Sonnet이 전체 데이터 분석 → Skill/Instinct 생성
 """
 
-# TODO(2026-05): orca.llm_client.LLMClient으로 마이그레이션 예정.
-# 현재 직접 anthropic SDK 사용 중.
-
 import json
 import re
 import logging
@@ -21,7 +18,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from collections import defaultdict
 
-from anthropic import Anthropic
+from orca.llm_client import LLMClient
 from orca.paths import atomic_write_json
 from orca.state import (
     list_jackal_recommendations,
@@ -63,6 +60,8 @@ def _fetch_history(ticker: str, lookback_days: int):
 
 # [Bug Fix 1-B] 잘못된 모델명 수정
 MODEL_S = os.environ.get("ANTHROPIC_MODEL", os.environ.get("SUBAGENT_MODEL", "claude-sonnet-4-6"))
+API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+_llm_client = LLMClient(API_KEY, fail_fast=False)
 
 _EVOLUTION = THRESHOLDS["evolution"]
 _EVOLUTION_CORE = _EVOLUTION["core"]
@@ -173,7 +172,7 @@ DEFAULT_WEIGHTS = {
 class JackalEvolution:
 
     def __init__(self):
-        self.client  = Anthropic()
+        self.client  = _llm_client
         self.weights = self._load_weights()
         self._logs: list = []
 
@@ -684,12 +683,14 @@ Rules:
 - Signals with accuracy >= 60% get positive adjustment
 - Signals with accuracy <= 40% get negative adjustment""".strip()
 
-        resp = self.client.messages.create(
+        response = self.client.call(
             model=MODEL_S,
             max_tokens=3000,
-            messages=[{"role": "user", "content": prompt}],
+            system="",
+            user=prompt,
+            call_site="jackal.evolution",
         )
-        return resp.content[0].text
+        return response.text
 
     def _parse_response(self, raw: str) -> dict:
         """

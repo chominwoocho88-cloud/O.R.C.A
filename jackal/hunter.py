@@ -13,9 +13,6 @@ Jackal Hunter — 100→50→25→10→5 단계별 스윙 타점 탐색
 포트폴리오 종목 제외 — 항상 새 종목만 발굴
 """
 
-# TODO(2026-05): orca.llm_client.LLMClient으로 마이그레이션 예정.
-# 현재 직접 anthropic SDK 사용 중.
-
 import os
 import sys
 import json
@@ -28,7 +25,7 @@ from pathlib import Path
 
 import httpx
 import pandas as pd
-from anthropic import Anthropic
+from orca.llm_client import LLMClient
 from orca.paths import atomic_write_json
 from orca.state import (
     record_jackal_weight_snapshot,
@@ -66,6 +63,8 @@ from .adapter import (
 TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 MODEL_H          = os.environ.get("SUBAGENT_MODEL", "claude-haiku-4-5-20251001")
+API_KEY          = os.environ.get("ANTHROPIC_API_KEY", "")
+_llm_client      = LLMClient(API_KEY, fail_fast=False)
 
 _HUNTER = THRESHOLDS["hunter"]
 _HUNTER_MACRO = _HUNTER["macro_gate"]
@@ -301,13 +300,16 @@ ARIA 관심종목:\n{actionable}
 JSON만 반환:
 {{"suggestions": [{{"ticker": "TSM", "name": "TSMC", "market": "US", "currency": "$", "reason": "이유"}}]}}"""
 
+    response = _llm_client.call(
+        model=MODEL_H,
+        max_tokens=600,
+        system="",
+        user=prompt,
+        use_search=True,
+        call_site="jackal.hunter.suggest",
+    )
     try:
-        resp = Anthropic().messages.create(
-            model=MODEL_H, max_tokens=600,
-            tools=[{"type": "web_search_20250305", "name": "web_search"}],
-            messages=[{"role": "user", "content": prompt}],
-        )
-        full = "".join(getattr(b, "text", "") for b in resp.content)
+        full = response.text
         m    = re.search(r"\{[\s\S]*\}", re.sub(r"```(?:json)?|```", "", full).strip())
         if not m:
             return []
@@ -939,12 +941,15 @@ def _stage3_quick_scan(top25: list, aria: dict) -> list:
 [학습 요약]에 실패 패턴이 있다면 해당 조건 종목은 후순위로 밀 것.
 JSON만: {{"top10": ["TICKER1", "TICKER2", ...]}}"""
 
+    response = _llm_client.call(
+        model=MODEL_H,
+        max_tokens=200,
+        system="",
+        user=prompt,
+        call_site="jackal.hunter.quick_scan",
+    )
     try:
-        resp = Anthropic().messages.create(
-            model=MODEL_H, max_tokens=200,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        raw  = re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip()
+        raw  = re.sub(r"```(?:json)?|```", "", response.text).strip()
         m    = re.search(r"\{[\s\S]*\}", raw)
         if not m:
             return top25[:10]
@@ -1184,12 +1189,15 @@ day1 vs swing 구분:
   둘 다 높음 → 강한 타점
   둘 다 낮음 → 패스"""
 
+    response = _llm_client.call(
+        model=MODEL_H,
+        max_tokens=450,
+        system="",
+        user=prompt,
+        call_site="jackal.hunter.analyst",
+    )
     try:
-        resp = Anthropic().messages.create(
-            model=MODEL_H, max_tokens=450,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        r = _safe_parse_json(re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip())
+        r = _safe_parse_json(re.sub(r"```(?:json)?|```", "", response.text).strip())
         r["analyst_score"] = int(r.get("analyst_score", 50))
         r["day1_score"]    = int(r.get("day1_score",    50))
         r["swing_score"]   = int(r.get("swing_score",   50))
@@ -1289,12 +1297,15 @@ BB: {tech['bb_pos']:.0f}% (하단 터치가 반등 보장 아님)
   "volume_concern": "투매소진 또는 분산매도 또는 무기력 또는 정상"}}"""
 
     raw = ""
+    response = _llm_client.call(
+        model=MODEL_H,
+        max_tokens=300,
+        system="",
+        user=prompt,
+        call_site="jackal.hunter.devil",
+    )
     try:
-        resp = Anthropic().messages.create(
-            model=MODEL_H, max_tokens=300,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        raw = re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip()
+        raw = re.sub(r"```(?:json)?|```", "", response.text).strip()
         r = _safe_parse_json(raw)
         if not r:
             return _with_hunter_devil_metadata(

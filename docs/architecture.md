@@ -86,7 +86,7 @@ Strangler Fig 패턴을 따른다.
 
 - shared/ 골격 생성 (이번 commit)
 - docs/architecture.md 비전 명문화 (이번 commit)
-- LLMClient는 orca/llm_client.py에 있음 (다음 단계에서 shared/llm/로 이동 예정)
+- LLMClient는 orca/llm_client.py에 있음 (ORCA + JACKAL 모두 사용 중, 다음 단계에서 shared/llm/로 이동 예정)
 - KIS API client는 미구현 (KIS 가입 완료, 다음 단계에서 shared/broker/kis.py로 신규 생성 예정)
 - orca/, jackal/ 코드는 모두 기존 위치 유지
 - modules/, integrations/, tools/ 폴더는 미생성 (필요 시점에 만듦)

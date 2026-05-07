@@ -64,10 +64,16 @@ orca.breaking
 orca.calendar
 orca.postprocess
 orca.backtest
+jackal.hunter.suggest
+jackal.hunter.quick_scan
+jackal.hunter.analyst
+jackal.hunter.devil
+jackal.scanner.analyst
+jackal.scanner.devil
+jackal.scanner.suggest
+jackal.evolution
+jackal.compact
 ```
-
-Reserve `jackal.*` for the next sprint when JACKAL Anthropic calls move behind
-the same adapter.
 
 ## Fail-Fast Mode
 
@@ -88,7 +94,8 @@ LLM credential is missing.
 
 ## Next Sprint
 
-- Migrate JACKAL direct Anthropic SDK calls to `LLMClient`.
-- Deprecate `jackal.shield.log_usage()` after JACKAL logs flow through JSONL.
+- JACKAL direct Anthropic SDK calls migrated to `LLMClient` (Day 2 commit).
+- Review deprecation of `jackal.shield.log_usage()` after JACKAL JSONL logging
+  settles in production.
 - Build a dashboard comparing estimated cost in `orca_cost.json` with observed
   token usage in `llm_log.jsonl`.

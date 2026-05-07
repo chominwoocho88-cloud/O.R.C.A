@@ -227,8 +227,8 @@ class JackalShield:
 # Hunter / Scanner / Evolution?먯꽌 import?댁꽌 API ?몄텧 ???ㅽ뻾
 # ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
 
-# TODO(2026-05): orca.llm_client.LLMClient으로 통합 예정.
-# 현재 LLMClient가 자체 JSONL 로그를 가지므로 log_usage()는 점진적 deprecate 예정.
+# log_usage: orca.llm_client.LLMClient의 JSONL 로그(data/llm_log.jsonl)와 병행 운영 중.
+# 다음 sprint에서 단일 소스로 통합 검토.
 
 def log_usage(caller: str, input_tokens: int, output_tokens: int,
               model: str = "unknown") -> None:
@@ -238,9 +238,9 @@ def log_usage(caller: str, input_tokens: int, output_tokens: int,
 
     ?ъ슜踰?
         from .shield import log_usage
-        resp = client.messages.create(model=MODEL_H, ...)
-        log_usage("hunter_stage3", resp.usage.input_tokens,
-                   resp.usage.output_tokens, model=MODEL_H)
+        response = llm_client.call(model=MODEL_H, ...)
+        log_usage("hunter_stage3", response.input_tokens,
+                   response.output_tokens, model=MODEL_H)
 
     Args:
         caller: ?몄텧 ?꾩튂 ?앸퀎??(?? "hunter_stage3", "evolution_review")

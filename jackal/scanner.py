@@ -13,9 +13,6 @@ Jackal Scanner — Analyst → Devil → Final 3단계 타점 분석
   5. 결과 저장 (Evolution 학습용 — 신호·레짐·Devil 정확도 포함)
 """
 
-# TODO(2026-05): orca.llm_client.LLMClient으로 마이그레이션 예정.
-# 현재 직접 anthropic SDK 사용 중.
-
 import os
 import sys
 import json
@@ -26,8 +23,8 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import httpx
-from anthropic import Anthropic
 
+from orca.llm_client import LLMClient
 from orca.paths import DATA_FILE, atomic_write_json
 from orca.state import (
     list_jackal_recommendations,
@@ -84,6 +81,8 @@ PORTFOLIO_FILE = _DATA_DIR / "portfolio.json"
 TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 MODEL_H          = os.environ.get("SUBAGENT_MODEL", "claude-haiku-4-5-20251001")
+API_KEY          = os.environ.get("ANTHROPIC_API_KEY", "")
+_llm_client      = LLMClient(API_KEY, fail_fast=False)
 
 _SCANNER = THRESHOLDS["scanner"]
 _SCANNER_COOLDOWN = _SCANNER["cooldown"]
@@ -631,12 +630,15 @@ VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
   "stop_loss": 숫자 또는 null
 }}"""
 
+    response = _llm_client.call(
+        model=MODEL_H,
+        max_tokens=400,
+        system="",
+        user=prompt,
+        call_site="jackal.scanner.analyst",
+    )
     try:
-        resp = Anthropic().messages.create(
-            model=MODEL_H, max_tokens=400,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        raw  = re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip()
+        raw  = re.sub(r"```(?:json)?|```", "", response.text).strip()
         m    = re.search(r"\{[\s\S]*\}", raw)
         if not m:
             return {"analyst_score": 50, "confidence": "낮음",
@@ -721,12 +723,15 @@ VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
 }}"""
 
     raw = ""
+    response = _llm_client.call(
+        model=MODEL_H,
+        max_tokens=400,
+        system="",
+        user=prompt,
+        call_site="jackal.scanner.devil",
+    )
     try:
-        resp = Anthropic().messages.create(
-            model=MODEL_H, max_tokens=400,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        raw  = re.sub(r"```(?:json)?|```", "", resp.content[0].text).strip()
+        raw  = re.sub(r"```(?:json)?|```", "", response.text).strip()
         m    = re.search(r"\{[\s\S]*\}", raw)
         if not m:
             return _with_scanner_devil_metadata(
@@ -1454,12 +1459,15 @@ JSON만 반환하세요:
   ]
 }}"""
 
+    response = _llm_client.call(
+        model=MODEL_H,
+        max_tokens=500,
+        system="",
+        user=prompt,
+        call_site="jackal.scanner.suggest",
+    )
     try:
-        resp = Anthropic().messages.create(
-            model=MODEL_H, max_tokens=500,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        raw  = re.sub(r"", "", resp.content[0].text).strip()
+        raw  = re.sub(r"", "", response.text).strip()
         m    = re.search(r"\{{[\s\S]*\}}", raw)
         if not m:
             return {}

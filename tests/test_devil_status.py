@@ -85,28 +85,19 @@ def _import_target(module_name: str):
     return importlib.import_module(module_name)
 
 
-def _make_anthropic_class(*, text: str = "{}", exception: Exception | None = None):
-    class DummyBlock:
-        def __init__(self, payload: str):
-            self.text = payload
+class _DummyLLMClient:
+    def __init__(self, *, text: str = "{}", exception: Exception | None = None):
+        self.text = text
+        self.exception = exception
 
-    class DummyResponse:
-        def __init__(self, payload: str):
-            self.content = [DummyBlock(payload)]
+    def call(self, **kwargs):
+        if self.exception is not None:
+            raise self.exception
+        return types.SimpleNamespace(text=self.text)
 
-    class DummyMessages:
-        def create(self, *args, **kwargs):
-            if exception is not None:
-                raise exception
-            return DummyResponse(text)
 
-    class DummyAnthropic:
-        def __init__(self, api_key=None, **kwargs):
-            self.api_key = api_key
-            self.kwargs = kwargs
-            self.messages = DummyMessages()
-
-    return DummyAnthropic
+def _make_llm_client(*, text: str = "{}", exception: Exception | None = None):
+    return _DummyLLMClient(text=text, exception=exception)
 
 
 def _hunter_tech() -> dict:
@@ -232,7 +223,7 @@ class HunterDevilStatusTests(unittest.TestCase):
             '"thesis_killer_hit": false, "is_dead_cat": false, '
             '"structural_decline": false, "volume_concern": "정상"}'
         )
-        with patch.object(self.hunter, "Anthropic", _make_anthropic_class(text=response)):
+        with patch.object(self.hunter, "_llm_client", _make_llm_client(text=response)):
             devil = self.hunter._devil_swing("TSM", _hunter_tech(), _hunter_analyst(), _hunter_aria(), "$")
         self.assertEqual(devil["devil_status"], "ok_with_objection")
         self.assertTrue(devil["devil_called"])
@@ -246,7 +237,7 @@ class HunterDevilStatusTests(unittest.TestCase):
             '"thesis_killer_hit": false, "is_dead_cat": false, '
             '"structural_decline": false, "volume_concern": "정상"}'
         )
-        with patch.object(self.hunter, "Anthropic", _make_anthropic_class(text=response)):
+        with patch.object(self.hunter, "_llm_client", _make_llm_client(text=response)):
             devil = self.hunter._devil_swing("TSM", _hunter_tech(), _hunter_analyst(), _hunter_aria(), "$")
         self.assertEqual(devil["devil_status"], "no_material_objection")
         self.assertTrue(devil["devil_parse_ok"])
@@ -254,7 +245,7 @@ class HunterDevilStatusTests(unittest.TestCase):
         self.assertEqual(devil["main_risk"], "")
 
     def test_hunter_status_parse_failed_on_non_json_response(self):
-        with patch.object(self.hunter, "Anthropic", _make_anthropic_class(text="not-json-response")):
+        with patch.object(self.hunter, "_llm_client", _make_llm_client(text="not-json-response")):
             devil = self.hunter._devil_swing("TSM", _hunter_tech(), _hunter_analyst(), _hunter_aria(), "$")
         self.assertEqual(devil["devil_status"], "parse_failed")
         self.assertFalse(devil["devil_parse_ok"])
@@ -263,18 +254,14 @@ class HunterDevilStatusTests(unittest.TestCase):
         self.assertEqual(devil["verdict"], "부분동의")
         self.assertEqual(devil["devil_raw_excerpt"], "not-json-response")
 
-    def test_hunter_status_api_error_uses_fallback_values(self):
+    def test_hunter_status_api_error_raises(self):
         with patch.object(
             self.hunter,
-            "Anthropic",
-            _make_anthropic_class(exception=RuntimeError("boom")),
+            "_llm_client",
+            _make_llm_client(exception=RuntimeError("boom")),
         ):
-            devil = self.hunter._devil_swing("TSM", _hunter_tech(), _hunter_analyst(), _hunter_aria(), "$")
-        self.assertEqual(devil["devil_status"], "api_error")
-        self.assertFalse(devil["devil_parse_ok"])
-        self.assertEqual(devil["devil_render_mode"], "label_only")
-        self.assertEqual(devil["devil_score"], self.hunter._HUNTER_ENTRY["default_devil_score"])
-        self.assertEqual(devil["verdict"], "부분동의")
+            with self.assertRaisesRegex(RuntimeError, "boom"):
+                self.hunter._devil_swing("TSM", _hunter_tech(), _hunter_analyst(), _hunter_aria(), "$")
 
     def test_hunter_alert_line_ok_with_objection(self):
         line = self.hunter._build_hunter_devil_line(
@@ -340,7 +327,7 @@ class ScannerDevilStatusTests(unittest.TestCase):
             '"objections": ["거래량이 아직 부족함"], '
             '"thesis_killer_hit": false, "killer_detail": "", "bear_case": ""}'
         )
-        with patch.object(self.scanner, "Anthropic", _make_anthropic_class(text=response)):
+        with patch.object(self.scanner, "_llm_client", _make_llm_client(text=response)):
             devil = self.scanner.agent_devil(
                 "NVDA",
                 _scanner_info(),
@@ -361,7 +348,7 @@ class ScannerDevilStatusTests(unittest.TestCase):
             '"objections": [], "thesis_killer_hit": false, '
             '"killer_detail": "", "bear_case": ""}'
         )
-        with patch.object(self.scanner, "Anthropic", _make_anthropic_class(text=response)):
+        with patch.object(self.scanner, "_llm_client", _make_llm_client(text=response)):
             devil = self.scanner.agent_devil(
                 "NVDA",
                 _scanner_info(),
@@ -375,7 +362,7 @@ class ScannerDevilStatusTests(unittest.TestCase):
         self.assertEqual(devil["devil_render_mode"], "label_only")
 
     def test_scanner_status_parse_failed_when_regex_missing(self):
-        with patch.object(self.scanner, "Anthropic", _make_anthropic_class(text="plain text")):
+        with patch.object(self.scanner, "_llm_client", _make_llm_client(text="plain text")):
             devil = self.scanner.agent_devil(
                 "NVDA",
                 _scanner_info(),
@@ -390,7 +377,7 @@ class ScannerDevilStatusTests(unittest.TestCase):
         self.assertEqual(devil["devil_raw_excerpt"], "plain text")
 
     def test_scanner_status_parse_failed_when_json_invalid(self):
-        with patch.object(self.scanner, "Anthropic", _make_anthropic_class(text='{"devil_score": 40,}')):
+        with patch.object(self.scanner, "_llm_client", _make_llm_client(text='{"devil_score": 40,}')):
             devil = self.scanner.agent_devil(
                 "NVDA",
                 _scanner_info(),
@@ -404,25 +391,21 @@ class ScannerDevilStatusTests(unittest.TestCase):
         self.assertEqual(devil["devil_score"], 30)
         self.assertEqual(devil["verdict"], "부분동의")
 
-    def test_scanner_status_api_error_uses_fallback_values(self):
+    def test_scanner_status_api_error_raises(self):
         with patch.object(
             self.scanner,
-            "Anthropic",
-            _make_anthropic_class(exception=RuntimeError("network down")),
+            "_llm_client",
+            _make_llm_client(exception=RuntimeError("network down")),
         ):
-            devil = self.scanner.agent_devil(
-                "NVDA",
-                _scanner_info(),
-                _scanner_tech(),
-                _scanner_macro(),
-                _scanner_aria(),
-                _scanner_analyst(),
-            )
-        self.assertEqual(devil["devil_status"], "api_error")
-        self.assertFalse(devil["devil_parse_ok"])
-        self.assertEqual(devil["devil_render_mode"], "label_only")
-        self.assertEqual(devil["devil_score"], 30)
-        self.assertEqual(devil["verdict"], "부분동의")
+            with self.assertRaisesRegex(RuntimeError, "network down"):
+                self.scanner.agent_devil(
+                    "NVDA",
+                    _scanner_info(),
+                    _scanner_tech(),
+                    _scanner_macro(),
+                    _scanner_aria(),
+                    _scanner_analyst(),
+                )
 
     def test_scanner_alert_line_ok_with_objection(self):
         line = self.scanner._build_scanner_devil_line(

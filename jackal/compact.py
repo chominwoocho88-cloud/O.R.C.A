@@ -11,15 +11,13 @@ Jackal Compact - Context Rot 諛⑹? ?먮룞 ?뺤텞 ?쒖뒪??
   ?섏젙: current_tokens=0?대㈃ jackal_usage_log.json?먯꽌 ?ㅻ뒛 ?ㅼ궗?⑸웾 ?⑹궛
 """
 
-# TODO(2026-05): orca.llm_client.LLMClient으로 마이그레이션 예정.
-# 현재 직접 anthropic SDK 사용 중.
-
 import json
 import logging
 import os
 from datetime import datetime, date
 from pathlib import Path
-from anthropic import Anthropic
+
+from orca.llm_client import LLMClient
 
 log = logging.getLogger("jackal_compact")
 
@@ -33,13 +31,15 @@ _COMPACT_THRESHOLD = int(os.getenv("JACKAL_COMPACT_THRESHOLD", "60000"))
 _TARGET_RATIO      = 0.30
 
 _MODEL = os.getenv("SUBAGENT_MODEL", "claude-haiku-4-5-20251001")
+_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+_llm_client = LLMClient(_API_KEY, fail_fast=False)
 
 
 class JackalCompact:
     """Compact JACKAL usage logs and cache recent high-signal context."""
 
     def __init__(self):
-        self.client     = Anthropic()
+        self.client     = _llm_client
         self.log_path   = _COMPACT_LOG
         self.cache_path = _COMPACT_CACHE
 
@@ -189,22 +189,24 @@ class JackalCompact:
 異쒕젰: ?쒓뎅?? 遺덈┸ ?ъ씤???뺤떇, 500???대궡
 """.strip()
 
-        resp = self.client.messages.create(
+        response = self.client.call(
             model=_MODEL,
             max_tokens=600,
-            messages=[{"role": "user", "content": prompt}],
+            system="",
+            user=prompt,
+            call_site="jackal.compact",
         )
         token_usage = {
-            "prompt_tokens":      resp.usage.input_tokens,
-            "response_tokens":    resp.usage.output_tokens,
-            "total_api_tokens":   resp.usage.input_tokens + resp.usage.output_tokens,
+            "prompt_tokens":      response.input_tokens,
+            "response_tokens":    response.output_tokens,
+            "total_api_tokens":   response.input_tokens + response.output_tokens,
             "estimated_cost_usd": round(
-                resp.usage.input_tokens  * 0.00000080
-                + resp.usage.output_tokens * 0.00000400,
+                response.input_tokens  * 0.00000080
+                + response.output_tokens * 0.00000400,
                 6,
             ),
         }
-        return resp.content[0].text.strip(), token_usage
+        return response.text.strip(), token_usage
 
     def _save_cache(self, summary: str):
         self.cache_path.write_text(
