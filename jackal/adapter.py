@@ -3,21 +3,27 @@ adapter.py — ORCA ↔ JACKAL 인터페이스 레이어
 """
 import json
 import logging
-from pathlib import Path
 
 from orca.state import load_latest_jackal_weight_snapshot
+from shared.paths import (
+    BASELINE_FILE,
+    DATA_DIR,
+    JACKAL_LEGACY_DIR,
+    JACKAL_NEWS_FILE,
+    JACKAL_WEIGHTS_FILE,
+    MEMORY_FILE,
+)
 
 log = logging.getLogger("jackal_adapter")
 
 # ── 경로 — 항상 repo root 기준 절대경로 ──────────────────────────
-_JACKAL_DIR = Path(__file__).parent   # jackal/
-_REPO_ROOT  = _JACKAL_DIR.parent      # repo root
-DATA_DIR    = _REPO_ROOT / "data"
+_JACKAL_DIR = JACKAL_LEGACY_DIR   # jackal/
+_REPO_ROOT  = JACKAL_LEGACY_DIR.parent      # repo root
 
-ORCA_BASELINE = DATA_DIR / "morning_baseline.json"
-ORCA_MEMORY   = DATA_DIR / "memory.json"
-JACKAL_NEWS   = DATA_DIR / "jackal_news.json"
-_JACKAL_WEIGHTS = _JACKAL_DIR / "jackal_weights.json"
+ORCA_BASELINE = BASELINE_FILE
+ORCA_MEMORY   = MEMORY_FILE
+JACKAL_NEWS   = JACKAL_NEWS_FILE
+_JACKAL_WEIGHTS = JACKAL_WEIGHTS_FILE
 
 
 # ══════════════════════════════════════════════════════════════════

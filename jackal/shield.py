@@ -20,10 +20,12 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from shared.paths import JACKAL_LEGACY_DIR, JACKAL_USAGE_LOG_FILE
+
 log = logging.getLogger("jackal_shield")
 
-_BASE      = Path(__file__).parent
-_REPO_ROOT = _BASE.parent   # repo root ??API ???ㅼ틪 踰붿쐞
+_BASE      = JACKAL_LEGACY_DIR
+_REPO_ROOT = JACKAL_LEGACY_DIR.parent   # repo root ??API ???ㅼ틪 踰붿쐞
 
 # ??? ?ㅼ젙 ?????????????????????????????????????????????????????????
 _DAILY_TOKEN_BUDGET = int(os.getenv("JACKAL_DAILY_BUDGET", "500000"))
@@ -39,7 +41,7 @@ _EXCLUDE_DIRS    = {".git", "__pycache__", "node_modules", ".venv", "venv"}
 _SCAN_EXTENSIONS = {".py", ".json", ".yml", ".yaml", ".env", ".txt", ".md"}
 
 # [Fix] usage_log 寃쎈줈 異붽?
-_USAGE_LOG = _BASE / "jackal_usage_log.json"
+_USAGE_LOG = JACKAL_USAGE_LOG_FILE
 
 
 class JackalShield:

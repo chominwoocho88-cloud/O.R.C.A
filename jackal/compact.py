@@ -15,17 +15,17 @@ import json
 import logging
 import os
 from datetime import datetime, date
-from pathlib import Path
 
 from shared.llm.client import LLMClient
+from shared.paths import ACCURACY_FILE, JACKAL_LEGACY_DIR, JACKAL_USAGE_LOG_FILE
 
 log = logging.getLogger("jackal_compact")
 
-_BASE          = Path(__file__).parent
-_REPO_ROOT     = _BASE.parent          # jackal/ ??repo root
+_BASE          = JACKAL_LEGACY_DIR
+_REPO_ROOT     = JACKAL_LEGACY_DIR.parent          # jackal/ ??repo root
 _COMPACT_LOG   = _BASE / "compact_log.json"
 _COMPACT_CACHE = _BASE / "compact_cache.json"
-_USAGE_LOG     = _BASE / "jackal_usage_log.json"   # Bug Fix 2 ?곕룞
+_USAGE_LOG     = JACKAL_USAGE_LOG_FILE   # Bug Fix 2 ?곕룞
 
 _COMPACT_THRESHOLD = int(os.getenv("JACKAL_COMPACT_THRESHOLD", "60000"))
 _TARGET_RATIO      = 0.30
@@ -135,7 +135,7 @@ class JackalCompact:
     def _collect_compressible_data(self) -> dict:
         data = {}
 
-        acc_path = _REPO_ROOT / "data" / "accuracy.json"   # data/accuracy.json (repo root 湲곗?)
+        acc_path = ACCURACY_FILE   # data/accuracy.json (repo root 湲곗?)
         if acc_path.exists():
             try:
                 data["accuracy"] = json.loads(acc_path.read_text(encoding="utf-8"))

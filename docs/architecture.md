@@ -96,6 +96,7 @@ Strangler Fig 패턴을 따른다.
 - Phase A 진단 완료: 경로 의존성 전수 조사.
 - Day 11 Phase B-1: shared/paths.py 신규 작성. 기존 코드 영향 0.
 - Day 12 Phase B-2: orca/paths.py가 shared.paths의 alias. 호출부 영향 0.
+- Day 13 Phase B-3: jackal 첫 3개 파일(adapter, shield, compact)이 shared.paths 사용. JACKAL legacy 데이터 위치 그대로.
 - 마이그레이션 계획: docs/migration_plan.md 참조
 - KIS API client는 미구현 (KIS 가입 완료, 다음 단계에서 shared/broker/kis.py로 신규 생성 예정)
 - orca/, jackal/ 코드는 모두 기존 위치 유지
