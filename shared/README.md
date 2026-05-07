@@ -15,3 +15,4 @@
 - broker/      증권사 API (KIS, 키움 등)
 - db/          SQLite wrapper
 - logging/     JSONL, 메트릭
+- paths.py     중앙 경로 관리 (활성)

@@ -92,6 +92,10 @@ Strangler Fig 패턴을 따른다.
 - Day 7: pipeline.py를 modules/orca/pipeline/로 이동 (alias 유지). 작은 파일로 modules/ 이동 패턴 첫 검증.
 - Day 8: agents.py 이동 (modules/orca/pipeline/agents.py). mock.patch 호환성 패턴 적용.
 - Day 9: run_cycle.py 이동. Stage 1 핵심 ORCA pipeline 3 파일 (pipeline + agents + run_cycle) 모두 modules/orca/pipeline/ 입주 완료.
+- Day 10 안전 게이트 발동: JACKAL Path(__file__) 패턴 발견으로 modules/jackal/pipeline 이동 보류.
+- Phase A 진단 완료: 경로 의존성 전수 조사.
+- Day 11 Phase B-1: shared/paths.py 신규 작성. 기존 코드 영향 0.
+- Day 12 Phase B-2: orca/paths.py가 shared.paths의 alias. 호출부 영향 0.
 - 마이그레이션 계획: docs/migration_plan.md 참조
 - KIS API client는 미구현 (KIS 가입 완료, 다음 단계에서 shared/broker/kis.py로 신규 생성 예정)
 - orca/, jackal/ 코드는 모두 기존 위치 유지
@@ -106,4 +110,6 @@ Strangler Fig 패턴을 따른다.
 5. modules/orca/pipeline/pipeline.py 이동 (완료 - Day 7)
 6. modules/orca/pipeline/agents.py 이동 (완료 - Day 8)
 7. modules/orca/pipeline/run_cycle.py 이동 (완료 - Day 9)
-8. modules/jackal/pipeline/ 분리 (다음 sprint)
+8. shared/paths.py 도입 및 orca/paths.py alias 변환 (완료 - Phase B-1/B-2)
+9. JACKAL 경로 상수 교체 (Phase B-3~B-5)
+10. modules/jackal/pipeline/ 분리 재시도 (Phase D)

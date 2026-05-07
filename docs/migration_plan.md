@@ -30,8 +30,14 @@
   - Day 7-8 학습: alias는 module 객체 wildcard re-export 패턴 필요 (mock.patch 호환성)
 - ✅ Day 9: modules/orca/pipeline/run_cycle.py 분리 — ORCA cycle orchestration 이동, alias 유지
 - Day 9 후속: modules/orca/lessons/ + state.py 분리 검토 (lessons 먼저)
-- Day 10: modules/jackal/pipeline/ 분리
-- Day 10: 검증 + 운영 안정성
+- Day 10: modules/jackal/pipeline/ 분리 시도 중 JACKAL Path(__file__) 경로 의존성 발견, 안전 게이트 발동
+- ✅ Day 11: Phase B-1 - shared/paths.py 신규
+- ✅ Day 12: Phase B-1b - shared/paths.py atomic write 함수 추가
+- ✅ Day 12: Phase B-2 - orca/paths.py를 shared.paths alias로 변환 완료
+- Day 13: Phase B-3 - jackal/{adapter, shield, compact} 경로 교체
+- Day 14: Phase B-4 - jackal/{evolution, tracker, scanner, hunter} 경로 교체
+- Day 15: Phase B-5 - jackal/{core, backtest} 경로 교체
+- Day 16+: Phase D - jackal/{adapter, shield} → modules/ 이동 재시도
 
 ### Stage 2: KIS + 분 단위 데이터 (Day 11~17) — 1주
 

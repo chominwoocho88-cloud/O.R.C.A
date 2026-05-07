@@ -1,65 +1,79 @@
-﻿"""Central path management for ORCA runtime and report artifacts."""
+"""
+orca.paths (DEPRECATED ALIAS)
+=============================
+이 모듈은 backward-compatible alias입니다.
+실제 코드는 shared/paths.py 로 이동됨 (Phase B-2 commit).
+
+신규 코드는 다음 경로 사용 권장:
+    from shared.paths import DATA_DIR, MEMORY_FILE, atomic_write_json, ...
+
+ORCA 전용 상수 PACKAGE_DIR은 shared.paths의 ORCA_LEGACY_DIR로 매핑됨.
+"""
 from __future__ import annotations
 
-import json
-import os
-from pathlib import Path
-from typing import Any
-from uuid import uuid4
+import sys as _sys
 
-PACKAGE_DIR = Path(__file__).resolve().parent
-_REPO_ROOT = PACKAGE_DIR.parent
-DATA_DIR = _REPO_ROOT / "data"
-REPORTS_DIR = _REPO_ROOT / "reports"
+# wildcard import로 모든 module-level 심볼 가져오기 (mock.patch 호환)
+from shared.paths import *  # noqa: F401,F403
+from shared import paths as _paths
 
+# 명시적 export (사전 조사 결과의 모든 상수 + 함수)
+from shared.paths import (
+    REPO_ROOT,
+    DATA_DIR,
+    REPORTS_DIR,
+    ORCA_LEGACY_DIR,
+    JACKAL_LEGACY_DIR,
+    MEMORY_FILE,
+    ACCURACY_FILE,
+    SENTIMENT_FILE,
+    ROTATION_FILE,
+    WEIGHTS_FILE,
+    LESSONS_FILE,
+    COST_FILE,
+    PORTFOLIO_FILE,
+    PATTERN_DB_FILE,
+    STATE_DB_FILE,
+    JACKAL_DB_FILE,
+    BASELINE_FILE,
+    DATA_FILE,
+    BREAKING_FILE,
+    DASHBOARD_FILE,
+    ensure_dirs,
+    atomic_write_text,
+    atomic_write_json,
+)
+from shared.paths import _REPO_ROOT, _atomic_write_text_once  # noqa: F401
 
-def ensure_dirs() -> None:
-    DATA_DIR.mkdir(exist_ok=True)
-    REPORTS_DIR.mkdir(exist_ok=True)
+# ORCA 전용 alias: PACKAGE_DIR = ORCA_LEGACY_DIR
+PACKAGE_DIR = ORCA_LEGACY_DIR
+_paths.PACKAGE_DIR = PACKAGE_DIR
 
+__all__ = [
+    "PACKAGE_DIR",
+    "REPO_ROOT",
+    "DATA_DIR",
+    "REPORTS_DIR",
+    "ORCA_LEGACY_DIR",
+    "JACKAL_LEGACY_DIR",
+    "MEMORY_FILE",
+    "ACCURACY_FILE",
+    "SENTIMENT_FILE",
+    "ROTATION_FILE",
+    "WEIGHTS_FILE",
+    "LESSONS_FILE",
+    "COST_FILE",
+    "PORTFOLIO_FILE",
+    "PATTERN_DB_FILE",
+    "STATE_DB_FILE",
+    "JACKAL_DB_FILE",
+    "BASELINE_FILE",
+    "DATA_FILE",
+    "BREAKING_FILE",
+    "DASHBOARD_FILE",
+    "ensure_dirs",
+    "atomic_write_text",
+    "atomic_write_json",
+]
 
-ensure_dirs()
-
-# Canonical persistent tracked data
-MEMORY_FILE = DATA_DIR / "memory.json"
-ACCURACY_FILE = DATA_DIR / "accuracy.json"
-SENTIMENT_FILE = DATA_DIR / "sentiment.json"
-ROTATION_FILE = DATA_DIR / "rotation.json"
-WEIGHTS_FILE = DATA_DIR / "orca_weights.json"
-LESSONS_FILE = DATA_DIR / "orca_lessons.json"
-COST_FILE = DATA_DIR / "orca_cost.json"
-PORTFOLIO_FILE = DATA_DIR / "portfolio.json"
-PATTERN_DB_FILE = DATA_DIR / "pattern_db.json"
-STATE_DB_FILE = DATA_DIR / "orca_state.db"
-JACKAL_DB_FILE = DATA_DIR / "jackal_state.db"
-
-# Runtime / ephemeral files
-BASELINE_FILE = DATA_DIR / "morning_baseline.json"
-DATA_FILE = DATA_DIR / "orca_market_data.json"
-BREAKING_FILE = DATA_DIR / "breaking_sent.json"
-
-# Output files
-DASHBOARD_FILE = REPORTS_DIR / "dashboard.html"
-
-def _atomic_write_text_once(path: Path, text: str, encoding: str = "utf-8") -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(f".{path.name}.{uuid4().hex}.tmp")
-    try:
-        tmp.write_text(text, encoding=encoding)
-        os.replace(tmp, path)
-    finally:
-        if tmp.exists():
-            tmp.unlink(missing_ok=True)
-
-
-def atomic_write_text(path: Path, text: str, encoding: str = "utf-8") -> None:
-    _atomic_write_text_once(path, text, encoding=encoding)
-
-
-def atomic_write_json(path: Path, data: Any) -> None:
-    atomic_write_text(
-        path,
-        json.dumps(data, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-
+_sys.modules[__name__] = _paths
