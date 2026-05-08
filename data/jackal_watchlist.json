@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-08T13:33:10.726037+09:00",
+  "generated_at": "2026-05-08T19:55:37.959792+09:00",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -14,54 +14,72 @@
       "avg_cost": 182.99,
       "market": "US",
       "currency": "$",
-      "portfolio": true,
-      "asset_type": "stock"
+      "portfolio": false,
+      "asset_type": "stock",
+      "source": "candidate:scan",
+      "reason": "MA20($201.85)과 MA50($188.04) 위에서 강한 상승 배",
+      "candidate_id": "cand_94fb83dd13254e81b4f7aa6e4af1ba75"
     },
     "000660.KS": {
       "name": "SK하이닉스",
       "avg_cost": null,
       "market": "KR",
       "currency": "₩",
-      "portfolio": true,
-      "asset_type": "stock"
+      "portfolio": false,
+      "asset_type": "stock",
+      "source": "candidate:shadow",
+      "reason": "신호품질미달(42점)",
+      "candidate_id": "cand_94cdb80447a74a1098978eefb792589d"
     },
     "005930.KS": {
       "name": "삼성전자",
       "avg_cost": null,
       "market": "KR",
       "currency": "₩",
-      "portfolio": true,
-      "asset_type": "stock"
+      "portfolio": false,
+      "asset_type": "stock",
+      "source": "candidate:shadow",
+      "reason": "신호품질미달(42점)",
+      "candidate_id": "cand_02d51691c57a4e48837d115278fcd1a2"
     },
     "AVGO": {
       "name": "브로드컴",
       "avg_cost": null,
       "market": "US",
       "currency": "$",
-      "portfolio": true,
-      "asset_type": "stock"
+      "portfolio": false,
+      "asset_type": "stock",
+      "source": "candidate:scan",
+      "reason": "MA20($407.25) 근처에서 지지를 받고 있으며, 52주 고점 대비",
+      "candidate_id": "cand_7b8056522edf4a23b08e76690e026213"
     },
     "035720.KS": {
       "name": "카카오",
       "avg_cost": null,
       "market": "KR",
       "currency": "₩",
-      "portfolio": true,
-      "asset_type": "stock"
+      "portfolio": false,
+      "asset_type": "stock",
+      "source": "candidate:scan",
+      "reason": "RSI 26.0의 극도 과매도 상태에서 매집신호가 확인되었고, 거래량이 ",
+      "candidate_id": "cand_e3a10ad0b40d4c90a65067f785667c73"
     },
     "466920.KS": {
       "name": "SOL 코리아고배당",
       "avg_cost": null,
       "market": "KR",
       "currency": "₩",
-      "portfolio": true,
-      "asset_type": "etf_sector_concentrated"
+      "portfolio": false,
+      "asset_type": "etf_sector_concentrated",
+      "source": "candidate:scan",
+      "reason": "분석 실패 | ⚠️ RSI 68.7은 과매수 영역(70 근처)으로 단기 조",
+      "candidate_id": "cand_031e38d71e77408fb4716e94a7a64465"
     }
   },
   "counts": {
     "total": 6,
-    "portfolio": 6,
-    "candidate": 0,
+    "portfolio": 0,
+    "candidate": 6,
     "recommendation": 0
   }
 }
