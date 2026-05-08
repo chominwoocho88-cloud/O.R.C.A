@@ -7104,138 +7104,133 @@
   },
   {
     "analysis_date": "2026-05-08",
-    "analysis_time": "12:30 KST",
+    "analysis_time": "23:26 KST",
     "mode": "MORNING",
     "mode_label": "아침 풀분석",
-    "one_line_summary": "코스피 7,420 외국인 역대최대 순매도(-7.15조) 후 개인 방어 한계 경계, 나스닥 25,806 AI 호재에도 연속상승 3일+ 급반전 리스크 11.7% 내포",
+    "one_line_summary": "S&P500 7393·나스닥 26139 고점 유지 속 반도체(MU +25%·SMCI +24%) 강세 지속, 그러나 EWY 역대 최대 단일일 유출 409M달러·외국인 7.15조 순매도로 코스피 급반전 리스크 11.7% 경보 발령",
     "market_regime": "위험선호(급반전 경계)",
     "trend_phase": "상승추세",
     "trend_strategy": {
-      "recommended": "AI 반도체·데이터센터 인프라 비중 유지하되 분할 매수·타이트한 손절 병행. SK하이닉스·삼성전자 기존 포지션은 코스피 2,620pt(7,420 환산 기준) 이상 유지 시 홀드",
-      "caution": "외국인 추가 순매도 -1조 이상 재발 시 즉시 비중 축소. 개인 5.99조 방어는 단발성 수급으로 지속 불가 — 외국인 이탈 2~3거래일 내 재개 가능성 높음. 나스닥 연속 3일+ 상승 구간: 단일 호재 소화 후 매크로 우려 재부각 경계",
+      "recommended": "미국 반도체·AI 섹터 추세 추종 매수 유지(MU·SMCI 모멘텀). KOSPI 신규 진입 자제, 기존 보유분 부분 익절 고려",
+      "caution": "EWY 5일 누적 900M+ 유출 + 외국인 역대 최대 순매도 동시 발생. 나스닥 3일 연속 급등 후 백테스트 11.7% 급반전 리스크 조건 충족. PLTR 실적 서프라이즈에도 -3% 하락은 AI 소프트웨어 피크아웃 경고 신호",
       "difficulty": "보통"
     },
-    "confidence_overall": "낮음",
-    "consensus_level": "낮음",
+    "confidence_overall": "보통",
+    "consensus_level": "보통",
     "top_headlines": [
       {
-        "headline": "코스피 7,420 유지 — 외국인 -7.15조 사상최대 순매도에도 개인+기관이 흡수하며 +1.43% 마감",
-        "signal_tag": "수급 이중성 경보",
+        "headline": "마이크론 HBM 2026년 완판 확인, 사상 최고가 $683 돌파 주간 +25%",
+        "signal_tag": "강세",
         "impact": "높음"
       },
       {
-        "headline": "나스닥 25,806 / S&P500 7,337 — AMD +38% 등 AI 반도체 어닝 서프라이즈 연속",
-        "signal_tag": "AI 모멘텀 지속",
+        "headline": "EWY 코리아 ETF 단일일 유출 $409M 역대 최대, 5일 누적 $900M+ 순유출",
+        "signal_tag": "경고",
         "impact": "높음"
       },
       {
-        "headline": "VIX 17.08 — 4월 관세 쇼크 이후 공포 급완화, 단기 과열 신호 혼재",
-        "signal_tag": "변동성 안정",
+        "headline": "팔란티어 EPS 18% 상회에도 주가 -3%, AI 소프트웨어 밸류에이션 피크아웃 신호",
+        "signal_tag": "경고",
         "impact": "보통"
       },
       {
-        "headline": "IDC 스마트폰 시장 -12.9% 전망 — 레거시 DRAM·NAND ASP 하락 압력 가속",
-        "signal_tag": "삼성전자 하방 리스크",
-        "impact": "보통"
+        "headline": "SMCI +24.51% 급등, AI 데이터센터 수요 폭증·거래량 평균 대비 228%",
+        "signal_tag": "강세",
+        "impact": "높음"
       },
       {
-        "headline": "6월 MSCI 정기 변경 선취 리밸런싱 가능성 — 외국인 매도 구조적 이탈 여부 미확인",
-        "signal_tag": "수급 불확실성",
-        "impact": "높음"
+        "headline": "Fed 금리 동결 3연속 확인, VIX 17.11로 시장 안정 구간 유지",
+        "signal_tag": "중립",
+        "impact": "보통"
       }
     ],
     "volatility_index": {
-      "vkospi": "데이터 미제공",
-      "vix": "17.08",
-      "fear_greed": "추정 중립~탐욕 (정확한 지수 미제공)",
-      "level": "중립",
-      "interpretation": "VIX 17.08은 공포 해소 구간이나, 60일 백테스트 기준 FG>=20 이상 구간에서 방향 정확도 17%에 불과. 연속 상승 3일+ 조건 충족 시 급반전 확률 11.7% 내포. 단기 과열 조정 가능성 배제 불가"
+      "vkospi": "N/A",
+      "vix": "17.11",
+      "fear_greed": "추정 55~65 (탐욕 구간)",
+      "level": "탐욕",
+      "interpretation": "VIX 17.11은 시장 안정 구간으로 공포 해소 후 탐욕 전환 완성 단계. 그러나 FG≥40 이상 구간에서 S&P500 연속 급등 시 백테스트상 급등 후 되돌림 리스크 경고 유효. 단순 안정 신호로 과신 금물."
     },
     "retail_reversal_signal": {
-      "retail_behavior": "5월 7일 외국인 -7.15조 최대 순매도 당일 개인 +5.99조 대규모 역매수 — 5월 6일에도 외국인 +3.13조 순매수 당일 개인 -5,760억 역매도로 전형적 역추세 패턴 반복",
-      "contrarian_implication": "역사적으로 개인 극단 매수 직후 단기 조정 빈도 높음. 개인 5.99조 방어는 단발성 수급으로 외국인 추가 이탈 시 지수 지지력 약화 우려. 단, 기관 +1.10조 동반 흡수는 완충 요인",
+      "retail_behavior": "KOSPI 5월 6일 개인 5,760억원 순매도, 외국인 3.13조원 순매수 후 EWY ETF로 이익 실현 이중 구조. 개인 고점 매도·외국인 매수→ETF 이익실현 패턴",
+      "contrarian_implication": "국내 개인 매도는 단기 역발상 매수 신호 가능성 있으나, EWY 역대 최대 유출(409M달러/1일, 900M+/5일) 동시 발생으로 단순 역발상 적용 위험. 외국인 내부 이익 실현 압력이 개인 역발상 신호를 압도할 가능성 높음",
       "reliability": "보통"
     },
     "outflows": [
       {
-        "zone": "코스피 외국인 수급",
-        "reason": "5월 7일 사상최대 단일일 순매도 -7.15조원. MSCI 리밸런싱 선취 or 구조적 비중 축소 여부 미확인 — 추가 매도 대기 물량 가능성 높음",
+        "zone": "KOSPI / EWY 코리아 ETF",
+        "reason": "75% YTD 급등 후 극단적 밸류에이션 도달, 외국인 역대 최대 -7.15조 순매도, EWY 역대 최대 단일일 유출 $409M 동시 발생. 이익 실현 집중",
         "severity": "높음",
-        "data_point": "외국인 순매도 -7.15조원(2026-05-07), 당일 KOSPI +1.43% 역설적 상승"
+        "data_point": "EWY 5월 6일 단일 유출 $409M(역대 최대), 5거래일 $900M+ 순유출; 개인 5,760억원 순매도"
       },
       {
-        "zone": "스마트폰·PC 레거시 반도체",
-        "reason": "AI 칩이 생산 캐파 독점, 스마트폰 시장 -12.9% 전망. 삼성전자 MX·DS 부문 동시 타격, 레거시 DRAM ASP 하락 가속",
-        "severity": "높음(기존 '보통' 상향 조정 — Devil 반론 반영)",
-        "data_point": "IDC 스마트폰 시장 -12.9%, AI 데이터센터 캐파 집중"
+        "zone": "AI 소프트웨어 (팔란티어 등 고PER 성장주)",
+        "reason": "EPS 18% 상회에도 주가 -3% 하락. 실적 서프라이즈→주가 하락 패턴은 섹터 전반 고점 신호로 추가 밸류에이션 프리미엄 소화 불가 상태",
+        "severity": "높음",
+        "data_point": "PLTR EPS 0.33 vs 예상 0.28 (18% 상회) 불구 -3% 하락"
       }
     ],
     "inflows": [
       {
-        "zone": "AI 반도체·데이터센터 인프라",
-        "reason": "AMD +38%, SMCI +24.5%, MU +5% 어닝 서프라이즈 연속. Q1 28% YoY 어닝 비트. 엔비디아·SK하이닉스 HBM 수요 사이클 지속",
+        "zone": "반도체 / HBM (MU, SMCI)",
+        "reason": "마이크론 HBM 2026년 완판 확인, 최대 상업용 SSD 출하 개시. SMCI AI 데이터센터 수요 폭발적 성장. 실적 기반 펀더멘털 매수 지속",
         "momentum": "강함",
-        "data_point": "나스닥 25,806 / AMD Q1 EPS 서프라이즈 / SK하이닉스 HBM3E 공급 확대"
+        "data_point": "MU 주간 +25%, 사상 최고 $683.09; SMCI +24.51%, 거래량 평균 대비 228%"
       },
       {
-        "zone": "국내 기관 수급",
-        "reason": "5월 7일 기관 +1.10조 순매수로 외국인 매물 일부 흡수. 연기금·보험 등 저가 매수세 유입",
+        "zone": "미국 대형 성장주 (나스닥 상단)",
+        "reason": "Q1 실적 84% 비트율·EPS 15.1% 성장 확인. TSMC 40% 매출 성장·AI 공급 부족 구조적 강세 지속",
         "momentum": "보통",
-        "data_point": "기관 순매수 +1.10조(2026-05-07)"
+        "data_point": "나스닥 26,139, S&P500 7,393 고점 유지"
       }
     ],
     "neutral_waiting": [
       {
-        "zone": "삼성전자",
-        "catalyst_needed": "레거시 DRAM 수요 회복 신호 또는 AI 온디바이스 칩 수주 확대 발표. 스마트폰 시장 전망 개선 필요"
+        "zone": "KOSPI 중소형주",
+        "catalyst_needed": "외국인 순매수 전환 및 EWY 유출 안정화 확인 필요"
       },
       {
-        "zone": "코스피 중소형 수출주",
-        "catalyst_needed": "원/달러 1,463원 수준 안정화 + 미중 관세 갈등 완화 신호. 외국인 수급 방향 확인 후 진입"
+        "zone": "AI 소프트웨어 섹터 (고PER)",
+        "catalyst_needed": "PLTR류 실적 서프라이즈→주가 상승 패턴 복원 또는 추가 금리 인하 기대감"
       }
     ],
     "hidden_signals": [
       {
-        "signal": "외국인 -7.15조 순매도 후 지수 +1.43% 상승 — 수급 이중성",
-        "implication": "개인+기관이 일시 방어했으나, 외국인 추가 이탈 재개 시 지지력 급격히 소멸. '매수 소진 후 하락' 패턴 주의",
-        "confidence": "보통"
-      },
-      {
-        "signal": "6년래 외국인 코스피 보유 비중 최고 → 매도 여력 충분",
-        "implication": "외국인 보유 비중이 역사적 고점이면 추가 차익실현 또는 비중 축소 여력이 크다는 뜻. MSCI 정기 변경 전후 추가 매도 압력 가중 가능",
-        "confidence": "보통"
-      },
-      {
-        "signal": "SK하이닉스 베타 1.36x — 나스닥 연동 하방 민감도 높음",
-        "implication": "나스닥 -1% 하락 시 SK하이닉스 약 -1.36% 연동. AMD 단일 호재 소화 후 나스닥 조정 시 SK하이닉스 낙폭 확대 위험",
+        "signal": "PLTR 실적 서프라이즈에도 주가 하락: 나스닥 추가 상승 여력 상한선 신호",
+        "implication": "AI 소프트웨어 섹터 전반의 밸류에이션 피크아웃 가능성. 향후 나스닥 추가 급등 시 차익 실현 압력이 동반될 구조적 저항선 형성",
         "confidence": "높음"
       },
       {
-        "signal": "VIX 17.08 — 과거 급등 직전 저점 패턴과 일치 가능성",
-        "implication": "VIX 15~18 구간은 역사적으로 시장 자기만족 구간. 단기 충격 발생 시 VIX 25+ 급등 및 지수 급락 가능",
+        "signal": "외국인 3.13조 순매수 후 동일 주체(외국인 패시브) EWY로 이중 이익실현 구조",
+        "implication": "단순 순매수 수치만 보면 긍정적이나 실질적으로는 현물 매수→ETF 헤지/매도 이중 구조. 코스피 실질 외국인 수급은 중립 이하일 가능성",
+        "confidence": "보통"
+      },
+      {
+        "signal": "백테스트: 나스닥 3일 연속 상승 + 전일 예측 100% 적중 조건 동시 충족 → 급반전 11.7% 리스크",
+        "implication": "통계적으로 현재 조건이 급반전 발생 패턴과 정확히 부합. 단기 조정 가능성에 대한 헤지 포지션 고려 필요",
         "confidence": "보통"
       }
     ],
+    "korea_focus": {
+      "krw_usd": "1,462.89원",
+      "kospi_flow": "외국인 역대 최대 순매도(-7.15조), EWY 5일 $900M+ 유출. 개인 5,760억 순매도로 수급 공백 상태",
+      "sk_hynix": "나스닥 연동 베타 1.36x 적용 시 나스닥 -2% 충격 발생 시 -2.8% 낙폭 예상. HBM 호재 선반영 상태로 추가 상승 촉매 부재",
+      "samsung": "삼성전자 별도 데이터 없으나 KOSPI 전반 수급 공백 환경에서 외국인 매도 타깃 가능성 높음",
+      "assessment": "KOSPI 75% YTD 급등 후 극단적 밸류에이션 도달. EWY 역대 최대 유출 + 외국인 역대 최대 순매도 동시 발생으로 단기 -5~8% 기술적 조정 리스크 현실적. 신규 진입 자제, 기존 보유분 부분 익절 권고. 코스피 7,200선 이탈 여부가 핵심 관찰 지점."
+    },
     "thesis_killers": [
-      {
-        "event": "코스피",
-        "timeframe": "1~2거래일",
-        "confirms_if": "코스피 2,620pt 이상 유지 + 외국인 순매도 -5,000억원 이하",
-        "invalidates_if": "코스피 2,550pt 이하 이탈 또는 외국인 순매도 -1조원 이상 재발",
-        "quality": "ok"
-      },
       {
         "event": "나스닥",
         "timeframe": "당일 종가",
-        "confirms_if": "나스닥 +1% 이상 종가(25,806pt 대비 26,064pt 이상)",
-        "invalidates_if": "나스닥 -1% 이하 종가(25,548pt 이하) → SK하이닉스 -1.4% 연동 낙폭",
+        "confirms_if": "나스닥 +1.0% 이상 종가 마감 (25,900pt 상회)",
+        "invalidates_if": "나스닥 -1.5% 이하 종가 (25,420pt 이탈) — 연속상승 후 갑작스런 충격 패턴 발동",
         "quality": "ok"
       },
       {
         "event": "SK하이닉스",
-        "timeframe": "2~3거래일",
-        "confirms_if": "SK하이닉스 +2% 이상 유지로 AI 반도체 수요 신뢰 확인",
-        "invalidates_if": "SK하이닉스 -3% 이하 → 레거시 DRAM 수요 위축 + 외국인 이탈 연쇄 확인",
+        "timeframe": "당일 종가",
+        "confirms_if": "SK하이닉스 +2.0% 이상 종가 (HBM 모멘텀 실질 지속 확인)",
+        "invalidates_if": "SK하이닉스 -2.8% 이하 종가 (나스닥 -2% 연동 낙폭 현실화)",
         "quality": "ok"
       }
     ],
@@ -7512,64 +7507,157 @@
     "data_quality": "degraded",
     "jackal_candidate_review": {
       "analysis_date": "2026-05-08",
-      "market_bias": "mixed",
-      "market_bias_label": "혼조/관망",
-      "reviewed_count": 0,
-      "aligned_count": 0,
-      "neutral_count": 0,
+      "market_bias": "risk_on",
+      "market_bias_label": "위험선호",
+      "reviewed_count": 12,
+      "aligned_count": 3,
+      "neutral_count": 9,
       "opposed_count": 0,
-      "follow_count": 0,
-      "watch_count": 0,
-      "avoid_count": 0,
+      "follow_count": 1,
+      "watch_count": 8,
+      "avoid_count": 3,
       "review_verdict_breakdown": {
         "strong_aligned": 0,
-        "aligned": 0,
-        "neutral": 0,
+        "aligned": 3,
+        "neutral": 9,
         "opposed": 0,
         "strong_opposed": 0
       },
-      "average_review_confidence": "low",
-      "reason_code_frequency": {},
-      "highlights": []
+      "average_review_confidence": "medium",
+      "reason_code_frequency": {
+        "market_bias_tailwind": 12,
+        "insufficient_data": 9,
+        "devil_bearish_warn": 8,
+        "devil_contradicts_thesis": 3,
+        "signal_family_trusted": 3,
+        "quality_high": 1
+      },
+      "highlights": [
+        {
+          "ticker": "466920.KS",
+          "name": "SOL 코리아고배당",
+          "source_event_type": "scan",
+          "alignment": "neutral",
+          "review_verdict": "neutral",
+          "alignment_score": 0.05,
+          "alignment_reason_codes": [
+            "market_bias_tailwind",
+            "insufficient_data",
+            "devil_bearish_warn",
+            "devil_contradicts_thesis"
+          ],
+          "review_confidence": "low",
+          "quality_score": 50,
+          "signal_family": "general_rebound",
+          "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: insufficient_data (general_rebound)"
+        },
+        {
+          "ticker": "AVGO",
+          "name": "브로드컴",
+          "source_event_type": "scan",
+          "alignment": "neutral",
+          "review_verdict": "neutral",
+          "alignment_score": 0.05,
+          "alignment_reason_codes": [
+            "market_bias_tailwind",
+            "insufficient_data",
+            "devil_bearish_warn",
+            "devil_contradicts_thesis"
+          ],
+          "review_confidence": "low",
+          "quality_score": 50,
+          "signal_family": "general_rebound",
+          "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: insufficient_data (general_rebound)"
+        },
+        {
+          "ticker": "NVDA",
+          "name": "엔비디아",
+          "source_event_type": "scan",
+          "alignment": "neutral",
+          "review_verdict": "neutral",
+          "alignment_score": 0.1,
+          "alignment_reason_codes": [
+            "market_bias_tailwind",
+            "insufficient_data",
+            "devil_bearish_warn"
+          ],
+          "review_confidence": "low",
+          "quality_score": 50,
+          "signal_family": "general_rebound",
+          "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: insufficient_data (general_rebound)"
+        },
+        {
+          "ticker": "000660.KS",
+          "name": "SK하이닉스",
+          "source_event_type": "shadow",
+          "alignment": "neutral",
+          "review_verdict": "neutral",
+          "alignment_score": 0.118,
+          "alignment_reason_codes": [
+            "market_bias_tailwind",
+            "insufficient_data"
+          ],
+          "review_confidence": "low",
+          "quality_score": 42,
+          "signal_family": "general_rebound",
+          "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: insufficient_data (general_rebound)"
+        },
+        {
+          "ticker": "005930.KS",
+          "name": "삼성전자",
+          "source_event_type": "shadow",
+          "alignment": "neutral",
+          "review_verdict": "neutral",
+          "alignment_score": 0.118,
+          "alignment_reason_codes": [
+            "market_bias_tailwind",
+            "insufficient_data"
+          ],
+          "review_confidence": "low",
+          "quality_score": 42,
+          "signal_family": "general_rebound",
+          "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: insufficient_data (general_rebound)"
+        }
+      ]
     },
     "jackal_probability_summary": {
       "window_days": 90,
       "min_samples": 5,
-      "raw_rows": 340,
-      "deduped_rows": 340,
+      "raw_rows": 345,
+      "deduped_rows": 345,
       "duplicates_skipped": 0,
       "overall": {
-        "wins": 259,
-        "losses": 81,
-        "total": 340,
-        "avg_return": 4.607,
-        "win_rate": 76.2,
-        "effective_win_rate": 75.9,
+        "wins": 262,
+        "losses": 83,
+        "total": 345,
+        "avg_return": 4.599,
+        "win_rate": 75.9,
+        "effective_win_rate": 75.6,
         "qualified": true
       },
       "trusted_families": [
         {
           "signal_family": "panic_rebound",
           "signal_family_label": "패닉셀반등",
-          "wins": 56,
+          "wins": 58,
           "losses": 14,
-          "total": 70,
-          "avg_return": 6.145,
+          "total": 72,
+          "avg_return": 6.057,
           "source_event_type": "backtest",
-          "win_rate": 80.0,
-          "effective_win_rate": 78.4,
+          "win_rate": 80.6,
+          "effective_win_rate": 78.9,
           "qualified": true
         },
         {
           "signal_family": "momentum_pullback",
           "signal_family_label": "모멘텀눌림목",
-          "wins": 149,
-          "losses": 46,
-          "total": 195,
+          "wins": 150,
+          "losses": 48,
+          "total": 198,
           "avg_return": 4.376,
           "source_event_type": "backtest",
-          "win_rate": 76.4,
-          "effective_win_rate": 75.9,
+          "win_rate": 75.8,
+          "effective_win_rate": 75.2,
           "qualified": true
         },
         {
@@ -7649,36 +7737,36 @@
         {
           "signal_family": "momentum_pullback",
           "signal_family_label": "모멘텀눌림목",
-          "wins": 149,
-          "losses": 46,
-          "total": 195,
+          "wins": 150,
+          "losses": 48,
+          "total": 198,
           "avg_return": 4.376,
           "source_event_type": "backtest",
-          "win_rate": 76.4,
-          "effective_win_rate": 75.9,
+          "win_rate": 75.8,
+          "effective_win_rate": 75.2,
           "qualified": true
         },
         {
           "signal_family": "panic_rebound",
           "signal_family_label": "패닉셀반등",
-          "wins": 56,
+          "wins": 58,
           "losses": 14,
-          "total": 70,
-          "avg_return": 6.145,
+          "total": 72,
+          "avg_return": 6.057,
           "source_event_type": "backtest",
-          "win_rate": 80.0,
-          "effective_win_rate": 78.4,
+          "win_rate": 80.6,
+          "effective_win_rate": 78.9,
           "qualified": true
         }
       ],
       "alignment_summary": {
         "backtest": {
-          "wins": 259,
-          "losses": 81,
-          "total": 340,
-          "avg_return": 4.607,
-          "win_rate": 76.2,
-          "effective_win_rate": 75.9,
+          "wins": 262,
+          "losses": 83,
+          "total": 345,
+          "avg_return": 4.599,
+          "win_rate": 75.9,
+          "effective_win_rate": 75.6,
           "qualified": true
         }
       },

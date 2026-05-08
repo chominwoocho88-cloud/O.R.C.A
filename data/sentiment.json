@@ -491,8 +491,8 @@
       },
       "regime": "위험선호(급반전 경계)",
       "trend": "상승추세",
-      "vix_level": "중립",
-      "vix_val": 17.08,
+      "vix_level": "탐욕",
+      "vix_val": 17.11,
       "vkospi_val": 15.0,
       "fear_greed": 67.0,
       "internal_raw": 60.8955223880597,
@@ -517,8 +517,8 @@
     },
     "regime": "위험선호(급반전 경계)",
     "trend": "상승추세",
-    "vix_level": "중립",
-    "vix_val": 17.08,
+    "vix_level": "탐욕",
+    "vix_val": 17.11,
     "vkospi_val": 15.0,
     "fear_greed": 67.0,
     "internal_raw": 60.8955223880597,
@@ -534,5 +534,5 @@
     "max_30d": 64,
     "avg_30d": 61.2
   },
-  "last_updated": "2026-05-08T12:30:51.676836+09:00"
+  "last_updated": "2026-05-08T23:26:07.805882+09:00"
 }
