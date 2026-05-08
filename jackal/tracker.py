@@ -39,10 +39,14 @@ import os
 import sys
 import time
 from datetime import datetime, timezone, timedelta
-from pathlib import Path
 
 import pandas as pd
 from shared.build_info import get_build_info
+from shared.paths import (
+    JACKAL_HUNT_LOG_FILE,
+    JACKAL_LEGACY_DIR,
+    JACKAL_WEIGHTS_FILE,
+)
 from orca.paths import atomic_write_json
 from orca.state import (
     list_jackal_live_events,
@@ -58,10 +62,10 @@ if hasattr(sys.stdout, "reconfigure"):
 
 log = logging.getLogger("jackal_tracker")
 
-_BASE         = Path(__file__).parent          # jackal/
-_REPO_ROOT    = _BASE.parent                   # repo root
-HUNT_LOG_FILE = _BASE / "hunt_log.json"
-WEIGHTS_FILE  = _BASE / "jackal_weights.json"
+_BASE         = JACKAL_LEGACY_DIR              # jackal/
+_REPO_ROOT    = JACKAL_LEGACY_DIR.parent       # repo root
+HUNT_LOG_FILE = JACKAL_HUNT_LOG_FILE
+WEIGHTS_FILE  = JACKAL_WEIGHTS_FILE
 
 KST = timezone(timedelta(hours=9))
 

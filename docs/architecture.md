@@ -99,6 +99,7 @@ Strangler Fig 패턴을 따른다.
 - Day 13 Phase B-3: jackal 첫 3개 파일(adapter, shield, compact)이 shared.paths 사용. JACKAL legacy 데이터 위치 그대로.
 - Phase B-3.5: 텔레그램 메시지 짤림 수정 + build 표시 추가. 운영 가시성 향상.
 - Phase B-3.5b: JACKAL 텔레그램에도 build 표시. 운영 가시성 ORCA + JACKAL 통합 완성.
+- Phase B-4: jackal/{evolution, tracker, scanner, hunter} 경로 shared.paths 통합 완료. 운영 데이터 위치는 그대로 유지.
 - 마이그레이션 계획: docs/migration_plan.md 참조
 - KIS API client는 미구현 (KIS 가입 완료, 다음 단계에서 shared/broker/kis.py로 신규 생성 예정)
 - orca/, jackal/ 코드는 모두 기존 위치 유지
@@ -114,5 +115,5 @@ Strangler Fig 패턴을 따른다.
 6. modules/orca/pipeline/agents.py 이동 (완료 - Day 8)
 7. modules/orca/pipeline/run_cycle.py 이동 (완료 - Day 9)
 8. shared/paths.py 도입 및 orca/paths.py alias 변환 (완료 - Phase B-1/B-2)
-9. JACKAL 경로 상수 교체 (Phase B-3~B-5)
+9. JACKAL 경로 상수 교체 (Phase B-3~B-4 완료, Phase B-5 예정)
 10. modules/jackal/pipeline/ 분리 재시도 (Phase D)

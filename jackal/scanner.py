@@ -20,12 +20,22 @@ import re
 import logging
 import argparse
 from datetime import datetime, timezone, timedelta
-from pathlib import Path
 
 import httpx
 
 from shared.build_info import get_build_info
 from shared.llm.client import LLMClient
+from shared.paths import (
+    BASELINE_FILE,
+    DATA_DIR,
+    JACKAL_LEGACY_DIR,
+    JACKAL_NEWS_FILE as SHARED_JACKAL_NEWS_FILE,
+    JACKAL_WATCHLIST_FILE,
+    JACKAL_WEIGHTS_FILE,
+    PORTFOLIO_FILE as SHARED_PORTFOLIO_FILE,
+    ROTATION_FILE,
+    SENTIMENT_FILE,
+)
 from orca.paths import DATA_FILE, atomic_write_json
 from orca.state import (
     list_jackal_recommendations,
@@ -64,20 +74,20 @@ if hasattr(sys.stdout, "reconfigure"):
 log = logging.getLogger("jackal_scanner")
 
 KST   = timezone(timedelta(hours=9))
-_BASE = Path(__file__).parent
-_DATA_DIR = _BASE.parent / "data"
+_BASE = JACKAL_LEGACY_DIR
+_DATA_DIR = DATA_DIR
 
 SCAN_LOG_FILE      = _BASE / "scan_log.json"
 COOLDOWN_FILE      = _BASE / "scan_cooldown.json"
-WEIGHTS_FILE       = _BASE / "jackal_weights.json"
+WEIGHTS_FILE       = JACKAL_WEIGHTS_FILE
 RECOMMEND_LOG_FILE = _BASE / "recommendation_log.json"
-JACKAL_WATCHLIST   = _DATA_DIR / "jackal_watchlist.json"   # ORCA가 읽음
-JACKAL_NEWS_FILE   = _DATA_DIR / "jackal_news.json"        # ORCA가 씀, JACKAL이 읽음
+JACKAL_WATCHLIST   = JACKAL_WATCHLIST_FILE
+JACKAL_NEWS_FILE   = SHARED_JACKAL_NEWS_FILE
 # ARIA 데이터 파일 (읽기만, 의존성 없음)
-ORCA_BASELINE  = _DATA_DIR / "morning_baseline.json"
-ORCA_SENTIMENT = _DATA_DIR / "sentiment.json"
-ORCA_ROTATION  = _DATA_DIR / "rotation.json"
-PORTFOLIO_FILE = _DATA_DIR / "portfolio.json"
+ORCA_BASELINE  = BASELINE_FILE
+ORCA_SENTIMENT = SENTIMENT_FILE
+ORCA_ROTATION  = ROTATION_FILE
+PORTFOLIO_FILE = SHARED_PORTFOLIO_FILE
 
 TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")

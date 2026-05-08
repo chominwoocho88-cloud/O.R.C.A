@@ -15,10 +15,14 @@ import re
 import logging
 import os
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from collections import defaultdict
 
 from shared.llm.client import LLMClient
+from shared.paths import (
+    JACKAL_HUNT_LOG_FILE,
+    JACKAL_LEGACY_DIR,
+    JACKAL_WEIGHTS_FILE,
+)
 from orca.paths import atomic_write_json
 from orca.state import (
     list_jackal_recommendations,
@@ -35,9 +39,9 @@ from .thresholds import THRESHOLDS
 
 log = logging.getLogger("jackal_evolution")
 
-_BASE         = Path(__file__).parent
-WEIGHTS_FILE  = _BASE / "jackal_weights.json"
-HUNT_LOG_FILE = _BASE / "hunt_log.json"
+_BASE         = JACKAL_LEGACY_DIR
+WEIGHTS_FILE  = JACKAL_WEIGHTS_FILE
+HUNT_LOG_FILE = JACKAL_HUNT_LOG_FILE
 SCAN_LOG_FILE = _BASE / "scan_log.json"
 SKILLS_DIR    = _BASE / "skills"
 LESSONS_DIR   = _BASE / "lessons"

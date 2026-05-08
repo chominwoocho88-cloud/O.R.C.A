@@ -21,12 +21,19 @@ import logging
 import time
 import functools
 from datetime import datetime, timezone, timedelta
-from pathlib import Path
 
 import httpx
 import pandas as pd
 from shared.build_info import get_build_info
 from shared.llm.client import LLMClient
+from shared.paths import (
+    DATA_DIR,
+    JACKAL_HUNT_COOLDOWN_FILE,
+    JACKAL_HUNT_LOG_FILE,
+    JACKAL_LEGACY_DIR,
+    JACKAL_WATCHLIST_FILE,
+    PORTFOLIO_FILE as SHARED_PORTFOLIO_FILE,
+)
 from orca.paths import atomic_write_json
 from orca.state import (
     record_jackal_weight_snapshot,
@@ -48,13 +55,13 @@ if hasattr(sys.stdout, "reconfigure"):
 log = logging.getLogger("jackal_hunter")
 
 KST   = timezone(timedelta(hours=9))
-_BASE = Path(__file__).parent
-_DATA_DIR = _BASE.parent / "data"
+_BASE = JACKAL_LEGACY_DIR
+_DATA_DIR = DATA_DIR
 
-HUNT_LOG_FILE  = _BASE / "hunt_log.json"
-HUNT_COOL_FILE = _BASE / "hunt_cooldown.json"
-PORTFOLIO_FILE = _DATA_DIR / "portfolio.json"
-JACKAL_WATCHLIST = _DATA_DIR / "jackal_watchlist.json"
+HUNT_LOG_FILE  = JACKAL_HUNT_LOG_FILE
+HUNT_COOL_FILE = JACKAL_HUNT_COOLDOWN_FILE
+PORTFOLIO_FILE = SHARED_PORTFOLIO_FILE
+JACKAL_WATCHLIST = JACKAL_WATCHLIST_FILE
 
 from .adapter import (
     load_orca_context as _load_orca_context,
