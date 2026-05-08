@@ -36,6 +36,7 @@
 - ✅ Day 12: Phase B-2 - orca/paths.py를 shared.paths alias로 변환 완료
 - ✅ Day 13: Phase B-3 - jackal/{adapter, shield, compact} 경로 교체
 - ✅ Phase B-3.5: 텔레그램 운영 가시성 작업 완료 — 메시지 짤림 수정 + build 표시 추가
+- ✅ Phase B-3.5b: JACKAL 텔레그램 build 표시 완료
 - Day 14: Phase B-4 - jackal/{evolution, tracker, scanner, hunter} 경로 교체
 - Day 15: Phase B-5 - jackal/{core, backtest} 경로 교체
 - Day 16+: Phase D - jackal/{adapter, shield} → modules/ 이동 재시도

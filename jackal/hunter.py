@@ -25,6 +25,7 @@ from pathlib import Path
 
 import httpx
 import pandas as pd
+from shared.build_info import get_build_info
 from shared.llm.client import LLMClient
 from orca.paths import atomic_write_json
 from orca.state import (
@@ -1609,7 +1610,14 @@ def _set_cooldown(ticker: str, hours: float = HUNT_COOLDOWN_H):
     atomic_write_json(HUNT_COOL_FILE, cd)
 
 
+def _append_build_info(text: str) -> str:
+    if "build:" in text:
+        return text
+    return text.rstrip() + "\n<code>build: " + get_build_info() + "</code>"
+
+
 def _send_telegram(text: str) -> bool:
+    text = _append_build_info(text)
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         print(text); return False
     try:

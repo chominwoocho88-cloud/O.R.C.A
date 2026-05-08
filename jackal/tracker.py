@@ -42,6 +42,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import pandas as pd
+from shared.build_info import get_build_info
 from orca.paths import atomic_write_json
 from orca.state import (
     list_jackal_live_events,
@@ -67,6 +68,12 @@ KST = timezone(timedelta(hours=9))
 _TRACKER = THRESHOLDS["tracker"]
 _TRACKER_OUTCOMES = _TRACKER["outcomes"]
 _TRACKER_WEIGHTS = _TRACKER["weights"]
+
+
+def _append_build_info(text: str) -> str:
+    if "build:" in text:
+        return text
+    return text.rstrip() + "\n<code>build: " + get_build_info() + "</code>"
 
 # ── 설정 ─────────────────────────────────────────────────────────
 MIN_ELAPSED_HOURS = _TRACKER_OUTCOMES["min_elapsed_hours"]    # 이 시간이 지난 항목만 처리 (장 마감 보장)
@@ -571,6 +578,7 @@ def _send_tracker_summary(stats: dict):
             f"━━━━━━━━━━━━━━━━━━━━\n"
             f"⏰ {now_str} KST"
         )
+        text = _append_build_info(text)
         httpx.post(
             f"https://api.telegram.org/bot{token}/sendMessage",
             json={"chat_id": chat_id, "text": text,
