@@ -1,142 +1,137 @@
 {
   "analysis_date": "2026-05-08",
-  "analysis_time": "10:35 KST",
+  "analysis_time": "12:30 KST",
   "mode": "MORNING",
   "mode_label": "아침 풀분석",
-  "one_line_summary": "코스피 7,447 외국인 역대 최대 순매도 7.15조 충격 속 개인 5.99조 방어, 나스닥 25,806 AMD 어닝 서프라이즈로 위험선호 유지되나 방향성 분기점 도달",
-  "market_regime": "위험선호 (단기 변동성 확대 경계)",
+  "one_line_summary": "코스피 7,420 외국인 역대최대 순매도(-7.15조) 후 개인 방어 한계 경계, 나스닥 25,806 AI 호재에도 연속상승 3일+ 급반전 리스크 11.7% 내포",
+  "market_regime": "위험선호(급반전 경계)",
   "trend_phase": "상승추세",
   "trend_strategy": {
-    "recommended": "반도체·AI 섹터 중심 모멘텀 추종 유지, AMD·엔비디아 강세 기반 기술주 비중 유지. 코스피는 7,400pt 지지 여부 확인 후 단기 반등 포지션 검토",
-    "caution": "코스피 외국인 역대급 순매도(7.15조원) 이후 반등 시 추가 매도 압력 재개 가능. 나스닥 -1% 이하 마감 시 즉시 위험선호 regime 재평가 필요. inflows 데이터 부재로 상승추세 확신 보류",
+    "recommended": "AI 반도체·데이터센터 인프라 비중 유지하되 분할 매수·타이트한 손절 병행. SK하이닉스·삼성전자 기존 포지션은 코스피 2,620pt(7,420 환산 기준) 이상 유지 시 홀드",
+    "caution": "외국인 추가 순매도 -1조 이상 재발 시 즉시 비중 축소. 개인 5.99조 방어는 단발성 수급으로 지속 불가 — 외국인 이탈 2~3거래일 내 재개 가능성 높음. 나스닥 연속 3일+ 상승 구간: 단일 호재 소화 후 매크로 우려 재부각 경계",
     "difficulty": "보통"
   },
-  "confidence_overall": "보통",
-  "consensus_level": "보통",
+  "confidence_overall": "낮음",
+  "consensus_level": "낮음",
   "top_headlines": [
     {
-      "headline": "코스피 5월 7일 외국인 순매도 7.15조원 — 역대 단일 최대 기록 경신",
-      "signal_tag": "⚠️ 자본유출 경보",
+      "headline": "코스피 7,420 유지 — 외국인 -7.15조 사상최대 순매도에도 개인+기관이 흡수하며 +1.43% 마감",
+      "signal_tag": "수급 이중성 경보",
       "impact": "높음"
     },
     {
-      "headline": "AMD 어닝 서프라이즈 +15% — AI 반도체 수요 실적 재확인",
-      "signal_tag": "🟢 기술주 모멘텀",
+      "headline": "나스닥 25,806 / S&P500 7,337 — AMD +38% 등 AI 반도체 어닝 서프라이즈 연속",
+      "signal_tag": "AI 모멘텀 지속",
       "impact": "높음"
     },
     {
-      "headline": "나스닥 25,806 / S&P500 7,337 — 미국 증시 상승세 유지",
-      "signal_tag": "🟢 위험선호 지속",
+      "headline": "VIX 17.08 — 4월 관세 쇼크 이후 공포 급완화, 단기 과열 신호 혼재",
+      "signal_tag": "변동성 안정",
+      "impact": "보통"
+    },
+    {
+      "headline": "IDC 스마트폰 시장 -12.9% 전망 — 레거시 DRAM·NAND ASP 하락 압력 가속",
+      "signal_tag": "삼성전자 하방 리스크",
+      "impact": "보통"
+    },
+    {
+      "headline": "6월 MSCI 정기 변경 선취 리밸런싱 가능성 — 외국인 매도 구조적 이탈 여부 미확인",
+      "signal_tag": "수급 불확실성",
       "impact": "높음"
-    },
-    {
-      "headline": "Duolingo -14% 급락 — 북킹 성장률 10.5% 둔화로 소비자 성장주 타격",
-      "signal_tag": "🔴 성장주 개별 리스크",
-      "impact": "보통"
-    },
-    {
-      "headline": "Broadcom OpenAI 커스텀 칩 협상 난항 — 주가 -3% 하락",
-      "signal_tag": "🟡 AI 인프라 불확실성",
-      "impact": "보통"
-    },
-    {
-      "headline": "Coinbase 직원 14%(700명) 감축 — AI 효율화 명분 크립토 수요 둔화",
-      "signal_tag": "🔴 크립토 섹터 경고",
-      "impact": "보통"
     }
   ],
   "volatility_index": {
-    "vkospi": "N/A (실시간 미확인, 단 코스피 VI 발동 62% YoY 급증)",
+    "vkospi": "데이터 미제공",
     "vix": "17.08",
-    "fear_greed": "N/A (실시간 미확인)",
+    "fear_greed": "추정 중립~탐욕 (정확한 지수 미제공)",
     "level": "중립",
-    "interpretation": "VIX 17.08은 단기 공포 완화 구간으로 시장이 급격한 패닉 상태는 아님. 그러나 코스피 VI 발동 건수 62% YoY 급증(장 초반 9-10시 구간 113%)은 실질적 장중 변동성 확대를 경고. 외국인 역대 최대 이탈에도 VIX가 낮다는 것은 미국 시장과 한국 시장 간 디커플링 리스크를 시사. 참고 지표로만 활용 권장(백테스트 정확도 32%)."
+    "interpretation": "VIX 17.08은 공포 해소 구간이나, 60일 백테스트 기준 FG>=20 이상 구간에서 방향 정확도 17%에 불과. 연속 상승 3일+ 조건 충족 시 급반전 확률 11.7% 내포. 단기 과열 조정 가능성 배제 불가"
   },
   "retail_reversal_signal": {
-    "retail_behavior": "코스피 개인투자자 역대 4위 규모 순매수 5.99조원 — 외국인 7.15조 매도에 정면 역매매로 84% 흡수",
-    "contrarian_implication": "개인의 대규모 역매매는 단기 낙폭 과대 반등 기대 심리 반영. 60거래일 백테스트 기준 급락(-3%+) 다음날 반등 확률 83%로 기술적 반등 가능성 존재. 그러나 외국인 매도세 지속 시 개인 수급 한계 노출 및 추가 하방 압력 잔존. 수급 주체 교체 완료 여부가 핵심 관건.",
+    "retail_behavior": "5월 7일 외국인 -7.15조 최대 순매도 당일 개인 +5.99조 대규모 역매수 — 5월 6일에도 외국인 +3.13조 순매수 당일 개인 -5,760억 역매도로 전형적 역추세 패턴 반복",
+    "contrarian_implication": "역사적으로 개인 극단 매수 직후 단기 조정 빈도 높음. 개인 5.99조 방어는 단발성 수급으로 외국인 추가 이탈 시 지수 지지력 약화 우려. 단, 기관 +1.10조 동반 흡수는 완충 요인",
     "reliability": "보통"
   },
   "outflows": [
     {
-      "zone": "코스피 (한국 증시)",
-      "reason": "외국인 역대 최대 일간 순매도 7.15조원($5.1B) — 5월 7일 단일 최고 기록. 매크로 불확실성·Fed 강경 기조 지속에 따른 EM 자금 이탈. 코스피 7,490 사상최고 직후 고점 청산 패턴",
+      "zone": "코스피 외국인 수급",
+      "reason": "5월 7일 사상최대 단일일 순매도 -7.15조원. MSCI 리밸런싱 선취 or 구조적 비중 축소 여부 미확인 — 추가 매도 대기 물량 가능성 높음",
       "severity": "높음",
-      "data_point": "7.15조원 순매도 (역대 1위 단일 규모), 개인 5.99조 흡수 후 잔여 미흡수 약 1.16조"
+      "data_point": "외국인 순매도 -7.15조원(2026-05-07), 당일 KOSPI +1.43% 역설적 상승"
     },
     {
-      "zone": "Broadcom / 대형 AI 인프라 투자",
-      "reason": "OpenAI와의 커스텀 칩 협상 난항 — 마이크로소프트 부분 구매 여부 미결. 대형 AI 칩 딜 불확실성 부각",
-      "severity": "보통",
-      "data_point": "Broadcom 주가 -3%, OpenAI 커스텀 칩 딜 스톨"
-    },
-    {
-      "zone": "Duolingo / 소비자 구독 성장주",
-      "reason": "Q1 매출 소폭 상회했으나 북킹 성장률 10.5%로 가이던스 둔화 → 성장 기대 하향 조정",
-      "severity": "보통",
-      "data_point": "주가 -14%, 북킹 성장률 10.5% 둔화"
-    },
-    {
-      "zone": "Coinbase / 크립토 관련 성장주",
-      "reason": "직원 14%(700명) 감축 — AI 효율화 명분이나 시장 수요 둔화 시그널. 크립토 섹터 성장 기대 하향",
-      "severity": "보통",
-      "data_point": "700명 감원, 헤드카운트 14% 감소"
+      "zone": "스마트폰·PC 레거시 반도체",
+      "reason": "AI 칩이 생산 캐파 독점, 스마트폰 시장 -12.9% 전망. 삼성전자 MX·DS 부문 동시 타격, 레거시 DRAM ASP 하락 가속",
+      "severity": "높음(기존 '보통' 상향 조정 — Devil 반론 반영)",
+      "data_point": "IDC 스마트폰 시장 -12.9%, AI 데이터센터 캐파 집중"
     }
   ],
   "inflows": [
     {
-      "zone": "나스닥 / 미국 빅테크",
-      "reason": "AMD +15% 어닝 서프라이즈, 디즈니·맥도날드 실적 호조 등 어닝 시즌 긍정 흐름 지속. AI 반도체 수요 실적 재확인",
+      "zone": "AI 반도체·데이터센터 인프라",
+      "reason": "AMD +38%, SMCI +24.5%, MU +5% 어닝 서프라이즈 연속. Q1 28% YoY 어닝 비트. 엔비디아·SK하이닉스 HBM 수요 사이클 지속",
       "momentum": "강함",
-      "data_point": "나스닥 25,806, S&P500 7,337, AMD +15%"
+      "data_point": "나스닥 25,806 / AMD Q1 EPS 서프라이즈 / SK하이닉스 HBM3E 공급 확대"
     },
     {
-      "zone": "AI 반도체 섹터 (엔비디아·AMD 중심)",
-      "reason": "AMD 실적 서프라이즈로 AI 반도체 수요 내러티브 재강화. 엔비디아 연동 상승 모멘텀 유지",
-      "momentum": "강함",
-      "data_point": "AMD Q1 어닝 서프라이즈 +15% 주가 반응"
-    },
-    {
-      "zone": "코스피 개인투자자 (역발상 매수)",
-      "reason": "외국인 대규모 이탈 구간에서 역대 4위 순매수. 낙폭 과대 인식 기반 저점 매수 유입",
+      "zone": "국내 기관 수급",
+      "reason": "5월 7일 기관 +1.10조 순매수로 외국인 매물 일부 흡수. 연기금·보험 등 저가 매수세 유입",
       "momentum": "보통",
-      "data_point": "개인 5.99조원 순매수 (역대 4위)"
+      "data_point": "기관 순매수 +1.10조(2026-05-07)"
     }
   ],
   "neutral_waiting": [
     {
-      "zone": "코스피 전체 (방향성 분기점)",
-      "catalyst_needed": "나스닥 오늘 종가 +1% 이상 마감 시 반등 확인 / 외국인 순매도 규모 정상화 여부"
+      "zone": "삼성전자",
+      "catalyst_needed": "레거시 DRAM 수요 회복 신호 또는 AI 온디바이스 칩 수주 확대 발표. 스마트폰 시장 전망 개선 필요"
     },
     {
-      "zone": "원/달러 환율 (1,463.58)",
-      "catalyst_needed": "Fed 추가 강경 발언 여부 및 달러 인덱스 방향성 확인. 1,470 이상 돌파 시 EM 자금 이탈 가속 경보"
-    },
-    {
-      "zone": "SK하이닉스 / 삼성전자",
-      "catalyst_needed": "나스닥 반도체 섹터 방향성 확인 및 외국인 수급 정상화. HBM 수요 관련 추가 가이던스"
+      "zone": "코스피 중소형 수출주",
+      "catalyst_needed": "원/달러 1,463원 수준 안정화 + 미중 관세 갈등 완화 신호. 외국인 수급 방향 확인 후 진입"
     }
   ],
   "hidden_signals": [
     {
-      "signal": "코스피 사상최고(7,490) 직후 외국인 역대 최대 이탈 동시 발생 — 고점 청산 교과서적 패턴",
-      "implication": "기관 스마트머니의 고점 인식 가능성 높음. 단기 기술적 반등 후 추가 이탈 2라운드 리스크 존재. 사상최고 경신 = 매도 청산 트리거 가설 유효",
+      "signal": "외국인 -7.15조 순매도 후 지수 +1.43% 상승 — 수급 이중성",
+      "implication": "개인+기관이 일시 방어했으나, 외국인 추가 이탈 재개 시 지지력 급격히 소멸. '매수 소진 후 하락' 패턴 주의",
+      "confidence": "보통"
+    },
+    {
+      "signal": "6년래 외국인 코스피 보유 비중 최고 → 매도 여력 충분",
+      "implication": "외국인 보유 비중이 역사적 고점이면 추가 차익실현 또는 비중 축소 여력이 크다는 뜻. MSCI 정기 변경 전후 추가 매도 압력 가중 가능",
+      "confidence": "보통"
+    },
+    {
+      "signal": "SK하이닉스 베타 1.36x — 나스닥 연동 하방 민감도 높음",
+      "implication": "나스닥 -1% 하락 시 SK하이닉스 약 -1.36% 연동. AMD 단일 호재 소화 후 나스닥 조정 시 SK하이닉스 낙폭 확대 위험",
+      "confidence": "높음"
+    },
+    {
+      "signal": "VIX 17.08 — 과거 급등 직전 저점 패턴과 일치 가능성",
+      "implication": "VIX 15~18 구간은 역사적으로 시장 자기만족 구간. 단기 충격 발생 시 VIX 25+ 급등 및 지수 급락 가능",
       "confidence": "보통"
     }
   ],
   "thesis_killers": [
     {
-      "event": "나스닥",
-      "timeframe": "오늘 미국장 종가",
-      "confirms_if": "나스닥 +1% 이상 종가 — 위험선호 유지, 코스피 반등 근거 강화",
-      "invalidates_if": "나스닥 -1% 이하 종가 — 위험선호 regime 붕괴, 코스피 추가 하락 신호",
+      "event": "코스피",
+      "timeframe": "1~2거래일",
+      "confirms_if": "코스피 2,620pt 이상 유지 + 외국인 순매도 -5,000억원 이하",
+      "invalidates_if": "코스피 2,550pt 이하 이탈 또는 외국인 순매도 -1조원 이상 재발",
       "quality": "ok"
     },
     {
-      "event": "코스피",
-      "timeframe": "금일 장중",
-      "confirms_if": "코스피 7,400pt 이상 유지 마감 — 외국인 이탈에도 개인 흡수 구조 안정 확인",
-      "invalidates_if": "코스피 7,200pt 이하 이탈 — 개인 수급 한계 노출, 추가 이탈 가속 국면",
+      "event": "나스닥",
+      "timeframe": "당일 종가",
+      "confirms_if": "나스닥 +1% 이상 종가(25,806pt 대비 26,064pt 이상)",
+      "invalidates_if": "나스닥 -1% 이하 종가(25,548pt 이하) → SK하이닉스 -1.4% 연동 낙폭",
+      "quality": "ok"
+    },
+    {
+      "event": "SK하이닉스",
+      "timeframe": "2~3거래일",
+      "confirms_if": "SK하이닉스 +2% 이상 유지로 AI 반도체 수요 신뢰 확인",
+      "invalidates_if": "SK하이닉스 -3% 이하 → 레거시 DRAM 수요 위축 + 외국인 이탈 연쇄 확인",
       "quality": "ok"
     }
   ],
@@ -413,8 +408,8 @@
   "data_quality": "degraded",
   "jackal_candidate_review": {
     "analysis_date": "2026-05-08",
-    "market_bias": "risk_on",
-    "market_bias_label": "위험선호",
+    "market_bias": "mixed",
+    "market_bias_label": "혼조/관망",
     "reviewed_count": 0,
     "aligned_count": 0,
     "neutral_count": 0,
@@ -640,32 +635,18 @@
   "health": {
     "status": "degraded",
     "degraded_reasons": [
-      "cost_alert_failed",
-      "external_data_degraded",
-      "weight_update_failed"
+      "external_data_degraded"
     ],
     "counters": {
-      "warnings": 3,
-      "soft_fails": 3
+      "warnings": 1,
+      "soft_fails": 1
     },
     "details": [
-      {
-        "code": "cost_alert_failed",
-        "where": "orca/main.py::main",
-        "exception_type": "ModuleNotFoundError",
-        "message": "월 API 비용 경고 발송 실패"
-      },
       {
         "code": "external_data_degraded",
         "where": "orca/run_cycle.py::run_orca_cycle",
         "exception_type": "",
         "message": "partial data failure: KRX_API, KOREA_NEWS"
-      },
-      {
-        "code": "weight_update_failed",
-        "where": "orca/main.py::main",
-        "exception_type": "ModuleNotFoundError",
-        "message": "가중치 업데이트 실패"
       }
     ]
   },
@@ -686,13 +667,13 @@
       "path": "data/orca_state.db",
       "exists": true,
       "size_bytes": 21483520,
-      "mtime_iso": "2026-05-08T10:36:03.295885+09:00"
+      "mtime_iso": "2026-05-08T12:31:01.427697+09:00"
     },
     "jackal_state_db": {
       "path": "data/jackal_state.db",
       "exists": true,
       "size_bytes": 229376,
-      "mtime_iso": "2026-05-08T10:32:38.206274+09:00",
+      "mtime_iso": "2026-05-08T12:28:00.372134+09:00",
       "tables": {
         "jackal_shadow_signals": 0,
         "jackal_live_events": 10,
