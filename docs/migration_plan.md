@@ -39,7 +39,9 @@
 - ✅ Phase B-3.5b: JACKAL 텔레그램 build 표시 완료
 - ✅ Day 14: Phase B-4 - jackal/{evolution, tracker, scanner, hunter} 경로 교체 완료
 - ✅ Day 15: Phase B-5 - jackal/{core, backtest} 경로 교체 완료
-- Day 16+: Phase D - jackal/{adapter, shield} → modules/ 이동 재시도
+- ✅ Day 16: Phase D-1 - jackal/adapter.py → modules/jackal/pipeline/ 이동 완료
+- ✅ Day 16: Phase D-2 - jackal/shield.py → modules/jackal/pipeline/ 이동 완료
+- ✅ Stage 1 완료: shared/paths 기반 경로 정리 + modules/jackal/pipeline/ 첫 이동 완료
 
 ### Stage 2: KIS + 분 단위 데이터 (Day 11~17) — 1주
 
