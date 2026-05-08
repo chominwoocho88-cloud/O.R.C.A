@@ -1,5 +1,6 @@
 import os
 import unittest
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 
@@ -41,7 +42,31 @@ class Phase4Sprint22aTests(unittest.TestCase):
                 _run_phase4_drift_check({"history": []})
 
         printed = " ".join(str(call.args[0]) for call in mock_print.call_args_list if call.args)
-        self.assertIn("drift detector failed", printed)
+        self.assertIn("PHASE4_DRIFT_CHECK failed", printed)
+        self.assertTrue(any(call.kwargs.get("flush") is True for call in mock_print.call_args_list))
+
+    def test_drift_check_outputs_marker(self):
+        from modules.orca.pipeline.run_cycle import _run_phase4_drift_check
+
+        today = datetime.now()
+        accuracy = {
+            "history": [
+                {
+                    "date": (today - timedelta(days=i)).strftime("%Y-%m-%d"),
+                    "total": 3,
+                    "correct": 3,
+                }
+                for i in range(20)
+            ]
+        }
+
+        with patch("builtins.print") as mock_print:
+            _run_phase4_drift_check(accuracy)
+
+        printed = " ".join(str(call.args[0]) for call in mock_print.call_args_list if call.args)
+        self.assertIn("PHASE4_DRIFT_CHECK stable", printed)
+        self.assertIn("baseline=", printed)
+        self.assertTrue(any(call.kwargs.get("flush") is True for call in mock_print.call_args_list))
 
 
 if __name__ == "__main__":

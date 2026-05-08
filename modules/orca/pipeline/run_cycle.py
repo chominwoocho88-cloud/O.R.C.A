@@ -54,19 +54,23 @@ def _run_phase4_drift_check(accuracy: dict) -> None:
         drift_result = detect_drift(accuracy)
         if drift_result.drift_detected:
             print(
-                "  Drift detected: {reason} (recent={recent:.1%}, baseline={baseline:.1%})".format(
-                    reason=drift_result.reason,
-                    recent=drift_result.recent_accuracy,
-                    baseline=drift_result.baseline_accuracy,
-                )
+                f"PHASE4_DRIFT_CHECK drift reason={drift_result.reason} "
+                f"recent={drift_result.recent_accuracy:.1%} "
+                f"baseline={drift_result.baseline_accuracy:.1%}",
+                flush=True,
             )
         else:
-            print("  Accuracy stable (recent={recent:.1%})".format(recent=drift_result.recent_accuracy))
+            print(
+                f"PHASE4_DRIFT_CHECK stable "
+                f"recent={drift_result.recent_accuracy:.1%} "
+                f"baseline={drift_result.baseline_accuracy:.1%}",
+                flush=True,
+            )
 
         if is_phase4_self_correction_enabled():
-            print("  Phase 4 self-correction flag enabled (observe-only)")
+            print("PHASE4_DRIFT_CHECK flag_enabled observe_only", flush=True)
     except Exception as e:
-        print(f"  drift detector failed: {e}")
+        print(f"PHASE4_DRIFT_CHECK failed error={e}", flush=True)
 
 
 class HealthTracker:
