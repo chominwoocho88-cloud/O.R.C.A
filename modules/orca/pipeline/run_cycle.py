@@ -47,9 +47,9 @@ def is_phase4_self_correction_enabled() -> bool:
 
 
 def _run_phase4_drift_check(accuracy: dict) -> dict:
-    """Run the Phase 4 drift detector in observe-only mode."""
+    """Run the Phase 4 drift detector and correction decision in observe-only mode."""
     try:
-        from orca.self_correction import detect_drift
+        from orca.self_correction import apply_phase4_correction, detect_drift
 
         drift_result = detect_drift(accuracy)
         if drift_result.drift_detected:
@@ -68,8 +68,19 @@ def _run_phase4_drift_check(accuracy: dict) -> dict:
             )
 
         flag_enabled = is_phase4_self_correction_enabled()
+        correction_info = {}
         if flag_enabled:
             print("PHASE4_DRIFT_CHECK flag_enabled observe_only", flush=True)
+            correction_info = apply_phase4_correction(drift_result)
+            if correction_info["correction_applied"]:
+                print(
+                    f"PHASE4_CORRECTION decision severity={correction_info['severity']} "
+                    f"delta={correction_info['delta']} "
+                    f"(NOT applied yet, Sprint 2-3a)",
+                    flush=True,
+                )
+            else:
+                print("PHASE4_CORRECTION decision none", flush=True)
 
         return {
             "drift_detected": drift_result.drift_detected,
@@ -77,6 +88,7 @@ def _run_phase4_drift_check(accuracy: dict) -> dict:
             "recent_accuracy": drift_result.recent_accuracy,
             "baseline_accuracy": drift_result.baseline_accuracy,
             "flag_enabled": flag_enabled,
+            "correction": correction_info,
         }
     except Exception as e:
         print(f"PHASE4_DRIFT_CHECK failed error={e}", flush=True)

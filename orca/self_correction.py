@@ -21,6 +21,11 @@ DEFAULT_MIN_RECENT_SAMPLES = 5
 DEFAULT_MIN_BASELINE_SAMPLES = 15
 DEFAULT_LOW_ACCURACY_THRESHOLD = 0.75
 DEFAULT_DRIFT_DELTA_PCT = 0.15
+DEFAULT_SEVERE_DROP_THRESHOLD = 0.15
+PHASE4_CORRECTION_LADDER = [
+    ("severe_drop", -0.10),
+    ("low_accuracy", -0.05),
+]
 
 
 @dataclass(frozen=True)
@@ -118,6 +123,47 @@ def detect_drift(
     )
 
 
+def get_correction_severity(drift_result: DriftResult) -> str | None:
+    """Classify drift severity for future correction actions."""
+    if not drift_result.drift_detected:
+        return None
+
+    delta = drift_result.baseline_accuracy - drift_result.recent_accuracy
+    if delta >= DEFAULT_SEVERE_DROP_THRESHOLD:
+        return "severe_drop"
+    if drift_result.recent_accuracy < DEFAULT_LOW_ACCURACY_THRESHOLD:
+        return "low_accuracy"
+    return None
+
+
+def get_correction_delta(severity: str) -> float:
+    """Return the conservative correction delta for a severity label."""
+    for label, delta in PHASE4_CORRECTION_LADDER:
+        if label == severity:
+            return delta
+    return 0.0
+
+
+def apply_phase4_correction(drift_result: DriftResult) -> dict[str, Any]:
+    """Return Phase 4 correction decision info without mutating weights."""
+    severity = get_correction_severity(drift_result)
+    if severity is None:
+        return {
+            "correction_applied": False,
+            "severity": None,
+            "delta": 0.0,
+            "reason": "no_correction_needed",
+        }
+
+    delta = get_correction_delta(severity)
+    return {
+        "correction_applied": True,
+        "severity": severity,
+        "delta": delta,
+        "reason": f"correction_{severity}",
+    }
+
+
 __all__ = [
     "DEFAULT_RECENT_DAYS",
     "DEFAULT_BASELINE_DAYS",
@@ -125,6 +171,11 @@ __all__ = [
     "DEFAULT_MIN_BASELINE_SAMPLES",
     "DEFAULT_LOW_ACCURACY_THRESHOLD",
     "DEFAULT_DRIFT_DELTA_PCT",
+    "DEFAULT_SEVERE_DROP_THRESHOLD",
+    "PHASE4_CORRECTION_LADDER",
     "DriftResult",
     "detect_drift",
+    "get_correction_severity",
+    "get_correction_delta",
+    "apply_phase4_correction",
 ]
