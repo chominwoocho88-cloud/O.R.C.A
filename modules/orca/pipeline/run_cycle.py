@@ -222,7 +222,7 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
         print(get_monthly_cost_summary())
 
         try:
-            from .data import load_cost
+            from orca.data import load_cost
 
             _cost = load_cost()
             _mk = datetime.now(KST).strftime("%Y-%m")
@@ -308,7 +308,7 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
             print("\n=== Verifying yesterday predictions ===")
             accuracy = run_verification()
             try:
-                from .analysis import update_weights_from_accuracy
+                from orca.analysis import update_weights_from_accuracy
 
                 changes = update_weights_from_accuracy(accuracy)
                 if changes:
