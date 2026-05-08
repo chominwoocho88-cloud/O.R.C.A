@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-08 10:36 KST",
+  "collected_at": "2026-05-08 12:31 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,40 +12,58 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia announces multi-billion-dollar partnership with Corning for optical fiber manufacturing, boosting AI infrastructure capabilities",
+      "headline": "NVIDIA announces multi-billion dollar partnership with Corning to enhance optical-fiber manufacturing for AI infrastructure",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "NVIDIA to invest up to $2.1 billion in IREN partnership for AI infrastructure deployment",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix shares surge on rising demand for memory chips from AI data centers, supported by foreign buying and AI supercycle optimism",
+      "headline": "SK Hynix stock gained 3.31% on May 7, 2026, rising with semiconductor sector momentum and AI demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics market cap surpasses $1 trillion as shares surge over 10% driven by AI chip demand and semiconductor rally",
+      "headline": "Samsung Electronics market cap surpasses $1 trillion after U.S. AI chip stocks surge",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics stock increased 14.41% in the past 24 hours driven by AI infrastructure demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom experiencing significant momentum driven by strong AI demand and strategic partnerships with major tech companies for custom AI chips",
+      "headline": "Broadcom experiencing robust momentum with 106% year-over-year revenue growth in AI semiconductors",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom Q1 FY2026 shows strong performance with 29% revenue increase and $22 billion Q2 revenue guidance",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp signed partnership deal with OpenAI for AI expansion, though stock shows mixed technical signals with bearish short-term ratings",
-      "impact": "neutral",
+      "headline": "Kakao Corp stock at 46,300 KRW with OpenAI partnership announcement supporting AI initiatives",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "Shinhan SOL Shipbuilding TOP3 ETF tracking shipbuilding companies shows declining performance with sell signals amid profit-taking in Korean markets",
-      "impact": "bearish",
+      "headline": "Shinhan SOL Korea dividend ETF maintains stable performance with 6% annualized dividend yield",
+      "impact": "neutral",
       "source": "web_search"
     }
   ],
-  "total": 6
+  "total": 9
 }
