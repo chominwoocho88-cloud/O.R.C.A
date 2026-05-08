@@ -16,8 +16,8 @@ import json
 import logging
 import argparse
 from datetime import datetime
-from pathlib import Path
 
+from shared.paths import JACKAL_LEGACY_DIR, JACKAL_WEIGHTS_FILE
 from orca.state import load_latest_jackal_weight_snapshot
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
@@ -36,7 +36,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 log = logging.getLogger("jackal_core")
-_BASE = Path(__file__).resolve().parent
+_BASE = JACKAL_LEGACY_DIR
 
 
 class JackalCore:
@@ -104,7 +104,7 @@ class JackalCore:
         """jackal_weights.json["last_evolved_at"] 기반 24h 판단"""
         weights = load_latest_jackal_weight_snapshot()
         if not isinstance(weights, dict):
-            weights_file = _BASE / "jackal_weights.json"
+            weights_file = JACKAL_WEIGHTS_FILE
             if not weights_file.exists():
                 return True
             try:

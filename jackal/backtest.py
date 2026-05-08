@@ -15,11 +15,11 @@ Jackal research backtest runner (v2).
 
 [Bug Fix] 경로 수정 (2024-04)
   - 실행 위치: repo root (`python -m jackal.backtest`)
-  - _ROOT = Path(__file__).parent  → jackal/ 폴더
-  - MEMORY_FILE = _ROOT / "data" / "memory.json"
+  - _JACKAL_DIR = shared.paths.JACKAL_LEGACY_DIR  → jackal/ 폴더
+  - MEMORY_FILE = shared.paths.MEMORY_FILE
       → 실제: jackal/data/memory.json (없음)
       → 정상: data/memory.json (repo root 기준)
-  수정: _JACKAL_DIR / _REPO_ROOT 분리로 경로를 명확히 구분
+  수정: shared.paths의 _JACKAL_DIR / _REPO_ROOT 분리로 경로를 명확히 구분
 """
 
 import argparse
@@ -29,7 +29,6 @@ import os
 import sys
 import time
 from datetime import datetime, timedelta
-from pathlib import Path
 from collections import defaultdict
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
@@ -37,6 +36,11 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 import pandas as pd
+from shared.paths import (
+    JACKAL_LEGACY_DIR,
+    MEMORY_FILE as SHARED_MEMORY_FILE,
+    REPO_ROOT,
+)
 from orca.state import (
     finish_backtest_session,
     get_latest_backtest_session,
@@ -56,10 +60,10 @@ from .backtest_materialization import (
 )
 
 # ── 경로 (Bug Fix) ────────────────────────────────────────────────
-_JACKAL_DIR = Path(__file__).parent          # jackal/
-_REPO_ROOT  = _JACKAL_DIR.parent             # repo root (aria-agent/)
+_JACKAL_DIR = JACKAL_LEGACY_DIR              # jackal/
+_REPO_ROOT  = REPO_ROOT                      # repo root
 
-MEMORY_FILE = _REPO_ROOT / "data" / "memory.json"          # fallback source
+MEMORY_FILE = SHARED_MEMORY_FILE             # fallback source
 
 _JACKAL_SESSION_ID: str | None = None
 
