@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-08 23:26 KST",
+  "collected_at": "2026-05-09 00:34 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Goldman Sachs raises NVDA profit forecast 12%, stock rallies on AI momentum",
+      "headline": "Nvidia announces $3.2B investment in Corning for AI optical fiber manufacturing plants in NC and Texas",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix record high after foreign buying surge, strong AI memory demand",
+      "headline": "SK하이닉스 stock up 3.31% on strong AI-driven HBM demand and foreign buying momentum",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics hits record high, target price raised to 500K KRW on memory re-evaluation",
+      "headline": "삼성전자 hits $1 trillion market cap milestone, up 2.07% with SK증권 raising target price to 500,000 KRW",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom stock slides 4% after OpenAI custom chip deal financing snag reported",
+      "headline": "Broadcom retreats to $412 from all-time high of $437.68 amid OpenAI financing concerns and spending skepticism",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao rises on AI service expansion expectations, analysts maintain buy rating",
-      "impact": "bullish",
+      "headline": "카카오 down as securities firms downgrade AI outlook and reduce price targets due to AI implementation delays",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF assets surge past 5 trillion won amid dividend focus trend",
+      "headline": "SOL 코리아고배당 ETF net assets surpass 5 trillion won on strong dividend stock performance and government policy support",
       "impact": "bullish",
       "source": "web_search"
     }
