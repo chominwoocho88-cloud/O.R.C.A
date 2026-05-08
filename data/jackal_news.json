@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-09 01:54 KST",
+  "collected_at": "2026-05-09 02:30 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -11,41 +11,65 @@
   "regime": "",
   "news_items": [
     {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics (005930.KS) hits record high >270,000 won; HBM4 memory unveiled for AI accelerators; valuation crosses $1 trillion",
+      "source": "Seoul Economic Daily, CNBC",
+      "data_pt": "Stock up 14-15% in week-long rally driven by AI chip demand. May 6-7 2026"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK hynix (000660.KS) record high >1.65 million won; up 40.93% since early May on AI memory chip demand",
+      "source": "Seoul Economic Daily, Trading Economics",
+      "data_pt": "Second-largest Korean chipmaker benefiting from HBM and DRAM shortage pricing. May 7 2026"
+    },
+    {
       "ticker": "NVDA",
-      "headline": "Nvidia stock rallies with partnerships for AI infrastructure; earnings May 20 expected to beat",
+      "headline": "NVIDIA secures $3.4B in future revenue by investing $2.1B in IREN for 5GW AI infrastructure deployment",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Nvidia partners with Corning on $500M deal to expand US optical connectivity manufacturing for AI data centers",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix surges to record high on foreign buying, strong memory chip demand driving analyst upgrades",
+      "headline": "SK Hynix shares hit record highs with strong demand for AI memory chips and record Q1 earnings",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics hits record high alongside SK Hynix amid strong semiconductor cycle",
+      "headline": "Samsung Electronics surpasses $1 trillion market cap as stock doubled in 2026 on AI-driven semiconductor demand",
       "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung union enters wage dispute mediation with potential strike risk impacting production",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom rebounds after OpenAI custom chip deal financing snag; analysts maintain bullish outlook",
-      "impact": "neutral",
+      "headline": "Broadcom slides 4% after OpenAI's $18B custom chip deal hits major financing snag",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom reports strong AI momentum with 106% year-over-year revenue growth in AI semiconductors",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao partners with OpenAI for Stargate initiative; stock trading near 52-week lows but analysts bullish",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF surges past 500B won AUM; strong dividend yield demand continues",
-      "impact": "bullish",
+      "headline": "Kakao reports earnings with potential AI partnership expansion under exploration",
+      "impact": "neutral",
       "source": "web_search"
     }
   ],
-  "total": 6
+  "total": 11
 }
