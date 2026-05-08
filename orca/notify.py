@@ -106,6 +106,20 @@ def _safe_float(value, default: float = 0.0) -> float:
         return default
 
 
+def _build_phase4_drift_badge(report: dict) -> str:
+    """Build the Phase 4 drift badge when observation is explicitly enabled."""
+    drift_info = report.get("phase4_drift") or {}
+    if not drift_info.get("flag_enabled"):
+        return ""
+    if not drift_info.get("drift_detected"):
+        return ""
+
+    reason = str(drift_info.get("reason") or "unknown")
+    recent = _safe_float(drift_info.get("recent_accuracy"))
+    baseline = _safe_float(drift_info.get("baseline_accuracy"))
+    return f"🟡 Drift 감지: {reason} (recent {recent:.1%}, baseline {baseline:.1%})"
+
+
 def _report_line_text(value, *, limit: int | None = None) -> str:
     text = str(value or "").strip()
     if limit is None or len(text) <= limit:
@@ -188,6 +202,9 @@ def send_report(report: dict, run_number: int) -> bool:
     badge = _build_health_badge(report)
     if badge:
         lines.append(badge)
+    phase4_badge = _build_phase4_drift_badge(report)
+    if phase4_badge:
+        lines.append(phase4_badge)
     lines.append("<code>build: " + get_build_info() + "</code>")
     return send_message("\n".join(lines), reply_markup=make_buttons())
 

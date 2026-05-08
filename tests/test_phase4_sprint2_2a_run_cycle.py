@@ -39,9 +39,10 @@ class Phase4Sprint22aTests(unittest.TestCase):
 
         with patch("orca.self_correction.detect_drift", side_effect=RuntimeError("boom")):
             with patch("builtins.print") as mock_print:
-                _run_phase4_drift_check({"history": []})
+                result = _run_phase4_drift_check({"history": []})
 
         printed = " ".join(str(call.args[0]) for call in mock_print.call_args_list if call.args)
+        self.assertEqual(result, {})
         self.assertIn("PHASE4_DRIFT_CHECK failed", printed)
         self.assertTrue(any(call.kwargs.get("flush") is True for call in mock_print.call_args_list))
 
@@ -61,9 +62,12 @@ class Phase4Sprint22aTests(unittest.TestCase):
         }
 
         with patch("builtins.print") as mock_print:
-            _run_phase4_drift_check(accuracy)
+            result = _run_phase4_drift_check(accuracy)
 
         printed = " ".join(str(call.args[0]) for call in mock_print.call_args_list if call.args)
+        self.assertIsInstance(result, dict)
+        self.assertFalse(result["drift_detected"])
+        self.assertEqual(result["reason"], "stable")
         self.assertIn("PHASE4_DRIFT_CHECK stable", printed)
         self.assertIn("baseline=", printed)
         self.assertTrue(any(call.kwargs.get("flush") is True for call in mock_print.call_args_list))

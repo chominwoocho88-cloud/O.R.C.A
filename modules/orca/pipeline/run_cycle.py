@@ -46,7 +46,7 @@ def is_phase4_self_correction_enabled() -> bool:
     return get_orca_flag("WAVE_F_PHASE4_SELF_CORRECTION", False)
 
 
-def _run_phase4_drift_check(accuracy: dict) -> None:
+def _run_phase4_drift_check(accuracy: dict) -> dict:
     """Run the Phase 4 drift detector in observe-only mode."""
     try:
         from orca.self_correction import detect_drift
@@ -67,10 +67,20 @@ def _run_phase4_drift_check(accuracy: dict) -> None:
                 flush=True,
             )
 
-        if is_phase4_self_correction_enabled():
+        flag_enabled = is_phase4_self_correction_enabled()
+        if flag_enabled:
             print("PHASE4_DRIFT_CHECK flag_enabled observe_only", flush=True)
+
+        return {
+            "drift_detected": drift_result.drift_detected,
+            "reason": drift_result.reason,
+            "recent_accuracy": drift_result.recent_accuracy,
+            "baseline_accuracy": drift_result.baseline_accuracy,
+            "flag_enabled": flag_enabled,
+        }
     except Exception as e:
         print(f"PHASE4_DRIFT_CHECK failed error={e}", flush=True)
+    return {}
 
 
 class HealthTracker:
@@ -337,6 +347,7 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
                 extract_dawn_lessons(todays, "market outcomes today")
 
         accuracy = {}
+        phase4_drift = {}
         if mode == "MORNING":
             print("\n=== Verifying yesterday predictions ===")
             accuracy = run_verification()
@@ -355,7 +366,7 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
                 )
                 print(f"  \uac00\uc911\uce58 \uc5c5\ub370\uc774\ud2b8 \uc2a4\ud0b5: {e}")
 
-            _run_phase4_drift_check(accuracy)
+            phase4_drift = _run_phase4_drift_check(accuracy)
 
         present.send_start_notice()
         hunter, analyst, devil, report = pipeline.run_agent_pipeline(
@@ -372,6 +383,8 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
         report["analysis_time"] = datetime.now(KST).strftime("%H:%M KST")
         report["mode"] = mode
         report["data_quality"] = market_data.get("data_quality", "ok")
+        if phase4_drift:
+            report["phase4_drift"] = phase4_drift
 
         drift = get_regime_drift(report.get("market_regime", ""))
         if drift and drift != "STABLE":
