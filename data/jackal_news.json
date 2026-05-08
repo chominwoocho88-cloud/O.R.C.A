@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-08 08:42 KST",
+  "collected_at": "2026-05-08 10:36 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,58 +12,40 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia partners with Corning for $3.2B optical fiber manufacturing investment; stock gains 5.41%",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "Goldman Sachs says Nvidia stock is meaningfully undervalued ahead of May 20 earnings report",
+      "headline": "Nvidia announces multi-billion-dollar partnership with Corning for optical fiber manufacturing, boosting AI infrastructure capabilities",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix hits record highs driven by foreign buying and chip price increases; 80.7% return over past 30 days",
+      "headline": "SK Hynix shares surge on rising demand for memory chips from AI data centers, supported by foreign buying and AI supercycle optimism",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics reaches $1 trillion market cap valuation; stock up 2.07% to record high",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "SK Securities raises Samsung Electronics price target to 500,000 won; memory company revaluation just beginning",
+      "headline": "Samsung Electronics market cap surpasses $1 trillion as shares surge over 10% driven by AI chip demand and semiconductor rally",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom experiencing significant momentum from strong AI demand and strategic partnerships",
+      "headline": "Broadcom experiencing significant momentum driven by strong AI demand and strategic partnerships with major tech companies for custom AI chips",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "OpenAI CEO Sam Altman signs partnership deal with Kakao for AI expansion",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "035720.KS",
-      "headline": "Kakao trading at 45,250 KRW; technical indicators show Strong Sell signal; analyst target price 73,160 KRW",
+      "headline": "Kakao Corp signed partnership deal with OpenAI for AI expansion, though stock shows mixed technical signals with bearish short-term ratings",
       "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF reaches 5 billion won net assets; financial stocks drive growth",
-      "impact": "bullish",
+      "headline": "Shinhan SOL Shipbuilding TOP3 ETF tracking shipbuilding companies shows declining performance with sell signals amid profit-taking in Korean markets",
+      "impact": "bearish",
       "source": "web_search"
     }
   ],
-  "total": 9
+  "total": 6
 }
