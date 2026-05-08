@@ -643,7 +643,7 @@ VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
 
     response = _llm_client.call(
         model=MODEL_H,
-        max_tokens=400,
+        max_tokens=1000,
         system="",
         user=prompt,
         call_site="jackal.scanner.analyst",
@@ -736,7 +736,7 @@ VIX: {fred.get('vix','N/A')} | HY스프레드: {fred.get('hy_spread','N/A')}%
     raw = ""
     response = _llm_client.call(
         model=MODEL_H,
-        max_tokens=400,
+        max_tokens=1000,
         system="",
         user=prompt,
         call_site="jackal.scanner.devil",
