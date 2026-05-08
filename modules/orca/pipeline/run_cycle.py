@@ -81,6 +81,13 @@ def _run_phase4_drift_check(accuracy: dict) -> dict:
                 )
             else:
                 print("PHASE4_CORRECTION decision none", flush=True)
+            try:
+                from orca.self_correction import append_self_correction_log
+
+                entry = append_self_correction_log(drift_result, correction_info)
+                print(f"PHASE4_AUDIT logged timestamp={entry['timestamp']}", flush=True)
+            except Exception as e:
+                print(f"PHASE4_AUDIT failed error={e}", flush=True)
 
         return {
             "drift_detected": drift_result.drift_detected,

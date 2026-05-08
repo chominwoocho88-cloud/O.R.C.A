@@ -10,8 +10,10 @@ Design reference: docs/phase6/wave-f-meta-learning-design.md
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 
@@ -26,6 +28,7 @@ PHASE4_CORRECTION_LADDER = [
     ("severe_drop", -0.10),
     ("low_accuracy", -0.05),
 ]
+SELF_CORRECTION_LOG_FILE = Path("data/self_correction_log.json")
 
 
 @dataclass(frozen=True)
@@ -164,6 +167,60 @@ def apply_phase4_correction(drift_result: DriftResult) -> dict[str, Any]:
     }
 
 
+def load_self_correction_log(log_file: str | Path = SELF_CORRECTION_LOG_FILE) -> list[dict[str, Any]]:
+    """Load the Phase 4 self-correction audit log."""
+    log_path = Path(log_file)
+    if not log_path.exists():
+        return []
+    try:
+        data = json.loads(log_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return []
+    if not isinstance(data, list):
+        return []
+    return data
+
+
+def append_self_correction_log(
+    drift_result: DriftResult,
+    correction_info: dict[str, Any],
+    *,
+    log_file: str | Path = SELF_CORRECTION_LOG_FILE,
+    timestamp: str | None = None,
+) -> dict[str, Any]:
+    """Append a Phase 4 correction audit entry without changing weights."""
+    if timestamp is None:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    entry = {
+        "timestamp": timestamp,
+        "drift_detected": drift_result.drift_detected,
+        "drift_reason": drift_result.reason,
+        "recent_accuracy": drift_result.recent_accuracy,
+        "baseline_accuracy": drift_result.baseline_accuracy,
+        "recent_samples": drift_result.recent_samples,
+        "baseline_samples": drift_result.baseline_samples,
+        "correction_applied": correction_info.get("correction_applied", False),
+        "correction_severity": correction_info.get("severity"),
+        "correction_delta": correction_info.get("delta", 0.0),
+        "correction_reason": correction_info.get("reason", ""),
+    }
+
+    log_path = Path(log_file)
+    log = load_self_correction_log(log_path)
+    log.append(entry)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        from shared.paths import atomic_write_json
+
+        atomic_write_json(log_path, log)
+    except ImportError:
+        log_path.write_text(json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    return entry
+
+
 __all__ = [
     "DEFAULT_RECENT_DAYS",
     "DEFAULT_BASELINE_DAYS",
@@ -173,9 +230,12 @@ __all__ = [
     "DEFAULT_DRIFT_DELTA_PCT",
     "DEFAULT_SEVERE_DROP_THRESHOLD",
     "PHASE4_CORRECTION_LADDER",
+    "SELF_CORRECTION_LOG_FILE",
     "DriftResult",
     "detect_drift",
     "get_correction_severity",
     "get_correction_delta",
     "apply_phase4_correction",
+    "load_self_correction_log",
+    "append_self_correction_log",
 ]
