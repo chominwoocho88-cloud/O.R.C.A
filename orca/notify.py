@@ -12,6 +12,7 @@ from pathlib import Path
 from .analysis import get_active_lessons, load_lessons
 from .brand import ORCA_FULL_NAME, ORCA_NAME
 from .compat import get_orca_env
+from shared.build_info import get_build_info
 from shared.llm.client import LLMClient
 from .notify_transport import _format_accuracy_display, send_message
 
@@ -105,6 +106,18 @@ def _safe_float(value, default: float = 0.0) -> float:
         return default
 
 
+def _report_line_text(value, *, limit: int | None = None) -> str:
+    text = str(value or "").strip()
+    if limit is None or len(text) <= limit:
+        return text
+
+    cut = text[:limit].rstrip()
+    boundary = max(cut.rfind(" "), cut.rfind(","), cut.rfind("/"), cut.rfind("·"))
+    if boundary >= int(limit * 0.6):
+        cut = cut[:boundary].rstrip()
+    return cut + "…"
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # TELEGRAM
 # ══════════════════════════════════════════════════════════════════════════════
@@ -175,6 +188,7 @@ def send_report(report: dict, run_number: int) -> bool:
     badge = _build_health_badge(report)
     if badge:
         lines.append(badge)
+    lines.append("<code>build: " + get_build_info() + "</code>")
     return send_message("\n".join(lines), reply_markup=make_buttons())
 
 
@@ -192,16 +206,16 @@ def _build_morning(report: dict) -> list:
         ]
     for o in report.get("outflows", [])[:3]:
         lines += ["▼ <b>" + o.get("zone","") + "</b> [" + o.get("severity","") + "]",
-                  "  <i>" + o.get("reason","")[:70] + "</i>"]
+                  "  <i>" + _report_line_text(o.get("reason",""), limit=160) + "</i>"]
     if report.get("outflows"): lines.append("")
     for i in report.get("inflows", [])[:3]:
         lines += ["▲ <b>" + i.get("zone","") + "</b> [" + i.get("momentum","") + "]",
-                  "  <i>" + i.get("reason","")[:70] + "</i>"]
+                  "  <i>" + _report_line_text(i.get("reason",""), limit=160) + "</i>"]
     if report.get("inflows"): lines.append("")
     for tk in report.get("thesis_killers", [])[:3]:
         lines += ["🎯 [" + tk.get("timeframe","") + "] <b>" + tk.get("event","") + "</b>",
-                  "  ✓ " + tk.get("confirms_if","")[:50],
-                  "  ✗ " + tk.get("invalidates_if","")[:50]]
+                  "  ✓ " + _report_line_text(tk.get("confirms_if","")),
+                  "  ✗ " + _report_line_text(tk.get("invalidates_if",""))]
     if report.get("thesis_killers"): lines.append("")
     for idx, a in enumerate(report.get("actionable_watch", [])[:3], 1):
         lines.append("📌 " + str(idx) + ". " + a)
@@ -258,8 +272,8 @@ def _build_afternoon(report: dict) -> list:
     lines = ["━━ 오후 업데이트 ━━", ""]
     outflows = report.get("outflows", [])
     inflows  = report.get("inflows", [])
-    if outflows: lines.append("▼ " + outflows[0].get("zone","") + " — " + outflows[0].get("reason","")[:50])
-    if inflows:  lines.append("▲ " + inflows[0].get("zone","") + " — " + inflows[0].get("reason","")[:50])
+    if outflows: lines.append("▼ " + outflows[0].get("zone","") + " — " + _report_line_text(outflows[0].get("reason",""), limit=160))
+    if inflows:  lines.append("▲ " + inflows[0].get("zone","") + " — " + _report_line_text(inflows[0].get("reason",""), limit=160))
     if report.get("actionable_watch"): lines.append("📌 " + report["actionable_watch"][0])
     kr = report.get("korea_focus", {})
     if kr.get("krw_usd"):
@@ -267,7 +281,7 @@ def _build_afternoon(report: dict) -> list:
     tks = report.get("thesis_killers", [])
     if tks:
         lines += ["", "🎯 <b>" + tks[0].get("event","") + "</b>",
-                  "  ✓ " + tks[0].get("confirms_if","")[:50]]
+                  "  ✓ " + _report_line_text(tks[0].get("confirms_if",""))]
     return lines
 
 
@@ -289,8 +303,8 @@ def _build_dawn(report: dict) -> list:
     lines = ["━━ 새벽 글로벌 브리핑 ━━", ""]
     inflows  = report.get("inflows", [])
     outflows = report.get("outflows", [])
-    if inflows:  lines.append("▲ " + inflows[0].get("zone","") + " — " + inflows[0].get("reason","")[:60])
-    if outflows: lines.append("▼ " + outflows[0].get("zone","") + " — " + outflows[0].get("reason","")[:60])
+    if inflows:  lines.append("▲ " + inflows[0].get("zone","") + " — " + _report_line_text(inflows[0].get("reason",""), limit=160))
+    if outflows: lines.append("▼ " + outflows[0].get("zone","") + " — " + _report_line_text(outflows[0].get("reason",""), limit=160))
     lines.append("")
     tomorrow = report.get("tomorrow_setup", "")
     if tomorrow: lines += ["📋 <b>오늘 아침 준비</b>", "<i>" + tomorrow[:100] + "</i>"]
