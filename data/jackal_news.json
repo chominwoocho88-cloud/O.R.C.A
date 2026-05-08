@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-09 00:34 KST",
+  "collected_at": "2026-05-09 01:54 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia announces $3.2B investment in Corning for AI optical fiber manufacturing plants in NC and Texas",
+      "headline": "Nvidia stock rallies with partnerships for AI infrastructure; earnings May 20 expected to beat",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK하이닉스 stock up 3.31% on strong AI-driven HBM demand and foreign buying momentum",
+      "headline": "SK Hynix surges to record high on foreign buying, strong memory chip demand driving analyst upgrades",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "삼성전자 hits $1 trillion market cap milestone, up 2.07% with SK증권 raising target price to 500,000 KRW",
+      "headline": "Samsung Electronics hits record high alongside SK Hynix amid strong semiconductor cycle",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom retreats to $412 from all-time high of $437.68 amid OpenAI financing concerns and spending skepticism",
-      "impact": "bearish",
+      "headline": "Broadcom rebounds after OpenAI custom chip deal financing snag; analysts maintain bullish outlook",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "카카오 down as securities firms downgrade AI outlook and reduce price targets due to AI implementation delays",
-      "impact": "bearish",
+      "headline": "Kakao partners with OpenAI for Stargate initiative; stock trading near 52-week lows but analysts bullish",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL 코리아고배당 ETF net assets surpass 5 trillion won on strong dividend stock performance and government policy support",
+      "headline": "SOL Korea High Dividend ETF surges past 500B won AUM; strong dividend yield demand continues",
       "impact": "bullish",
       "source": "web_search"
     }
