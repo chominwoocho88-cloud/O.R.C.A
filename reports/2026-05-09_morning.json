@@ -1,138 +1,143 @@
 {
   "analysis_date": "2026-05-09",
-  "analysis_time": "02:30 KST",
+  "analysis_time": "02:51 KST",
   "mode": "MORNING",
   "mode_label": "아침 풀분석",
-  "one_line_summary": "나스닥·코스피 신고가 경신에도 외국인 2일 합산 12.7조원 순매도 지속, 개인 매수 과부하 구조에서 위험회피 전환 리스크 고조",
-  "market_regime": "위험선호(표면) / 위험회피 전환 경계(실질)",
+  "one_line_summary": "나스닥 26,184·코스피 7,498 신고권 유지 속 외국인 7.17조 사상 최대 순매도, 개인 5.99조 매수로 지수 방어하며 선별적 위험선호 지속",
+  "market_regime": "위험선호(선별적) — 외국인 차익실현 병존",
   "trend_phase": "상승추세",
   "trend_strategy": {
-    "recommended": "AI·반도체 섹터 단기 모멘텀 추종 시 반드시 손절선 설정(SK하이닉스 -2% / 나스닥 -1% 이탈 시 즉시 대응). 신규 매수보다 기존 포지션 수익 실현 병행 권고",
-    "caution": "외국인 3거래일 연속 대규모 순매도 지속 시 개인 매수 손실 급증 위험. 코스피 7,300pt 이탈 시 추가 하락(-200pt) 가능성 대비 필수. 미시간 소비심리 48.2 역대 최저권 = 내수 소비 관련 포지션 최소화",
-    "difficulty": "어려움"
+    "recommended": "AI·반도체(엔비디아·SK하이닉스) 모멘텀 추종 유지, 코스피 외국인 수급 안정 확인 후 단계적 비중 확대",
+    "caution": "Meta·크루즈·에듀테크 등 가이던스 하향 섹터 노출 축소; 3일 이상 연속 상승 국면 블랙스완 리스크 경계, 개인 단독 매수 주도 장세 과신 금지",
+    "difficulty": "보통"
   },
-  "confidence_overall": "낮음",
-  "consensus_level": "낮음",
+  "confidence_overall": "보통",
+  "consensus_level": "보통",
   "top_headlines": [
     {
-      "headline": "KOSPI 외국인 2일 합산 순매도 -12.7조원(약 87억달러) — 역대 최대 규모",
-      "signal_tag": "외국인 이탈 / 매도 압력",
+      "headline": "코스피 7,498 유지 속 외국인 5월 8일 7.17조원 사상 최대 순매도 — 개인 5.99조 매수로 지수 +1.43% 방어",
+      "signal_tag": "수급 분기",
       "impact": "높음"
     },
     {
-      "headline": "나스닥 26,206·S&P500 7,399 신고가 유지 — AI·반도체 어닝 서프라이즈 주도",
-      "signal_tag": "모멘텀 / 차익실현 구간 진입",
+      "headline": "AMD +15%, Alphabet +10%, MU +25% 주간 — AI·반도체 실적 서프라이즈로 빅테크 차별화 위험선호 주도",
+      "signal_tag": "섹터 모멘텀",
       "impact": "높음"
     },
     {
-      "headline": "미시간 소비자신뢰지수 48.2 — 예상(49.7) 하회, 역대 최저권 근접",
-      "signal_tag": "소비 둔화 / 경기 경고",
-      "impact": "높음"
-    },
-    {
-      "headline": "MercadoLibre(MELI) -11.7% 어닝 미스 — 이머징 소비재 실적 기대 하향",
-      "signal_tag": "이머징 소비 섹터 이탈",
+      "headline": "Meta -9%, Norwegian Cruise -9%, Duolingo -14%, MercadoLibre -11.7% — 가이던스 쇼크 종목 집중 매도",
+      "signal_tag": "실적 리스크",
       "impact": "보통"
     },
     {
-      "headline": "연준 4인 반대 표결 — 역사적 이례, 통화정책 불확실성 확대",
-      "signal_tag": "Fed 리스크 / 정책 분열",
+      "headline": "코스피 외국인 지분율 38.9% 6년 만의 신고 후 차익실현 급전환 — 구조적 이탈 vs 전술적 리밸런싱 논쟁",
+      "signal_tag": "외국인 수급",
+      "impact": "높음"
+    },
+    {
+      "headline": "VIX 17.41 중립 하단 유지 — 극단 공포 해소됐으나 고점권 + 낮은 VIX 조합은 이벤트 발생 시 스파이크 취약",
+      "signal_tag": "변동성 경보",
       "impact": "보통"
     }
   ],
   "volatility_index": {
     "vkospi": "N/A",
-    "vix": "17.34",
-    "fear_greed": "데이터 미제공",
+    "vix": "17.41",
+    "fear_greed": "N/A",
     "level": "중립",
-    "interpretation": "VIX 17.34는 중립 구간으로 시장이 아직 극단적 탐욕으로 이동하지 않았음을 시사. 외국인 대규모 이탈·소비심리 급락·Fed 분열 표결이 공포 완충 역할을 동시에 수행 중. 신고가 경신에도 VIX가 하락하지 않는 것은 불안 심리의 잠재적 누적 신호로 해석 가능. 나스닥 연속 3일+ 상승 구간에서 급반전 가능성 경계 요망."
+    "interpretation": "VIX 17.41은 역사적 중립 하단으로 공포 국면은 완전 해소. 그러나 나스닥·S&P 고점권과 낮은 VIX의 조합은 외부 충격 시 급격한 스파이크 가능성 내포. 현재 구간은 과도한 안도감 경계 필요."
   },
   "retail_reversal_signal": {
-    "retail_behavior": "국내 개인투자자 2일 연속 순매수 — 5월7일 +5.99조원, 5월8일 +3.93조원. 외국인 대규모 이탈 물량을 개인·기관이 전량 흡수하며 지수 방어 구조 형성",
-    "contrarian_implication": "개인이 외국인 매도 물량을 전량 받아내는 구조는 단기 지지 제공. 그러나 외국인 매도 지속 시 개인 손실 급증 리스크. 역발상: 개인 매수 과부화 = 추가 하락의 잠재적 트리거. 역사적으로 외국인 대규모 이탈 직후 코스피 평균 -2.1% 추가 하락 선례 존재.",
+    "retail_behavior": "코스피 5월 8일 개인 순매수 5.99조원 — 외국인 7.17조원 사상 최대 순매도 물량을 대부분 흡수하며 지수 방어",
+    "contrarian_implication": "개인이 외국인 대규모 매도를 받아내는 구조는 단기 역발상 매도 신호로 해석 가능. 과거 패턴상 외국인 대량 매도 후 개인 과매수 구간에서 단기 되돌림 리스크 상존. 단, 지수가 하락하지 않았다는 사실은 매도 압력 소화 능력을 시사하며 즉각적 붕괴 조건은 미충족.",
     "reliability": "보통"
   },
   "outflows": [
     {
-      "zone": "KOSPI 외국인",
-      "reason": "2거래일 연속 대규모 순매도. 5월7일 -7.154조원(역대 최대), 5월8일 -5.548조원 합산 -12.7조원. 단순 차익실현을 넘어 구조적 리스크 재조정 가능성",
+      "zone": "코스피 — 외국인 단기 차익실현",
+      "reason": "5월 8일 외국인 7.17조원 사상 최대 순매도. 지분율 38.9% 신고 후 포지션 조정 압력. 5월 6일 3.13조 순매수 후 급격 반전으로 단기 전술적 리밸런싱 성격.",
       "severity": "높음",
-      "data_point": "5월7~8일 외국인 KOSPI 순매도 합산 약 12.7조원(약 87억달러)"
+      "data_point": "5월 8일 외국인 순매도 7.17조원 / KOSPI 동시 +1.43% (개인 5.99조 매수 방어)"
     },
     {
-      "zone": "MercadoLibre / 이머징 소비재",
-      "reason": "어닝 미스로 -11.7% 급락. 이머징 소비 섹터 전반의 실적 기대 하향 신호 발생",
+      "zone": "Meta — AI 설비투자 수익화 불안",
+      "reason": "FY Capex 가이던스 $125-145B 상향에도 유저성장 실망 및 AI 수익화 가시성 의문으로 -9% 급락. 빅테크 내 차별화 매도.",
       "severity": "보통",
-      "data_point": "MELI 5월8일 -11.7% (어닝 미스)"
+      "data_point": "Meta FY capex $125-145B 상향 + 유저성장 실망 → -9%"
     },
     {
-      "zone": "미국 소비재·경기민감주",
-      "reason": "미시간 소비자신뢰지수 48.2로 예상 하회. 휘발유 가격 상승발 소비심리 위축. 내수 소비 섹터 자금 유출 압력 지속",
+      "zone": "소비재·크루즈·에듀테크 — 가이던스 하향 집중 매도",
+      "reason": "Norwegian Cruise -9%(유럽 예약 부진·연료비 상승), Duolingo -14%(가이던스 모더레이션), MercadoLibre -11.7%(이익 미스). 실적 시즌 내 소비 둔화 섹터 선별 이탈.",
       "severity": "보통",
-      "data_point": "미시간 소비자신뢰 48.2 (예상 49.7 하회, 역대 최저권)"
+      "data_point": "Norwegian -9%, Duolingo -14%, MercadoLibre -11.7%"
     }
   ],
   "inflows": [
     {
-      "zone": "AI·반도체 섹터 (나스닥 주도)",
-      "reason": "AMD·SMCI·Micron 등 연속 어닝 서프라이즈로 위험선호 심리 유지. 나스닥 26,206 신고가 유지",
-      "momentum": "강함(단기) / 지속가능성 불확실",
-      "data_point": "나스닥 26,206.61, S&P500 7,399.81"
+      "zone": "AI·반도체 — 실적 서프라이즈 모멘텀",
+      "reason": "AMD +15%, Alphabet +10%, MU +25% 주간 급등. AI 인프라 수요 확인으로 빅테크 내 차별화 자금 유입 지속.",
+      "momentum": "강함",
+      "data_point": "AMD +15%, Alphabet +10%, MU +25% (주간 기준)"
     },
     {
-      "zone": "KOSPI 국내 개인·기관",
-      "reason": "외국인 이탈 물량 흡수 목적 순매수. 단기 지수 방어 효과 발생",
-      "momentum": "보통(구조적 취약)",
-      "data_point": "개인 2일 합산 순매수 약 9.92조원"
+      "zone": "코스피 — 개인 투자자 저가 매수",
+      "reason": "외국인 대규모 매도를 개인이 흡수하며 지수 방어. 코스피 7,498 고점권 유지.",
+      "momentum": "보통",
+      "data_point": "5월 8일 개인 순매수 5.99조원 / KOSPI +1.43%"
+    },
+    {
+      "zone": "SK하이닉스·삼성전자 — HBM 수요 기대",
+      "reason": "나스닥 반도체 강세 연동 및 AI 인프라 투자 확대 수혜 기대로 외국인 매도에도 내수 수급 방어.",
+      "momentum": "보통",
+      "data_point": "나스닥 AI 반도체 섹터 강세 / 코스피 반도체 외국인 매도 대비 지수 방어"
     }
   ],
   "neutral_waiting": [
     {
-      "zone": "미국 국채 10년물 (4.37%)",
-      "catalyst_needed": "연준 추가 금리 결정 신호 또는 인플레이션 데이터 명확한 방향성 확인"
+      "zone": "엔비디아 — 실적 발표 전 관망",
+      "catalyst_needed": "엔비디아 실적 발표 및 가이던스 확인. +1.5% 이상 시 AI 섹터 전반 불안 해소 확인, -2% 이하 시 AI 전반 재평가 리스크."
     },
     {
-      "zone": "원/달러 환율 (1461.11원)",
-      "catalyst_needed": "외국인 매도세 진정 또는 한국은행 개입 신호 확인"
+      "zone": "마이크로소프트 — 빅테크 실적 시즌 미발표",
+      "catalyst_needed": "MS 실적 발표로 기업 AI 수요 지속성 검증 필요. Meta 쇼크의 개별 이슈 vs 섹터 리스크 판별 열쇠."
+    },
+    {
+      "zone": "원/달러 환율 1,461원대 — 방향성 탐색",
+      "catalyst_needed": "미 연준 통화정책 기조 및 미중 무역 협상 진전 여부. 1,450원 이하 안정 시 외국인 귀환 신호, 1,480원 돌파 시 추가 이탈 압력."
     }
   ],
   "hidden_signals": [
     {
-      "signal": "연준 4인 반대 표결 — 역사적 이례적 사례",
-      "implication": "연준 내부 분열은 향후 금리 결정의 예측 불가능성을 높이며, 시장 변동성 급등 트리거로 작용 가능. 현재 시장이 이를 과소평가 중일 가능성",
+      "signal": "외국인 7.17조 순매도에도 코스피 +1.43% 동반 상승 — 수급 소화 능력 확인",
+      "implication": "단순 외국인 매도 = 하락 공식이 작동하지 않음. 개인 매수세 강도가 예상 이상으로 강하며, 코스피 기반 수급이 변화했을 가능성. 단, 지속성 확인 필요.",
       "confidence": "보통"
     },
     {
-      "signal": "Core PCE 3.2% 고착화 + 미시간 소비심리 역대 최저권 동시 발생",
-      "implication": "스태그플레이션 시나리오(고인플레·저성장)의 실질적 진입 신호. 연준의 금리 인하 여지 축소와 소비 기반 붕괴가 동시에 진행 중",
+      "signal": "코스피 외국인 지분율 38.9% — 6년 만의 신고치 후 차익실현 패턴",
+      "implication": "신고치 경신 후 외국인의 전술적 리밸런싱은 역설적으로 중기 상승 모멘텀 유지를 시사할 수 있음. 구조적 이탈이 아닌 포지션 조정이라면 재매수 재진입 시 상승 탄력 재점화 가능.",
       "confidence": "보통"
-    },
-    {
-      "signal": "외국인 역대 최대 순매도에도 코스피 신고가 유지",
-      "implication": "개인의 물량 흡수로 지수가 방어되고 있으나, 이는 지속 불가능한 구조. 외국인 매도 3거래일 이상 지속 시 개인 패닉 셀 가능성 내포",
-      "confidence": "높음"
     }
   ],
   "thesis_killers": [
     {
       "event": "코스피",
       "timeframe": "향후 1~2거래일",
-      "confirms_if": "코스피 7,400pt 이상 유지 + 외국인 순매도 3,000억원 이하로 축소",
-      "invalidates_if": "코스피 7,300pt 이하 이탈 + 외국인 3거래일 연속 순매도 지속",
+      "confirms_if": "코스피 2,620pt 이상 종가 유지 + 외국인 순매도 3조 미만",
+      "invalidates_if": "코스피 2,540pt 이하 이탈 또는 외국인 순매도 5조 이상 재발",
       "quality": "ok"
     },
     {
       "event": "나스닥",
-      "timeframe": "향후 1~2거래일",
-      "confirms_if": "나스닥 +1% 이상 종가 유지 (26,430pt 이상)",
-      "invalidates_if": "나스닥 -1% 이하 종가 (25,907pt 이하 이탈)",
+      "timeframe": "향후 1거래일",
+      "confirms_if": "나스닥 +1% 이상 종가 — 빅테크 차별화 우려 해소",
+      "invalidates_if": "나스닥 -1.5% 이하 — Meta 충격 전이 확인",
       "quality": "ok"
     },
     {
       "event": "SK하이닉스",
-      "timeframe": "향후 1~2거래일",
-      "confirms_if": "SK하이닉스 +2% 이상 종가",
-      "invalidates_if": "SK하이닉스 -2% 이하 종가 — 나스닥 -1.4% × 1.4 연동 낙폭 확인 시 위험회피 전환 확정",
+      "timeframe": "향후 2거래일",
+      "confirms_if": "SK하이닉스 +2% 이상 — 외국인 매도에도 수급 소화 확인",
+      "invalidates_if": "SK하이닉스 -3% 이하 — 나스닥 약세 × 1.4 베타 현실화",
       "quality": "ok"
     }
   ],
@@ -417,25 +422,25 @@
   },
   "jackal_candidate_review": {
     "analysis_date": "2026-05-09",
-    "market_bias": "mixed",
-    "market_bias_label": "혼조/관망",
+    "market_bias": "risk_on",
+    "market_bias_label": "위험선호",
     "reviewed_count": 12,
-    "aligned_count": 2,
-    "neutral_count": 10,
+    "aligned_count": 3,
+    "neutral_count": 9,
     "opposed_count": 0,
     "follow_count": 1,
     "watch_count": 8,
     "avoid_count": 3,
     "review_verdict_breakdown": {
       "strong_aligned": 0,
-      "aligned": 2,
-      "neutral": 10,
+      "aligned": 3,
+      "neutral": 9,
       "opposed": 0,
       "strong_opposed": 0
     },
-    "average_review_confidence": "low",
+    "average_review_confidence": "medium",
     "reason_code_frequency": {
-      "regime_unclear": 12,
+      "market_bias_tailwind": 12,
       "insufficient_data": 9,
       "devil_bearish_warn": 8,
       "devil_contradicts_thesis": 3,
@@ -449,9 +454,9 @@
         "source_event_type": "scan",
         "alignment": "neutral",
         "review_verdict": "neutral",
-        "alignment_score": -0.1,
+        "alignment_score": 0.05,
         "alignment_reason_codes": [
-          "regime_unclear",
+          "market_bias_tailwind",
           "insufficient_data",
           "devil_bearish_warn",
           "devil_contradicts_thesis"
@@ -459,7 +464,7 @@
         "review_confidence": "low",
         "quality_score": 50,
         "signal_family": "general_rebound",
-        "why": "현재 ORCA 레짐이 혼조라서 후보를 바로 추종하기보다 관찰 대상으로 보는 편이 안전합니다. | Signal family history: insufficient_data (general_rebound)"
+        "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: insufficient_data (general_rebound)"
       },
       {
         "ticker": "AVGO",
@@ -467,9 +472,9 @@
         "source_event_type": "scan",
         "alignment": "neutral",
         "review_verdict": "neutral",
-        "alignment_score": -0.1,
+        "alignment_score": 0.05,
         "alignment_reason_codes": [
-          "regime_unclear",
+          "market_bias_tailwind",
           "insufficient_data",
           "devil_bearish_warn",
           "devil_contradicts_thesis"
@@ -477,7 +482,7 @@
         "review_confidence": "low",
         "quality_score": 50,
         "signal_family": "general_rebound",
-        "why": "현재 ORCA 레짐이 혼조라서 후보를 바로 추종하기보다 관찰 대상으로 보는 편이 안전합니다. | Signal family history: insufficient_data (general_rebound)"
+        "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: insufficient_data (general_rebound)"
       },
       {
         "ticker": "NVDA",
@@ -485,16 +490,16 @@
         "source_event_type": "scan",
         "alignment": "neutral",
         "review_verdict": "neutral",
-        "alignment_score": -0.05,
+        "alignment_score": 0.1,
         "alignment_reason_codes": [
-          "regime_unclear",
+          "market_bias_tailwind",
           "insufficient_data",
           "devil_bearish_warn"
         ],
         "review_confidence": "low",
         "quality_score": 50,
         "signal_family": "general_rebound",
-        "why": "현재 ORCA 레짐이 혼조라서 후보를 바로 추종하기보다 관찰 대상으로 보는 편이 안전합니다. | Signal family history: insufficient_data (general_rebound)"
+        "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: insufficient_data (general_rebound)"
       },
       {
         "ticker": "000660.KS",
@@ -502,15 +507,15 @@
         "source_event_type": "shadow",
         "alignment": "neutral",
         "review_verdict": "neutral",
-        "alignment_score": -0.032,
+        "alignment_score": 0.118,
         "alignment_reason_codes": [
-          "regime_unclear",
+          "market_bias_tailwind",
           "insufficient_data"
         ],
         "review_confidence": "low",
         "quality_score": 42,
         "signal_family": "general_rebound",
-        "why": "현재 ORCA 레짐이 혼조라서 후보를 바로 추종하기보다 관찰 대상으로 보는 편이 안전합니다. | Signal family history: insufficient_data (general_rebound)"
+        "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: insufficient_data (general_rebound)"
       },
       {
         "ticker": "005930.KS",
@@ -518,15 +523,15 @@
         "source_event_type": "shadow",
         "alignment": "neutral",
         "review_verdict": "neutral",
-        "alignment_score": -0.032,
+        "alignment_score": 0.118,
         "alignment_reason_codes": [
-          "regime_unclear",
+          "market_bias_tailwind",
           "insufficient_data"
         ],
         "review_confidence": "low",
         "quality_score": 42,
         "signal_family": "general_rebound",
-        "why": "현재 ORCA 레짐이 혼조라서 후보를 바로 추종하기보다 관찰 대상으로 보는 편이 안전합니다. | Signal family history: insufficient_data (general_rebound)"
+        "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: insufficient_data (general_rebound)"
       }
     ]
   },
@@ -768,14 +773,14 @@
     "orca_state_db": {
       "path": "data/orca_state.db",
       "exists": true,
-      "size_bytes": 21684224,
-      "mtime_iso": "2026-05-09T02:30:28.547153+09:00"
+      "size_bytes": 21696512,
+      "mtime_iso": "2026-05-09T02:51:28.422500+09:00"
     },
     "jackal_state_db": {
       "path": "data/jackal_state.db",
       "exists": true,
       "size_bytes": 282624,
-      "mtime_iso": "2026-05-09T02:27:33.353882+09:00",
+      "mtime_iso": "2026-05-09T02:48:13.657573+09:00",
       "tables": {
         "jackal_shadow_signals": 6,
         "jackal_live_events": 21,

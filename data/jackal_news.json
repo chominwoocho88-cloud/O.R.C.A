@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-09 02:30 KST",
+  "collected_at": "2026-05-09 02:51 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -11,65 +11,41 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics (005930.KS) hits record high >270,000 won; HBM4 memory unveiled for AI accelerators; valuation crosses $1 trillion",
-      "source": "Seoul Economic Daily, CNBC",
-      "data_pt": "Stock up 14-15% in week-long rally driven by AI chip demand. May 6-7 2026"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK hynix (000660.KS) record high >1.65 million won; up 40.93% since early May on AI memory chip demand",
-      "source": "Seoul Economic Daily, Trading Economics",
-      "data_pt": "Second-largest Korean chipmaker benefiting from HBM and DRAM shortage pricing. May 7 2026"
-    },
-    {
       "ticker": "NVDA",
-      "headline": "NVIDIA secures $3.4B in future revenue by investing $2.1B in IREN for 5GW AI infrastructure deployment",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "Nvidia partners with Corning on $500M deal to expand US optical connectivity manufacturing for AI data centers",
+      "headline": "NVIDIA announces strategic partnership with IREN to deploy up to 5 gigawatts of AI infrastructure with $2.1B investment commitment",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix shares hit record highs with strong demand for AI memory chips and record Q1 earnings",
+      "headline": "SK Hynix stock surges on strong AI memory demand and positive analyst sentiment with target price upgrade to 3M won",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics surpasses $1 trillion market cap as stock doubled in 2026 on AI-driven semiconductor demand",
+      "headline": "Samsung Electronics hits record high with SK Securities raising price target to 500K won on earnings improvement and low valuation",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "005930.KS",
-      "headline": "Samsung union enters wage dispute mediation with potential strike risk impacting production",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
       "ticker": "AVGO",
-      "headline": "Broadcom slides 4% after OpenAI's $18B custom chip deal hits major financing snag",
+      "headline": "Broadcom shares slide 4% after report that OpenAI custom AI chip deal worth $18B hits major financing snag",
       "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom reports strong AI momentum with 106% year-over-year revenue growth in AI semiconductors",
-      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao reports earnings with potential AI partnership expansion under exploration",
-      "impact": "neutral",
+      "headline": "Kakao announces agentic AI service launching in second half 2026 with ChatGPT For Kakao reaching 11M cumulative sign-ups",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "466920.KS",
+      "headline": "SOL Korea High Dividend ETF crosses 4 trillion won net assets as portfolio stocks including financials surge on policy support",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 11
+  "total": 6
 }
