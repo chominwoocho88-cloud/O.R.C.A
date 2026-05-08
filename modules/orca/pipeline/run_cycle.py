@@ -32,12 +32,41 @@ from orca.analysis import (
     run_verification,
 )
 from orca.brand import ORCA_NAME
+from orca.compat import get_orca_flag
 from orca.data import fetch_all_market_data, get_monthly_cost_summary, update_cost
 from orca.paths import REPORTS_DIR
 from orca.state import finish_run as state_finish_run
 from orca.state import start_run as state_start_run
 
 KST = timezone(timedelta(hours=9))
+
+
+def is_phase4_self_correction_enabled() -> bool:
+    """Return whether Phase 4 self-correction observation is enabled."""
+    return get_orca_flag("WAVE_F_PHASE4_SELF_CORRECTION", False)
+
+
+def _run_phase4_drift_check(accuracy: dict) -> None:
+    """Run the Phase 4 drift detector in observe-only mode."""
+    try:
+        from orca.self_correction import detect_drift
+
+        drift_result = detect_drift(accuracy)
+        if drift_result.drift_detected:
+            print(
+                "  Drift detected: {reason} (recent={recent:.1%}, baseline={baseline:.1%})".format(
+                    reason=drift_result.reason,
+                    recent=drift_result.recent_accuracy,
+                    baseline=drift_result.baseline_accuracy,
+                )
+            )
+        else:
+            print("  Accuracy stable (recent={recent:.1%})".format(recent=drift_result.recent_accuracy))
+
+        if is_phase4_self_correction_enabled():
+            print("  Phase 4 self-correction flag enabled (observe-only)")
+    except Exception as e:
+        print(f"  drift detector failed: {e}")
 
 
 class HealthTracker:
@@ -321,6 +350,8 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
                     message="\uac00\uc911\uce58 \uc5c5\ub370\uc774\ud2b8 \uc2e4\ud328",
                 )
                 print(f"  \uac00\uc911\uce58 \uc5c5\ub370\uc774\ud2b8 \uc2a4\ud0b5: {e}")
+
+            _run_phase4_drift_check(accuracy)
 
         present.send_start_notice()
         hunter, analyst, devil, report = pipeline.run_agent_pipeline(
