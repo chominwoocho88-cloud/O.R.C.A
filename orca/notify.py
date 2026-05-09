@@ -280,7 +280,7 @@ def _build_morning(report: dict) -> list:
         if avg_conf:
             lines.append("평균 확신도: " + avg_conf)
         for item in candidate_review.get("highlights", [])[:3]:
-            reasons = item.get("alignment_reason_codes", [])[:2]
+            reasons = item.get("alignment_reason_codes", [])[:4]
             descriptions = [REASON_DESCRIPTIONS.get(reason, reason) for reason in reasons]
             reason_suffix = " [" + ", ".join(descriptions) + "]" if descriptions else ""
             lines.append(
@@ -292,6 +292,10 @@ def _build_morning(report: dict) -> list:
                     suffix=reason_suffix,
                 )
             )
+            why_text = str(item.get("why", "") or "").strip()
+            if why_text:
+                why_truncated = why_text[:60].rstrip() + "..." if len(why_text) > 60 else why_text
+                lines.append(f"   ↳ {why_truncated}")
 
     lessons = get_active_lessons(max_lessons=3)
     if lessons:
