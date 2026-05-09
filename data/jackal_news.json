@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-10 00:20 KST",
+  "collected_at": "2026-05-10 00:35 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,64 +12,40 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA and IREN announce strategic partnership to deploy 5 gigawatts of AI infrastructure",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "NVIDIA adds Suzanne Nora Johnson to Board, Goldman Sachs maintains bullish outlook with $250 price target",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "NVIDIA stock surges on semiconductor strength amid strong AI demand and analyst estimate increases",
+      "headline": "Nvidia appoints Suzanne Nora Johnson to board; earnings report scheduled for May 20 with strong revenue guidance",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix HBM products face price increases as memory demand strengthens with AI infrastructure expansion",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix included in Nvidia official meetings for physical AI partnership discussions",
+      "headline": "SK Hynix shares surge on strong momentum amid AI chip demand surge and foreign institutional buying",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics shares decline 1.1% amid foreign investor selling and profit-taking after recent rally",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung chip workers reject $340k bonus demand and threaten strike amid labor tensions",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom stock rallies on $35B financing deal with Apollo and Blackstone for AI infrastructure expansion",
+      "headline": "Samsung Electronics reports Q1 revenue of 133.9 trillion KRW (+43% sequential), reaching 1 trillion market cap valuation",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom stock experiences volatility after OpenAI custom chip deal faces $18B financing snag",
-      "impact": "bearish",
+      "headline": "Broadcom stock drops 4% on OpenAI custom AI chip financing snag; secures $35B private credit deal talks with Apollo/Blackstone",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
-      "ticker": "AVGO",
-      "headline": "Broadcom beats Q1 earnings estimates and raises guidance with strong AI semiconductor growth",
+      "ticker": "035720.KS",
+      "headline": "Kakao partners with OpenAI for Stargate initiative expansion; stock trading at 46,300 KRW with +58% upside analyst potential",
       "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "466920.KS",
+      "headline": "SOL Korea High Dividend ETF experiences strong growth with 174.5 billion won cumulative net purchases; focused on stable cash flows",
+      "impact": "neutral",
       "source": "web_search"
     }
   ],
-  "total": 13
+  "total": 6
 }

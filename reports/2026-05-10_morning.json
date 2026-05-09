@@ -1,178 +1,189 @@
 {
   "analysis_date": "2026-05-10",
-  "analysis_time": "00:20 KST",
+  "analysis_time": "00:35 KST",
   "mode": "MORNING",
   "mode_label": "아침 풀분석",
-  "one_line_summary": "나스닥·코스피 동반 신고점에도 외국인 이틀 합산 -12.7조원 역대 최대 순매도 지속, 개인 추격매수 한계 임박 — 단기 천장 패턴 경계",
-  "market_regime": "위험선호(단기 과열·반전 경계)",
+  "one_line_summary": "나스닥 26,247·코스피 7,499 신고점권 유지 중이나, 외국인 단일일 역대 최대 순매도(-7.15조원) 충격 소화 여부가 오늘 장세의 핵심 분기점",
+  "market_regime": "위험선호 (단기 과열·반전 경계)",
   "trend_phase": "상승추세",
   "trend_strategy": {
-    "recommended": "기존 보유 포지션 유지하되 신규 진입 자제. 반도체·AI 핵심 종목은 분할 익절 고려. KOSPI 7,500선 저항 구간에서 추가 외국인 매도 여부 실시간 모니터링",
-    "caution": "외국인 이틀 합산 -12.7조원 역대 최대 순매도 + 개인 단독 지수 방어 구조는 역사적 단기 고점 패턴과 일치. CoreWeave형 가이던스 미스 추가 발생 시 AI 인프라 섹터 전반 조정 가속. 13거래일 +24% 급등 후 블랙스완 발생 확률 50%(6회 중 3회) 실증 경계",
+    "recommended": "추세 추종 매수 유지, 단 코스피 7,200pt·나스닥 26,000pt 이탈 시 즉시 손절. 급등 구간 분할 익절 병행 권고",
+    "caution": "외국인 역대 최대 단일일 순매도(-7.15조원) 이후 2차 매도 가능성 경계. AMD +90%(1개월)·코스피200 IT +43.73% YTD 등 가격 선반영 구간에서 추격 매수 자제",
     "difficulty": "어려움"
   },
-  "confidence_overall": "낮음",
-  "consensus_level": "낮음",
+  "confidence_overall": "보통",
+  "consensus_level": "보통",
   "top_headlines": [
     {
-      "headline": "외국인 KOSPI 이틀 합산 -12.7조원 역대 최대 순매도, 개인 5.99조원 맞대응으로 지수 +1.43% 방어",
-      "signal_tag": "수급 경고",
+      "headline": "코스피 5/7 외국인 역대 최대 단일일 순매도 -7.15조원 — 신고점 7,531 직후 급반전",
+      "signal_tag": "⚠️ 단기 천장 경계",
       "impact": "높음"
     },
     {
-      "headline": "AMD 주간 +20%·YTD +90%, Q1 매출 $10.25B 서프라이즈로 AI 반도체 모멘텀 지속",
-      "signal_tag": "강세 신호",
+      "headline": "삼성전자 분기 순이익 +750% YoY, 시총 1조달러 돌파",
+      "signal_tag": "🚀 어닝 서프라이즈",
       "impact": "높음"
     },
     {
-      "headline": "CoreWeave Q2 가이던스 미스($2.45-2.6B vs 컨센서스 $2.69B), 주가 -7% — AI 수익화 속도 의구심",
-      "signal_tag": "약세 신호",
+      "headline": "나스닥 26,247·S&P500 7,399 신고점권 — AMD +20%/주, 팔란티어 어닝 비트",
+      "signal_tag": "📈 AI 모멘텀 지속",
       "impact": "높음"
     },
     {
-      "headline": "한국 4월 반도체 수출 $31.9B(+173.5% YoY) 역대 최고, 총수출 +48% YoY",
-      "signal_tag": "펀더멘털 강세",
-      "impact": "높음"
-    },
-    {
-      "headline": "S&P500 7,398 사상 최고치·나스닥 26,247 신고점, 6주 연속 상승 — 과열 구간 진입",
-      "signal_tag": "과열 경계",
+      "headline": "CoreWeave Q2 영업이익 가이던스 $30-90M vs 컨센서스 $154M 대폭 하회",
+      "signal_tag": "🔴 AI 인프라 수익성 균열",
       "impact": "보통"
     },
     {
-      "headline": "HBM 2026년 완판·DRAM 가격 Q2 +63% 전망, 글로벌 반도체 Q1 $298.5B(+25% QoQ)",
-      "signal_tag": "섹터 강세",
+      "headline": "Fed 8-4 반대표, Core PCE 3.2% vs CPI 2.6% 역대 최대 괴리 — 금리 불확실성 지속",
+      "signal_tag": "🔶 통화정책 불확실",
+      "impact": "보통"
+    },
+    {
+      "headline": "디즈니 Q2 스트리밍+파크 동반 어닝 서프라이즈, 주가 +8% 급등",
+      "signal_tag": "✅ 소비 회복 신호",
       "impact": "보통"
     }
   ],
   "volatility_index": {
     "vkospi": "데이터 미제공",
     "vix": "17.19",
-    "fear_greed": "탐욕 구간 추정(데이터 미제공)",
-    "level": "탐욕",
-    "interpretation": "VIX 17.19로 관세 쇼크 당시 60+ 대비 극적 안정. 공포 해소 완료. 그러나 6주 연속 상승 + 신고점 구간에서 VIX 저점은 역설적 경계 신호. 과거 VIX 저점 형성 후 급등 사례 다수 — 현재 구간이 VIX 바닥일 가능성 배제 불가"
+    "fear_greed": "데이터 미제공",
+    "level": "중립",
+    "interpretation": "VIX 17.19는 공포 구간 완전 탈출 후 중립 수렴 확인. 그러나 낮은 변동성은 단기 과열 랠리 이후 급락 취약성을 높이는 역설적 신호. VIX 단독 방향성 예측 정확도 32%로 보조 지표로만 활용 권고"
   },
   "retail_reversal_signal": {
-    "retail_behavior": "KOSPI 외국인 -7.15조원 역대 최대 순매도 시 개인 +5.99조원 순매수로 물량 84% 흡수. 이틀 합산 외국인 -12.7조원에 개인 단독 대응",
-    "contrarian_implication": "개인의 대규모 추격매수는 단기 낙폭 방어에 성공했으나, 역사적으로 외국인 대규모 이탈 구간에서 개인 과대 매수는 단기 고점 신호로 작동. 추가 외국인 매도 출회 시 개인 흡수 한계 도달 → 급락 가속 리스크 내재",
+    "retail_behavior": "5/7 외국인 -7.15조원 역대 최대 순매도에 맞서 개인 +5.99조원 적극 매수 대응. 삼성 시총 1조달러·코스피 신고점 달성 직후 고가 추격 매수 패턴",
+    "contrarian_implication": "개인이 역대급 외국인 매도를 고가에서 받아내는 구조 형성 — 추가 외국인 매도 압력 발생 시 개인 손실 확대 및 공황 매도 전환 리스크. 역발상적으로 코스피 단기 과열 신호로 해석 가능",
     "reliability": "보통"
   },
   "outflows": [
     {
-      "zone": "KOSPI 외국인 수급",
-      "reason": "이틀 합산 -12.7조원(5월 6일 -5.55조 + 5월 7일 -7.15조원) 역대 최대 순매도. 13거래일 +24% 급등 후 차익실현 + 구조적 포지션 축소 신호 혼재. KOSPI 7,500선 저항 구간에서 포지션 축소 지속",
+      "zone": "코스피 대형주 (외국인 이탈)",
+      "reason": "코스피 신고점 7,531 직후 외국인 역대 최대 단일일 차익실현 및 포지션 청산",
       "severity": "높음",
-      "data_point": "외국인 단일일 최대 순매도 -7.15조원; 이틀 합산 -12.7조원; 지수는 개인 매수로 +1.43% 방어"
+      "data_point": "5/7 외국인 순매도 -7.15조원 (역대 최대 단일일), 전일 +3.13조원 순매수 대비 급반전"
     },
     {
-      "zone": "CoreWeave·AI 클라우드 인프라",
-      "reason": "Q2 가이던스 미스(컨센서스 $2.69B vs 가이던스 $2.45-2.6B) 발표로 AI 인프라 수익화 속도 둔화 우려 재점화. 캐펙스 $31-35B 상향에도 주가 -7% 반응 — '투자↑·수익화↓' 우려 반영",
+      "zone": "CoreWeave·AI 인프라 클라우드",
+      "reason": "Q2 매출 가이던스 $2.45-2.6B vs 컨센서스 $2.69B 하회, 영업이익 $30-90M vs $154M 대폭 하회",
       "severity": "보통",
-      "data_point": "CRWV -7%; Q2 가이던스 $2.45-2.6B vs 컨센서스 $2.69B 하회; 캐펙스 $31-35B 상향"
+      "data_point": "주가 -7%, CapEx $31-35B 상향으로 수익성 우려 부각"
+    },
+    {
+      "zone": "미국 채권 (인플레 불확실성)",
+      "reason": "Core PCE 3.2% vs Core CPI 2.6% 역대 최대 괴리, Fed 내 4명 반대표로 금리 인하 기대 약화",
+      "severity": "보통",
+      "data_point": "Fed 8-4 표결, 금리 3.5-3.75% 동결 3연속"
     }
   ],
   "inflows": [
     {
-      "zone": "AMD·AI 반도체 설계",
-      "reason": "Q1 매출 $10.25B(+38% YoY, 컨센서스 +3.5% 상회). AI GPU 수요 폭발적 성장. 엔터프라이즈 AI 클라우드 생태계 확장. 시총 $700B 돌파",
+      "zone": "글로벌 반도체·HBM (AI 사이클)",
+      "reason": "삼성전자 분기 순이익 +750% YoY·시총 1조달러, 한국 반도체 수출 139% YoY, SK하이닉스 HBM 수혜 지속, TSMC 연간 성장률 >30% 전망",
       "momentum": "강함",
-      "data_point": "AMD 주간 +20%, YTD +90%; Q1 $10.25B vs 컨센서스 $9.9B; 시총 $700B 돌파"
+      "data_point": "삼성 시총 $1T 돌파(5/6), 코스피200 IT지수 YTD +43.73%, 한국 3월 경상수지 사상최대 $37.33B"
     },
     {
-      "zone": "HBM·DRAM 메모리 반도체",
-      "reason": "HBM 2026년 말까지 완판, 2027년까지 공급 부족 지속. HBM 가격 연중 +50%, DRAM Q2 +63%, NAND +75% 전망. 글로벌 반도체 Q1 $298.5B(+25% QoQ)",
+      "zone": "미국 대형 기술주 (AI 어닝 사이클)",
+      "reason": "AMD Q1 EPS $1.37 vs $1.29 어닝 비트, 1주간 +20%·1개월 +90% 급등. 팔란티어 EPS 33¢ vs 28¢ 비트",
       "momentum": "강함",
-      "data_point": "MU +5%; HBM 2026년 완판; DRAM 가격 Q2 +63% 전망; 글로벌 반도체 Q1 $298.5B"
+      "data_point": "AMD 시총 $713B 돌파, 나스닥 26,247 신고점권"
     },
     {
-      "zone": "KOSPI·한국 수출주",
-      "reason": "4월 수출 $85.89B(+48% YoY) 사상 최고. 반도체 수출 $31.9B(+173.5% YoY) 역대 최고. 경상수지 흑자 $37.33B. 펀더멘털 서프라이즈 지속",
-      "momentum": "강함",
-      "data_point": "KOSPI 7,490(+1.43%); 4월 반도체 수출 $31.9B(+173.5% YoY); 경상수지 $37.33B"
+      "zone": "코스피 (외국인 접근성 구조 개선)",
+      "reason": "삼성증권-IBKR 파트너십으로 글로벌 460만 계좌 한국 직접 투자 채널 개통, 외국인 보유 비중 6년 최고",
+      "momentum": "형성중",
+      "data_point": "외국인 코스피 보유 비중 6년 최고치, IBKR 옴니버스 계좌 서비스 개시"
     },
     {
-      "zone": "TSMC·파운드리",
-      "reason": "4월 매출 $13.08B(+17.5% YoY). Q1 +40% 성장, 영업이익률 50%. FY 2026 +30%+ 가이던스 유지",
-      "momentum": "강함",
-      "data_point": "TSM 4월 매출 $13.08B(+17.5% YoY); Q1 +40%; 영업이익률 50%"
+      "zone": "한국 내수·건설 (재정 확장)",
+      "reason": "2026년 예산 728조원(+8% YoY) 확장 편성, 이재명 정부 소비·건설 부양 정책 집행",
+      "momentum": "형성중",
+      "data_point": "2026 예산 728조원, YoY +8%"
     },
     {
-      "zone": "나스닥·기술주",
-      "reason": "S&P500·나스닥 동반 신고점. 6주 연속 상승. AMD·PLTR·TSM 어닝 서프라이즈 연속",
-      "momentum": "강함",
-      "data_point": "나스닥 26,247(+1.71%, 신고점); S&P500 7,398(+0.84%, ATH); 6주 연속 상승"
+      "zone": "미국 소비재·미디어",
+      "reason": "디즈니 Q2 스트리밍+파크 실적 모두 상회, 소비 회복 신호 가시화",
+      "momentum": "형성중",
+      "data_point": "디즈니 주가 +8%, 스트리밍·파크 동반 호조"
     }
   ],
   "neutral_waiting": [
     {
-      "zone": "엔비디아·AI 대형주",
-      "catalyst_needed": "시총 $4T 재돌파 여부 확인. AI 인프라 수익화 우려 해소 또는 추가 어닝 서프라이즈 필요"
+      "zone": "미국 AI 인프라 (데이터센터 CapEx 수혜주)",
+      "catalyst_needed": "CoreWeave 가이던스 미달 충격 소화 후 AWS·Azure·GCP Q2 실적 및 실제 CapEx 집행 규모 확인"
     },
     {
-      "zone": "삼성전자",
-      "catalyst_needed": "외국인 순매도 축소 및 HBM4 공급 계약 구체화. KOSPI 7,500 안착 여부 확인 필요"
+      "zone": "코스피 중소형주",
+      "catalyst_needed": "5/7 역대 최대 외국인 순매도 충격 소화 및 재유입 확인. 코스피 7,500선 안착 여부 검증"
     },
     {
-      "zone": "미-중 관세 협상",
-      "catalyst_needed": "구체적 합의 일정 또는 관세율 인하 발표. 협상 결렬 뉴스 부재 시 현 모멘텀 유지"
+      "zone": "미국 경기민감주",
+      "catalyst_needed": "비농업 고용 변동성 안정화 및 Core PCE 3.2%→2%대 하락 경로 가시적 확인"
     }
   ],
   "hidden_signals": [
     {
-      "signal": "외국인 이틀 합산 -12.7조원에도 KOSPI 신고점 유지 — 개인 유동성 한계 테스트 구간",
-      "implication": "개인의 외국인 매도 물량 흡수 능력이 한계에 근접 중. 3거래일 연속 외국인 대규모 순매도 발생 시 지수 방어 불가 → 7,200~7,300 조정 가능성",
+      "signal": "전일 외국인 +3.13조원 순매수 → 익일 -7.15조원 급반전 — 이틀 합산 -4.02조원 순유출",
+      "implication": "단기 '구조적 외국인 유입' 내러티브 신뢰도 훼손. IBKR 파트너십 등 외국인 접근성 개선 테마와 실제 자금 흐름 간 괴리 확대. 외국인 보유 비중 6년 최고 = 추가 매수 여력 소진 가능성 동시 존재",
       "confidence": "높음"
     },
     {
-      "signal": "CoreWeave 가이던스 미스는 단순 개별 종목 이슈가 아닌 AI 인프라 수익화 사이클 속도 점검 신호",
-      "implication": "MS·아마존·구글 AI 캐펙스 ROI 의구심 확산 시 HBM 수요 전망 하향 조정 리스크. SK하이닉스·마이크론 밸류에이션 재평가 트리거 가능",
+      "signal": "Core PCE 3.2% vs Core CPI 2.6% 역대 최대 괴리 지속",
+      "implication": "Fed의 실질 물가 기준인 PCE가 여전히 고착화 — 시장 금리 인하 기대와 Fed 실제 행동 간 갭 확대 시 나스닥 밸류에이션 리레이팅 위험. 4명 반대표는 향후 의사록 공개 시 추가 충격 가능",
       "confidence": "보통"
     },
     {
-      "signal": "VIX 17.19 저점 형성 + 6주 연속 상승 구간에서 백테스트상 블랙스완 발생 확률 50%",
-      "implication": "VIX 저점은 역설적 경계 신호. 현재 구간이 변동성 저점일 경우 향후 급등 가능성 내재. 포지션 헤지 비용 저렴한 지금이 풋옵션 매수 최적 구간",
+      "signal": "AMD 1개월 +90% 급등 후 NTM P/E 추정 45배 이상 진입",
+      "implication": "어닝 서프라이즈 후 '소문에 사고 뉴스에 팔기' 패턴 재현 위험. 추가 상승 여력보다 실망 매물 위험이 비대칭적으로 크며, 반도체 ETF 전반 동반 조정 시 SK하이닉스·삼성전자 연동 낙폭 확대 경로",
       "confidence": "보통"
     },
     {
-      "signal": "한국 4월 반도체 수출 +173.5% YoY — 이미 주가에 선반영된 펀더멘털 호재",
-      "implication": "'뉴스에 팔기' 패턴 발동 리스크. 수출 지표 서프라이즈가 추가 매수 촉매가 되지 못하고 차익실현 빌미로 전환될 가능성",
+      "signal": "한국 3월 경상수지 사상최대 $37.33B 달성에도 KRW/USD 1,461.48 유지",
+      "implication": "경상수지 흑자 확대에도 원화 강세 제한 — 외국인 주식 대규모 매도 달러 환전 수요가 상쇄. 원화 약세 지속 시 외국인 추가 매도 유인 증가의 자기강화 루프 주의",
       "confidence": "보통"
     }
   ],
   "korea_focus": {
-    "krw_usd": "1461.48",
-    "kospi_flow": "외국인 -7.15조원(역대 단일일 최대) + 개인 +5.99조원 순매수로 지수 +1.43% 방어. 이틀 합산 외국인 -12.7조원",
-    "sk_hynix": "13거래일 +24% 급등 후 HBM 완판·수출 호조 선반영 구간. 나스닥 -2% 충격 시 베타 1.36x 적용 예상 낙폭 -2.8% 이상",
-    "samsung": "외국인 순매도 직격. HBM4 공급 경쟁에서 SK하이닉스 대비 상대적 열위. 외국인 매도 지속 시 추가 하방 압력",
-    "assessment": "펀더멘털(수출 +173.5% YoY)은 역대급 강세이나 수급(외국인 역대 최대 순매도)은 역대급 경고. 두 신호의 충돌이 핵심 리스크. 7,500선 저항 구간에서 외국인 매도 지속 여부가 향후 방향성 결정. 단기적으로 개인 추격매수 한계 도달 여부 모니터링 필수"
+    "krw_usd": "1,461.48",
+    "kospi_flow": "5/7 외국인 역대 최대 단일일 순매도 -7.15조원 (전일 +3.13조원 대비 급반전). 개인 +5.99조원으로 방어 매수 대응",
+    "sk_hynix": "HBM 수혜 모멘텀 강함 유지. 단 베타 1.36x 기준 나스닥 -2% 시 예상 낙폭 -2.8% — 나스닥 조정 연동 리스크 핵심 모니터링",
+    "samsung": "분기 순이익 +750% YoY, 시총 $1조달러 돌파(5/6). 어닝 서프라이즈 이후 차익실현 매물 및 외국인 순매도 진원지로 작용한 것으로 추정",
+    "assessment": "코스피는 구조적 상승 근거(반도체 어닝·외국인 접근성)와 단기 과열 신호(역대 최대 외국인 매도·개인 고가 매수)가 충돌하는 분기점. 7,200pt 지지 확인이 오늘 장세의 핵심 판단 기준. KRW 약세 지속 여부가 외국인 추가 이탈 결정 변수"
   },
   "counterarguments": [
     {
-      "against": "KOSPI 7,490 신고점·위험선호 지속 전망",
-      "because": "13거래일 +24% 급등 후 외국인 이틀 합산 -12.7조원 순매도는 단순 차익실현이 아닌 구조적 포지션 축소 신호 가능성. 개인이 외국인 대규모 매도를 단독 흡수하는 구조는 역사적 단기 천장 패턴과 일치. KOSPI 7,500선 저항 구간에서 추가 외국인 매도 출회 시 지수 방어 불가",
+      "against": "외국인 -7.15조원 = 단기 천장 확정 신호",
+      "because": "60거래일 백테스트 기준 급락(-3%+) 다음날 반등 확률 83%. 2024년 8월 외국인 대규모 이탈 직후 코스피 3거래일 내 +4.2% 반등 사례 존재. 역대 최대 순매도 = 매도 클라이맥스 완성으로도 해석 가능하며 '단기 천장' 단정은 확증 편향 위험",
+      "risk_level": "높음"
+    },
+    {
+      "against": "AI 어닝 사이클 지속으로 반도체 모멘텀 추가 상승",
+      "because": "CoreWeave 영업이익 가이던스 $30-90M vs $154M 대폭 하회는 AI 인프라 수익성 균열 선행 신호. CapEx $31-35B 상향은 자본집약도 증가→ROE 하락 경로. AMD 1개월 +90% 과열 구간에서 차익실현 압력 비대칭적으로 큼",
       "risk_level": "높음"
     }
   ],
   "thesis_killers": [
     {
       "event": "코스피",
-      "timeframe": "향후 2거래일",
-      "confirms_if": "코스피 7,500pt 이상 종가 유지 + 외국인 순매도 1조원 이하로 축소",
-      "invalidates_if": "코스피 7,300pt 이하 이탈 또는 외국인 순매도 3조원 이상 지속",
-      "quality": "ok"
-    },
-    {
-      "event": "SK하이닉스",
-      "timeframe": "향후 3거래일",
-      "confirms_if": "SK하이닉스 +2% 이상 + 종가 기준 신고점 경신",
-      "invalidates_if": "SK하이닉스 -3% 이하 하락 (나스닥 -2% 충격 연동 시 베타 1.36x 적용 예상 낙폭)",
+      "timeframe": "1거래일",
+      "confirms_if": "코스피 7,350pt 이상 종가 유지 (외국인 매도 소화 확인)",
+      "invalidates_if": "코스피 7,200pt 이하 이탈 (2차 하락 가속)",
       "quality": "ok"
     },
     {
       "event": "나스닥",
-      "timeframe": "금주 내",
-      "confirms_if": "나스닥 +1% 이상 종가 + AI 반도체 섹터 동반 상승",
-      "invalidates_if": "나스닥 -2% 이하 하락 (CoreWeave형 추가 가이던스 미스 발생 시)",
+      "timeframe": "1~2거래일",
+      "confirms_if": "나스닥 +1% 이상 종가 (26,247 신고점 돌파 재시도)",
+      "invalidates_if": "나스닥 -1.5% 이하 (26,000pt 하회, SK하이닉스 -2.1% 이상 연동 낙폭 예상)",
+      "quality": "ok"
+    },
+    {
+      "event": "SK하이닉스",
+      "timeframe": "2거래일",
+      "confirms_if": "SK하이닉스 +2% 이상 (HBM 수요 내러티브 유효)",
+      "invalidates_if": "SK하이닉스 -3% 이하 (나스닥 -2% × 베타 1.4 = -2.8% 임계 이탈)",
       "quality": "ok"
     }
   ],
@@ -457,25 +468,25 @@
   },
   "jackal_candidate_review": {
     "analysis_date": "2026-05-10",
-    "market_bias": "mixed",
-    "market_bias_label": "혼조/관망",
+    "market_bias": "risk_on",
+    "market_bias_label": "위험선호",
     "reviewed_count": 12,
-    "aligned_count": 2,
-    "neutral_count": 10,
+    "aligned_count": 3,
+    "neutral_count": 9,
     "opposed_count": 0,
     "follow_count": 1,
     "watch_count": 8,
     "avoid_count": 3,
     "review_verdict_breakdown": {
       "strong_aligned": 0,
-      "aligned": 2,
-      "neutral": 10,
+      "aligned": 3,
+      "neutral": 9,
       "opposed": 0,
       "strong_opposed": 0
     },
-    "average_review_confidence": "low",
+    "average_review_confidence": "medium",
     "reason_code_frequency": {
-      "regime_unclear": 12,
+      "market_bias_tailwind": 12,
       "no_history_stats": 9,
       "devil_bearish_warn": 8,
       "devil_contradicts_thesis": 3,
@@ -489,9 +500,9 @@
         "source_event_type": "scan",
         "alignment": "neutral",
         "review_verdict": "neutral",
-        "alignment_score": -0.1,
+        "alignment_score": 0.05,
         "alignment_reason_codes": [
-          "regime_unclear",
+          "market_bias_tailwind",
           "no_history_stats",
           "devil_bearish_warn",
           "devil_contradicts_thesis"
@@ -499,7 +510,7 @@
         "review_confidence": "low",
         "quality_score": 50,
         "signal_family": "general_rebound",
-        "why": "현재 ORCA 레짐이 혼조라서 후보를 바로 추종하기보다 관찰 대상으로 보는 편이 안전합니다. | Signal family history: no_history_stats (general_rebound)"
+        "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: no_history_stats (general_rebound)"
       },
       {
         "ticker": "AVGO",
@@ -507,9 +518,9 @@
         "source_event_type": "scan",
         "alignment": "neutral",
         "review_verdict": "neutral",
-        "alignment_score": -0.1,
+        "alignment_score": 0.05,
         "alignment_reason_codes": [
-          "regime_unclear",
+          "market_bias_tailwind",
           "no_history_stats",
           "devil_bearish_warn",
           "devil_contradicts_thesis"
@@ -517,7 +528,7 @@
         "review_confidence": "low",
         "quality_score": 50,
         "signal_family": "general_rebound",
-        "why": "현재 ORCA 레짐이 혼조라서 후보를 바로 추종하기보다 관찰 대상으로 보는 편이 안전합니다. | Signal family history: no_history_stats (general_rebound)"
+        "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: no_history_stats (general_rebound)"
       },
       {
         "ticker": "NVDA",
@@ -525,16 +536,16 @@
         "source_event_type": "scan",
         "alignment": "neutral",
         "review_verdict": "neutral",
-        "alignment_score": -0.05,
+        "alignment_score": 0.1,
         "alignment_reason_codes": [
-          "regime_unclear",
+          "market_bias_tailwind",
           "no_history_stats",
           "devil_bearish_warn"
         ],
         "review_confidence": "low",
         "quality_score": 50,
         "signal_family": "general_rebound",
-        "why": "현재 ORCA 레짐이 혼조라서 후보를 바로 추종하기보다 관찰 대상으로 보는 편이 안전합니다. | Signal family history: no_history_stats (general_rebound)"
+        "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: no_history_stats (general_rebound)"
       },
       {
         "ticker": "000660.KS",
@@ -542,15 +553,15 @@
         "source_event_type": "shadow",
         "alignment": "neutral",
         "review_verdict": "neutral",
-        "alignment_score": -0.032,
+        "alignment_score": 0.118,
         "alignment_reason_codes": [
-          "regime_unclear",
+          "market_bias_tailwind",
           "no_history_stats"
         ],
         "review_confidence": "low",
         "quality_score": 42,
         "signal_family": "general_rebound",
-        "why": "현재 ORCA 레짐이 혼조라서 후보를 바로 추종하기보다 관찰 대상으로 보는 편이 안전합니다. | Signal family history: no_history_stats (general_rebound)"
+        "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: no_history_stats (general_rebound)"
       },
       {
         "ticker": "005930.KS",
@@ -558,15 +569,15 @@
         "source_event_type": "shadow",
         "alignment": "neutral",
         "review_verdict": "neutral",
-        "alignment_score": -0.032,
+        "alignment_score": 0.118,
         "alignment_reason_codes": [
-          "regime_unclear",
+          "market_bias_tailwind",
           "no_history_stats"
         ],
         "review_confidence": "low",
         "quality_score": 42,
         "signal_family": "general_rebound",
-        "why": "현재 ORCA 레짐이 혼조라서 후보를 바로 추종하기보다 관찰 대상으로 보는 편이 안전합니다. | Signal family history: no_history_stats (general_rebound)"
+        "why": "현재 ORCA 레짐이 우호적이라 JACKAL의 롱 후보를 함께 검토하기 좋은 구간입니다. | Signal family history: no_history_stats (general_rebound)"
       }
     ]
   },
@@ -808,14 +819,14 @@
     "orca_state_db": {
       "path": "data/orca_state.db",
       "exists": true,
-      "size_bytes": 21803008,
-      "mtime_iso": "2026-05-10T00:20:49.115718+09:00"
+      "size_bytes": 21823488,
+      "mtime_iso": "2026-05-10T00:35:32.729187+09:00"
     },
     "jackal_state_db": {
       "path": "data/jackal_state.db",
       "exists": true,
       "size_bytes": 282624,
-      "mtime_iso": "2026-05-10T00:16:52.867406+09:00",
+      "mtime_iso": "2026-05-10T00:31:24.967054+09:00",
       "tables": {
         "jackal_shadow_signals": 6,
         "jackal_live_events": 21,
