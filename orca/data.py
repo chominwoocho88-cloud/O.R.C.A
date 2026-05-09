@@ -86,14 +86,46 @@ def _fetch_one_market_fallback(ticker):
         print("  " + ticker + " fallback 실패: " + str(e)[:70])
         return None
 
+def _fetch_kis_investor_flow(ticker: str = "005930") -> dict | None:
+    """Return KIS investor flow in fetch_krx_flow format, or None to fall back."""
+    try:
+        kis_module = importlib.import_module("shared.broker.kis")
+        client_class = kis_module.KisClient
+
+        client = client_class()
+        if not client.is_configured():
+            return None
+
+        result = client.get_investor_flow(ticker)
+        if not result:
+            return None
+
+        return {
+            "foreign_net": str(result.get("foreign_net", 0)),
+            "institution_net": str(result.get("institution_net", 0)),
+            "individual_net": str(result.get("individual_net", 0)),
+            "foreign_buy": "N/A",
+            "foreign_sell": "N/A",
+            "source": "kis",
+            "date": result.get("date", "N/A"),
+            "krx_kospi_close": "N/A",
+            "krx_kospi_change": "N/A",
+        }
+    except Exception:
+        return None
+
 def fetch_krx_flow() -> dict:
     """KRX OpenAPI — 실제 제공 데이터로 한국 시장 보조 지표 수집
-    ※ 투자자별 매매동향은 KRX OpenAPI 미제공 (유료 별도 상품)
+    ※ 투자자별 매매동향은 KIS 우선, 실패 시 기존 KRX 보조 지표 흐름 유지
     대신: KOSPI 지수 시세 (Yahoo Finance 교차검증용)
 
     엔드포인트: data-dbg.krx.co.kr/svc/apis/idx/kospi_dd_trd
     AUTH_KEY 헤더, basDd=YYYYMMDD 파라미터, GET 방식
     """
+    kis_result = _fetch_kis_investor_flow()
+    if kis_result is not None:
+        return kis_result
+
     result = {
         "foreign_net": "N/A", "institution_net": "N/A", "individual_net": "N/A",
         "foreign_buy": "N/A", "foreign_sell": "N/A",

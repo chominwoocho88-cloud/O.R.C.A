@@ -488,9 +488,9 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
         if "(alt)" in str(md.get("fear_greed_rating","")): data_missing.append("F&G폴백"); data_quality_score -= 5
         if md.get("krw_usd","N/A") == "N/A":          data_missing.append("환율"); data_quality_score -= 10
         if md.get("nvda","N/A") == "N/A":             data_missing.append("NVDA"); data_quality_score -= 5
-        # 외국인 수급: KRX 실데이터 > EWY 프록시 > 없음
-        if md.get("krx_flow_source") == "krx_api":
-            pass  # KRX 실데이터 연결됨 — 감점 없음
+        # 외국인 수급: KRX/KIS 실데이터 > EWY 프록시 > 없음
+        if md.get("krx_flow_source") in ("krx_api", "kis"):
+            pass  # KRX/KIS 실데이터 연결됨 — 감점 없음
         elif md.get("ewy","N/A") != "N/A":
             data_missing.append("KRX수급(EWY프록시대체)"); data_quality_score -= 3
         else:
