@@ -1,4 +1,5 @@
 ﻿import os, sys, json, re, time, httpx
+import importlib
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 os.environ["PYTHONIOENCODING"] = "utf-8"
@@ -9,8 +10,47 @@ from shared.market_data.fetch import fetch_latest_close, fetch_put_call_ratio_su
 from .notify_transport import send_message
 from .paths import COST_FILE, DATA_FILE
 _CORE={"sp500","nasdaq","vix","kospi"}
+KisClient = None
+
+def _is_kis_ticker(ticker):
+    upper = str(ticker or "").strip().upper()
+    return upper.endswith(".KS") or upper.endswith(".KQ") or (upper.isdigit() and len(upper) == 6)
+
+def _get_kis_client_class():
+    global KisClient
+    if KisClient is None:
+        KisClient = importlib.import_module("shared.broker").KisClient
+    return KisClient
+
+def _fetch_one_kis_price(ticker):
+    """Return (price, change) from KIS for Korean tickers, or None to fall back."""
+    try:
+        if not _is_kis_ticker(ticker):
+            return None
+
+        client_class = _get_kis_client_class()
+        client = client_class()
+        if not client.is_configured():
+            return None
+
+        result = client.get_current_price(ticker)
+        price = result.get("price", 0)
+        change = result.get("change", 0)
+        if not price:
+            return None
+
+        change_value = round(float(change), 2)
+        price_str = str(round(float(price), 2))
+        change_str = ("+" if change_value >= 0 else "") + str(change_value) + "%"
+        return price_str, change_str
+    except Exception:
+        return None
 
 def _fetch_one(ticker,retries=2):
+    kis_result = _fetch_one_kis_price(ticker)
+    if kis_result is not None:
+        return kis_result
+
     for i in range(retries+1):
         try:
             r=httpx.get("https://query1.finance.yahoo.com/v8/finance/chart/"+ticker,params={"interval":"1d","range":"1d"},headers={"User-Agent":"Mozilla/5.0"},timeout=10)
