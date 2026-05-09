@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-09 22:45 KST",
+  "collected_at": "2026-05-09 23:29 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -9,6 +9,43 @@
     "466920.KS"
   ],
   "regime": "",
-  "news_items": [],
-  "total": 0
+  "news_items": [
+    {
+      "ticker": "NVDA",
+      "headline": "Nvidia embraces role of AI investor, pushing past $40 billion in equity bets this year; Stock +1.75% on strong AI demand",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK Hynix shares up +1.93% amid strong HBM demand and positive analyst outlook on memory semiconductor recovery",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics down -1.10%; Foreign investors selling amid concerns about Iran-US negotiations affecting risk sentiment",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom rallies +4% after Apollo and Blackstone in talks for $35B financing deal to fund AI build-out; Q1 AI revenue doubled",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "Kakao up +3.37%; AI expansion and improved business fundamentals driving positive sentiment despite past earnings miss",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "466920.KS",
+      "headline": "SOL Korea High Dividend ETF net assets exceeded 670B KRW; Strong inflows and portfolio gains from financial stocks and value plays",
+      "impact": "bullish",
+      "source": "web_search"
+    }
+  ],
+  "total": 6
 }
