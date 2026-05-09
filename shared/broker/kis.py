@@ -7,9 +7,12 @@ Phase 8b / Day 11 scope:
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 import httpx
@@ -20,6 +23,7 @@ PROD_BASE_URL = "https://openapi.koreainvestment.com:9443"
 
 DEFAULT_TIMEOUT = 10.0
 TOKEN_REFRESH_MARGIN_SECONDS = 300
+TOKEN_CACHE_PATH = Path("data/kis_token.json")
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
@@ -85,6 +89,71 @@ class KisToken:
         )
 
 
+def _is_cacheable_credentials(app_key: str = "", app_secret: str = "") -> bool:
+    """Return whether credentials look like real KIS keys worth file-caching."""
+    if not app_key and not app_secret:
+        return True
+    return len(str(app_key).strip()) >= 20 and len(str(app_secret).strip()) >= 40
+
+
+def _cache_fingerprint(value: str) -> str:
+    """Return a short, non-secret fingerprint for cache scoping."""
+    if not value:
+        return ""
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()[:16]
+
+
+def _load_token_from_file(
+    *, app_key: str = "", base_url: str = ""
+) -> Optional[KisToken]:
+    """Load a valid token from the file cache, returning None on any miss."""
+    try:
+        if not TOKEN_CACHE_PATH.exists():
+            return None
+        data = json.loads(TOKEN_CACHE_PATH.read_text(encoding="utf-8"))
+        if app_key and data.get("app_key_hash") != _cache_fingerprint(app_key):
+            return None
+        if base_url and data.get("base_url") not in ("", base_url):
+            return None
+        token = KisToken(
+            access_token=str(data.get("access_token", "")),
+            expires_at=float(data.get("expires_at", 0)),
+        )
+        if token.is_valid():
+            return token
+    except Exception:
+        return None
+    return None
+
+
+def _save_token_to_file(
+    token: KisToken,
+    *,
+    app_key: str = "",
+    app_secret: str = "",
+    base_url: str = "",
+) -> None:
+    """Save a token to the file cache; failures stay non-fatal."""
+    try:
+        if not _is_cacheable_credentials(app_key, app_secret):
+            return
+        TOKEN_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        TOKEN_CACHE_PATH.write_text(
+            json.dumps(
+                {
+                    "access_token": token.access_token,
+                    "expires_at": token.expires_at,
+                    "app_key_hash": _cache_fingerprint(app_key),
+                    "base_url": base_url,
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+    except Exception:
+        pass
+
+
 class KisClient:
     """KIS API client for authentication and domestic market data calls."""
 
@@ -112,6 +181,15 @@ class KisClient:
         """Return a cached token, or request a new one from KIS."""
         if not force_refresh and self._token and self._token.is_valid():
             return self._token.access_token
+
+        if not force_refresh:
+            cached = _load_token_from_file(
+                app_key=self.app_key,
+                base_url=self.base_url,
+            )
+            if cached:
+                self._token = cached
+                return cached.access_token
 
         if not self.is_configured():
             raise KisAuthError("KIS environment variables are not configured")
@@ -147,6 +225,12 @@ class KisClient:
         self._token = KisToken(
             access_token=access_token,
             expires_at=time.time() + expires_in,
+        )
+        _save_token_to_file(
+            self._token,
+            app_key=self.app_key,
+            app_secret=self.app_secret,
+            base_url=self.base_url,
         )
         return access_token
 

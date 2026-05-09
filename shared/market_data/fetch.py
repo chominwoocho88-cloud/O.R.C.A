@@ -20,7 +20,9 @@ except Exception:  # pragma: no cover - runtime degraded path
     yf = None
 
 from orca import context_market_data as _context_market_data
-from shared.broker import KisClient
+from shared.broker import KisClient, get_shared_kis_client
+
+_DEFAULT_KIS_CLIENT_CLASS = KisClient
 
 _fetch_with_fallback = _context_market_data._fetch_with_fallback
 
@@ -507,7 +509,11 @@ def _try_fdr_history(ticker: str, start: str, end: str) -> pd.DataFrame | None:
 def _try_kis_history(ticker: str, start: str, end: str) -> pd.DataFrame | None:
     """Fetch Korean daily OHLCV through KIS when credentials are configured."""
     try:
-        client = KisClient()
+        client = (
+            KisClient()
+            if KisClient is not _DEFAULT_KIS_CLIENT_CLASS
+            else get_shared_kis_client()
+        )
         if not client.is_configured():
             return None
 

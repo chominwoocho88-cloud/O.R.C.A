@@ -22,14 +22,18 @@ def _get_kis_client_class():
         KisClient = importlib.import_module("shared.broker").KisClient
     return KisClient
 
+def _get_kis_client():
+    if KisClient is not None:
+        return KisClient()
+    return importlib.import_module("shared.broker").get_shared_kis_client()
+
 def _fetch_one_kis_price(ticker):
     """Return (price, change) from KIS for Korean tickers, or None to fall back."""
     try:
         if not _is_kis_ticker(ticker):
             return None
 
-        client_class = _get_kis_client_class()
-        client = client_class()
+        client = _get_kis_client()
         if not client.is_configured():
             return None
 
@@ -89,10 +93,7 @@ def _fetch_one_market_fallback(ticker):
 def _fetch_kis_investor_flow(ticker: str = "005930") -> dict | None:
     """Return KIS investor flow in fetch_krx_flow format, or None to fall back."""
     try:
-        kis_module = importlib.import_module("shared.broker.kis")
-        client_class = kis_module.KisClient
-
-        client = client_class()
+        client = _get_kis_client()
         if not client.is_configured():
             print("  KIS: not configured (env missing)")
             return None
