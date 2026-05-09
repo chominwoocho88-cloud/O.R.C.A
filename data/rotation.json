@@ -1,58 +1,36 @@
 {
   "ranking": [
     [
-      "AI 반도체 / HBM (Micron·SK하이닉스·삼성전자)",
+      "반도체·AI 칩 (AMD, Micron, TSMC)",
       3
     ],
     [
-      "나스닥 / 대형 AI 테크",
+      "AI 인프라·엔터프라이즈 클라우드 (Palantir, Rackspace)",
       3
     ],
     [
-      "삼성전자",
-      3
-    ],
-    [
-      "코스피 / 한국 증시",
+      "코스피 전기전자·반도체 섹터",
       2
     ],
     [
-      "CoreWeave / AI 클라우드 인프라 2선주",
+      "LatAm 이커머스·핀테크 (MercadoLibre)",
       -2
     ],
     [
-      "인텔 / 미국 레거시 파운드리",
+      "AI 클라우드 인프라 (CoreWeave)",
       -2
     ],
     [
-      "코스피 외국인",
+      "코스피 현물 (외국인)",
       -3
     ]
   ],
   "rotation_signal": {
-    "from": "코스피 외국인",
-    "to": "AI 반도체 / HBM (Micron·SK하이닉스·삼성전자)",
+    "from": "코스피 현물 (외국인)",
+    "to": "반도체·AI 칩 (AMD, Micron, TSMC)",
     "strength": "강함"
   },
   "history": [
-    {
-      "date": "2026-04-30",
-      "ranking": [
-        [
-          "Booking Holdings / 여행 소비 섹터",
-          -1
-        ],
-        [
-          "OpenAI / AI 인프라 직접 투자 섹터",
-          -2
-        ],
-        [
-          "에너지·소비재 (인플레 압박 취약 섹터)",
-          -2
-        ]
-      ],
-      "rotation_signal": {}
-    },
     {
       "date": "2026-04-30",
       "ranking": [
@@ -1000,6 +978,40 @@
       "rotation_signal": {
         "from": "코스피 외국인",
         "to": "AI 반도체 / HBM (Micron·SK하이닉스·삼성전자)",
+        "strength": "강함"
+      }
+    },
+    {
+      "date": "2026-05-10",
+      "ranking": [
+        [
+          "반도체·AI 칩 (AMD, Micron, TSMC)",
+          3
+        ],
+        [
+          "AI 인프라·엔터프라이즈 클라우드 (Palantir, Rackspace)",
+          3
+        ],
+        [
+          "코스피 전기전자·반도체 섹터",
+          2
+        ],
+        [
+          "LatAm 이커머스·핀테크 (MercadoLibre)",
+          -2
+        ],
+        [
+          "AI 클라우드 인프라 (CoreWeave)",
+          -2
+        ],
+        [
+          "코스피 현물 (외국인)",
+          -3
+        ]
+      ],
+      "rotation_signal": {
+        "from": "코스피 현물 (외국인)",
+        "to": "반도체·AI 칩 (AMD, Micron, TSMC)",
         "strength": "강함"
       }
     }

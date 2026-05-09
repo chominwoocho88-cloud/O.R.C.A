@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-10 01:48 KST",
+  "collected_at": "2026-05-10 02:20 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,64 +12,40 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia secures $3.4B in future revenue by investing $2.1B in IREN data centers",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "Semiconductor stocks surge, leading broader market rally with strong AI chip demand",
+      "headline": "Wall Street analysts increasingly bullish on Nvidia ahead of May 20 earnings; IREN partnership announced for 5GW AI infrastructure deployment",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix surges to record high levels amid AI demand and HBM market leadership",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix posts record Q1 2026 profit with operating margin at record highs",
+      "headline": "SK Hynix shares surge amid regional market rally driven by strong AI chip demand and hyperscaler spending",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics market cap surpasses $1 trillion on AI chip boom",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung profit surges over eightfold to beat estimates as AI boom fuels memory chip demand",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom stock rallies on $35B financing deal reports from Apollo and Blackstone",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom AI chip deal with OpenAI faces $18B financing snag",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "035720.KS",
-      "headline": "Kakao stock trades at 46,300 KRW with mixed technical signals and analyst buy ratings",
+      "headline": "Samsung Electronics reaches $1 trillion valuation milestone; wage negotiations resume May 11-12 with strike threat",
       "impact": "neutral",
       "source": "web_search"
     },
     {
-      "ticker": "466920.KS",
-      "headline": "SOL 코리아고배당 ETF surpasses 5 trillion won in assets on high dividend strategy",
+      "ticker": "AVGO",
+      "headline": "Broadcom rallies after $35B financing deal with Apollo and Blackstone reported; OpenAI chip deal financing challenges ease",
       "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "Kakao Corp gains 3.4% following OpenAI partnership announcement for Stargate AI initiative expansion",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "466920.KS",
+      "headline": "SOL Korea High Dividend ETF tracking Shipbuilding Top 3 showing modest performance with strong sell technical signal",
+      "impact": "bearish",
       "source": "web_search"
     }
   ],
-  "total": 10
+  "total": 6
 }
