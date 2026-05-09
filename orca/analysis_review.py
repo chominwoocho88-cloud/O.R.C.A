@@ -102,6 +102,13 @@ _REVIEW_VERDICTS = (
 )
 
 _CONFIDENCE_SCORE = {"low": 1, "medium": 2, "high": 3}
+_INSUFFICIENT_DATA_REASON_CODES = {
+    "insufficient_data",
+    "no_signal_family",
+    "no_history_stats",
+    "unqualified_history",
+    "missing_quality",
+}
 
 
 def _clamp(value: float, low: float = -1.0, high: float = 1.0) -> float:
@@ -194,11 +201,13 @@ def _signal_family_history_component(
     family_history: dict[str, dict],
 ) -> tuple[float, list[str], bool]:
     if not signal_family:
-        return 0.0, ["insufficient_data"], False
+        return 0.0, ["no_signal_family"], False
 
     stats = family_history.get(signal_family, {})
-    if not stats or not stats.get("qualified"):
-        return 0.0, ["insufficient_data"], False
+    if not stats:
+        return 0.0, ["no_history_stats"], False
+    if not stats.get("qualified"):
+        return 0.0, ["unqualified_history"], False
 
     effective = float(stats.get("effective_win_rate", 0.0) or 0.0)
     component = _clamp((effective - 50.0) / 20.0)
@@ -214,7 +223,7 @@ def _quality_component(signal_quality: float | int | None) -> tuple[float, list[
     try:
         quality = float(signal_quality)
     except (TypeError, ValueError):
-        return 0.0, ["insufficient_data"], False
+        return 0.0, ["missing_quality"], False
 
     component = _clamp((quality - 50.0) / 50.0)
     codes: list[str] = []
@@ -306,7 +315,7 @@ def _review_confidence_label(
     bullish_agree: bool,
     reason_codes: list[str],
 ) -> str:
-    if "insufficient_data" in reason_codes:
+    if any(code in _INSUFFICIENT_DATA_REASON_CODES for code in reason_codes):
         return "low"
     if evidence_count >= 4 and ("mixed_signals" not in reason_codes) and ("regime_unclear" not in reason_codes):
         return "high"
