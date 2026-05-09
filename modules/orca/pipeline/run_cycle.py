@@ -71,23 +71,31 @@ def _run_phase4_drift_check(accuracy: dict) -> dict:
         correction_info = {}
         if flag_enabled:
             print("PHASE4_DRIFT_CHECK flag_enabled observe_only", flush=True)
-            correction_info = apply_phase4_correction(drift_result)
-            if correction_info["correction_applied"]:
-                print(
-                    f"PHASE4_CORRECTION decision severity={correction_info['severity']} "
-                    f"delta={correction_info['delta']} "
-                    f"(NOT applied yet, Sprint 2-3a)",
-                    flush=True,
-                )
-            else:
-                print("PHASE4_CORRECTION decision none", flush=True)
             try:
-                from orca.self_correction import append_self_correction_log
+                from orca.self_correction import append_self_correction_log, load_self_correction_log
 
-                entry = append_self_correction_log(drift_result, correction_info)
-                print(f"PHASE4_AUDIT logged timestamp={entry['timestamp']}", flush=True)
+                audit_log = load_self_correction_log()
+                correction_info = apply_phase4_correction(drift_result, audit_log=audit_log)
+                reason = str(correction_info.get("reason", ""))
+                if reason.startswith("cooldown"):
+                    print(f"PHASE4_CORRECTION skipped reason={reason}", flush=True)
+                elif correction_info["correction_applied"]:
+                    print(
+                        f"PHASE4_CORRECTION decision severity={correction_info['severity']} "
+                        f"delta={correction_info['delta']} "
+                        f"(NOT applied yet, Sprint 2-3a)",
+                        flush=True,
+                    )
+                else:
+                    print("PHASE4_CORRECTION decision none", flush=True)
+
+                try:
+                    entry = append_self_correction_log(drift_result, correction_info)
+                    print(f"PHASE4_AUDIT logged timestamp={entry['timestamp']}", flush=True)
+                except Exception as e:
+                    print(f"PHASE4_AUDIT failed error={e}", flush=True)
             except Exception as e:
-                print(f"PHASE4_AUDIT failed error={e}", flush=True)
+                print(f"PHASE4_CORRECTION failed error={e}", flush=True)
 
         return {
             "drift_detected": drift_result.drift_detected,

@@ -11,6 +11,7 @@ Design reference: docs/phase6/wave-f-meta-learning-design.md
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -24,6 +25,7 @@ DEFAULT_MIN_BASELINE_SAMPLES = 15
 DEFAULT_LOW_ACCURACY_THRESHOLD = 0.75
 DEFAULT_DRIFT_DELTA_PCT = 0.15
 DEFAULT_SEVERE_DROP_THRESHOLD = 0.15
+DEFAULT_COOLDOWN_DAYS = 7
 PHASE4_CORRECTION_LADDER = [
     ("severe_drop", -0.10),
     ("low_accuracy", -0.05),
@@ -147,8 +149,71 @@ def get_correction_delta(severity: str) -> float:
     return 0.0
 
 
-def apply_phase4_correction(drift_result: DriftResult) -> dict[str, Any]:
+def get_cooldown_days() -> int:
+    """Return the Phase 4 cooldown period from env, falling back safely."""
+    try:
+        return int(os.getenv("PHASE4_COOLDOWN_DAYS", str(DEFAULT_COOLDOWN_DAYS)))
+    except (TypeError, ValueError):
+        return DEFAULT_COOLDOWN_DAYS
+
+
+def is_in_cooldown(
+    audit_log: list,
+    *,
+    cooldown_days: int | None = None,
+    now: datetime | None = None,
+) -> tuple[bool, str | None]:
+    """Return whether a previous applied correction is still cooling down."""
+    if cooldown_days is None:
+        cooldown_days = get_cooldown_days()
+    if now is None:
+        now = datetime.now()
+    if not audit_log:
+        return False, None
+
+    last_correction = None
+    for entry in reversed(audit_log):
+        if entry.get("correction_applied"):
+            last_correction = entry
+            break
+    if last_correction is None:
+        return False, None
+
+    try:
+        last_ts = datetime.strptime(last_correction["timestamp"], "%Y-%m-%d %H:%M:%S")
+    except (KeyError, ValueError):
+        return False, None
+
+    elapsed = now - last_ts
+    cooldown_period = timedelta(days=cooldown_days)
+    if elapsed < cooldown_period:
+        days_remaining = (cooldown_period - elapsed).days
+        return True, f"cooldown_active_{days_remaining}d_remaining"
+    return False, None
+
+
+def apply_phase4_correction(
+    drift_result: DriftResult,
+    *,
+    audit_log: list | None = None,
+    cooldown_days: int | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
     """Return Phase 4 correction decision info without mutating weights."""
+    if audit_log is not None:
+        in_cooldown, cooldown_reason = is_in_cooldown(
+            audit_log,
+            cooldown_days=cooldown_days,
+            now=now,
+        )
+        if in_cooldown:
+            return {
+                "correction_applied": False,
+                "severity": None,
+                "delta": 0.0,
+                "reason": cooldown_reason or "cooldown_active",
+            }
+
     severity = get_correction_severity(drift_result)
     if severity is None:
         return {
@@ -229,12 +294,15 @@ __all__ = [
     "DEFAULT_LOW_ACCURACY_THRESHOLD",
     "DEFAULT_DRIFT_DELTA_PCT",
     "DEFAULT_SEVERE_DROP_THRESHOLD",
+    "DEFAULT_COOLDOWN_DAYS",
     "PHASE4_CORRECTION_LADDER",
     "SELF_CORRECTION_LOG_FILE",
     "DriftResult",
     "detect_drift",
     "get_correction_severity",
     "get_correction_delta",
+    "get_cooldown_days",
+    "is_in_cooldown",
     "apply_phase4_correction",
     "load_self_correction_log",
     "append_self_correction_log",
