@@ -31,6 +31,18 @@ API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 MODEL_S = "claude-haiku-4-5-20251001"   # 캘린더/속보용 가벼운 모델
 client  = LLMClient(API_KEY, fail_fast=False)
 
+REASON_DESCRIPTIONS = {
+    "market_bias_tailwind": "시장우호",
+    "market_bias_headwind": "시장역풍",
+    "regime_unclear": "시장모호",
+    "insufficient_data": "데이터부족",
+    "mixed_signals": "신호혼재",
+    "devil_bearish_warn": "반론경고",
+    "devil_contradicts_thesis": "논리충돌",
+    "devil_bullish_agree": "반론동의",
+    "thesis_killer_triggered": "무효조건",
+}
+
 
 def _now() -> datetime:
     return datetime.now(KST)
@@ -265,7 +277,8 @@ def _build_morning(report: dict) -> list:
             lines.append("평균 확신도: " + avg_conf)
         for item in candidate_review.get("highlights", [])[:3]:
             reasons = item.get("alignment_reason_codes", [])[:2]
-            reason_suffix = " [" + ", ".join(reasons) + "]" if reasons else ""
+            descriptions = [REASON_DESCRIPTIONS.get(reason, reason) for reason in reasons]
+            reason_suffix = " [" + ", ".join(descriptions) + "]" if descriptions else ""
             lines.append(
                 "• {ticker} {alignment}/{verdict} ({quality}){suffix}".format(
                     ticker=item.get("ticker", ""),
