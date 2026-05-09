@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-09 18:48 KST",
+  "collected_at": "2026-05-09 20:45 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA Announces Strategic Partnership with IREN Limited for AI Infrastructure Deployment; Stock Shows Positive Momentum with IREN Investment and Corning Partnership",
+      "headline": "Goldman Sachs upgrades NVIDIA earnings/profit forecasts 12% with strong Q1 2026 guidance expected",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix Up 1.93% on Strong Q1 Results and HBM Demand; Memory Chip Market Rally Continues with Positive Analyst Outlook for 2026",
+      "headline": "SK Hynix up 1.93% - HBM demand expansion driving 1Q2026 strong results with positive outlook",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics Down 1.10% as Foreign Investors Continue Selling; Market Shows Mixed Signals Amid Iran-US Ceasefire Uncertainty",
+      "headline": "Samsung Electronics down 1.10% amid foreign investor selling pressure and profit-taking after gains",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom Stock Rallies on $35B Financing Deal with Apollo and Blackstone Following OpenAI Chip Deal Financing Snag; Strong Backlog Support",
+      "headline": "Broadcom rallies 4.3% on Apollo/Blackstone $55B financing news, Q1 revenue up 29% YoY to $19.3B",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Up 3.37% on Positive Sentiment; Platform Strengthens User Protection with Police Partnership to Combat Phishing Crimes",
+      "headline": "Kakao partners with police to combat phishing fraud; stock up 3.37% amid AI collaboration expectations",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF Surges Past 4 Trillion Won Assets Under Management with Strong Recent Performance Driven by Financial Stocks and Government Valueon Program",
+      "headline": "SOL 코리아고배당 ETF surpassed 4,000 billion KRW AUM, number 1 inflow among domestic dividend ETFs",
       "impact": "bullish",
       "source": "web_search"
     }
