@@ -215,6 +215,90 @@ class KisClient:
                 continue
         return result
 
+    def get_investor_flow(self, ticker: str) -> dict:
+        """Fetch per-stock foreign/institution investor flow from KIS."""
+        code = self._normalize_ticker(ticker)
+        url = f"{self.base_url}/uapi/domestic-stock/v1/quotations/inquire-investor"
+        headers = self._auth_headers("FHKST01010900")
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": code,
+        }
+
+        try:
+            resp = httpx.get(url, headers=headers, params=params, timeout=self.timeout)
+            resp.raise_for_status()
+            data = resp.json()
+        except (httpx.HTTPError, ValueError) as exc:
+            raise KisError(f"KIS investor flow request failed: {exc}") from exc
+
+        _raise_for_kis_error(data)
+        output = data.get("output", []) or []
+        if isinstance(output, list):
+            if not output:
+                raise KisError("KIS investor flow response missing output")
+            row = output[0]
+        else:
+            row = output
+
+        try:
+            return {
+                "ticker": code,
+                "foreign_buy": _to_int(row.get("frgn_buy_qty")),
+                "foreign_sell": _to_int(row.get("frgn_seln_qty")),
+                "foreign_net": _to_int(row.get("frgn_ntby_qty")),
+                "institution_buy": _to_int(row.get("orgn_buy_qty")),
+                "institution_sell": _to_int(row.get("orgn_seln_qty")),
+                "institution_net": _to_int(row.get("orgn_ntby_qty")),
+                "individual_net": _to_int(row.get("prsn_ntby_qty")),
+                "date": row.get("stck_bsop_date", ""),
+                "source": "kis",
+            }
+        except (AttributeError, TypeError, ValueError) as exc:
+            raise KisError(f"KIS investor flow response invalid: {row}") from exc
+
+    def get_foreign_institution_total(self, market: str = "0000") -> list[dict]:
+        """Fetch foreign/institution aggregate rankings from KIS HTS 0440."""
+        url = (
+            f"{self.base_url}"
+            "/uapi/domestic-stock/v1/quotations/foreign-institution-total"
+        )
+        headers = self._auth_headers("FHPTJ04400000")
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "V",
+            "FID_COND_SCR_DIV_CODE": "16449",
+            "FID_INPUT_ISCD": market,
+            "FID_DIV_CLS_CODE": "0",
+            "FID_RANK_SORT_CLS_CODE": "0",
+            "FID_ETC_CLS_CODE": "0",
+        }
+
+        try:
+            resp = httpx.get(url, headers=headers, params=params, timeout=self.timeout)
+            resp.raise_for_status()
+            data = resp.json()
+        except (httpx.HTTPError, ValueError) as exc:
+            raise KisError(f"KIS foreign/institution total request failed: {exc}") from exc
+
+        _raise_for_kis_error(data)
+        output = data.get("output", []) or []
+
+        result = []
+        for row in output:
+            try:
+                result.append(
+                    {
+                        "ticker": row.get("mksc_shrn_iscd", ""),
+                        "name": row.get("hts_kor_isnm", ""),
+                        "foreign_net": _to_int(row.get("frgn_ntby_qty")),
+                        "institution_net": _to_int(row.get("orgn_ntby_qty")),
+                        "source": "kis",
+                    }
+                )
+            except (AttributeError, TypeError, ValueError):
+                continue
+        return result
+
     def _normalize_ticker(self, ticker: str) -> str:
         """Normalize yfinance-style Korean tickers to KIS six-digit codes."""
         value = str(ticker or "").strip()
