@@ -115,11 +115,11 @@ class Phase8d2KisOrcaIntegrationTests(unittest.TestCase):
 
 class Phase8d2AgentsSourceBranchTests(unittest.TestCase):
     def test_kis_source_in_no_penalty_set(self):
-        """source='kis' is treated like krx_api real data."""
-        sources_no_penalty = ("krx_api", "kis")
+        """source='kis' is the only investor-flow real-data source."""
+        sources_no_penalty = ("kis",)
 
-        self.assertIn("krx_api", sources_no_penalty)
         self.assertIn("kis", sources_no_penalty)
+        self.assertNotIn("krx_api", sources_no_penalty)
         self.assertNotIn("none", sources_no_penalty)
         self.assertNotIn("ewy", sources_no_penalty)
 
@@ -127,4 +127,5 @@ class Phase8d2AgentsSourceBranchTests(unittest.TestCase):
         """agents.py excludes kis source from flow-data penalties."""
         source = Path("modules/orca/pipeline/agents.py").read_text(encoding="utf-8")
 
-        self.assertIn('("krx_api", "kis")', source)
+        self.assertIn('md.get("krx_flow_source") == "kis"', source)
+        self.assertNotIn("krx_api", source)

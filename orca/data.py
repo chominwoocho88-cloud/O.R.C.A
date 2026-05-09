@@ -132,73 +132,18 @@ def _fetch_kis_investor_flow(ticker: str = "005930") -> dict | None:
         return None
 
 def fetch_krx_flow() -> dict:
-    """KRX OpenAPI — 실제 제공 데이터로 한국 시장 보조 지표 수집
-    ※ 투자자별 매매동향은 KIS 우선, 실패 시 기존 KRX 보조 지표 흐름 유지
-    대신: KOSPI 지수 시세 (Yahoo Finance 교차검증용)
-
-    엔드포인트: data-dbg.krx.co.kr/svc/apis/idx/kospi_dd_trd
-    AUTH_KEY 헤더, basDd=YYYYMMDD 파라미터, GET 방식
-    """
+    """KIS single-source investor flow collector."""
     kis_result = _fetch_kis_investor_flow()
     if kis_result is not None:
         return kis_result
 
-    result = {
+    return {
         "foreign_net": "N/A", "institution_net": "N/A", "individual_net": "N/A",
         "foreign_buy": "N/A", "foreign_sell": "N/A",
         "source": "none", "date": "N/A",
         "krx_kospi_close": "N/A", "krx_kospi_change": "N/A",
+        "note": "KIS 수급 연결 확인 필요",
     }
-    api_key = os.environ.get("KRX_API_KEY", "")
-    if not api_key:
-        return result
-
-    now = datetime.now(KST)
-    # 직전 거래일 계산
-    d = now if now.hour >= 18 else now - timedelta(days=1)
-    for _ in range(7):
-        if d.weekday() < 5:
-            break
-        d = d - timedelta(days=1)
-    date_str = d.strftime("%Y%m%d")
-
-    headers = {
-        "AUTH_KEY": api_key.strip(),
-        "Accept": "application/json",
-    }
-
-    # KOSPI 일별 시세 (실제 제공 엔드포인트)
-    try:
-        r = httpx.get(
-            "https://data-dbg.krx.co.kr/svc/apis/idx/kospi_dd_trd",
-            headers=headers,
-            params={"basDd": date_str},
-            timeout=12,
-            follow_redirects=True,
-        )
-        if r.status_code == 200:
-            rows = r.json().get("OutBlock_1", [])
-            if rows:
-                # 종합(KOSPI) 행 찾기
-                for row in rows:
-                    nm = str(row.get("IDX_NM", "") or row.get("idxNm",""))
-                    if "종합" in nm or "KOSPI" in nm.upper():
-                        close = str(row.get("CLSPRC","") or row.get("clsPrc",""))
-                        fluc  = str(row.get("FLUC_RT","") or row.get("flucRt",""))
-                        if close:
-                            result["krx_kospi_close"]  = close
-                            result["krx_kospi_change"] = fluc
-                            result["source"]           = "krx_api"
-                            result["date"]             = date_str
-                            break
-        else:
-            pass
-    except Exception as e:
-        pass
-
-    # 투자자별 수급은 미제공 — Hunter 웹서치로 보완
-
-    return result
 
 
 def fetch_yahoo_data():
@@ -604,11 +549,10 @@ def fetch_all_market_data():
         krx_flow = fetch_krx_flow()
     except Exception as e:
         krx_flow = {"source": "none", "date": "N/A", "krx_kospi_close": "N/A", "krx_kospi_change": "N/A"}
-        _record_failure("KRX_API", e, "primary")
+        _record_failure("KIS_FLOW", e, "primary")
 
     if krx_flow.get("source", "none") == "none":
-        krx_error = "missing_api_key" if not os.environ.get("KRX_API_KEY", "") else "unavailable"
-        _record_failure("KRX_API", krx_error, "primary")
+        _record_failure("KIS_FLOW", "unavailable", "primary")
 
     print("[FRED 매크로지표]")
     try:
@@ -715,13 +659,12 @@ def format_for_hunter(data):
     elif market_status == "after_hours":
         status_str = "\n📌 " + data_label
 
-    # 외국인 수급 — 직접 데이터 우선, 없으면 EWY 프록시
+    # 외국인 수급 — KIS 직접 데이터 우선, 없으면 EWY 프록시
     krx_src = data.get("krx_flow_source", "none")
-    if krx_src in ("kis", "krx_api"):
+    if krx_src == "kis":
         krx_date = data.get("krx_flow_date", "")
-        flow_label = "KIS" if krx_src == "kis" else "직접데이터"
         flow_str = (
-            "\n📊 외국인수급(" + flow_label + " " + krx_date + "):"
+            "\n📊 외국인수급(KIS " + krx_date + "):"
             " 외국인 " + data.get("krx_foreign_net","N/A") +
             " | 기관 " + data.get("krx_institution_net","N/A") +
             " | 개인 " + data.get("krx_individual_net","N/A")

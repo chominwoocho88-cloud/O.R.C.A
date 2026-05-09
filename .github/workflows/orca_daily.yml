@@ -149,7 +149,6 @@ jobs:
           MAX_THINKING_TOKENS: "8000"
           SUBAGENT_MODEL: "claude-haiku-4-5-20251001"
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
           # Phase 8d-3a: KIS step-level env for the ORCA execution step.
           KIS_CMW_APP_KEY_PAPER: ${{ secrets.KIS_CMW_APP_KEY_PAPER }}
