@@ -38,6 +38,11 @@ jobs:
       USE_UNIFIED_FETCH: "1"
       USE_FDR_MAIN: "1"
       YF_RATE_LIMIT_FAST_FAIL: "1"
+      # Phase 8d-3: KIS API integration (paper trading)
+      KIS_CMW_APP_KEY_PAPER: ${{ secrets.KIS_CMW_APP_KEY_PAPER }}
+      KIS_CMW_APP_SECRET_PAPER: ${{ secrets.KIS_CMW_APP_SECRET_PAPER }}
+      KIS_CMW_ACCOUNT_NUMBER_PAPER: ${{ secrets.KIS_CMW_ACCOUNT_NUMBER_PAPER }}
+      KIS_IS_PAPER: "true"
     permissions:
       contents: write
 
