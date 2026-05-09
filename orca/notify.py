@@ -48,6 +48,15 @@ REASON_DESCRIPTIONS = {
 }
 
 
+def _format_ticker_display(item: dict) -> str:
+    """Format JACKAL candidate ticker display with a name when available."""
+    ticker = str(item.get("ticker", "") or "").strip()
+    name = str(item.get("name", "") or "").strip()
+    if name and name != ticker:
+        return f"{name} ({ticker})"
+    return ticker
+
+
 def _now() -> datetime:
     return datetime.now(KST)
 
@@ -284,8 +293,8 @@ def _build_morning(report: dict) -> list:
             descriptions = [REASON_DESCRIPTIONS.get(reason, reason) for reason in reasons]
             reason_suffix = " [" + ", ".join(descriptions) + "]" if descriptions else ""
             lines.append(
-                "• {ticker} {alignment}/{verdict} ({quality}){suffix}".format(
-                    ticker=item.get("ticker", ""),
+                "• {display} {alignment}/{verdict} ({quality}){suffix}".format(
+                    display=_format_ticker_display(item),
                     alignment=item.get("alignment", ""),
                     verdict=item.get("review_verdict", ""),
                     quality=item.get("quality_score", "-"),
