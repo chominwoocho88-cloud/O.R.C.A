@@ -94,12 +94,15 @@ def _fetch_kis_investor_flow(ticker: str = "005930") -> dict | None:
 
         client = client_class()
         if not client.is_configured():
+            print("  KIS: not configured (env missing)")
             return None
 
         result = client.get_investor_flow(ticker)
         if not result:
+            print("  KIS: empty response")
             return None
 
+        print("  KIS: success (date=" + str(result.get("date", "N/A")) + ")")
         return {
             "foreign_net": str(result.get("foreign_net", 0)),
             "institution_net": str(result.get("institution_net", 0)),
@@ -111,7 +114,8 @@ def _fetch_kis_investor_flow(ticker: str = "005930") -> dict | None:
             "krx_kospi_close": "N/A",
             "krx_kospi_change": "N/A",
         }
-    except Exception:
+    except Exception as e:
+        print("  KIS: exception (" + type(e).__name__ + ")")
         return None
 
 def fetch_krx_flow() -> dict:
