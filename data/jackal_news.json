@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-10 01:11 KST",
+  "collected_at": "2026-05-10 01:27 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,64 +12,64 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVDA partnerships with IREN for AI infrastructure expansion and $500M Corning investment signal continued infrastructure dominance",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "Wall Street shifting AI focus to Intel and AMD as CPU makers gain momentum while Nvidia lags this week",
+      "headline": "Wall Street shifts focus from Nvidia to Intel, AMD, and Micron as AI chip diversification accelerates",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "NVDA",
-      "headline": "Goldman Sachs maintains Buy rating with $250 price target implying 20% upside ahead of May 20 earnings",
+      "headline": "Nvidia partners with IREN for 5GW AI infrastructure deployment deal, stock gains 5.77%",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Goldman Sachs rates Nvidia as Strong Buy with $250 price target, stock trades at discount valuation",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix ETF surpasses Tesla in AUM with AI semiconductor strength and positive memory pricing trends",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "Bernstein bullish on memory stocks after DRAM prices surge with tight inventory levels supporting pricing power",
+      "headline": "SK Hynix stock rises 1.93% on HBM memory demand strength and Q1 earnings beat",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics down 1.1% amid foreign investor selling and U.S.-Iran geopolitical uncertainty",
+      "headline": "Samsung Electronics falls 1.10% amid global equities weakness and U.S.-Iran tensions",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung's 2026 operating profit raised 8% to 360 trillion won reflecting strong Q1 memory prices and tight supply dynamics",
+      "headline": "Samsung targets 360 trillion won operating profit on strong memory pricing, rated Buy by analysts",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom rallies 4% on reports of Apollo and Blackstone negotiating $35 billion financing deal for AI expansion",
-      "impact": "bullish",
+      "headline": "Broadcom slips 4% as OpenAI AI chip deal hits major $18 billion financing snag",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "OpenAI custom AI chip deal with Broadcom hits $18 billion financing snag causing 4% stock decline",
+      "headline": "Broadcom rebounds 4.3% on Bloomberg report of potential $35B Apollo-Blackstone financing deal",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "Kakao stock down as brokers cut price targets citing lack of AI tangible results vs. global competitors",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao up 3.37% amid positive earnings report but faces analyst downgrades due to AI disappointment",
-      "impact": "neutral",
+      "headline": "Kakao rises 3.37% on potential Uber interest in acquiring controlling stake in Kakao Mobility",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 12
+  "total": 11
 }
