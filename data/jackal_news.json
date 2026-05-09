@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-10 00:35 KST",
+  "collected_at": "2026-05-10 01:11 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,40 +12,64 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia appoints Suzanne Nora Johnson to board; earnings report scheduled for May 20 with strong revenue guidance",
+      "headline": "NVDA partnerships with IREN for AI infrastructure expansion and $500M Corning investment signal continued infrastructure dominance",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Wall Street shifting AI focus to Intel and AMD as CPU makers gain momentum while Nvidia lags this week",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Goldman Sachs maintains Buy rating with $250 price target implying 20% upside ahead of May 20 earnings",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix shares surge on strong momentum amid AI chip demand surge and foreign institutional buying",
+      "headline": "SK Hynix ETF surpasses Tesla in AUM with AI semiconductor strength and positive memory pricing trends",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "Bernstein bullish on memory stocks after DRAM prices surge with tight inventory levels supporting pricing power",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics reports Q1 revenue of 133.9 trillion KRW (+43% sequential), reaching 1 trillion market cap valuation",
+      "headline": "Samsung Electronics down 1.1% amid foreign investor selling and U.S.-Iran geopolitical uncertainty",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung's 2026 operating profit raised 8% to 360 trillion won reflecting strong Q1 memory prices and tight supply dynamics",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom stock drops 4% on OpenAI custom AI chip financing snag; secures $35B private credit deal talks with Apollo/Blackstone",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "035720.KS",
-      "headline": "Kakao partners with OpenAI for Stargate initiative expansion; stock trading at 46,300 KRW with +58% upside analyst potential",
+      "headline": "Broadcom rallies 4% on reports of Apollo and Blackstone negotiating $35 billion financing deal for AI expansion",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF experiences strong growth with 174.5 billion won cumulative net purchases; focused on stable cash flows",
+      "ticker": "AVGO",
+      "headline": "OpenAI custom AI chip deal with Broadcom hits $18 billion financing snag causing 4% stock decline",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "Kakao up 3.37% amid positive earnings report but faces analyst downgrades due to AI disappointment",
       "impact": "neutral",
       "source": "web_search"
     }
   ],
-  "total": 6
+  "total": 12
 }
