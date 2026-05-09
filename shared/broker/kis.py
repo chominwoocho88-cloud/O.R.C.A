@@ -20,6 +20,10 @@ PROD_BASE_URL = "https://openapi.koreainvestment.com:9443"
 
 DEFAULT_TIMEOUT = 10.0
 TOKEN_REFRESH_MARGIN_SECONDS = 300
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+)
 
 
 class KisError(Exception):
@@ -38,6 +42,11 @@ def _is_paper_mode() -> bool:
 def get_kis_base_url() -> str:
     """Return the KIS base URL for the configured trading mode."""
     return PAPER_BASE_URL if _is_paper_mode() else PROD_BASE_URL
+
+
+def _get_user_agent() -> str:
+    """Read the KIS User-Agent override, or use the official sample default."""
+    return os.environ.get("KIS_USER_AGENT", DEFAULT_USER_AGENT)
 
 
 def _get_app_key() -> str:
@@ -113,9 +122,17 @@ class KisClient:
             "appkey": self.app_key,
             "appsecret": self.app_secret,
         }
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "text/plain",
+            "charset": "UTF-8",
+            "User-Agent": _get_user_agent(),
+        }
 
         try:
-            resp = httpx.post(url, json=payload, timeout=self.timeout)
+            resp = httpx.post(
+                url, json=payload, headers=headers, timeout=self.timeout
+            )
             resp.raise_for_status()
             data = resp.json()
         except (httpx.HTTPError, ValueError) as exc:
@@ -307,15 +324,20 @@ class KisClient:
             return value[:-3]
         return value.zfill(6)
 
-    def _auth_headers(self, tr_id: str) -> dict[str, str]:
+    def _auth_headers(self, tr_id: str, tr_cont: str = "") -> dict[str, str]:
         """Build KIS REST headers for an authenticated request."""
         token = self.get_token()
         return {
-            "content-type": "application/json; charset=utf-8",
+            "Content-Type": "application/json",
+            "Accept": "text/plain",
+            "charset": "UTF-8",
+            "User-Agent": _get_user_agent(),
             "authorization": f"Bearer {token}",
             "appkey": self.app_key,
             "appsecret": self.app_secret,
             "tr_id": tr_id,
+            "custtype": "P",
+            "tr_cont": tr_cont,
         }
 
 
