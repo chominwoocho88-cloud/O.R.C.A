@@ -135,6 +135,79 @@ jobs:
           conn.close()
           PY
 
+      - name: Debug KIS env (TEMPORARY - Phase 8d-3h)
+        env:
+          KIS_CMW_APP_KEY_PAPER: ${{ secrets.KIS_CMW_APP_KEY_PAPER }}
+          KIS_CMW_APP_SECRET_PAPER: ${{ secrets.KIS_CMW_APP_SECRET_PAPER }}
+          KIS_CMW_ACCOUNT_NUMBER_PAPER: ${{ secrets.KIS_CMW_ACCOUNT_NUMBER_PAPER }}
+          KIS_IS_PAPER: ${{ env.KIS_IS_PAPER }}
+        run: |
+          python - <<'PY'
+          import os
+          import json
+          import urllib.request
+          import urllib.error
+
+          # Print env var lengths and last 2 chars only.
+          for k in ["KIS_CMW_APP_KEY_PAPER", "KIS_CMW_APP_SECRET_PAPER",
+                    "KIS_CMW_ACCOUNT_NUMBER_PAPER", "KIS_IS_PAPER"]:
+              v = os.environ.get(k, "")
+              v_stripped = v.strip()
+              print(f"{k}:")
+              print(f"  raw length: {len(v)}")
+              print(f"  stripped length: {len(v_stripped)}")
+              print(f"  has whitespace: {v != v_stripped}")
+              if v_stripped:
+                  print(f"  last 2 chars: {repr(v_stripped[-2:])}")
+              print()
+
+          # GitHub Actions runner IP.
+          try:
+              ip = urllib.request.urlopen("https://api.ipify.org", timeout=5).read().decode()
+              print(f"Runner IP: {ip}")
+          except Exception as e:
+              print(f"IP check failed: {e}")
+
+          # Direct KIS token request probe.
+          url = "https://openapivts.koreainvestment.com:29443/oauth2/tokenP"
+          payload = json.dumps({
+              "grant_type": "client_credentials",
+              "appkey": os.environ.get("KIS_CMW_APP_KEY_PAPER", ""),
+              "appsecret": os.environ.get("KIS_CMW_APP_SECRET_PAPER", ""),
+          }).encode()
+
+          req = urllib.request.Request(
+              url,
+              data=payload,
+              headers={
+                  "Content-Type": "application/json",
+                  "Accept": "text/plain",
+                  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+              },
+              method="POST",
+          )
+
+          try:
+              resp = urllib.request.urlopen(req, timeout=10)
+              print(f"KIS token request: SUCCESS {resp.status}")
+              body = resp.read().decode()
+              try:
+                  data = json.loads(body)
+                  print(f"Response keys: {sorted(data.keys())}")
+                  if "access_token" in data:
+                      print(f"access_token length: {len(str(data.get('access_token', '')))}")
+                  if "expires_in" in data:
+                      print(f"expires_in: {data.get('expires_in')}")
+              except Exception:
+                  print(f"Response length: {len(body)}")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", errors="ignore")[:300]
+              print(f"KIS token request: HTTP {e.code}")
+              print(f"Response body: {body}")
+          except Exception as e:
+              print(f"KIS token request: EXCEPTION {type(e).__name__}: {e}")
+          PY
+
       - name: Run ORCA report
         env:
           ORCA_MODE: ${{ env.ORCA_RUN_MODE }}
