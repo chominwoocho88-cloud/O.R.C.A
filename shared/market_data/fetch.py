@@ -20,6 +20,7 @@ except Exception:  # pragma: no cover - runtime degraded path
     yf = None
 
 from orca import context_market_data as _context_market_data
+from shared.broker import KisClient
 
 _fetch_with_fallback = _context_market_data._fetch_with_fallback
 
@@ -28,6 +29,9 @@ _GLOBAL_FETCH_STATS: dict[str, int] = {
     "fdr_attempts": 0,
     "fdr_success": 0,
     "fdr_failed": 0,
+    "kis_attempts": 0,
+    "kis_success": 0,
+    "kis_failed": 0,
     "alpha_vantage_attempts": 0,
     "yfinance_batch_success": 0,
     "yfinance_ticker_success": 0,
@@ -38,6 +42,7 @@ _GLOBAL_FETCH_STATS: dict[str, int] = {
     "failed": 0,
     "total": 0,
 }
+_PROVIDER_STATS = _GLOBAL_FETCH_STATS
 _LAST_FETCH_SOURCE: dict[str, str] = {}
 _LAST_PROVIDER_WARNINGS: list[str] = []
 
@@ -64,7 +69,9 @@ __all__ = [
     "_sum_option_column",
     "_try_alpha_vantage_history",
     "_try_fdr_history",
+    "_try_kis_history",
     "_use_fdr_main",
+    "_PROVIDER_STATS",
 ]
 
 
@@ -96,6 +103,14 @@ def fetch_daily_history(
 
     if _resolve_use_fallback(use_fallback):
         _context_market_data.reset_last_yfinance_status()
+        if _is_korean_market_ticker(ticker):
+            _record_provider_attempt("kis")
+            kis_frame = _try_kis_history(ticker, start, end)
+            if kis_frame is not None and not kis_frame.empty:
+                _record_fetch_source(ticker, "kis")
+                return kis_frame
+            _record_provider_issue("kis_failed")
+
         if _use_fdr_main():
             _record_provider_attempt("fdr")
             fdr_frame = _try_fdr_history(ticker, start, end)
@@ -404,6 +419,9 @@ def reset_fetch_stats() -> None:
         {
             "fdr_attempts": 0,
             "fdr_failed": 0,
+            "kis_attempts": 0,
+            "kis_success": 0,
+            "kis_failed": 0,
             "alpha_vantage_attempts": 0,
             "yfinance_batch_success": 0,
             "yfinance_ticker_success": 0,
@@ -434,6 +452,8 @@ def _record_fetch_source(ticker: str, source: str | None) -> None:
     normalized_source = str(source or "").strip() or "failed"
     if normalized_source == "fdr":
         key = "fdr_success"
+    elif normalized_source == "kis":
+        key = "kis_success"
     elif normalized_source == "yfinance_batch":
         key = "yfinance_batch_success"
     elif normalized_source == "yfinance_ticker":
@@ -481,6 +501,46 @@ def _try_fdr_history(ticker: str, start: str, end: str) -> pd.DataFrame | None:
         if exc.__class__.__name__ == "FDRTickerNotSupportedError":
             return None
         sys.stderr.write(f"WARN: FDR provider failed for {ticker}: {exc}\n")
+        return None
+
+
+def _try_kis_history(ticker: str, start: str, end: str) -> pd.DataFrame | None:
+    """Fetch Korean daily OHLCV through KIS when credentials are configured."""
+    try:
+        client = KisClient()
+        if not client.is_configured():
+            return None
+
+        rows = client.get_daily_history(
+            ticker,
+            start.replace("-", ""),
+            end.replace("-", ""),
+        )
+        if not rows:
+            return None
+
+        records = []
+        for row in rows:
+            try:
+                records.append(
+                    {
+                        "Date": pd.to_datetime(row.get("date"), format="%Y%m%d"),
+                        "Open": float(row.get("open", 0)),
+                        "High": float(row.get("high", 0)),
+                        "Low": float(row.get("low", 0)),
+                        "Close": float(row.get("close", 0)),
+                        "Volume": int(row.get("volume", 0)),
+                    }
+                )
+            except (AttributeError, TypeError, ValueError):
+                continue
+        if not records:
+            return None
+
+        frame = pd.DataFrame(records).set_index("Date").sort_index()
+        return frame[["Open", "High", "Low", "Close", "Volume"]]
+    except Exception as exc:
+        sys.stderr.write(f"WARN: KIS provider failed for {ticker}: {exc}\n")
         return None
 
 
