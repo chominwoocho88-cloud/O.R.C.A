@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-09 23:29 KST",
+  "collected_at": "2026-05-09 23:54 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,38 +12,38 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia embraces role of AI investor, pushing past $40 billion in equity bets this year; Stock +1.75% on strong AI demand",
+      "headline": "Nvidia to discuss Q1 fiscal 2027 earnings on May 20; board adds Suzanne Nora Johnson; partnerships with Corning and IREN announced",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix shares up +1.93% amid strong HBM demand and positive analyst outlook on memory semiconductor recovery",
+      "headline": "SK Hynix shares up 1.93% amid AI demand surge and aggressive courting by major tech companies",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics down -1.10%; Foreign investors selling amid concerns about Iran-US negotiations affecting risk sentiment",
+      "headline": "Samsung Electronics enters wage mediation May 11-12; union threatens 18-day strike if talks fail; shares at 268,500 KRW",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom rallies +4% after Apollo and Blackstone in talks for $35B financing deal to fund AI build-out; Q1 AI revenue doubled",
+      "headline": "Broadcom up 3.03% on AI growth; Q1 beat and $35B financing talks with Apollo/Blackstone reported; OpenAI deal financing snag earlier resolved",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao up +3.37%; AI expansion and improved business fundamentals driving positive sentiment despite past earnings miss",
+      "headline": "Kakao stock up 3.37% to 46,775 KRW; company partnering with OpenAI for AI expansion and agent development",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF net assets exceeded 670B KRW; Strong inflows and portfolio gains from financial stocks and value plays",
-      "impact": "bullish",
+      "headline": "Shinhan SOL Shipbuilding Top3 Plus ETF at 32,100 KRW; tracking Korean shipbuilding sector performance",
+      "impact": "neutral",
       "source": "web_search"
     }
   ],
