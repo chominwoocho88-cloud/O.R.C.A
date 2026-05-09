@@ -77,7 +77,7 @@ class KisToken:
 
 
 class KisClient:
-    """KIS API client skeleton for authentication and token caching."""
+    """KIS API client for authentication and domestic market data calls."""
 
     def __init__(
         self,
@@ -133,6 +133,107 @@ class KisClient:
         )
         return access_token
 
+    def get_current_price(self, ticker: str) -> dict:
+        """Fetch current domestic stock price from KIS."""
+        code = self._normalize_ticker(ticker)
+        url = f"{self.base_url}/uapi/domestic-stock/v1/quotations/inquire-price"
+        headers = self._auth_headers("FHKST01010100")
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": code,
+        }
+
+        try:
+            resp = httpx.get(url, headers=headers, params=params, timeout=self.timeout)
+            resp.raise_for_status()
+            data = resp.json()
+        except (httpx.HTTPError, ValueError) as exc:
+            raise KisError(f"KIS current price request failed: {exc}") from exc
+
+        _raise_for_kis_error(data)
+        output = data.get("output", {}) or {}
+
+        try:
+            return {
+                "ticker": code,
+                "price": _to_float(output.get("stck_prpr")),
+                "change": _to_float(output.get("prdy_ctrt")),
+                "volume": _to_int(output.get("acml_vol")),
+                "source": "kis",
+                "timestamp": output.get("stck_bsop_date", ""),
+            }
+        except (TypeError, ValueError) as exc:
+            raise KisError(f"KIS current price response invalid: {output}") from exc
+
+    def get_daily_history(
+        self,
+        ticker: str,
+        start_date: str,
+        end_date: str,
+    ) -> list[dict]:
+        """Fetch daily domestic stock OHLCV history from KIS."""
+        code = self._normalize_ticker(ticker)
+        url = (
+            f"{self.base_url}"
+            "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
+        )
+        headers = self._auth_headers("FHKST03010100")
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": code,
+            "FID_INPUT_DATE_1": start_date,
+            "FID_INPUT_DATE_2": end_date,
+            "FID_PERIOD_DIV_CODE": "D",
+            "FID_ORG_ADJ_PRC": "0",
+        }
+
+        try:
+            resp = httpx.get(url, headers=headers, params=params, timeout=self.timeout)
+            resp.raise_for_status()
+            data = resp.json()
+        except (httpx.HTTPError, ValueError) as exc:
+            raise KisError(f"KIS daily history request failed: {exc}") from exc
+
+        _raise_for_kis_error(data)
+        rows = data.get("output2", []) or []
+
+        result = []
+        for row in rows:
+            try:
+                result.append(
+                    {
+                        "date": row.get("stck_bsop_date", ""),
+                        "open": _to_float(row.get("stck_oprc")),
+                        "high": _to_float(row.get("stck_hgpr")),
+                        "low": _to_float(row.get("stck_lwpr")),
+                        "close": _to_float(row.get("stck_clpr")),
+                        "volume": _to_int(row.get("acml_vol")),
+                        "source": "kis",
+                    }
+                )
+            except (AttributeError, TypeError, ValueError):
+                continue
+        return result
+
+    def _normalize_ticker(self, ticker: str) -> str:
+        """Normalize yfinance-style Korean tickers to KIS six-digit codes."""
+        value = str(ticker or "").strip()
+        upper = value.upper()
+        if upper.endswith(".KS") or upper.endswith(".KQ"):
+            return value[:-3]
+        return value.zfill(6)
+
+    def _auth_headers(self, tr_id: str) -> dict[str, str]:
+        """Build KIS REST headers for an authenticated request."""
+        token = self.get_token()
+        return {
+            "content-type": "application/json; charset=utf-8",
+            "authorization": f"Bearer {token}",
+            "appkey": self.app_key,
+            "appsecret": self.app_secret,
+            "tr_id": tr_id,
+        }
+
 
 def _coerce_expires_in(value: object) -> float:
     """Convert KIS expires_in values to seconds, defaulting to 24 hours."""
@@ -140,3 +241,19 @@ def _coerce_expires_in(value: object) -> float:
         return float(value)
     except (TypeError, ValueError):
         return 86400.0
+
+
+def _raise_for_kis_error(data: dict) -> None:
+    """Raise KisError when KIS reports an application-level error."""
+    if data.get("rt_cd") != "0":
+        raise KisError(f"KIS API error: {data.get('msg1', 'unknown')}")
+
+
+def _to_float(value: object) -> float:
+    """Convert KIS numeric string fields to float."""
+    return float(value or 0)
+
+
+def _to_int(value: object) -> int:
+    """Convert KIS numeric string fields to int."""
+    return int(float(value or 0))
