@@ -115,7 +115,19 @@ def _fetch_kis_investor_flow(ticker: str = "005930") -> dict | None:
             "krx_kospi_change": "N/A",
         }
     except Exception as e:
-        print("  KIS: exception (" + type(e).__name__ + ")")
+        msg = str(e)[:100].lower()
+        status_hint = ""
+        if "403" in msg:
+            status_hint = " [403 Forbidden]"
+        elif "401" in msg:
+            status_hint = " [401 Unauthorized]"
+        elif "404" in msg:
+            status_hint = " [404 Not Found]"
+        elif "500" in msg:
+            status_hint = " [500 Server Error]"
+        elif "timeout" in msg:
+            status_hint = " [timeout]"
+        print("  KIS: exception (" + type(e).__name__ + ")" + status_hint)
         return None
 
 def fetch_krx_flow() -> dict:
@@ -138,7 +150,6 @@ def fetch_krx_flow() -> dict:
     }
     api_key = os.environ.get("KRX_API_KEY", "")
     if not api_key:
-        print("  KRX API 키 없음 (KRX_API_KEY 미설정)")
         return result
 
     now = datetime.now(KST)
@@ -178,16 +189,13 @@ def fetch_krx_flow() -> dict:
                             result["krx_kospi_change"] = fluc
                             result["source"]           = "krx_api"
                             result["date"]             = date_str
-                            print("  KRX KOSPI(" + date_str + "): " + close + " (" + fluc + "%)")
                             break
         else:
-            print("  KRX API → " + str(r.status_code))
+            pass
     except Exception as e:
-        print("  KRX API 실패: " + str(e)[:60])
+        pass
 
     # 투자자별 수급은 미제공 — Hunter 웹서치로 보완
-    if result["source"] == "none":
-        print("  KRX 투자자 수급: OpenAPI 미제공 (유료 별도 상품)")
 
     return result
 
@@ -450,7 +458,7 @@ def fetch_fsc_data() -> dict:
     - getGoldPriceInfo:   금시세 (안전자산 흐름)
     - getOilPriceInfo:    국내 유류가 (경유·휘발유, 에너지 비용 지표)
 
-    ※ KRX 투자자 수급 (외국인/기관) — stub, 나중에 연결
+    ※ 투자자 수급 (외국인/기관) — KIS 직접 데이터로 대체 예정
     """
     result = {
         "samsung_fsc": None, "sk_hynix_fsc": None,
@@ -522,7 +530,7 @@ def fetch_fsc_data() -> dict:
         elif "휘발유" in ctg and prc and prc != "0":
             result["oil_price_gasoline"] = prc
 
-    # ── 4. KRX 투자자 수급 — stub (나중에 연결) ─────────────────────────
+    # ── 4. 투자자 수급 — KIS 직접 데이터로 대체 예정 ───────────────────
     # TODO: 외국인/기관/개인 순매수 연결 예정
     # result["krx_foreign_net_fsc"]   = None
     # result["krx_institution_net_fsc"] = None
@@ -590,7 +598,7 @@ def fetch_all_market_data():
     if pcr.get("pcr_avg") is None and pcr.get("pcr_spy") is None and pcr.get("pcr_qqq") is None:
         _record_failure("PCR", "unavailable", "primary")
 
-    print("[KRX 투자자 수급]")
+    print("[Investor flow]")
     try:
         krx_flow = fetch_krx_flow()
     except Exception as e:
@@ -676,7 +684,7 @@ def fetch_all_market_data():
           "fsc_source":       fsc.get("fsc_source", False),
           "korea_special_news":kr_n,
           "failed_sources": failed_primary + failed_secondary,
-          "source":"Yahoo Finance + FearGreedChart + KRX + FRED + FSC"}
+          "source":"Yahoo Finance + FearGreedChart + InvestorFlow + FRED + FSC"}
     data["volatility_alert"]=check_volatility_alert(data)
     if data["data_quality"]=="poor":
         try:
@@ -706,12 +714,13 @@ def format_for_hunter(data):
     elif market_status == "after_hours":
         status_str = "\n📌 " + data_label
 
-    # 외국인 수급 — KRX 실데이터 우선, 없으면 EWY 프록시
+    # 외국인 수급 — 직접 데이터 우선, 없으면 EWY 프록시
     krx_src = data.get("krx_flow_source", "none")
-    if krx_src == "krx_api":
+    if krx_src in ("kis", "krx_api"):
         krx_date = data.get("krx_flow_date", "")
+        flow_label = "KIS" if krx_src == "kis" else "직접데이터"
         flow_str = (
-            "\n📊 외국인수급(KRX실데이터 " + krx_date + "):"
+            "\n📊 외국인수급(" + flow_label + " " + krx_date + "):"
             " 외국인 " + data.get("krx_foreign_net","N/A") +
             " | 기관 " + data.get("krx_institution_net","N/A") +
             " | 개인 " + data.get("krx_individual_net","N/A")
@@ -721,9 +730,9 @@ def format_for_hunter(data):
         ewy_chg = data.get("ewy_change", "")
         if ewy != "N/A":
             flow_str = ("\n📌 외국인수급프록시: EWY(한국ETF) " + ewy + " (" + ewy_chg + ")"
-                        " — 직접수급 아님, KRX API 연결 확인 필요")
+                        " — 직접수급 아님, KIS 수급 연결 확인 필요")
         else:
-            flow_str = "\n⚠️ 외국인 수급 없음 (KRX API 미연결, EWY도 N/A)"
+            flow_str = "\n⚠️ 외국인 수급 없음 (KIS 직접수급 미연결, EWY도 N/A)"
 
     fg_str2 = ""
     if fg_source_val == "vix_proxy":
