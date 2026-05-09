@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-09 23:54 KST",
+  "collected_at": "2026-05-10 00:20 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,40 +12,64 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia to discuss Q1 fiscal 2027 earnings on May 20; board adds Suzanne Nora Johnson; partnerships with Corning and IREN announced",
+      "headline": "NVIDIA and IREN announce strategic partnership to deploy 5 gigawatts of AI infrastructure",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "NVIDIA adds Suzanne Nora Johnson to Board, Goldman Sachs maintains bullish outlook with $250 price target",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "NVIDIA stock surges on semiconductor strength amid strong AI demand and analyst estimate increases",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix shares up 1.93% amid AI demand surge and aggressive courting by major tech companies",
+      "headline": "SK Hynix HBM products face price increases as memory demand strengthens with AI infrastructure expansion",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK Hynix included in Nvidia official meetings for physical AI partnership discussions",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics enters wage mediation May 11-12; union threatens 18-day strike if talks fail; shares at 268,500 KRW",
+      "headline": "Samsung Electronics shares decline 1.1% amid foreign investor selling and profit-taking after recent rally",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung chip workers reject $340k bonus demand and threaten strike amid labor tensions",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom up 3.03% on AI growth; Q1 beat and $35B financing talks with Apollo/Blackstone reported; OpenAI deal financing snag earlier resolved",
+      "headline": "Broadcom stock rallies on $35B financing deal with Apollo and Blackstone for AI infrastructure expansion",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "035720.KS",
-      "headline": "Kakao stock up 3.37% to 46,775 KRW; company partnering with OpenAI for AI expansion and agent development",
-      "impact": "bullish",
+      "ticker": "AVGO",
+      "headline": "Broadcom stock experiences volatility after OpenAI custom chip deal faces $18B financing snag",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
-      "ticker": "466920.KS",
-      "headline": "Shinhan SOL Shipbuilding Top3 Plus ETF at 32,100 KRW; tracking Korean shipbuilding sector performance",
-      "impact": "neutral",
+      "ticker": "AVGO",
+      "headline": "Broadcom beats Q1 earnings estimates and raises guidance with strong AI semiconductor growth",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 6
+  "total": 13
 }
