@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-09 01:54 KST",
+  "collected_at": "2026-05-09 02:51 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia stock rallies with partnerships for AI infrastructure; earnings May 20 expected to beat",
+      "headline": "NVIDIA announces strategic partnership with IREN to deploy up to 5 gigawatts of AI infrastructure with $2.1B investment commitment",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix surges to record high on foreign buying, strong memory chip demand driving analyst upgrades",
+      "headline": "SK Hynix stock surges on strong AI memory demand and positive analyst sentiment with target price upgrade to 3M won",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics hits record high alongside SK Hynix amid strong semiconductor cycle",
+      "headline": "Samsung Electronics hits record high with SK Securities raising price target to 500K won on earnings improvement and low valuation",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom rebounds after OpenAI custom chip deal financing snag; analysts maintain bullish outlook",
-      "impact": "neutral",
+      "headline": "Broadcom shares slide 4% after report that OpenAI custom AI chip deal worth $18B hits major financing snag",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao partners with OpenAI for Stargate initiative; stock trading near 52-week lows but analysts bullish",
+      "headline": "Kakao announces agentic AI service launching in second half 2026 with ChatGPT For Kakao reaching 11M cumulative sign-ups",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF surges past 500B won AUM; strong dividend yield demand continues",
+      "headline": "SOL Korea High Dividend ETF crosses 4 trillion won net assets as portfolio stocks including financials surge on policy support",
       "impact": "bullish",
       "source": "web_search"
     }
