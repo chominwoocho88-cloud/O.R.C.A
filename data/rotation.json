@@ -1,7 +1,7 @@
 {
   "ranking": [
     [
-      "미국 대형 반도체·AI (AMD, 엔비디아, TSMC)",
+      "AI 반도체 (엔비디아·AMD·Supermicro)",
       3
     ],
     [
@@ -9,50 +9,32 @@
       3
     ],
     [
-      "팔란티어 / AI 소프트웨어",
+      "대형 빅테크 (Meta·Alphabet·Netflix)",
+      3
+    ],
+    [
+      "미국 노동시장 연계 경기주",
       2
     ],
     [
-      "미국 소형주 (Russell 2000)",
-      2
-    ],
-    [
-      "CoreWeave / AI 클라우드 인프라 소형주",
+      "고밸류 SaaS·클라우드 소프트웨어",
       -2
     ],
     [
-      "에너지 비용 민감 소비재·항공",
+      "미국 소비재·경기민감 섹터",
       -2
     ],
     [
-      "코스피 단기 차익실현 매물",
+      "KOSPI 외국인 자금",
       -3
     ]
   ],
   "rotation_signal": {
-    "from": "코스피 단기 차익실현 매물",
-    "to": "미국 대형 반도체·AI (AMD, 엔비디아, TSMC)",
+    "from": "KOSPI 외국인 자금",
+    "to": "AI 반도체 (엔비디아·AMD·Supermicro)",
     "strength": "강함"
   },
   "history": [
-    {
-      "date": "2026-05-01",
-      "ranking": [
-        [
-          "전통 제조업 경기민감주(단기)",
-          -2
-        ],
-        [
-          "메타(Meta) 개별주 및 동종 AI capex 집행 빅테크",
-          -3
-        ],
-        [
-          "에너지·정유 섹터",
-          -3
-        ]
-      ],
-      "rotation_signal": {}
-    },
     {
       "date": "2026-05-01",
       "ranking": [
@@ -1020,6 +1002,44 @@
       "rotation_signal": {
         "from": "코스피 단기 차익실현 매물",
         "to": "미국 대형 반도체·AI (AMD, 엔비디아, TSMC)",
+        "strength": "강함"
+      }
+    },
+    {
+      "date": "2026-05-10",
+      "ranking": [
+        [
+          "AI 반도체 (엔비디아·AMD·Supermicro)",
+          3
+        ],
+        [
+          "한국 반도체 (SK하이닉스·삼성전자)",
+          3
+        ],
+        [
+          "대형 빅테크 (Meta·Alphabet·Netflix)",
+          3
+        ],
+        [
+          "미국 노동시장 연계 경기주",
+          2
+        ],
+        [
+          "고밸류 SaaS·클라우드 소프트웨어",
+          -2
+        ],
+        [
+          "미국 소비재·경기민감 섹터",
+          -2
+        ],
+        [
+          "KOSPI 외국인 자금",
+          -3
+        ]
+      ],
+      "rotation_signal": {
+        "from": "KOSPI 외국인 자금",
+        "to": "AI 반도체 (엔비디아·AMD·Supermicro)",
         "strength": "강함"
       }
     }
