@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-10 02:20 KST",
+  "collected_at": "2026-05-10 02:49 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,38 +12,38 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Wall Street analysts increasingly bullish on Nvidia ahead of May 20 earnings; IREN partnership announced for 5GW AI infrastructure deployment",
+      "headline": "Nvidia to invest up to $2.1 billion in IREN in partnership that deploys as much as 5 gigawatts of AI infrastructure",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix shares surge amid regional market rally driven by strong AI chip demand and hyperscaler spending",
+      "headline": "SK Hynix consensus rating 'Strong Buy' with 36 analysts recommending buying, +6.19% upside potential",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics reaches $1 trillion valuation milestone; wage negotiations resume May 11-12 with strike threat",
-      "impact": "neutral",
+      "headline": "Samsung Electronics falls 1.10% amid foreign investor selling and US-Iran ceasefire uncertainty",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom rallies after $35B financing deal with Apollo and Blackstone reported; OpenAI chip deal financing challenges ease",
+      "headline": "Broadcom in talks with private credit lenders for $35B financing deal amid OpenAI chip partnership",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp gains 3.4% following OpenAI partnership announcement for Stargate AI initiative expansion",
+      "headline": "Kakao rises 3.37% with OpenAI partnership deal announcement; analysts target 73,160 KRW (58% upside)",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF tracking Shipbuilding Top 3 showing modest performance with strong sell technical signal",
-      "impact": "bearish",
+      "headline": "SOL Korea High Dividend ETF surpasses 500B KRW assets, leads dividend ETF inflows with 6% yield",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
