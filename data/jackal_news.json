@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-10 13:55 KST",
+  "collected_at": "2026-05-10 14:20 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,62 +12,62 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Goldman Sachs maintains $250 price target on Nvidia with 'major re-rating' expected ahead of earnings",
+      "headline": "NVDA partners with IREN for AI infrastructure deployment and announces Corning investment for optical technology manufacturing",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "NVDA",
-      "headline": "Nvidia partners with Corning for multiyear AI infrastructure optical connectivity expansion",
-      "impact": "bullish",
+      "headline": "Wall Street AI chip focus shifting to Intel, AMD, Micron as market rotates away from GPU-only plays",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "NVDA",
-      "headline": "Nvidia invests $2.1B in IREN data centers, securing $3.4B in future revenue",
-      "impact": "bullish",
+      "headline": "NVDA earnings due May 20 with stock trading at lowest valuation in years, bar for outperformance set high",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix receives unprecedented investment offers from big tech firms for memory chip capacity",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix launches SOCAMM2 192GB mass production, sets new AI server memory performance standard",
+      "headline": "SK Hynix memory chip demand lifts shares after earnings beat; stock up 1.93% amid HBM demand expansion",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics reaches $1 trillion market capitalization driven by AI chip demand",
+      "headline": "Samsung Electronics reaches $1 trillion market valuation driven by AI chip demand boom",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics posts over 8-fold surge in Q1 operating profit on semiconductor recovery",
+      "headline": "Samsung Electronics stock down 1.10% due to foreign selling and profit-taking after recent gains",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom secures $35B financing deal with Apollo, Blackstone; stock rallies 5% on largest private credit transaction ever",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom in talks with Apollo and Blackstone for $35B private credit financing for AI development",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom's custom AI chip deal with OpenAI faces major $18B financing difficulties",
+      "headline": "Broadcom OpenAI custom AI chip deal hits major $18B financing snag, stock drops 4% on uncertainty",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao newsroom lacks recent financial news updates or major market-moving announcements",
+      "headline": "Kakao stock up 3.37% amid earnings announcement but faces analyst downgrades due to AI disappointment",
       "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "Kakao and Naver face AI derating; multiple brokers cut price targets as global AI platforms advance",
+      "impact": "bearish",
       "source": "web_search"
     }
   ],
