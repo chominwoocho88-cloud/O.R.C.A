@@ -227,6 +227,62 @@ def _extract_relevant_news(ticker: str, name: str, aria: dict) -> str:
     return result or "관련 뉴스 없음"
 
 
+def _format_market_psychology_context(aria: dict, *, role: str) -> str:
+    """Format ORCA regime and Fear & Greed context for Hunter LLM prompts."""
+    aria = aria or {}
+    regime = str(aria.get("regime", "") or "정보없음")
+    fg_raw = aria.get("fear_greed", "50")
+    fg_label = str(aria.get("fear_greed_label", "") or "Neutral")
+    inflows = ", ".join(aria.get("key_inflows", [])[:3]) or "없음"
+    outflows = ", ".join(aria.get("key_outflows", [])[:3]) or "없음"
+
+    try:
+        fg_num = float(str(fg_raw).split()[0])
+    except Exception:
+        fg_num = 50.0
+
+    risk_on = any(key in regime for key in ("위험선호", "risk-on", "risk_on", "bull"))
+    risk_off = any(key in regime for key in ("위험회피", "risk-off", "risk_off", "bear"))
+
+    if risk_on and fg_num >= 60:
+        bias, market_read = ("risk_on_greed", "우호적 모멘텀은 인정하되 과열과 추격매수 리스크를 분리해서 판단")
+    elif risk_off and fg_num <= 40:
+        bias, market_read = ("risk_off_fear", "공포/위험회피 환경이므로 반등 신호도 실패 확률을 강하게 점검")
+    elif fg_num >= 60:
+        bias, market_read = ("greed", "탐욕 구간이므로 모멘텀과 과열 신호를 함께 평가")
+    elif fg_num <= 40:
+        bias, market_read = ("fear", "공포 구간이므로 투매 후 반등 가능성과 추가 하락 위험을 함께 평가")
+    else:
+        bias, market_read = ("neutral", "중립 구간이므로 종목 고유 기술/뉴스/수급 근거를 우선 평가")
+
+    if role == "devil":
+        guidance = (
+            "Devil 지침: 악마의 변호인 본질은 유지합니다. "
+            "반론을 없애지 말고, ORCA 레짐과 심리 구간에 맞춰 반론 강도를 조절하세요. "
+            "위험선호+Greed에서는 시장 모멘텀을 인정하되 종목 특이 위험과 과열을 지적하고, "
+            "위험회피+Fear에서는 강한 반대와 실패 시나리오를 우선하세요."
+        )
+    else:
+        guidance = (
+            "Analyst 지침: ORCA 레짐과 시장 심리를 적극 활용하세요. "
+            "위험선호+Greed에서는 모멘텀 지속성과 과열 리스크를 함께 보며, "
+            "위험회피+Fear에서는 종목 특이 강점이 시장 공포를 이길 수 있는지 보수적으로 평가하세요."
+        )
+
+    return "\n".join(
+        [
+            "[시장 환경 - ORCA 레짐 + Fear & Greed]",
+            f"- ORCA 레짐: {regime}",
+            f"- Fear & Greed: {fg_raw} ({fg_label})",
+            f"- 시장 바이어스: {bias}",
+            f"- 시장 심리 해석: {market_read}",
+            f"- 유입 섹터: {inflows}",
+            f"- 유출 섹터: {outflows}",
+            f"- {guidance}",
+        ]
+    )
+
+
 # ══════════════════════════════════════════════════════════════════
 # Universe 구성 (~100)
 # ══════════════════════════════════════════════════════════════════
@@ -1118,6 +1174,7 @@ def _analyst_swing(ticker: str, name: str, tech: dict,
 
     # 티커 관련 ARIA 뉴스 추출
     relevant_news = _extract_relevant_news(ticker, name, aria)
+    market_psychology = _format_market_psychology_context(aria, role="analyst")
 
     prompt = f"""당신은 단기 스윙 트레이딩 전문 분석가입니다.
 {name}({ticker})의 1~5일 스윙 반등 가능성을 분석하세요. JSON만 반환하세요.
@@ -1178,7 +1235,7 @@ day1 vs swing 구분:
         model=MODEL_H,
         max_tokens=1500,
         system="",
-        user=prompt,
+        user=market_psychology + "\n\n" + prompt,
         call_site="jackal.hunter.analyst",
     )
     try:
@@ -1244,6 +1301,7 @@ def _devil_swing(ticker: str, tech: dict, analyst: dict, aria: dict, cur: str) -
     }.get(swing_type, "")
 
     relevant_news = _extract_relevant_news(ticker, ticker, aria)
+    market_psychology = _format_market_psychology_context(aria, role="devil")
 
     prompt = f"""당신은 비판적 리스크 분석가입니다.
 Analyst가 {ticker}({cur}{price_str}) 스윙 매수를 추천합니다. 반드시 반박하세요. JSON만 반환.
@@ -1286,7 +1344,7 @@ BB: {tech['bb_pos']:.0f}% (하단 터치가 반등 보장 아님)
         model=MODEL_H,
         max_tokens=1000,
         system="",
-        user=prompt,
+        user=market_psychology + "\n\n" + prompt,
         call_site="jackal.hunter.devil",
     )
     try:
