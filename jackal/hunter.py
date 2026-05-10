@@ -32,7 +32,6 @@ from shared.paths import (
     JACKAL_HUNT_LOG_FILE,
     JACKAL_LEGACY_DIR,
     JACKAL_WATCHLIST_FILE,
-    PORTFOLIO_FILE as SHARED_PORTFOLIO_FILE,
 )
 from orca.paths import atomic_write_json
 from orca.state import (
@@ -60,7 +59,6 @@ _DATA_DIR = DATA_DIR
 
 HUNT_LOG_FILE  = JACKAL_HUNT_LOG_FILE
 HUNT_COOL_FILE = JACKAL_HUNT_COOLDOWN_FILE
-PORTFOLIO_FILE = SHARED_PORTFOLIO_FILE
 JACKAL_WATCHLIST = JACKAL_WATCHLIST_FILE
 
 from .adapter import (
@@ -86,56 +84,20 @@ _HUNTER_ENTRY = _HUNTER["entry_decision"]
 ANALYZE_FINAL   = _HUNTER["analyze_final"]     # 최종 Analyst+Devil 실행 수
 HUNT_COOLDOWN_H = _HUNTER["cooldown_hours"]
 
-# ── 기본 제외 포트폴리오 (portfolio.json 없을 때 fallback) ─────────────
-DEFAULT_PORTFOLIO_EXCLUSIONS = {
-    "NVDA", "AVGO", "SCHD", "000660.KS",
-    "005930.KS", "035720.KS", "466920.KS",
-}
-
-
 @functools.lru_cache(maxsize=1)
 def get_portfolio_exclusions() -> set[str]:
-    """
-    JACKAL Hunter에서 새 종목 발굴 시 제외할 현재 보유 종목.
-    기본값은 legacy fallback이고, portfolio.json이 있으면 ticker_yf 기준으로 대체.
-    """
+    """Return tickers already covered by the JACKAL watchlist."""
     if os.environ.get("JACKAL_EXCLUDE_PORTFOLIO", "true").lower() in {"0", "false", "no"}:
         return set()
 
     try:
-        from orca.analysis_market import _fetch_kis_portfolio
+        from jackal.watchlist import load_jackal_watchlist
 
-        kis_data = _fetch_kis_portfolio()
-        if kis_data and kis_data.get("source") == "kis":
-            excluded = {
-                str(h.get("ticker_yf") or h.get("ticker") or "").strip()
-                for h in kis_data.get("holdings", [])
-                if h.get("ticker_yf") or h.get("ticker")
-            }
-            if excluded:
-                return excluded
+        return set(load_jackal_watchlist().keys())
     except Exception as exc:
-        log.warning(f"KIS portfolio exclusion load 실패: {exc}")
+        log.warning(f"JACKAL watchlist exclusion load failed: {exc}")
+        return set()
 
-    if not PORTFOLIO_FILE.exists():
-        return set(DEFAULT_PORTFOLIO_EXCLUSIONS)
-
-    try:
-        data = json.loads(PORTFOLIO_FILE.read_text(encoding="utf-8"))
-        excluded = {
-            str(h.get("ticker_yf", "")).strip()
-            for h in data.get("holdings", [])
-            if h.get("ticker_yf")
-        }
-        return excluded or set(DEFAULT_PORTFOLIO_EXCLUSIONS)
-    except Exception as exc:
-        log.warning(f"portfolio exclusion load 실패: {exc}")
-        return set(DEFAULT_PORTFOLIO_EXCLUSIONS)
-
-# ══════════════════════════════════════════════════════════════════
-# 고정 섹터풀 (~80 종목)
-# ARIA 유입 섹터에 따라 동적으로 선택됨
-# ══════════════════════════════════════════════════════════════════
 SECTOR_POOLS = {
     "반도체/AI": [
         "TSM", "AMD", "INTC", "QCOM", "MU", "MRVL", "ARM",

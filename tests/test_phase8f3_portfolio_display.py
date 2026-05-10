@@ -11,7 +11,7 @@ class Phase8f3PortfolioDisplayTests(unittest.TestCase):
                 "holdings": [
                     {
                         "ticker": "005930",
-                        "name": "삼성전자",
+                        "name": "Samsung Electronics",
                         "valuation": 1_200_000,
                         "profit_pct": 5.2,
                         "avg_cost": 60_000,
@@ -20,7 +20,7 @@ class Phase8f3PortfolioDisplayTests(unittest.TestCase):
                     },
                     {
                         "ticker": "000660",
-                        "name": "SK하이닉스",
+                        "name": "SK Hynix",
                         "valuation": 800_000,
                         "profit_pct": 8.1,
                         "avg_cost": 200_000,
@@ -29,7 +29,7 @@ class Phase8f3PortfolioDisplayTests(unittest.TestCase):
                     },
                     {
                         "ticker": "NVDA",
-                        "name": "엔비디아",
+                        "name": "NVIDIA",
                         "valuation": 2_500_000,
                         "profit_pct": -1.2,
                         "avg_cost": 130,
@@ -38,7 +38,7 @@ class Phase8f3PortfolioDisplayTests(unittest.TestCase):
                     },
                     {
                         "ticker": None,
-                        "name": "현금",
+                        "name": "Cash",
                         "valuation": 500_000,
                         "asset_type": "cash",
                     },
@@ -55,15 +55,15 @@ class Phase8f3PortfolioDisplayTests(unittest.TestCase):
         self.assertIn("📡 KIS 실시간", section)
         self.assertIn("총 평가: 5,000,000원", section)
         self.assertIn("현금: 500,000원 (10.0%)", section)
-        self.assertIn("• 엔비디아: 2,500,000원 (-1.20%)", section)
+        self.assertIn("• NVIDIA: 2,500,000원 (-1.20%)", section)
 
-    def test_format_portfolio_section_fallback_source(self):
+    def test_format_portfolio_section_non_kis_source_hidden(self):
         report = {
             "portfolio_analysis": {
                 "holdings": [
                     {
                         "ticker": "005930",
-                        "name": "삼성전자",
+                        "name": "Samsung Electronics",
                         "valuation": 1_200_000,
                         "profit_pct": 5.2,
                         "asset_type": "stock",
@@ -73,20 +73,22 @@ class Phase8f3PortfolioDisplayTests(unittest.TestCase):
             }
         }
 
-        section = _format_portfolio_section(report)
-
-        self.assertIn("📁 정적 데이터 (KIS 실패)", section)
-        self.assertIn("삼성전자", section)
+        self.assertEqual(_format_portfolio_section(report), "")
 
     def test_format_portfolio_section_empty_report(self):
         self.assertEqual(_format_portfolio_section({}), "")
         self.assertEqual(_format_portfolio_section({"portfolio_analysis": {}}), "")
 
+    def test_format_portfolio_section_kis_empty_holdings_hidden(self):
+        report = {"portfolio_analysis": {"holdings": [], "source": "kis"}}
+
+        self.assertEqual(_format_portfolio_section(report), "")
+
     def test_format_portfolio_section_cash_only(self):
         report = {
             "portfolio_analysis": {
                 "holdings": [
-                    {"ticker": None, "name": "현금", "valuation": 500_000, "asset_type": "cash"}
+                    {"ticker": None, "name": "Cash", "valuation": 500_000, "asset_type": "cash"}
                 ],
                 "source": "kis",
             }
@@ -95,48 +97,58 @@ class Phase8f3PortfolioDisplayTests(unittest.TestCase):
         section = _format_portfolio_section(report)
 
         self.assertIn("현금: 500,000원", section)
-        self.assertNotIn("• 현금", section)
+        self.assertNotIn("• Cash", section)
 
     def test_format_portfolio_section_sorts_top_stocks(self):
         section = _format_portfolio_section(self._portfolio_report())
 
-        self.assertLess(section.index("엔비디아"), section.index("삼성전자"))
-        self.assertLess(section.index("삼성전자"), section.index("SK하이닉스"))
+        self.assertLess(section.index("NVIDIA"), section.index("Samsung Electronics"))
+        self.assertLess(section.index("Samsung Electronics"), section.index("SK Hynix"))
 
-    def test_format_portfolio_section_assessments_fallback(self):
+    def test_format_portfolio_section_assessments_only_hidden(self):
         report = {
             "portfolio_analysis": {
                 "source": "kis",
                 "holdings_count": 2,
                 "assessments": [
-                    {"ticker": "005930.KS", "name": "삼성전자", "signal": "neutral"},
-                    {"ticker": "NVDA", "name": "엔비디아", "signal": "bullish"},
+                    {"ticker": "005930.KS", "name": "Samsung Electronics", "signal": "neutral"},
+                    {"ticker": "NVDA", "name": "NVIDIA", "signal": "bullish"},
                 ],
             }
         }
 
-        section = _format_portfolio_section(report)
-
-        self.assertIn("보유/관찰: 2종목", section)
-        self.assertIn("삼성전자 (005930.KS): neutral", section)
+        self.assertEqual(_format_portfolio_section(report), "")
 
     def test_morning_message_includes_portfolio_after_jackal(self):
         report = self._portfolio_report()
         report["jackal_candidate_review"] = {
             "reviewed_count": 1,
-            "market_bias_label": "우호",
+            "market_bias_label": "favorable",
             "aligned_count": 1,
             "neutral_count": 0,
             "opposed_count": 0,
-            "highlights": [{"ticker": "NVDA", "name": "엔비디아", "alignment": "aligned"}],
+            "highlights": [{"ticker": "NVDA", "name": "NVIDIA", "alignment": "aligned"}],
         }
 
         with patch("orca.notify.get_active_lessons", return_value=[]):
             text = "\n".join(_build_morning(report))
 
-        self.assertIn("━━ 🐺 JACKAL 후보 리뷰 ━━", text)
+        self.assertIn("JACKAL 후보 리뷰", text)
         self.assertIn("━━ 📊 포트폴리오 ━━", text)
         self.assertLess(text.index("JACKAL 후보 리뷰"), text.index("포트폴리오"))
+
+    def test_morning_message_hides_non_kis_portfolio(self):
+        report = {
+            "portfolio_analysis": {
+                "source": "fallback_json",
+                "holdings": [{"ticker": "NVDA", "name": "NVIDIA", "valuation": 100}],
+            }
+        }
+
+        with patch("orca.notify.get_active_lessons", return_value=[]):
+            text = "\n".join(_build_morning(report))
+
+        self.assertNotIn("포트폴리오", text)
 
 
 if __name__ == "__main__":

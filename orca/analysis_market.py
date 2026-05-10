@@ -8,7 +8,6 @@ from ._analysis_common import _load, _now, _save, _today
 from .data import load_market_data
 from .paths import (
     BASELINE_FILE,
-    PORTFOLIO_FILE,
     ROTATION_FILE,
     SENTIMENT_FILE,
     WEIGHTS_FILE,
@@ -372,22 +371,21 @@ def _fetch_kis_portfolio() -> dict | None:
         return None
 
 
-def _load_portfolio_fallback() -> dict:
-    """Load data/portfolio.json as a safe fallback when KIS is unavailable."""
-    data = _load(PORTFOLIO_FILE, {"holdings": []})
-    if not isinstance(data, dict):
-        data = {"holdings": []}
-    result = dict(data)
-    result.setdefault("holdings", [])
-    result["source"] = "fallback_json" if result.get("holdings") else "none"
-    return result
-
-
 def run_portfolio(report: dict, market_data: dict = None) -> dict:
-    portfolio = _fetch_kis_portfolio() or _load_portfolio_fallback()
-    if not portfolio.get("holdings"):
-        print("  포트폴리오 없음 — 스킵")
-        return {}
+    """Run KIS-only portfolio analysis for ORCA reports."""
+    portfolio = _fetch_kis_portfolio()
+    if not portfolio or portfolio.get("source") != "kis" or not portfolio.get("holdings"):
+        result = {
+            "assessments": [],
+            "holdings": [],
+            "source": "none",
+            "holdings_count": 0,
+            "summary": {},
+            "timestamp": "",
+        }
+        report["portfolio_analysis"] = result
+        print("  Portfolio: KIS realtime data unavailable - skipped")
+        return result
 
     regime = report.get("market_regime", "")
     inflows = [i.get("zone", "") for i in report.get("inflows", [])[:3]]
@@ -405,17 +403,17 @@ def run_portfolio(report: dict, market_data: dict = None) -> dict:
             signal = "bearish"
         assessments.append({"ticker": ticker, "name": name, "signal": signal, "regime": regime})
 
-    print(f"  포트폴리오 {len(assessments)}종목 평가 완료")
+    print(f"  Portfolio: KIS realtime {len(assessments)} holdings evaluated")
     result = {
         "assessments": assessments,
-        "source": portfolio.get("source", "unknown"),
+        "holdings": portfolio.get("holdings", []),
+        "source": "kis",
         "holdings_count": len(portfolio.get("holdings", [])),
         "summary": portfolio.get("summary", {}),
         "timestamp": portfolio.get("timestamp", ""),
     }
     report["portfolio_analysis"] = result
     return result
-
 
 def run_rotation(report: dict) -> dict:
     data = _load(ROTATION_FILE, {"ranking": [], "history": []})

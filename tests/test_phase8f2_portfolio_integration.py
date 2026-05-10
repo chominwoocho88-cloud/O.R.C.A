@@ -1,8 +1,4 @@
-import json
-import shutil
-import tempfile
 import unittest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from jackal import hunter, scanner
@@ -26,7 +22,7 @@ class Phase8f2PortfolioIntegrationTests(unittest.TestCase):
                 {
                     "ticker": "005930",
                     "ticker_yf": "005930.KS",
-                    "name": "삼성전자",
+                    "name": "Samsung Electronics",
                     "weight": 95.71,
                     "avg_cost": 65000,
                     "current_price": 67000,
@@ -59,7 +55,7 @@ class Phase8f2PortfolioIntegrationTests(unittest.TestCase):
             "holdings": [
                 {
                     "ticker": "005930",
-                    "name": "삼성전자",
+                    "name": "Samsung Electronics",
                     "avg_price": 65000,
                     "current_price": 67000,
                     "valuation": 670000,
@@ -102,46 +98,40 @@ class Phase8f2PortfolioIntegrationTests(unittest.TestCase):
 
         self.assertEqual(result["source"], "kis")
         self.assertEqual(result["holdings_count"], 2)
+        self.assertEqual(result["holdings"][0]["ticker_yf"], "005930.KS")
         self.assertIn("portfolio_analysis", report)
         self.assertEqual(result["assessments"][0]["ticker"], "005930.KS")
 
-    def test_load_portfolio_fallback_marks_source(self):
-        tmpdir = Path(tempfile.mkdtemp())
-        try:
-            path = tmpdir / "portfolio.json"
-            path.write_text(
-                json.dumps({"holdings": [{"ticker_yf": "NVDA", "name": "엔비디아"}]}),
-                encoding="utf-8",
-            )
-            with patch.object(analysis_market, "PORTFOLIO_FILE", path):
-                result = analysis_market._load_portfolio_fallback()
-        finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+    def test_run_portfolio_kis_failure_uses_empty_result(self):
+        report = {"market_regime": "risk-on", "inflows": [], "outflows": []}
 
-        self.assertEqual(result["source"], "fallback_json")
-        self.assertEqual(result["holdings"][0]["ticker_yf"], "NVDA")
+        with patch.object(analysis_market, "_fetch_kis_portfolio", return_value=None):
+            result = analysis_market.run_portfolio(report, {})
 
-    def test_scanner_load_portfolio_uses_kis_contract(self):
-        with patch.object(analysis_market, "_fetch_kis_portfolio", return_value=self._kis_portfolio()):
+        self.assertEqual(result["source"], "none")
+        self.assertEqual(result["holdings"], [])
+        self.assertEqual(result["assessments"], [])
+        self.assertEqual(result["holdings_count"], 0)
+        self.assertEqual(report["portfolio_analysis"], result)
+
+    def test_scanner_load_portfolio_uses_jackal_watchlist(self):
+        expected = {"005930.KS": {"ticker": "005930.KS", "source": "kis_holdings"}}
+
+        with patch("jackal.watchlist.load_jackal_watchlist", return_value=expected):
             result = scanner._load_portfolio()
 
-        self.assertIn("005930.KS", result)
-        self.assertEqual(result["005930.KS"]["portfolio"], True)
-        self.assertNotIn(None, result)
+        self.assertEqual(result, expected)
 
-    def test_scanner_load_portfolio_falls_back_to_json(self):
-        with patch.object(analysis_market, "_fetch_kis_portfolio", return_value=None):
-            with patch.object(scanner, "PORTFOLIO_FILE", Path("data/portfolio.json")):
-                result = scanner._load_portfolio()
+    def test_hunter_exclusions_use_jackal_watchlist(self):
+        watchlist = {
+            "005930.KS": {"ticker": "005930.KS", "source": "kis_holdings"},
+            "NVDA": {"ticker": "NVDA", "source": "candidate_registry"},
+        }
 
-        self.assertIn("NVDA", result)
-
-    def test_hunter_exclusions_use_kis_portfolio(self):
-        with patch.object(analysis_market, "_fetch_kis_portfolio", return_value=self._kis_portfolio()):
+        with patch("jackal.watchlist.load_jackal_watchlist", return_value=watchlist):
             result = hunter.get_portfolio_exclusions()
 
-        self.assertIn("005930.KS", result)
-        self.assertNotIn("", result)
+        self.assertEqual(result, {"005930.KS", "NVDA"})
 
 
 if __name__ == "__main__":

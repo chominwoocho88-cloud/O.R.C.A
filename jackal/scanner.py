@@ -32,7 +32,6 @@ from shared.paths import (
     JACKAL_NEWS_FILE as SHARED_JACKAL_NEWS_FILE,
     JACKAL_WATCHLIST_FILE,
     JACKAL_WEIGHTS_FILE,
-    PORTFOLIO_FILE as SHARED_PORTFOLIO_FILE,
     ROTATION_FILE,
     SENTIMENT_FILE,
 )
@@ -87,7 +86,6 @@ JACKAL_NEWS_FILE   = SHARED_JACKAL_NEWS_FILE
 ORCA_BASELINE  = BASELINE_FILE
 ORCA_SENTIMENT = SENTIMENT_FILE
 ORCA_ROTATION  = ROTATION_FILE
-PORTFOLIO_FILE = SHARED_PORTFOLIO_FILE
 
 TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
@@ -102,103 +100,15 @@ _SCANNER_ANALYST_HINT = _SCANNER["analyst_hint"]
 _SCANNER_SIGNAL_RELABEL = _SCANNER["signal_relabel"]
 
 
-def _portfolio_holdings_to_watchlist(holdings: list[dict], default: dict) -> dict:
-    """Convert portfolio holdings to the scanner watchlist contract."""
-    result = {}
-    for h in holdings:
-        yf_ticker = h.get("ticker_yf") or h.get("ticker")
-        if not yf_ticker:
-            continue
-        if h.get("jackal_scan", True) is False:
-            continue
-
-        market = h.get("market", "US")
-        asset_type = h.get("asset_type", "stock")
-        result[yf_ticker] = {
-            "name": h.get("name", yf_ticker),
-            "avg_cost": h.get("avg_cost"),
-            "market": market,
-            "currency": h.get("currency", "$" if market == "US" else "KRW"),
-            "portfolio": True,
-            "asset_type": asset_type,
-        }
-    return result or default
-
-
-def _load_kis_portfolio_watchlist(default: dict) -> dict | None:
-    """Load realtime KIS portfolio holdings for JACKAL, if available."""
-    try:
-        from orca.analysis_market import _fetch_kis_portfolio
-
-        data = _fetch_kis_portfolio()
-        if not data or data.get("source") != "kis":
-            return None
-        return _portfolio_holdings_to_watchlist(data.get("holdings", []), default)
-    except Exception as exc:
-        log.warning(f"KIS portfolio load 실패: {exc}")
-        return None
-
-
 def _load_portfolio() -> dict:
-    """
-    data/portfolio.json 에서 포트폴리오 로드.
-    ticker_yf (yfinance 형식) 키로 딕셔너리 구성.
-    현금 등 ticker_yf 없는 항목은 스캔 제외.
-    """
-    # 기본값 — portfolio.json 없을 때 사용, asset_type 포함
-    default = {
-        "NVDA":      {"name": "엔비디아",   "avg_cost": 182.99, "market": "US", "currency": "$", "portfolio": True, "asset_type": "stock"},
-        "AVGO":      {"name": "브로드컴",   "avg_cost": None,   "market": "US", "currency": "$", "portfolio": True, "asset_type": "stock"},
-        # SCHD는 etf_broad_dividend → 기본값도 스캔 제외 반영
-        "000660.KS": {"name": "SK하이닉스", "avg_cost": None,   "market": "KR", "currency": "₩", "portfolio": True, "asset_type": "stock"},
-        "005930.KS": {"name": "삼성전자",   "avg_cost": None,   "market": "KR", "currency": "₩", "portfolio": True, "asset_type": "stock"},
-        "035720.KS": {"name": "카카오",     "avg_cost": None,   "market": "KR", "currency": "₩", "portfolio": True, "asset_type": "stock"},
-    }
-    kis_portfolio = _load_kis_portfolio_watchlist(default)
-    if kis_portfolio is not None:
-        return kis_portfolio
-
-    if not PORTFOLIO_FILE.exists():
-        return default
+    """Load JACKAL watchlist from KIS realtime holdings plus candidate_registry."""
     try:
-        data   = json.loads(PORTFOLIO_FILE.read_text(encoding="utf-8"))
-        result = {}
-        for h in data.get("holdings", []):
-            yf_ticker = h.get("ticker_yf")
-            if not yf_ticker:          # 현금 등 yfinance 없는 항목 제외
-                continue
-            # jackal_scan: false → 스캔 제외 (배당형 ETF 등)
-            if h.get("jackal_scan", True) is False:
-                log.info(f"   {yf_ticker} 스캔 제외 (jackal_scan=false)")
-                continue
-            market     = h.get("market", "US")
-            asset_type = h.get("asset_type", "stock")
+        from jackal.watchlist import load_jackal_watchlist
 
-            # asset_type 기반 jackal_scan 기본값 결정
-            # etf_broad_dividend → 구조적으로 기술지표 미적합 → 기본 false
-            # 명시된 jackal_scan 필드가 있으면 그것이 우선
-            if "jackal_scan" not in h:
-                default_scan = asset_type not in ("etf_broad_dividend", "cash")
-            else:
-                default_scan = h["jackal_scan"]
-
-            if not default_scan:
-                log.info(f"   {yf_ticker} 스캔 제외 (asset_type={asset_type})")
-                continue
-
-            result[yf_ticker] = {
-                "name":       h.get("name", yf_ticker),
-                "avg_cost":   h.get("avg_cost"),
-                "market":     market,
-                "currency":   h.get("currency", "$" if market == "US" else "₩"),
-                "portfolio":  True,
-                "asset_type": asset_type,
-            }
-        return result if result else default
-    except Exception as e:
-        log.warning(f"portfolio.json 로드 실패: {e} — 기본값 사용")
-        return default
-
+        return load_jackal_watchlist()
+    except Exception as exc:
+        log.warning(f"JACKAL watchlist load failed: {exc}")
+        return {}
 
 def _load_candidate_watchlist(*, max_age_days: int = 7, limit: int = 20) -> dict:
     """

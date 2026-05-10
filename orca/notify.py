@@ -1,4 +1,4 @@
-﻿"""
+"""
 orca_notify.py — ORCA 알림 모듈 통합
 포함: telegram · weekly · monthly · breaking · calendar
 """
@@ -65,24 +65,16 @@ def _portfolio_number(value) -> float:
 
 
 def _format_portfolio_section(report: dict) -> str:
-    """Build the Phase 8f-3 portfolio section for Telegram."""
+    """Build a KIS-only portfolio section for Telegram."""
     portfolio = report.get("portfolio_analysis", {}) or {}
-    if not portfolio:
+    if not portfolio or portfolio.get("source") != "kis":
         return ""
 
     holdings = portfolio.get("holdings", []) or []
-    assessments = portfolio.get("assessments", []) or []
-    if not holdings and not assessments:
+    if not holdings:
         return ""
 
-    source = portfolio.get("source", "unknown")
-    source_label = {
-        "kis": "📡 KIS 실시간",
-        "fallback_json": "📁 정적 데이터 (KIS 실패)",
-        "none": "⚠️ 데이터 없음",
-    }.get(source, "❓ " + str(source))
-
-    lines = ["━━ 📊 포트폴리오 ━━", source_label]
+    lines = ["━━ 📊 포트폴리오 ━━", "📡 KIS 실시간"]
     summary = portfolio.get("summary", {}) or {}
     total_valuation = _portfolio_number(summary.get("total_assets")) or _portfolio_number(
         summary.get("total_valuation")
@@ -132,19 +124,7 @@ def _format_portfolio_section(report: dict) -> str:
         else:
             lines.append(f"• {name} ({sign}{profit_pct:.2f}%)")
 
-    if not sorted_stocks and assessments:
-        count = int(portfolio.get("holdings_count", 0) or len(assessments))
-        if count:
-            lines.append(f"보유/관찰: {count}종목")
-        for item in assessments[:5]:
-            name = item.get("name") or item.get("ticker") or "Unknown"
-            ticker = item.get("ticker", "")
-            signal = item.get("signal", "neutral")
-            display = f"{name} ({ticker})" if ticker and name != ticker else name
-            lines.append(f"• {display}: {signal}")
-
     return "\n".join(lines)
-
 
 def _now() -> datetime:
     return datetime.now(KST)
