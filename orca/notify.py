@@ -57,6 +57,95 @@ def _format_ticker_display(item: dict) -> str:
     return ticker
 
 
+def _portfolio_number(value) -> float:
+    try:
+        return float(str(value or 0).replace(",", "").strip())
+    except Exception:
+        return 0.0
+
+
+def _format_portfolio_section(report: dict) -> str:
+    """Build the Phase 8f-3 portfolio section for Telegram."""
+    portfolio = report.get("portfolio_analysis", {}) or {}
+    if not portfolio:
+        return ""
+
+    holdings = portfolio.get("holdings", []) or []
+    assessments = portfolio.get("assessments", []) or []
+    if not holdings and not assessments:
+        return ""
+
+    source = portfolio.get("source", "unknown")
+    source_label = {
+        "kis": "📡 KIS 실시간",
+        "fallback_json": "📁 정적 데이터 (KIS 실패)",
+        "none": "⚠️ 데이터 없음",
+    }.get(source, "❓ " + str(source))
+
+    lines = ["━━ 📊 포트폴리오 ━━", source_label]
+    summary = portfolio.get("summary", {}) or {}
+    total_valuation = _portfolio_number(summary.get("total_assets")) or _portfolio_number(
+        summary.get("total_valuation")
+    )
+    cash_balance = _portfolio_number(summary.get("cash_balance"))
+
+    stock_holdings = [
+        h for h in holdings
+        if h.get("ticker") and h.get("asset_type") != "cash"
+    ]
+    cash_holdings = [h for h in holdings if h.get("asset_type") == "cash"]
+    if not total_valuation:
+        total_valuation = sum(_portfolio_number(h.get("valuation")) for h in holdings)
+    if not cash_balance and cash_holdings:
+        cash_balance = sum(_portfolio_number(h.get("valuation")) for h in cash_holdings)
+
+    total_purchase = sum(
+        _portfolio_number(h.get("avg_cost")) * _portfolio_number(h.get("quantity"))
+        for h in stock_holdings
+        if h.get("avg_cost") and h.get("quantity")
+    )
+    if total_valuation > 0:
+        if total_purchase > 0:
+            total_profit = total_valuation - cash_balance - total_purchase
+            total_profit_pct = (total_profit / total_purchase * 100) if total_purchase > 0 else 0
+            sign = "+" if total_profit_pct > 0 else ""
+            lines.append(f"총 평가: {total_valuation:,.0f}원 ({sign}{total_profit_pct:.2f}%)")
+        else:
+            lines.append(f"총 평가: {total_valuation:,.0f}원")
+
+    if cash_balance > 0:
+        cash_weight = (cash_balance / total_valuation * 100) if total_valuation > 0 else 0
+        lines.append(f"현금: {cash_balance:,.0f}원 ({cash_weight:.1f}%)")
+
+    sorted_stocks = sorted(
+        stock_holdings,
+        key=lambda h: _portfolio_number(h.get("valuation")),
+        reverse=True,
+    )
+    for stock in sorted_stocks[:5]:
+        name = stock.get("name") or stock.get("ticker") or "Unknown"
+        valuation = _portfolio_number(stock.get("valuation"))
+        profit_pct = _portfolio_number(stock.get("profit_pct"))
+        sign = "+" if profit_pct > 0 else ""
+        if valuation > 0:
+            lines.append(f"• {name}: {valuation:,.0f}원 ({sign}{profit_pct:.2f}%)")
+        else:
+            lines.append(f"• {name} ({sign}{profit_pct:.2f}%)")
+
+    if not sorted_stocks and assessments:
+        count = int(portfolio.get("holdings_count", 0) or len(assessments))
+        if count:
+            lines.append(f"보유/관찰: {count}종목")
+        for item in assessments[:5]:
+            name = item.get("name") or item.get("ticker") or "Unknown"
+            ticker = item.get("ticker", "")
+            signal = item.get("signal", "neutral")
+            display = f"{name} ({ticker})" if ticker and name != ticker else name
+            lines.append(f"• {display}: {signal}")
+
+    return "\n".join(lines)
+
+
 def _now() -> datetime:
     return datetime.now(KST)
 
@@ -305,6 +394,10 @@ def _build_morning(report: dict) -> list:
             if why_text:
                 why_truncated = why_text[:60].rstrip() + "..." if len(why_text) > 60 else why_text
                 lines.append(f"   ↳ {why_truncated}")
+
+    portfolio_section = _format_portfolio_section(report)
+    if portfolio_section:
+        lines += ["", portfolio_section]
 
     lessons = get_active_lessons(max_lessons=3)
     if lessons:
