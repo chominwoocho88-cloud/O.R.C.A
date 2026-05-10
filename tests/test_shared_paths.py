@@ -74,7 +74,6 @@ class SharedPathsTests(unittest.TestCase):
         self.assertEqual(sp.WEIGHTS_FILE, op.WEIGHTS_FILE)
         self.assertEqual(sp.LESSONS_FILE, op.LESSONS_FILE)
         self.assertEqual(sp.COST_FILE, op.COST_FILE)
-        self.assertEqual(sp.PORTFOLIO_FILE, op.PORTFOLIO_FILE)
         self.assertEqual(sp.PATTERN_DB_FILE, op.PATTERN_DB_FILE)
         self.assertEqual(sp.STATE_DB_FILE, op.STATE_DB_FILE)
         self.assertEqual(sp.JACKAL_DB_FILE, op.JACKAL_DB_FILE)

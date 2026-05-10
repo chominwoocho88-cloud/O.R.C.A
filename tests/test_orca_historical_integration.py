@@ -264,7 +264,6 @@ class OrcaHistoricalRenderingTests(unittest.TestCase):
                 patch.object(dashboard, "COST_FILE", tmpdir / "cost.json"),
                 patch.object(dashboard, "PATTERN_DB_FILE", tmpdir / "patterns.json"),
                 patch.object(dashboard, "DATA_FILE", tmpdir / "market.json"),
-                patch.object(dashboard, "PORTFOLIO_FILE", tmpdir / "portfolio.json"),
                 patch.object(dashboard, "HUNT_LOG_FILE", tmpdir / "hunt_log.json"),
                 patch.object(dashboard, "JACKAL_WEIGHTS_FILE", tmpdir / "weights.json"),
             ]

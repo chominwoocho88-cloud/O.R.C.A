@@ -11,10 +11,6 @@ from .paths import (
     MEMORY_FILE, COST_FILE, DASHBOARD_FILE as OUTPUT_FILE,
     PATTERN_DB_FILE, DATA_FILE,
 )
-try:
-    from .paths import PORTFOLIO_FILE
-except ImportError:
-    PORTFOLIO_FILE = Path("portfolio.json")
 
 # ── Jackal 경로 (repo root 기준) ──────────────────────────────────
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -119,18 +115,6 @@ def build_dashboard():
     dc      = len(cargs)
     mrisk   = cargs[0].get("against","—") if cargs else "—"
     psm     = pat.get("summary",[])[:4]; bsw=pat.get("blackswan",{})
-
-    port_rows = []
-    if PORTFOLIO_FILE.exists():
-        try:
-            hs = json.loads(PORTFOLIO_FILE.read_text(encoding="utf-8")).get("holdings",[])
-            for h in hs:
-                if h.get("ticker")=="cash": continue
-                cs = mkt.get(str(h.get("ticker",""))+"_change","0%")
-                try: cv=float(str(cs).replace("%","").replace("+",""))
-                except: cv=0.0
-                port_rows.append((h.get("name",""),cv))
-        except: pass
 
     mk2=now.strftime("%Y-%m"); mc=cost.get("monthly_runs",{}).get(mk2,{})
     cu=mc.get("estimated_usd",0.0); ck=round(cu*1480); cr=mc.get("runs",0)
@@ -359,16 +343,6 @@ def build_dashboard():
         return rows_html, stat_html, gate_html
 
     j_rows, j_stat, j_gate = jackal_block()
-
-    # ── 포트폴리오
-    # ── 포트폴리오
-    if port_rows:
-        port_html=""
-        for nm,cv in port_rows:
-            cls="pos" if cv>0 else "neg" if cv<0 else "neu"; sign="+" if cv>0 else ""
-            port_html+=f'<div class="prow"><span class="pname">{_e(nm)}</span><span class="pval {cls}">{sign}{cv}%</span></div>'
-    else:
-        port_html='<div class="pempty"><div class="pe-icon">📊</div><div class="pe-txt">포트폴리오 미연동</div><div class="pe-sub">연동 시 오늘 손익·비중 표시</div></div>'
 
     # ── 반론 강도
     devil_col = "#FF5252" if dc>=4 else "#FFB547" if dc>=2 else "#14E87A"
@@ -666,13 +640,6 @@ body{{
 
 <!-- ⑪ 레짐 전환 패턴 -->
 {"" if not psm else f'<div class="sec"><div class="sh"><span class="st">레짐 전환 패턴</span></div><div class="card" style="padding:12px;">{pat_block()}</div></div>'}
-
-<!-- ⑫ 포트폴리오 -->
-<div class="sec">
-  <div class="sh"><span class="st">포트폴리오</span><span class="sn">오늘 손익</span></div>
-  <div class="card" style="padding:{'8px 16px' if port_rows else '0'};">{port_html}</div>
-</div>
-
 
 <!-- ⑬ Jackal Hunter 타점 -->
 {"" if not hunt_log else f'''<div class="sec">

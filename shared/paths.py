@@ -61,7 +61,6 @@ ROTATION_FILE = DATA_DIR / "rotation.json"
 WEIGHTS_FILE = DATA_DIR / "orca_weights.json"
 LESSONS_FILE = DATA_DIR / "orca_lessons.json"
 COST_FILE = DATA_DIR / "orca_cost.json"
-PORTFOLIO_FILE = DATA_DIR / "portfolio.json"
 PATTERN_DB_FILE = DATA_DIR / "pattern_db.json"
 
 # ===== State DB =====
@@ -137,7 +136,6 @@ __all__ = [
     "WEIGHTS_FILE",
     "LESSONS_FILE",
     "COST_FILE",
-    "PORTFOLIO_FILE",
     "PATTERN_DB_FILE",
     # State DB
     "STATE_DB_FILE",
