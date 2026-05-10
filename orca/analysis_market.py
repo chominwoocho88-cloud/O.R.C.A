@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import importlib
+
 from ._analysis_common import _load, _now, _save, _today
 from .data import load_market_data
 from .paths import (
@@ -285,8 +287,104 @@ def run_sentiment(report: dict, market_data: dict = None) -> dict:
     return new
 
 
+def _portfolio_number(value: object) -> float:
+    try:
+        return float(str(value or 0).replace(",", "").strip())
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _kis_ticker_to_yfinance(ticker: str) -> str:
+    value = str(ticker or "").strip()
+    return value + ".KS" if value.isdigit() and len(value) == 6 else value
+
+
+def _fetch_kis_portfolio() -> dict | None:
+    """Load realtime portfolio holdings from KIS when credentials work."""
+    try:
+        broker_module = importlib.import_module("shared.broker")
+        client = broker_module.get_shared_kis_client()
+        if not client.is_configured():
+            return None
+
+        balance = client.get_account_balance()
+        if not balance:
+            return None
+
+        summary = balance.get("summary", {}) or {}
+        total_assets = _portfolio_number(summary.get("total_assets"))
+        if total_assets <= 0:
+            total_assets = _portfolio_number(summary.get("total_valuation")) + _portfolio_number(
+                summary.get("cash_balance")
+            )
+
+        holdings = []
+        for item in balance.get("holdings", []) or []:
+            ticker = str(item.get("ticker", "") or "").strip()
+            if not ticker:
+                continue
+            valuation = _portfolio_number(item.get("valuation"))
+            weight = round((valuation / total_assets * 100), 2) if total_assets > 0 else 0.0
+            holdings.append(
+                {
+                    "ticker": ticker,
+                    "ticker_yf": _kis_ticker_to_yfinance(ticker),
+                    "name": item.get("name", ticker),
+                    "weight": weight,
+                    "avg_cost": item.get("avg_price"),
+                    "current_price": item.get("current_price"),
+                    "valuation": valuation,
+                    "profit_pct": item.get("profit_pct"),
+                    "currency": "KRW",
+                    "asset_type": "stock",
+                    "market": "KR",
+                    "sector": "unknown",
+                    "jackal_scan": True,
+                    "_scan_reason": "kis_realtime",
+                }
+            )
+
+        cash_balance = _portfolio_number(summary.get("cash_balance"))
+        if cash_balance > 0:
+            cash_weight = round((cash_balance / total_assets * 100), 2) if total_assets > 0 else 0.0
+            holdings.append(
+                {
+                    "ticker": None,
+                    "ticker_yf": None,
+                    "name": "현금",
+                    "weight": cash_weight,
+                    "currency": "KRW",
+                    "asset_type": "cash",
+                    "market": "KR",
+                    "valuation": cash_balance,
+                    "jackal_scan": False,
+                }
+            )
+
+        return {
+            "_schema_version": "2.1",
+            "holdings": holdings,
+            "summary": summary,
+            "source": "kis",
+            "timestamp": balance.get("timestamp", _now().isoformat()),
+        }
+    except Exception:
+        return None
+
+
+def _load_portfolio_fallback() -> dict:
+    """Load data/portfolio.json as a safe fallback when KIS is unavailable."""
+    data = _load(PORTFOLIO_FILE, {"holdings": []})
+    if not isinstance(data, dict):
+        data = {"holdings": []}
+    result = dict(data)
+    result.setdefault("holdings", [])
+    result["source"] = "fallback_json" if result.get("holdings") else "none"
+    return result
+
+
 def run_portfolio(report: dict, market_data: dict = None) -> dict:
-    portfolio = _load(PORTFOLIO_FILE, {"holdings": []})
+    portfolio = _fetch_kis_portfolio() or _load_portfolio_fallback()
     if not portfolio.get("holdings"):
         print("  포트폴리오 없음 — 스킵")
         return {}
@@ -308,7 +406,15 @@ def run_portfolio(report: dict, market_data: dict = None) -> dict:
         assessments.append({"ticker": ticker, "name": name, "signal": signal, "regime": regime})
 
     print(f"  포트폴리오 {len(assessments)}종목 평가 완료")
-    return {"assessments": assessments}
+    result = {
+        "assessments": assessments,
+        "source": portfolio.get("source", "unknown"),
+        "holdings_count": len(portfolio.get("holdings", [])),
+        "summary": portfolio.get("summary", {}),
+        "timestamp": portfolio.get("timestamp", ""),
+    }
+    report["portfolio_analysis"] = result
+    return result
 
 
 def run_rotation(report: dict) -> dict:

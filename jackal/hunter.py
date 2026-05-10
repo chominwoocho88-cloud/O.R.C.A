@@ -102,6 +102,21 @@ def get_portfolio_exclusions() -> set[str]:
     if os.environ.get("JACKAL_EXCLUDE_PORTFOLIO", "true").lower() in {"0", "false", "no"}:
         return set()
 
+    try:
+        from orca.analysis_market import _fetch_kis_portfolio
+
+        kis_data = _fetch_kis_portfolio()
+        if kis_data and kis_data.get("source") == "kis":
+            excluded = {
+                str(h.get("ticker_yf") or h.get("ticker") or "").strip()
+                for h in kis_data.get("holdings", [])
+                if h.get("ticker_yf") or h.get("ticker")
+            }
+            if excluded:
+                return excluded
+    except Exception as exc:
+        log.warning(f"KIS portfolio exclusion load 실패: {exc}")
+
     if not PORTFOLIO_FILE.exists():
         return set(DEFAULT_PORTFOLIO_EXCLUSIONS)
 

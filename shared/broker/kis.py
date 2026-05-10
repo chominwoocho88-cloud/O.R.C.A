@@ -12,6 +12,7 @@ import json
 import os
 import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -176,6 +177,20 @@ class KisClient:
     def is_configured(self) -> bool:
         """Return whether required KIS credentials are present."""
         return bool(self.app_key and self.app_secret and self.account_number)
+
+    @property
+    def cano(self) -> str:
+        """Return the 8-digit KIS account number prefix (CANO)."""
+        cleaned = self._clean_account_number()
+        return cleaned[:8] if len(cleaned) >= 8 else cleaned
+
+    @property
+    def acnt_prdt_cd(self) -> str:
+        """Return the 2-digit KIS account product code, defaulting to 01."""
+        cleaned = self._clean_account_number()
+        if len(cleaned) >= 10:
+            return cleaned[8:10]
+        return "01"
 
     def get_token(self, *, force_refresh: bool = False) -> str:
         """Return a cached token, or request a new one from KIS."""
@@ -400,6 +415,101 @@ class KisClient:
                 continue
         return result
 
+    def get_account_balance(
+        self,
+        *,
+        afhr_flpr_yn: str = "N",
+        inqr_dvsn: str = "01",
+        unpr_dvsn: str = "01",
+        fund_sttl_icld_yn: str = "N",
+        fncg_amt_auto_rdpt_yn: str = "N",
+        prcs_dvsn: str = "00",
+    ) -> dict | None:
+        """Fetch domestic account balance through KIS, returning None on miss."""
+        if not self.is_configured():
+            return None
+
+        tr_id = "VTTC8434R" if _is_paper_mode() else "TTTC8434R"
+        url = f"{self.base_url}/uapi/domestic-stock/v1/trading/inquire-balance"
+        headers = self._auth_headers(tr_id)
+        params = {
+            "CANO": self.cano,
+            "ACNT_PRDT_CD": self.acnt_prdt_cd,
+            "AFHR_FLPR_YN": afhr_flpr_yn,
+            "INQR_DVSN": inqr_dvsn,
+            "UNPR_DVSN": unpr_dvsn,
+            "FUND_STTL_ICLD_YN": fund_sttl_icld_yn,
+            "FNCG_AMT_AUTO_RDPT_YN": fncg_amt_auto_rdpt_yn,
+            "PRCS_DVSN": prcs_dvsn,
+            "CTX_AREA_FK100": "",
+            "CTX_AREA_NK100": "",
+        }
+
+        try:
+            resp = httpx.get(url, headers=headers, params=params, timeout=self.timeout)
+            resp.raise_for_status()
+            data = resp.json()
+        except (httpx.HTTPError, ValueError):
+            return None
+
+        if data.get("rt_cd") != "0":
+            return None
+
+        holdings = []
+        for item in data.get("output1", []) or []:
+            if not isinstance(item, dict):
+                continue
+            try:
+                quantity = _to_int(item.get("hldg_qty"))
+                if quantity == 0:
+                    continue
+                holdings.append(
+                    {
+                        "ticker": item.get("pdno", ""),
+                        "name": item.get("prdt_name", ""),
+                        "quantity": quantity,
+                        "avg_price": _to_float(item.get("pchs_avg_pric")),
+                        "current_price": _to_float(item.get("prpr")),
+                        "valuation": _to_float(item.get("evlu_amt")),
+                        "profit_loss": _to_float(item.get("evlu_pfls_amt")),
+                        "profit_pct": _to_float(item.get("evlu_pfls_rt")),
+                    }
+                )
+            except (TypeError, ValueError):
+                continue
+
+        output2 = data.get("output2", {}) or {}
+        if isinstance(output2, list):
+            summary_raw = output2[0] if output2 else {}
+        elif isinstance(output2, dict):
+            summary_raw = output2
+        else:
+            summary_raw = {}
+
+        try:
+            summary = {
+                "total_valuation": _to_float(summary_raw.get("tot_evlu_amt")),
+                "total_purchase": _to_float(summary_raw.get("pchs_amt_smtl_amt")),
+                "total_profit": _to_float(summary_raw.get("evlu_pfls_smtl_amt")),
+                "cash_balance": _to_float(summary_raw.get("dnca_tot_amt")),
+                "total_assets": _to_float(summary_raw.get("tot_asst_amt")),
+            }
+        except (AttributeError, TypeError, ValueError):
+            summary = {
+                "total_valuation": 0.0,
+                "total_purchase": 0.0,
+                "total_profit": 0.0,
+                "cash_balance": 0.0,
+                "total_assets": 0.0,
+            }
+
+        return {
+            "holdings": holdings,
+            "summary": summary,
+            "source": "kis",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
     def _normalize_ticker(self, ticker: str) -> str:
         """Normalize yfinance-style Korean tickers to KIS six-digit codes."""
         value = str(ticker or "").strip()
@@ -407,6 +517,10 @@ class KisClient:
         if upper.endswith(".KS") or upper.endswith(".KQ"):
             return value[:-3]
         return value.zfill(6)
+
+    def _clean_account_number(self) -> str:
+        """Normalize account number variants without exposing the value."""
+        return str(self.account_number or "").strip().replace("-", "").replace(" ", "")
 
     def _auth_headers(self, tr_id: str, tr_cont: str = "") -> dict[str, str]:
         """Build KIS REST headers for an authenticated request."""
@@ -441,6 +555,8 @@ def _raise_for_kis_error(data: dict) -> None:
 
 def _to_float(value: object) -> float:
     """Convert KIS numeric string fields to float."""
+    if isinstance(value, str):
+        value = value.replace(",", "").strip()
     return float(value or 0)
 
 

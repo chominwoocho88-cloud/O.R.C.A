@@ -102,6 +102,43 @@ _SCANNER_ANALYST_HINT = _SCANNER["analyst_hint"]
 _SCANNER_SIGNAL_RELABEL = _SCANNER["signal_relabel"]
 
 
+def _portfolio_holdings_to_watchlist(holdings: list[dict], default: dict) -> dict:
+    """Convert portfolio holdings to the scanner watchlist contract."""
+    result = {}
+    for h in holdings:
+        yf_ticker = h.get("ticker_yf") or h.get("ticker")
+        if not yf_ticker:
+            continue
+        if h.get("jackal_scan", True) is False:
+            continue
+
+        market = h.get("market", "US")
+        asset_type = h.get("asset_type", "stock")
+        result[yf_ticker] = {
+            "name": h.get("name", yf_ticker),
+            "avg_cost": h.get("avg_cost"),
+            "market": market,
+            "currency": h.get("currency", "$" if market == "US" else "KRW"),
+            "portfolio": True,
+            "asset_type": asset_type,
+        }
+    return result or default
+
+
+def _load_kis_portfolio_watchlist(default: dict) -> dict | None:
+    """Load realtime KIS portfolio holdings for JACKAL, if available."""
+    try:
+        from orca.analysis_market import _fetch_kis_portfolio
+
+        data = _fetch_kis_portfolio()
+        if not data or data.get("source") != "kis":
+            return None
+        return _portfolio_holdings_to_watchlist(data.get("holdings", []), default)
+    except Exception as exc:
+        log.warning(f"KIS portfolio load 실패: {exc}")
+        return None
+
+
 def _load_portfolio() -> dict:
     """
     data/portfolio.json 에서 포트폴리오 로드.
@@ -117,6 +154,10 @@ def _load_portfolio() -> dict:
         "005930.KS": {"name": "삼성전자",   "avg_cost": None,   "market": "KR", "currency": "₩", "portfolio": True, "asset_type": "stock"},
         "035720.KS": {"name": "카카오",     "avg_cost": None,   "market": "KR", "currency": "₩", "portfolio": True, "asset_type": "stock"},
     }
+    kis_portfolio = _load_kis_portfolio_watchlist(default)
+    if kis_portfolio is not None:
+        return kis_portfolio
+
     if not PORTFOLIO_FILE.exists():
         return default
     try:
