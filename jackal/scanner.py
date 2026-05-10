@@ -258,6 +258,8 @@ def _load_orca_context() -> dict:
         "sentiment_level": "중립",
         "top_sector":    "",
         "bottom_sector": "",
+        "fear_greed":    "50",
+        "fear_greed_label": "Neutral",
     }
 
     # morning_baseline.json
@@ -271,6 +273,13 @@ def _load_orca_context() -> dict:
             ctx["thesis_killers"] = b.get("thesis_killers", [])
             ctx["key_inflows"]    = [i.get("zone","") for i in b.get("key_inflows", [])[:3]]
             ctx["key_outflows"]   = [o.get("zone","") for o in b.get("key_outflows", [])[:3]]
+            market_snapshot = b.get("market_snapshot", {}) or {}
+            fg_value = market_snapshot.get("fear_greed_value")
+            if fg_value not in (None, "", "N/A"):
+                ctx["fear_greed"] = fg_value
+            fg_label = market_snapshot.get("fear_greed_rating")
+            if fg_label not in (None, "", "N/A"):
+                ctx["fear_greed_label"] = fg_label
     except Exception:
         pass
 
@@ -281,6 +290,10 @@ def _load_orca_context() -> dict:
             cur = s.get("current", {})
             ctx["sentiment_score"] = cur.get("score", 50)
             ctx["sentiment_level"] = cur.get("level", "중립")
+            if ctx.get("fear_greed") in ("50", 50, "", None):
+                fg_value = cur.get("fear_greed")
+                if fg_value not in (None, "", "N/A"):
+                    ctx["fear_greed"] = fg_value
     except Exception:
         pass
 

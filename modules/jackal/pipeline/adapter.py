@@ -12,6 +12,7 @@ from shared.paths import (
     JACKAL_NEWS_FILE,
     JACKAL_WEIGHTS_FILE,
     MEMORY_FILE,
+    SENTIMENT_FILE,
 )
 
 log = logging.getLogger("jackal_adapter")
@@ -22,6 +23,7 @@ _REPO_ROOT  = JACKAL_LEGACY_DIR.parent      # repo root
 
 ORCA_BASELINE = BASELINE_FILE
 ORCA_MEMORY   = MEMORY_FILE
+ORCA_SENTIMENT = SENTIMENT_FILE
 JACKAL_NEWS   = JACKAL_NEWS_FILE
 _JACKAL_WEIGHTS = JACKAL_WEIGHTS_FILE
 
@@ -113,6 +115,8 @@ def load_orca_context() -> dict:
         "outflows_detail": [],
         "all_headlines":   [],
         "jackal_news":     {},
+        "fear_greed":      "50",
+        "fear_greed_label": "Neutral",
         "regime_source":   "none",   # 레짐 출처 추적 (baseline/memory/fallback)
     }
     try:
@@ -125,6 +129,13 @@ def load_orca_context() -> dict:
             ctx["key_outflows"]   = [o.get("zone", "") for o in b.get("outflows", [])[:3]]
             ctx["thesis_killers"] = b.get("thesis_killers", [])
             ctx["actionable"]     = b.get("actionable_watch", [])[:5]
+            market_snapshot = b.get("market_snapshot", {}) or {}
+            fg_value = market_snapshot.get("fear_greed_value")
+            if fg_value not in (None, "", "N/A"):
+                ctx["fear_greed"] = fg_value
+            fg_label = market_snapshot.get("fear_greed_rating")
+            if fg_label not in (None, "", "N/A"):
+                ctx["fear_greed_label"] = fg_label
             if ctx["regime"]:
                 ctx["regime_source"] = "baseline"
     except Exception as e:
@@ -147,6 +158,16 @@ def load_orca_context() -> dict:
                     ctx["key_inflows"] = [i.get("zone", "") for i in ctx["inflows_detail"][:3]]
     except Exception as e:
         log.warning(f"ARIA memory 로드 실패: {e}")
+
+    try:
+        if ORCA_SENTIMENT.exists() and ctx.get("fear_greed") in ("50", 50, "", None):
+            s = json.loads(ORCA_SENTIMENT.read_text(encoding="utf-8"))
+            cur = s.get("current", {})
+            fg_value = cur.get("fear_greed")
+            if fg_value not in (None, "", "N/A"):
+                ctx["fear_greed"] = fg_value
+    except Exception as e:
+        log.warning(f"ARIA sentiment 로드 실패: {e}")
 
     # ── Fallback: baseline + memory 모두 실패 시 거시 지표 기반 레짐 추정 ──
     if not ctx["regime"]:
