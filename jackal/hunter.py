@@ -39,6 +39,7 @@ from orca.state import (
     sync_jackal_live_events,
 )
 from .explanation import build_hunter_explanation_lines
+from .final_diagnostics import build_final_diag, format_final_diag
 from .families import canonical_family_key, family_label
 from .historical_context import apply_historical_adjustment as _apply_historical_context
 from .historical_context import historical_alert_lines as _historical_alert_lines
@@ -1399,23 +1400,28 @@ def _final(analyst: dict, devil: dict) -> dict:
       섹터로테이션/패닉셀: swing_score 우선 (장기 보유)
       기술적과매도:        day1_score 우선 (빠른 스캘핑)
     """
+    analyst_score = analyst.get("analyst_score")
+    devil_score = devil.get("devil_score", _HUNTER_ENTRY["default_devil_score"])
+
     # 즉시 차단
     if devil.get("thesis_killer_hit") or devil.get("is_dead_cat"):
+        block_reason = "thesis_killer" if devil.get("thesis_killer_hit") else "dead_cat"
         return {"final_score": 20, "is_entry": False,
                 "label": "🚫 데드캣/TK", "mode": "차단",
-                "day1_score": 20, "swing_score": 20}
+                "day1_score": 20, "swing_score": 20,
+                "diag": build_final_diag(analyst, devil, block_reason=block_reason, before_adjust=20)}
     if (
         devil.get("verdict") == "반대"
-        and devil.get("devil_score", _HUNTER_ENTRY["default_devil_score"])
-        >= _HUNTER_ENTRY["devil_block_score"]
+        and devil_score >= _HUNTER_ENTRY["devil_block_score"]
     ):
         return {"final_score": 25, "is_entry": False,
                 "label": "❌ Devil 강반대", "mode": "차단",
-                "day1_score": 25, "swing_score": 25}
+                "day1_score": 25, "swing_score": 25,
+                "diag": build_final_diag(analyst, devil, block_reason="devil_block", before_adjust=25)}
 
     d1     = analyst.get("day1_score",    analyst.get("analyst_score", _HUNTER_ENTRY["default_day1_score"]))
     sw     = analyst.get("swing_score",   analyst.get("analyst_score", _HUNTER_ENTRY["default_swing_score"]))
-    d_score = devil.get("devil_score", _HUNTER_ENTRY["default_devil_score"])
+    d_score = devil_score
     setup   = analyst.get("swing_setup", "중립")
     stype   = analyst.get("swing_type",  "기술적과매도")
 
@@ -1512,6 +1518,12 @@ def _final(analyst: dict, devil: dict) -> dict:
         "day1_score":   d1,
         "swing_score":  sw,
         "entry_threshold": threshold,
+        "diag": build_final_diag(
+            analyst, devil,
+            day1_score=d1, swing_score=sw, raw_score=round(raw_score, 1),
+            penalty=round(penalty, 1), before_adjust=score,
+            weights={"day1": w1, "swing": ws},
+        ),
     }
 
 
@@ -1554,6 +1566,7 @@ def _stage4_full_analysis(top10: list, aria: dict) -> list:
             {"ticker": ticker, "name": name, "tech": tech, "currency": cur},
         )
         final = _apply_historical_context(final, historical_context)
+        diag_str = format_final_diag(final)
 
         log.info(f"  {ticker:12} A:{analyst['analyst_score']} "
                  f"D:{devil['devil_score']}({devil.get('verdict','?')}) "
@@ -1569,7 +1582,8 @@ def _stage4_full_analysis(top10: list, aria: dict) -> list:
                     f"/{historical_context['avg_value']:+.1f}"
                     if historical_context
                     else ""
-                 ))
+                 )
+                 + diag_str)
 
         results.append(
             {
