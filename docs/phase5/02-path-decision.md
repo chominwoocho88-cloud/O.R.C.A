@@ -228,9 +228,9 @@ Operational summary:
 
 대상 workflow:
 - [orca_daily.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_daily.yml)
-- [orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml)
+- [jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml)
 - [jackal_tracker.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_tracker.yml)
-- [jackal_scanner.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_scanner.yml)
+- [jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml)
 
 이번 Phase 5 범위에서 고정할 원칙:
 - `data/orca_state.db` 와 `data/jackal_state.db` 를 둘 다 보존 대상으로 본다.
@@ -364,9 +364,9 @@ Phase 5 대응:
 
 영향 workflow:
 - [orca_daily.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_daily.yml)
-- [orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml)
+- [jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml)
 - [jackal_tracker.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_tracker.yml)
-- [jackal_scanner.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_scanner.yml)
+- [jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml)
 
 대응:
 - `Phase 5-D` 에서 workflow 별 write path / save path / retention path 설계
@@ -391,9 +391,9 @@ Phase 5 완료 판정 기준:
 
 4. 아래 `4`개 workflow 에서 `jackal_state.db` 보존 동작 확인
 - [orca_daily.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_daily.yml)
-- [orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml)
+- [jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml)
 - [jackal_tracker.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_tracker.yml)
-- [jackal_scanner.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_scanner.yml)
+- [jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml)
 
 5. scheduled run 후 아래 둘 중 하나 이상 관측
 - `jackal_shadow_signals COUNT > 0`

@@ -52,14 +52,14 @@ Source: `reports/orca_research_comparison.json`
 ### Latest `git log -1 data/orca_state.db`
 
 - Unavailable in this shell session because `git` is not installed.
-- Additional context: `data/orca_state.db` is gitignored in [.gitignore](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.gitignore:8), while JACKAL workflow comments explicitly state JACKAL SQLite writes may be lost and are not treated as JACKAL-owned artifacts in CI. See [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:104) and [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:130).
+- Additional context: `data/orca_state.db` is gitignored in [.gitignore](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.gitignore:8), while JACKAL workflow comments explicitly state JACKAL SQLite writes may be lost and are not treated as JACKAL-owned artifacts in CI. See [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:104) and [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:130).
 
 ### Snapshot interpretation
 
 Confirmed facts:
 - All Tier 1 JACKAL persistence tables currently have `COUNT = 0`.
 - Research reports already expect shadow history and projected JACKAL accuracy views, but the source tables are empty.
-- The scheduled JACKAL workflow runs `jackal.core` and `jackal.scanner`, then resets the checkout to `origin/main`; it does not treat `data/orca_state.db` as a JACKAL-owned persisted artifact. See [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:82), [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:97), [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:165), and [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:166).
+- The scheduled JACKAL workflow runs `jackal.core` and `jackal.scanner`, then resets the checkout to `origin/main`; it does not treat `data/orca_state.db` as a JACKAL-owned persisted artifact. See [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:82), [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:97), [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:165), and [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:166).
 
 Inference to verify in Phase 5-B/C:
 - Even when JACKAL runtime code writes to SQLite, CI may discard those rows before they become the next run's baseline.
@@ -183,7 +183,7 @@ Impact:
 Confirmed:
 - Writer functions exist in code for all five Tier 1 tables.
 - Current DB snapshot has zero rows in all five.
-- Scheduled workflow comments acknowledge that JACKAL SQLite writes may be lost because `data/orca_state.db` is not treated as a JACKAL-owned artifact. See [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:104).
+- Scheduled workflow comments acknowledge that JACKAL SQLite writes may be lost because `data/orca_state.db` is not treated as a JACKAL-owned artifact. See [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:104).
 
 Implication for Phase 5:
 - Phase 5 root fix has to preserve JACKAL state independently of ORCA's DB ownership assumptions.
@@ -286,10 +286,10 @@ Search result for other migration patterns:
 ### Workflow-level persistence risk
 
 Relevant scheduled path:
-- Run `jackal.core`: [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:82)
-- Run `jackal.scanner`: [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:97)
-- Reset and clean checkout: [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:165) and [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:166)
-- Explicit note that `data/orca_state.db` is ORCA-owned and JACKAL SQLite writes may be lost: [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:104) and [.github/workflows/orca_jackal.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/orca_jackal.yml:130)
+- Run `jackal.core`: [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:82)
+- Run `jackal.scanner`: [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:97)
+- Reset and clean checkout: [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:165) and [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:166)
+- Explicit note that `data/orca_state.db` is ORCA-owned and JACKAL SQLite writes may be lost: [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:104) and [.github/workflows/jackal_session.yml](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/.github/workflows/jackal_session.yml:130)
 
 Operational implication:
 - The code has write paths.

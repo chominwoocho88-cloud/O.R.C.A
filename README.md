@@ -80,7 +80,8 @@ This means the system learns from candidate quality and market alignment, not ju
 
 - `ORCA Daily`: market regime report, baseline, sentiment, rotation, dashboard render
 - `JACKAL Session`: scheduled Hunter -> Scanner flow for discovery plus timing in one run
-- `JACKAL Scanner (Manual)`: ad-hoc scan workflow for debugging or on-demand rescans
+  - `workflow_dispatch` supports `session_mode=full` / `scanner_only` with optional `force_scan`
+  - manual scanner runs now use `session_mode=scanner_only`
 - `JACKAL Tracker`: next-day / swing outcome tracking and weight refresh
 
 ## Documents
@@ -92,7 +93,7 @@ This means the system learns from candidate quality and market alignment, not ju
 - Backlog:
   [docs/orca_v2_backlog.md](docs/orca_v2_backlog.md)
 - Release readiness and GitHub handoff:
-  [docs/orca_jackal_release_readiness.md](docs/orca_jackal_release_readiness.md)
+  [docs/jackal_release_readiness.md](docs/jackal_release_readiness.md)
 
 ## Current Caveats
 

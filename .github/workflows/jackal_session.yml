@@ -60,6 +60,11 @@ jobs:
       USE_UNIFIED_FETCH: "1"
       USE_FDR_MAIN: "1"
       YF_RATE_LIMIT_FAST_FAIL: "1"
+      # Phase 8i-1: KIS env for JACKAL realtime watchlist
+      KIS_CMW_APP_KEY_PAPER: ${{ secrets.KIS_CMW_APP_KEY_PAPER }}
+      KIS_CMW_APP_SECRET_PAPER: ${{ secrets.KIS_CMW_APP_SECRET_PAPER }}
+      KIS_CMW_ACCOUNT_NUMBER_PAPER: ${{ secrets.KIS_CMW_ACCOUNT_NUMBER_PAPER }}
+      KIS_IS_PAPER: "true"
     permissions:
       contents: write
 
@@ -149,6 +154,11 @@ jobs:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
+          # Phase 8i-1: KIS env for JACKAL realtime watchlist
+          KIS_CMW_APP_KEY_PAPER: ${{ secrets.KIS_CMW_APP_KEY_PAPER }}
+          KIS_CMW_APP_SECRET_PAPER: ${{ secrets.KIS_CMW_APP_SECRET_PAPER }}
+          KIS_CMW_ACCOUNT_NUMBER_PAPER: ${{ secrets.KIS_CMW_ACCOUNT_NUMBER_PAPER }}
+          KIS_IS_PAPER: ${{ env.KIS_IS_PAPER }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "$JACKAL_SESSION_MODE" = "scanner_only" ]; then
             echo "Skipping Hunter because session_mode=scanner_only"
@@ -169,6 +179,11 @@ jobs:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
+          # Phase 8i-1: KIS env for JACKAL realtime watchlist
+          KIS_CMW_APP_KEY_PAPER: ${{ secrets.KIS_CMW_APP_KEY_PAPER }}
+          KIS_CMW_APP_SECRET_PAPER: ${{ secrets.KIS_CMW_APP_SECRET_PAPER }}
+          KIS_CMW_ACCOUNT_NUMBER_PAPER: ${{ secrets.KIS_CMW_ACCOUNT_NUMBER_PAPER }}
+          KIS_IS_PAPER: ${{ env.KIS_IS_PAPER }}
         run: |
           ARGS=""
           [ "$JACKAL_FORCE_SCAN" = "true" ] && ARGS="$ARGS --force"

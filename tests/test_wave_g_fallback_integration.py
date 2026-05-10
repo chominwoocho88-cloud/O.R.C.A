@@ -309,8 +309,7 @@ class WaveGFallbackFastFailTests(unittest.TestCase):
 class WaveGMigrationGuardTests(unittest.TestCase):
     def test_workflows_expose_alpha_vantage_env(self):
         workflows = [
-            "orca_jackal.yml",
-            "jackal_scanner.yml",
+            "jackal_session.yml",
             "jackal_tracker.yml",
             "orca_daily.yml",
             "jackal_backtest_learning.yml",

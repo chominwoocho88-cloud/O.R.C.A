@@ -273,8 +273,8 @@ Anthropic secret이 들어가는 주요 workflow:
 | Workflow | 라인 | 실행 내용 | Claude 비용 가능성 |
 |---|---:|---|---|
 | `.github/workflows/orca_daily.yml` | 138, 142-145 | `python -m orca.main`, ORCA daily/evening/weekly/monthly dispatcher | 높음 |
-| `.github/workflows/orca_jackal.yml` | 142-168 | JACKAL Hunter + Scanner 세션 | 높음 |
-| `.github/workflows/jackal_scanner.yml` | 80-83 | manual/ad-hoc scanner | 중간~높음 |
+| `.github/workflows/jackal_session.yml` | 142-168 | JACKAL Hunter + Scanner 세션 | 높음 |
+| `.github/workflows/jackal_session.yml` | 80-83 | manual/ad-hoc scanner | 중간~높음 |
 | `.github/workflows/orca_backtest.yml` | 155, 170 | ORCA/JACKAL backtest live mode | 높음, 실행량에 따라 큼 |
 | `.github/workflows/jackal_backtest_learning.yml` | 284, 298 | ORCA refresh + JACKAL backtest learning | 높음 |
 
@@ -413,8 +413,7 @@ PowerShell `Get-Content` 출력에서 일부 한글 문자열이 mojibake처럼 
 
 5. Workflow별 LLM cost profile 문서화.
    - `orca_daily`: high
-   - `orca_jackal`: high
-   - `jackal_scanner`: medium/high
+   - `jackal_session`: high
    - `orca_backtest`: potentially very high
    - `jackal_tracker`: no LLM
    - `quality`: no LLM

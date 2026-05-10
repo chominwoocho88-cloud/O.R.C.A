@@ -63,8 +63,8 @@
 - Phase 5 workflow checkpoint contract: `OK`. Evidence: 4개 stateful workflow가 모두 `checkpoint_jackal_db()`를 호출하고 `data/jackal_state.db`를 add 대상에 포함한다.
   `orca_daily.yml:141-160`,
   `jackal_tracker.yml:80-98`,
-  `jackal_scanner.yml:64-74`,
-  `orca_jackal.yml:110-127`.
+  `jackal_session.yml:64-74`,
+  `jackal_session.yml:110-127`.
 - Phase 5 2-phase write mitigation: `OK`. Evidence: `record_jackal_shadow_signal()` (`orca/state.py:1227-1243`),
   `resolve_jackal_shadow_signal()` (`orca/state.py:1352-1367`),
   `sync_jackal_live_events()` (`orca/state.py:1540-1555`) 모두
@@ -206,15 +206,15 @@ Coverage shape:
 - `orca_daily.yml`: ORCA 일일 리포트 workflow.
   Trigger: schedule `30 23 * * 0-4`, `0 14 * * 1-5`, `0 22 * * 6`, `0 21 1 * *` + manual `mode`. Evidence: `.github/workflows/orca_daily.yml:1-18`.
   Statefulness: `data/orca_state.db`, `data/jackal_state.db`, reports, multiple JSON files를 commit한다 (`.github/workflows/orca_daily.yml:141-161`).
-- `orca_jackal.yml`: JACKAL session workflow.
-  Trigger: Korea/US session schedule 4개 + manual `session_mode`, `force_hunt`, `force_scan`, `force_evolve`. Evidence: `.github/workflows/orca_jackal.yml:1-35`.
-  Statefulness: hotfix-style backup/reset/restore 후 `data/jackal_state.db` 포함 JACKAL-owned artifacts를 main에 push한다 (`.github/workflows/orca_jackal.yml:103-127`, `.github/workflows/orca_jackal.yml:145-190`).
+- `jackal_session.yml`: JACKAL session workflow.
+  Trigger: Korea/US session schedule 4개 + manual `session_mode`, `force_hunt`, `force_scan`, `force_evolve`. Evidence: `.github/workflows/jackal_session.yml:1-35`.
+  Statefulness: hotfix-style backup/reset/restore 후 `data/jackal_state.db` 포함 JACKAL-owned artifacts를 main에 push한다 (`.github/workflows/jackal_session.yml:103-127`, `.github/workflows/jackal_session.yml:145-190`).
 - `jackal_tracker.yml`: JACKAL outcome tracker workflow.
   Trigger: daily schedule `0 3 * * *`, `0 21 * * *` + manual `all_entries`, `dry_run`, `notify`. Evidence: `.github/workflows/jackal_tracker.yml:1-25`.
   Statefulness: `checkpoint_jackal_db()` 호출 후 `data/orca_state.db`, `data/jackal_state.db`, `jackal/jackal_weights.json`을 add한다 (`.github/workflows/jackal_tracker.yml:70-99`).
-- `jackal_scanner.yml`: manual scanner workflow.
-  Trigger: `workflow_dispatch` with `force`. Evidence: `.github/workflows/jackal_scanner.yml:1-13`.
-  Statefulness: `checkpoint_jackal_db()` 호출 후 `data/orca_state.db`, `data/jackal_state.db`와 JACKAL logs를 add한다 (`.github/workflows/jackal_scanner.yml:54-75`).
+- `jackal_session.yml`: JACKAL session workflow; manual scanner runs use `session_mode=scanner_only`.
+  Trigger: `workflow_dispatch` with `force`. Evidence: `.github/workflows/jackal_session.yml:1-13`.
+  Statefulness: `checkpoint_jackal_db()` 호출 후 `data/orca_state.db`, `data/jackal_state.db`와 JACKAL logs를 add한다 (`.github/workflows/jackal_session.yml:54-75`).
 - `orca_backtest.yml`: ORCA backtest workflow.
   Trigger: manual only. Evidence: `.github/workflows/orca_backtest.yml:1-8`.
   Statefulness: commit이 아니라 artifact upload 중심이다.
@@ -231,7 +231,7 @@ Coverage shape:
   Trigger: `workflow_call` + manual dispatch. Evidence: `.github/workflows/policy_promote.yml:1-25`.
   Statefulness: promotion md/json artifact를 upload한다.
 Workflow-wide observation:
-- `orca-repo-state` concurrency group이 `orca_daily.yml`, `orca_jackal.yml`, `jackal_tracker.yml`, `jackal_scanner.yml`, `orca_reset.yml`에 공통 적용돼 있다. Evidence: `.github/workflows/orca_daily.yml:3-5`, `.github/workflows/orca_jackal.yml:8-10`, `.github/workflows/jackal_tracker.yml:8-10`, `.github/workflows/jackal_scanner.yml:3-5`, `.github/workflows/orca_reset.yml:3-5`.
+- `orca-repo-state` concurrency group이 `orca_daily.yml`, `jackal_session.yml`, `jackal_tracker.yml`, `jackal_session.yml`, `orca_reset.yml`에 공통 적용돼 있다. Evidence: `.github/workflows/orca_daily.yml:3-5`, `.github/workflows/jackal_session.yml:8-10`, `.github/workflows/jackal_tracker.yml:8-10`, `.github/workflows/jackal_session.yml:3-5`, `.github/workflows/orca_reset.yml:3-5`.
 - test/lint-only workflow는 없다.
   현재 CI의 초점은 scheduled production execution, research report generation, policy artifact evaluation에 있다.
 ---
@@ -524,9 +524,9 @@ JSON/runtime file distribution:
   `jackal/evolution.py:159-195`, `204-1011`.
 - workflow shell save steps:
   `.github/workflows/orca_daily.yml:134-161`,
-  `.github/workflows/orca_jackal.yml:103-190`,
+  `.github/workflows/jackal_session.yml:103-190`,
   `.github/workflows/jackal_tracker.yml:70-99`,
-  `.github/workflows/jackal_scanner.yml:54-75`.
+  `.github/workflows/jackal_session.yml:54-75`.
 monkeypatch / stub 필요 영역:
 - Anthropic:
   `orca/agents.py:17-29`,
@@ -689,8 +689,8 @@ Evidence:
 current workflow save steps exist at
 `.github/workflows/orca_daily.yml:141-160`,
 `.github/workflows/jackal_tracker.yml:80-98`,
-`.github/workflows/jackal_scanner.yml:64-74`,
-`.github/workflows/orca_jackal.yml:110-127`,
+`.github/workflows/jackal_session.yml:64-74`,
+`.github/workflows/jackal_session.yml:110-127`,
 and there is no separate test/lint workflow invoking `unittest|pytest|coverage|actionlint`.
 #### Blind spot 9: ORCA poor-data notify 자체가 silent fail 가능
 어떤 상황:
@@ -754,10 +754,10 @@ runtime may run, but commit/push 실패면 다음 run baseline continuity가 끊
 Evidence:
 schedule-driven workflows:
 `.github/workflows/orca_daily.yml:7-18`,
-`.github/workflows/orca_jackal.yml:11-35`,
+`.github/workflows/jackal_session.yml:11-35`,
 `.github/workflows/jackal_tracker.yml:11-25`.
 hotfix save/reset/push retry:
-`.github/workflows/orca_jackal.yml:140-207`.
+`.github/workflows/jackal_session.yml:140-207`.
 평가:
 state continuity가 source control workflow health에 강하게 묶여 있다.
 #### SQLite 파일 손상 / lock / WAL sidecar mismatch
@@ -772,7 +772,7 @@ DB connect/WAL config:
 workflow checkpoint:
 `orca/state.py:118-132`,
 `.github/workflows/orca_daily.yml:141-160`,
-`.github/workflows/orca_jackal.yml:110-127`.
+`.github/workflows/jackal_session.yml:110-127`.
 평가:
 single-file SQLite 자체보다 “DB 파일 + git-based persistence + workflow timing” 조합이 실제 SPOF다.
 ### 5.2. 데이터 파이프라인 gap
@@ -798,7 +798,7 @@ Evidence: `orca/paths.py:28-38`, `jackal/hunter.py:1410-1474`, `jackal/scanner.p
 영향: source of truth 인식이 흐려질 수 있다.
 gap 6:
 workflow save steps가 shell-script로 중복돼 있다.
-Evidence: `.github/workflows/orca_daily.yml:146-164`, `.github/workflows/jackal_tracker.yml:85-99`, `.github/workflows/jackal_scanner.yml:69-75`, `.github/workflows/orca_jackal.yml:116-190`.
+Evidence: `.github/workflows/orca_daily.yml:146-164`, `.github/workflows/jackal_tracker.yml:85-99`, `.github/workflows/jackal_session.yml:69-75`, `.github/workflows/jackal_session.yml:116-190`.
 영향: 한 workflow만 drift해도 persistence behavior가 달라질 수 있다.
 ### 5.3. Technical debt inventory
 debt 1:
@@ -822,8 +822,8 @@ oversized modules가 너무 많다.
 Evidence: Section 2 LOC distribution.
 debt 7:
 workflow hotfix shell complexity가 높다.
-Evidence: `.github/workflows/orca_jackal.yml:103-207`.
-주석 자체가 `symptom-level hotfix`라고 적고 있다 (`.github/workflows/orca_jackal.yml:103-106`).
+Evidence: `.github/workflows/jackal_session.yml:103-207`.
+주석 자체가 `symptom-level hotfix`라고 적고 있다 (`.github/workflows/jackal_session.yml:103-106`).
 debt 8:
 daily report와 research report의 dual-DB provenance가 완전하지 않다.
 Evidence: `orca/research_report.py:291-325`, `reports/orca_research_comparison.json:1-4`.
@@ -877,7 +877,7 @@ Evidence:
 `orca/analysis.py:428-435`,
 `orca/state.py:93-132`,
 `.github/workflows/orca_daily.yml:141-160`,
-`.github/workflows/orca_jackal.yml:110-127`.
+`.github/workflows/jackal_session.yml:110-127`.
 #### P1-2. workflow state-preservation smoke check 추가
 Proposal:
 4개 stateful workflow의 save step에서
@@ -902,8 +902,8 @@ Why now:
 Evidence:
 `.github/workflows/orca_daily.yml:141-160`,
 `.github/workflows/jackal_tracker.yml:80-98`,
-`.github/workflows/jackal_scanner.yml:64-74`,
-`.github/workflows/orca_jackal.yml:110-127`.
+`.github/workflows/jackal_session.yml:64-74`,
+`.github/workflows/jackal_session.yml:110-127`.
 #### P1-3. dual-DB 상태 스냅샷을 report/dashboard에 노출
 Proposal:
 daily report 또는 research comparison에

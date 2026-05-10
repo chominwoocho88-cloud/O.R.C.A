@@ -445,9 +445,8 @@ class TestPhase5WorkflowContracts(unittest.TestCase):
 
     WORKFLOW_FILES = {
         ".github/workflows/orca_daily.yml",
-        ".github/workflows/orca_jackal.yml",
+        ".github/workflows/jackal_session.yml",
         ".github/workflows/jackal_tracker.yml",
-        ".github/workflows/jackal_scanner.yml",
     }
 
     def test_workflows_include_jackal_state_and_checkpoint_call(self):

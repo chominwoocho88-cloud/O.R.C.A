@@ -103,9 +103,8 @@ class TestWorkflowConcurrencyContracts(unittest.TestCase):
     WORKFLOWS = (
         "db_vacuum.yml",
         "orca_daily.yml",
-        "orca_jackal.yml",
+        "jackal_session.yml",
         "jackal_tracker.yml",
-        "jackal_scanner.yml",
         "jackal_backtest_learning.yml",
         "orca_reset.yml",
         "wave_f_archive.yml",
@@ -130,9 +129,8 @@ class TestWorkflowCheckpointContracts(unittest.TestCase):
 
     STATEFUL_WORKFLOWS = (
         "orca_daily.yml",
-        "orca_jackal.yml",
+        "jackal_session.yml",
         "jackal_tracker.yml",
-        "jackal_scanner.yml",
         "jackal_backtest_learning.yml",
     )
 
@@ -153,9 +151,8 @@ class TestWorkflowJackalStateContracts(unittest.TestCase):
 
     STATEFUL_WORKFLOWS = (
         "orca_daily.yml",
-        "orca_jackal.yml",
+        "jackal_session.yml",
         "jackal_tracker.yml",
-        "jackal_scanner.yml",
         "jackal_backtest_learning.yml",
     )
 
@@ -352,15 +349,11 @@ class TestHighRiskWorkflowNodeRuntimeContracts(unittest.TestCase):
             "uses: actions/setup-python@v6",
             "uses: actions/download-artifact@v8",
         ),
-        "jackal_scanner.yml": (
-            "uses: actions/checkout@v6",
-            "uses: actions/setup-python@v6",
-        ),
         "orca_daily.yml": (
             "uses: actions/checkout@v6",
             "uses: actions/setup-python@v6",
         ),
-        "orca_jackal.yml": (
+        "jackal_session.yml": (
             "uses: actions/checkout@v6",
             "uses: actions/setup-python@v6",
             "uses: actions/upload-artifact@v6",
@@ -408,9 +401,8 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
     HIGH_RISK_COMMIT_WORKFLOWS = (
         "db_vacuum.yml",
         "jackal_backtest_learning.yml",
-        "jackal_scanner.yml",
         "orca_daily.yml",
-        "orca_jackal.yml",
+        "jackal_session.yml",
         "orca_reset.yml",
         "wave_f_archive.yml",
         "wave_f_backfill.yml",
@@ -420,7 +412,6 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
     STANDARD_REBASE_WORKFLOWS = (
         "db_vacuum.yml",
         "jackal_backtest_learning.yml",
-        "jackal_scanner.yml",
         "orca_daily.yml",
         "orca_reset.yml",
         "wave_f_archive.yml",
@@ -431,9 +422,8 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
     DB_STATE_WORKFLOW_PATHS = {
         "db_vacuum.yml": ("data/orca_state.db",),
         "jackal_backtest_learning.yml": ("data/orca_state.db", "data/jackal_state.db"),
-        "jackal_scanner.yml": ("data/orca_state.db", "data/jackal_state.db"),
         "orca_daily.yml": ("data/orca_state.db", "data/jackal_state.db"),
-        "orca_jackal.yml": ("data/orca_state.db", "data/jackal_state.db"),
+        "jackal_session.yml": ("data/orca_state.db", "data/jackal_state.db"),
         "wave_f_archive.yml": ("data/orca_state.db",),
         "wave_f_backfill.yml": ("data/orca_state.db",),
         "wave_f_clustering.yml": ("data/orca_state.db",),
@@ -498,8 +488,8 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
                 staging_idx = text.find("Git status before staging:")
                 self.assertTrue(0 <= checkpoint_idx < staging_idx)
 
-    def test_orca_jackal_keeps_replay_push_safety_logs(self):
-        text = _read_text(_workflow_path("orca_jackal.yml"))
+    def test_jackal_session_keeps_replay_push_safety_logs(self):
+        text = _read_text(_workflow_path("jackal_session.yml"))
         for marker in (
             "Git status before staging:",
             "Aligning with origin/main before replaying JACKAL-owned state",
@@ -533,7 +523,7 @@ class TestHighRiskArtifactContracts(unittest.TestCase):
 
     def test_jackal_session_quality_artifact_contract_is_preserved(self):
         block = _extract_step_block(
-            _workflow_path("orca_jackal.yml"),
+            _workflow_path("jackal_session.yml"),
             "Upload smoke quality artifacts",
         )
         self.assertIn("uses: actions/upload-artifact@v6", block)
@@ -549,11 +539,10 @@ class TestWorkflowDispatchUiContracts(unittest.TestCase):
     WORKFLOWS_WITH_DISPATCH = (
         "db_vacuum.yml",
         "jackal_backtest_learning.yml",
-        "jackal_scanner.yml",
         "jackal_tracker.yml",
         "orca_backtest.yml",
         "orca_daily.yml",
-        "orca_jackal.yml",
+        "jackal_session.yml",
         "orca_reset.yml",
         "pages_dashboard.yml",
         "policy_eval.yml",
@@ -578,14 +567,15 @@ class TestWorkflowDispatchUiContracts(unittest.TestCase):
         self.assertIn("inputs.strict == true || inputs.strict == 'true'", text)
 
     def test_jackal_manual_dispatch_booleans_are_choice_inputs(self):
-        scanner = _extract_workflow_dispatch_block(_workflow_path("jackal_scanner.yml"))
+        session = _extract_workflow_dispatch_block(_workflow_path("jackal_session.yml"))
         tracker = _extract_workflow_dispatch_block(_workflow_path("jackal_tracker.yml"))
 
-        self.assertIn("force:", scanner)
-        self.assertIn("type: choice", scanner)
-        self.assertIn('default: "false"', scanner)
-        self.assertIn("Resolve Scanner inputs", _read_text(_workflow_path("jackal_scanner.yml")))
-        self.assertIn("JACKAL_SCANNER_FORCE", _read_text(_workflow_path("jackal_scanner.yml")))
+        self.assertIn("session_mode:", session)
+        self.assertIn("scanner_only", session)
+        self.assertIn("force_scan:", session)
+        self.assertIn("type: choice", session)
+        self.assertIn('default: "false"', session)
+        self.assertIn("JACKAL_FORCE_SCAN", _read_text(_workflow_path("jackal_session.yml")))
 
         for input_name in ("all_entries:", "dry_run:", "notify:"):
             self.assertIn(input_name, tracker)
@@ -646,9 +636,8 @@ class TestWorkflowOrcaStateContracts(unittest.TestCase):
 
     STATEFUL_WORKFLOWS = (
         "orca_daily.yml",
-        "orca_jackal.yml",
+        "jackal_session.yml",
         "jackal_tracker.yml",
-        "jackal_scanner.yml",
         "jackal_backtest_learning.yml",
     )
 
@@ -669,9 +658,8 @@ class TestWorkflowPresenceContracts(unittest.TestCase):
     REQUIRED_WORKFLOWS = {
         "db_vacuum.yml",
         "orca_daily.yml",
-        "orca_jackal.yml",
+        "jackal_session.yml",
         "jackal_tracker.yml",
-        "jackal_scanner.yml",
         "jackal_backtest_learning.yml",
         "orca_backtest.yml",
         "orca_reset.yml",
@@ -826,7 +814,7 @@ class TestPriorityWorkflowUiContracts(unittest.TestCase):
 
     PRIORITY_WORKFLOWS = (
         "orca_backtest.yml",
-        "orca_jackal.yml",
+        "jackal_session.yml",
         "orca_daily.yml",
         "wave_f_archive.yml",
     )
@@ -866,7 +854,7 @@ class TestPriorityWorkflowUiContracts(unittest.TestCase):
                     self.assertIn('default: "false"', text)
 
     def test_stateful_priority_workflows_commit_after_checkpoint(self):
-        for workflow_name in ("orca_jackal.yml", "orca_daily.yml", "wave_f_archive.yml"):
+        for workflow_name in ("jackal_session.yml", "orca_daily.yml", "wave_f_archive.yml"):
             with self.subTest(workflow=workflow_name):
                 text = _read_text(_workflow_path(workflow_name))
                 checkpoint_idx = text.find("Checkpoint DB")

@@ -150,8 +150,8 @@ Hunter
 Ref:
 `README.md:79-85`
 `README.md:97-101`
-`.github/workflows/orca_jackal.yml:1-18`
-`.github/workflows/orca_jackal.yml:62-97`
+`.github/workflows/jackal_session.yml:1-18`
+`.github/workflows/jackal_session.yml:62-97`
 ## 0.7 문서 사용 순서 권장
 먼저 읽을 곳:
 Section 1
@@ -206,7 +206,7 @@ Ref:
 다만 실제 workflow는
 Hunter 후에 Scanner를 실행한다.
 Ref:
-`.github/workflows/orca_jackal.yml:62-97`
+`.github/workflows/jackal_session.yml:62-97`
 이 차이는 중요하다.
 이유:
 사용자가 체감하는 Telegram 출력은
@@ -1505,9 +1505,9 @@ RS signal 설계 + backtest 범위 정의
 - core 실행 흐름: `jackal/core.py:55-90`
 - README session 설명: `README.md:79-85`
 - git 부재 caveat: `README.md:97-101`
-- workflow overview: `.github/workflows/orca_jackal.yml:1-18`
-- workflow Hunter step: `.github/workflows/orca_jackal.yml:62-83`
-- workflow Scanner step: `.github/workflows/orca_jackal.yml:84-97`
+- workflow overview: `.github/workflows/jackal_session.yml:1-18`
+- workflow Hunter step: `.github/workflows/jackal_session.yml:62-83`
+- workflow Scanner step: `.github/workflows/jackal_session.yml:84-97`
 - canonical families: `jackal/families.py:7-15`
 - canonical mapping: `jackal/families.py:33-109`
 - Hunter technical snapshot: `jackal/hunter.py:540-600`

@@ -217,8 +217,7 @@ class MarketFetchFDRPriorityTests(unittest.TestCase):
 
     def test_workflows_enable_fdr_main(self):
         workflows = [
-            "orca_jackal.yml",
-            "jackal_scanner.yml",
+            "jackal_session.yml",
             "jackal_tracker.yml",
             "orca_daily.yml",
             "orca_backtest.yml",
@@ -235,8 +234,7 @@ class MarketFetchFDRPriorityTests(unittest.TestCase):
 
     def test_workflows_install_requirements_for_fdr_dependency(self):
         workflows = [
-            "orca_jackal.yml",
-            "jackal_scanner.yml",
+            "jackal_session.yml",
             "jackal_tracker.yml",
             "orca_daily.yml",
             "orca_backtest.yml",
