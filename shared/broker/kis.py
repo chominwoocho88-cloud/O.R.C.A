@@ -415,6 +415,126 @@ class KisClient:
                 continue
         return result
 
+    def get_volume_rank(self, market: str = "KOSPI", limit: int = 20) -> list[dict]:
+        """Fetch domestic volume ranking from KIS, returning an empty list on miss."""
+        if not self.is_configured():
+            return []
+
+        url = f"{self.base_url}/uapi/domestic-stock/v1/quotations/volume-rank"
+        headers = self._auth_headers("FHPST01710000")
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_COND_SCR_DIV_CODE": "20171",
+            "FID_INPUT_ISCD": _ranking_market_code(market),
+            "FID_DIV_CLS_CODE": "0",
+            "FID_BLNG_CLS_CODE": "0",
+            "FID_TRGT_CLS_CODE": "111111111",
+            "FID_TRGT_EXLS_CLS_CODE": "0000000000",
+            "FID_INPUT_PRICE_1": "0",
+            "FID_INPUT_PRICE_2": "1000000",
+            "FID_VOL_CNT": "100000",
+            "FID_INPUT_DATE_1": "",
+        }
+
+        try:
+            resp = httpx.get(url, headers=headers, params=params, timeout=self.timeout)
+            resp.raise_for_status()
+            data = resp.json()
+            _raise_for_kis_error(data)
+        except (httpx.HTTPError, ValueError, KisError):
+            return []
+
+        rows = _response_rows(data.get("output", []))
+        result = []
+        for idx, row in enumerate(rows[: max(limit, 0)], start=1):
+            if not isinstance(row, dict):
+                continue
+            ticker = _first_value(row, "mksc_shrn_iscd", "stck_shrn_iscd", "pdno")
+            if not ticker:
+                continue
+            try:
+                result.append(
+                    {
+                        "ticker": ticker,
+                        "name": _first_value(row, "hts_kor_isnm", "prdt_name", "stck_kor_isnm"),
+                        "current_price": _to_float(_first_value(row, "stck_prpr", "prpr")),
+                        "volume": _to_int(_first_value(row, "acml_vol", "cntg_vol", "vol")),
+                        "change_rate": _to_float(_first_value(row, "prdy_ctrt", "fluctuation_rate")),
+                        "volume_rank": _to_int(_first_value(row, "data_rank", "rank") or idx),
+                        "source": "kis",
+                    }
+                )
+            except (TypeError, ValueError):
+                continue
+        return result
+
+    def get_fluctuation(
+        self,
+        market: str = "KOSPI",
+        limit: int = 20,
+        direction: str = "up",
+    ) -> list[dict]:
+        """Fetch domestic price fluctuation ranking from KIS, returning [] on miss."""
+        if not self.is_configured():
+            return []
+
+        url = f"{self.base_url}/uapi/domestic-stock/v1/ranking/fluctuation"
+        headers = self._auth_headers("FHPST01700000")
+        direction_key = str(direction or "up").lower()
+        if direction_key == "down":
+            rsfl_rate1, rsfl_rate2 = "-100", "0"
+        else:
+            rsfl_rate1, rsfl_rate2 = "0", "100"
+        params = {
+            "fid_rsfl_rate2": rsfl_rate2,
+            "fid_cond_mrkt_div_code": "J",
+            "fid_cond_scr_div_code": "20170",
+            "fid_input_iscd": _ranking_market_code(market),
+            "fid_rank_sort_cls_code": "0000",
+            "fid_input_cnt_1": str(max(limit, 0)),
+            "fid_prc_cls_code": "0",
+            "fid_input_price_1": "0",
+            "fid_input_price_2": "1000000",
+            "fid_vol_cnt": "100000",
+            "fid_trgt_cls_code": "0",
+            "fid_trgt_exls_cls_code": "0",
+            "fid_div_cls_code": "0",
+            "fid_rsfl_rate1": rsfl_rate1,
+        }
+
+        try:
+            resp = httpx.get(url, headers=headers, params=params, timeout=self.timeout)
+            resp.raise_for_status()
+            data = resp.json()
+            _raise_for_kis_error(data)
+        except (httpx.HTTPError, ValueError, KisError):
+            return []
+
+        rows = _response_rows(data.get("output", []))
+        result = []
+        for idx, row in enumerate(rows[: max(limit, 0)], start=1):
+            if not isinstance(row, dict):
+                continue
+            ticker = _first_value(row, "stck_shrn_iscd", "mksc_shrn_iscd", "pdno")
+            if not ticker:
+                continue
+            try:
+                result.append(
+                    {
+                        "ticker": ticker,
+                        "name": _first_value(row, "hts_kor_isnm", "prdt_name", "stck_kor_isnm"),
+                        "current_price": _to_float(_first_value(row, "stck_prpr", "prpr")),
+                        "change_rate": _to_float(_first_value(row, "prdy_ctrt", "fluctuation_rate")),
+                        "volume": _to_int(_first_value(row, "acml_vol", "cntg_vol", "vol")),
+                        "fluctuation_rank": _to_int(_first_value(row, "data_rank", "rank") or idx),
+                        "direction": "down" if direction_key == "down" else "up",
+                        "source": "kis",
+                    }
+                )
+            except (TypeError, ValueError):
+                continue
+        return result
+
     def get_account_balance(
         self,
         *,
@@ -553,6 +673,37 @@ def _raise_for_kis_error(data: dict) -> None:
         raise KisError(f"KIS API error: {data.get('msg1', 'unknown')}")
 
 
+def _ranking_market_code(market: str) -> str:
+    """Map human market names to KIS ranking input codes."""
+    value = str(market or "").strip().upper()
+    return {
+        "KOSPI": "0001",
+        "KS": "0001",
+        "KOSDAQ": "1001",
+        "KQ": "1001",
+        "KOSPI200": "2001",
+        "ALL": "0000",
+    }.get(value, value or "0000")
+
+
+def _response_rows(value: object) -> list[dict]:
+    """Normalize KIS output values into a row list."""
+    if isinstance(value, list):
+        return value
+    if isinstance(value, dict):
+        return [value]
+    return []
+
+
+def _first_value(row: dict, *keys: str) -> object:
+    """Return the first present value from a KIS response row."""
+    for key in keys:
+        value = row.get(key)
+        if value not in (None, ""):
+            return value
+    return ""
+
+
 def _to_float(value: object) -> float:
     """Convert KIS numeric string fields to float."""
     if isinstance(value, str):
@@ -562,4 +713,6 @@ def _to_float(value: object) -> float:
 
 def _to_int(value: object) -> int:
     """Convert KIS numeric string fields to int."""
+    if isinstance(value, str):
+        value = value.replace(",", "").strip()
     return int(float(value or 0))

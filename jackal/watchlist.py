@@ -128,9 +128,89 @@ def _load_kis_holdings_watchlist() -> dict[str, dict]:
         return {}
 
 
+def _load_kis_movers_watchlist() -> dict[str, dict]:
+    """Load KIS volume and price movers into the JACKAL watchlist contract."""
+    try:
+        from shared.broker import get_shared_kis_client
+
+        client = get_shared_kis_client()
+        if not client.is_configured():
+            return {}
+
+        watchlist: dict[str, dict] = {}
+
+        for item in client.get_volume_rank(market="KOSPI", limit=10):
+            ticker = _kis_to_watchlist_ticker(str(item.get("ticker", "") or ""))
+            if not ticker:
+                continue
+            market = _market_for_ticker(ticker)
+            watchlist[ticker] = {
+                "ticker": ticker,
+                "source": "kis_volume_surge",
+                "signal_type": "volume_surge",
+                "name": item.get("name", "") or ticker,
+                "volume_rank": item.get("volume_rank"),
+                "current_price": item.get("current_price", 0),
+                "volume": item.get("volume", 0),
+                "change_rate": item.get("change_rate", 0),
+                "market": market,
+                "currency": _currency_for_market(market),
+                "portfolio": False,
+                "asset_type": "stock",
+            }
+
+        for item in client.get_fluctuation(market="KOSPI", limit=10, direction="up"):
+            ticker = _kis_to_watchlist_ticker(str(item.get("ticker", "") or ""))
+            if not ticker or ticker in watchlist:
+                continue
+            market = _market_for_ticker(ticker)
+            watchlist[ticker] = {
+                "ticker": ticker,
+                "source": "kis_price_surge",
+                "signal_type": "price_surge",
+                "name": item.get("name", "") or ticker,
+                "fluctuation_rank": item.get("fluctuation_rank"),
+                "current_price": item.get("current_price", 0),
+                "volume": item.get("volume", 0),
+                "change_rate": item.get("change_rate", 0),
+                "market": market,
+                "currency": _currency_for_market(market),
+                "portfolio": False,
+                "asset_type": "stock",
+            }
+
+        for item in client.get_fluctuation(market="KOSPI", limit=10, direction="down"):
+            ticker = _kis_to_watchlist_ticker(str(item.get("ticker", "") or ""))
+            if not ticker or ticker in watchlist:
+                continue
+            market = _market_for_ticker(ticker)
+            watchlist[ticker] = {
+                "ticker": ticker,
+                "source": "kis_price_crash",
+                "signal_type": "price_crash",
+                "name": item.get("name", "") or ticker,
+                "fluctuation_rank": item.get("fluctuation_rank"),
+                "current_price": item.get("current_price", 0),
+                "volume": item.get("volume", 0),
+                "change_rate": item.get("change_rate", 0),
+                "market": market,
+                "currency": _currency_for_market(market),
+                "portfolio": False,
+                "asset_type": "stock",
+            }
+
+        return watchlist
+    except Exception:
+        return {}
+
+
 def load_jackal_watchlist() -> dict[str, dict]:
-    """Load a future JACKAL watchlist from KIS holdings plus candidate_registry."""
+    """Load JACKAL watchlist from KIS holdings, KIS movers, and candidate_registry."""
     watchlist = _load_kis_holdings_watchlist()
+    movers = _load_kis_movers_watchlist()
+    for ticker, info in movers.items():
+        if ticker not in watchlist:
+            watchlist[ticker] = info
     registry = _load_candidate_registry_watchlist()
     for ticker, info in registry.items():
         if ticker not in watchlist:
