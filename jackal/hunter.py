@@ -928,7 +928,7 @@ JSON만: {{"top10": ["TICKER1", "TICKER2", ...]}}"""
 
     response = _llm_client.call(
         model=MODEL_H,
-        max_tokens=200,
+        max_tokens=500,
         system="",
         user=prompt,
         call_site="jackal.hunter.quick_scan",
@@ -1176,7 +1176,7 @@ day1 vs swing 구분:
 
     response = _llm_client.call(
         model=MODEL_H,
-        max_tokens=450,
+        max_tokens=1500,
         system="",
         user=prompt,
         call_site="jackal.hunter.analyst",
@@ -1284,7 +1284,7 @@ BB: {tech['bb_pos']:.0f}% (하단 터치가 반등 보장 아님)
     raw = ""
     response = _llm_client.call(
         model=MODEL_H,
-        max_tokens=300,
+        max_tokens=1000,
         system="",
         user=prompt,
         call_site="jackal.hunter.devil",
