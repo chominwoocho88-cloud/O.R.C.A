@@ -44,6 +44,7 @@ from .historical_context import apply_historical_adjustment as _apply_historical
 from .historical_context import historical_alert_lines as _historical_alert_lines
 from .historical_context import market_features_from_aria as _historical_market_features_from_aria
 from .historical_context import try_retrieve_historical_context as _try_retrieve_historical_context
+from .json_parse import safe_parse_json as _parse_llm_json
 from .probability import apply_probability_adjustment, load_probability_summary
 from .thresholds import THRESHOLDS
 
@@ -1015,26 +1016,8 @@ JSON만: {{"top10": ["TICKER1", "TICKER2", ...]}}"""
 # Stage 4: 10 → 5 (Analyst → Devil → Final)
 # ══════════════════════════════════════════════════════════════════
 
-def _safe_parse_json(text: str) -> dict:
-    m = re.search(r"\{[\s\S]*\}", text)
-    if not m:
-        return {}
-    s = m.group()
-    for attempt in [
-        lambda x: json.loads(x),
-        lambda x: json.loads(re.sub(r",\s*([}\]])", r"\1", x)),
-    ]:
-        try:
-            return attempt(s)
-        except json.JSONDecodeError:
-            pass
-    s3 = re.sub(r",\s*([}\]])", r"\1", s)
-    s3 += "]" * (s3.count("[") - s3.count("]"))
-    s3 += "}" * (s3.count("{") - s3.count("}"))
-    try:
-        return json.loads(s3)
-    except Exception:
-        return {}
+def _safe_parse_json(text: str, *, schema_keys: list[str] | None = None) -> dict:
+    return _parse_llm_json(text, schema_keys=schema_keys)
 
 
 def _trim_devil_raw_excerpt(text: str | None, limit: int = 200) -> str | None:
@@ -1239,7 +1222,10 @@ day1 vs swing 구분:
         call_site="jackal.hunter.analyst",
     )
     try:
-        r = _safe_parse_json(re.sub(r"```(?:json)?|```", "", response.text).strip())
+        r = _safe_parse_json(
+            response.text,
+            schema_keys=["analyst_score", "signals_fired", "bull_case"],
+        )
         r["analyst_score"] = int(r.get("analyst_score", 50))
         r["day1_score"]    = int(r.get("day1_score",    50))
         r["swing_score"]   = int(r.get("swing_score",   50))
@@ -1348,8 +1334,8 @@ BB: {tech['bb_pos']:.0f}% (하단 터치가 반등 보장 아님)
         call_site="jackal.hunter.devil",
     )
     try:
-        raw = re.sub(r"```(?:json)?|```", "", response.text).strip()
-        r = _safe_parse_json(raw)
+        raw = response.text.strip()
+        r = _safe_parse_json(raw, schema_keys=["devil_score", "verdict", "main_risk"])
         if not r:
             return _with_hunter_devil_metadata(
                 {
