@@ -15,6 +15,7 @@ from statistics import mean
 from typing import Any
 
 from orca import state
+from orca import jackal_memory_shadow_store as _shadow_store
 from shared.paths import JACKAL_LEGACY_DIR
 
 
@@ -27,6 +28,7 @@ MIN_GLOBAL_RESOLVED = 20
 MIN_PATTERN_RESOLVED = 5
 MAX_STATS_BLOCK_CHARS = 1000
 SHADOW_LOG_FILE = JACKAL_LEGACY_DIR / "memory_context_shadow.log"
+MEMORY_CONTEXT_SHADOW_SCHEMA = _shadow_store.SCHEMA_SQL
 
 
 def get_memory_mode() -> str:
@@ -97,6 +99,43 @@ def log_shadow_memory_context(
     }
     with target.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(entry, ensure_ascii=False, sort_keys=True) + "\n")
+    try:
+        record_memory_context_shadow(
+            ticker=ticker,
+            role=entry["role"],
+            aria=aria,
+            memory_context=memory_context,
+            memory_mode=entry["mode"],
+            timestamp=entry["timestamp"],
+        )
+    except Exception:
+        pass
+
+
+def record_memory_context_shadow(
+    ticker: str,
+    role: str,
+    aria: dict[str, Any] | None,
+    memory_context: dict[str, Any] | None,
+    memory_mode: str,
+    *,
+    build_hash: str | None = None,
+    timestamp: str | None = None,
+) -> str | None:
+    """Persist one shadow memory-context entry to JACKAL DB."""
+    state.init_state_db()
+    timestamp = timestamp or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    with state._connect_jackal() as conn:
+        return _shadow_store.record_memory_context_shadow_conn(
+            conn,
+            timestamp=timestamp,
+            ticker=ticker,
+            role=_normalize_role(role),
+            aria=aria,
+            memory_context=memory_context,
+            memory_mode=memory_mode,
+            build_hash=build_hash,
+        )
 
 
 def shadow_memory_context(ticker: str, aria: dict[str, Any] | None, role: str) -> dict[str, Any] | None:

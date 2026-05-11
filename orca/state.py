@@ -28,6 +28,7 @@ from .lesson_archive_store import migrate_lesson_archive_table as _migrate_lesso
 from .lesson_archive_store import record_lesson_archive
 from orca.lesson_archive_store import clear_lesson_archive
 from . import jackal_prediction_cards as _prediction_cards
+from . import jackal_memory_shadow_store as _memory_shadow_store
 from . import retrieval_log_store as _retrieval_log_store
 from .paths import JACKAL_DB_FILE, STATE_DB_FILE
 
@@ -636,6 +637,7 @@ def _init_jackal_tables() -> None:
             """
         )
         _prediction_cards.migrate_jackal_prediction_cards(conn)
+        _memory_shadow_store.migrate_memory_context_shadow(conn)
 
 
 def init_state_db() -> None:
