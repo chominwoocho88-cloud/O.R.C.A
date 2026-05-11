@@ -139,7 +139,7 @@ def _load_kis_movers_watchlist() -> dict[str, dict]:
 
         watchlist: dict[str, dict] = {}
 
-        for item in client.get_volume_rank(market="KOSPI", limit=10):
+        for item in client.get_volume_rank(market="ALL", limit=10):
             ticker = _kis_to_watchlist_ticker(str(item.get("ticker", "") or ""))
             if not ticker:
                 continue
@@ -159,7 +159,7 @@ def _load_kis_movers_watchlist() -> dict[str, dict]:
                 "asset_type": "stock",
             }
 
-        for item in client.get_fluctuation(market="KOSPI", limit=10, direction="up"):
+        for item in client.get_fluctuation(market="ALL", limit=10, direction="up"):
             ticker = _kis_to_watchlist_ticker(str(item.get("ticker", "") or ""))
             if not ticker or ticker in watchlist:
                 continue
@@ -179,7 +179,7 @@ def _load_kis_movers_watchlist() -> dict[str, dict]:
                 "asset_type": "stock",
             }
 
-        for item in client.get_fluctuation(market="KOSPI", limit=10, direction="down"):
+        for item in client.get_fluctuation(market="ALL", limit=10, direction="down"):
             ticker = _kis_to_watchlist_ticker(str(item.get("ticker", "") or ""))
             if not ticker or ticker in watchlist:
                 continue

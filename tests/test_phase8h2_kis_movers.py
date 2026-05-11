@@ -43,7 +43,7 @@ class Phase8h2KisMoverClientTests(unittest.TestCase):
 
         with patch.object(client, "get_token", return_value="token"):
             with patch("shared.broker.kis.httpx.get", return_value=_FakeResponse(payload)) as mock_get:
-                result = client.get_volume_rank(market="KOSPI", limit=5)
+                result = client.get_volume_rank(market="ALL", limit=5)
 
         self.assertEqual(result[0]["ticker"], "005930")
         self.assertEqual(result[0]["volume_rank"], 1)
@@ -53,7 +53,7 @@ class Phase8h2KisMoverClientTests(unittest.TestCase):
         self.assertTrue(url.endswith("/uapi/domestic-stock/v1/quotations/volume-rank"))
         self.assertEqual(kwargs["headers"]["tr_id"], "FHPST01710000")
         self.assertEqual(kwargs["params"]["FID_COND_SCR_DIV_CODE"], "20171")
-        self.assertEqual(kwargs["params"]["FID_INPUT_ISCD"], "0001")
+        self.assertEqual(kwargs["params"]["FID_INPUT_ISCD"], "0000")
 
     def test_get_fluctuation_uses_official_endpoint_and_down_bounds(self):
         client = self._client()
@@ -73,7 +73,7 @@ class Phase8h2KisMoverClientTests(unittest.TestCase):
 
         with patch.object(client, "get_token", return_value="token"):
             with patch("shared.broker.kis.httpx.get", return_value=_FakeResponse(payload)) as mock_get:
-                result = client.get_fluctuation(market="KOSPI", limit=10, direction="down")
+                result = client.get_fluctuation(market="ALL", limit=10, direction="down")
 
         self.assertEqual(result[0]["ticker"], "000660")
         self.assertEqual(result[0]["direction"], "down")
@@ -83,6 +83,7 @@ class Phase8h2KisMoverClientTests(unittest.TestCase):
         self.assertTrue(url.endswith("/uapi/domestic-stock/v1/ranking/fluctuation"))
         self.assertEqual(kwargs["headers"]["tr_id"], "FHPST01700000")
         self.assertEqual(kwargs["params"]["fid_cond_scr_div_code"], "20170")
+        self.assertEqual(kwargs["params"]["fid_input_iscd"], "0000")
         self.assertEqual(kwargs["params"]["fid_rsfl_rate1"], "-100")
         self.assertEqual(kwargs["params"]["fid_rsfl_rate2"], "0")
 
@@ -140,6 +141,9 @@ class Phase8h2KisMoverWatchlistTests(unittest.TestCase):
         self.assertEqual(result["000660.KS"]["signal_type"], "price_surge")
         self.assertEqual(result["035720.KS"]["signal_type"], "price_crash")
         self.assertEqual(result["035720.KS"]["currency"], "KRW")
+        client.get_volume_rank.assert_called_once_with(market="ALL", limit=10)
+        client.get_fluctuation.assert_any_call(market="ALL", limit=10, direction="up")
+        client.get_fluctuation.assert_any_call(market="ALL", limit=10, direction="down")
 
     def test_load_kis_movers_watchlist_returns_empty_when_unconfigured(self):
         client = MagicMock()

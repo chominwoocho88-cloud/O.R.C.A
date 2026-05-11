@@ -415,7 +415,7 @@ class KisClient:
                 continue
         return result
 
-    def get_volume_rank(self, market: str = "KOSPI", limit: int = 20) -> list[dict]:
+    def get_volume_rank(self, market: str = "ALL", limit: int = 20) -> list[dict]:
         """Fetch domestic volume ranking from KIS, returning an empty list on miss."""
         if not self.is_configured():
             return []
@@ -470,7 +470,7 @@ class KisClient:
 
     def get_fluctuation(
         self,
-        market: str = "KOSPI",
+        market: str = "ALL",
         limit: int = 20,
         direction: str = "up",
     ) -> list[dict]:
