@@ -27,6 +27,7 @@ from .lesson_archive_store import get_lesson_archive
 from .lesson_archive_store import migrate_lesson_archive_table as _migrate_lesson_archive_table
 from .lesson_archive_store import record_lesson_archive
 from orca.lesson_archive_store import clear_lesson_archive
+from . import jackal_prediction_cards as _prediction_cards
 from . import retrieval_log_store as _retrieval_log_store
 from .paths import JACKAL_DB_FILE, STATE_DB_FILE
 
@@ -634,6 +635,7 @@ def _init_jackal_tables() -> None:
                AND p.captured_at = latest.captured_at;
             """
         )
+        _prediction_cards.migrate_jackal_prediction_cards(conn)
 
 
 def init_state_db() -> None:
@@ -2049,6 +2051,19 @@ def _jackal_event_external_key(event_type: str, entry: dict[str, Any]) -> str:
     return f"{event_type}|{ts}|{ticker}|{score}"
 
 
+def record_jackal_prediction_card(
+    event_id: str,
+    event_kind: str,
+    payload: dict[str, Any],
+    *,
+    build_hash: str | None = None,
+) -> str | None:
+    """Persist a normalized JACKAL prediction card for alerted live events."""
+    init_state_db()
+    with _connect_jackal() as conn:
+        return _prediction_cards.record_jackal_prediction_card_conn(conn, event_id, event_kind, payload, build_hash=build_hash)
+
+
 def sync_jackal_live_events(
     event_type: str,
     entries: list[dict[str, Any]],
@@ -2105,6 +2120,17 @@ def sync_jackal_live_events(
                     updated_at,
                 ),
             )
+            try:
+                _prediction_cards.record_jackal_prediction_card_conn(conn, event_id, event_type, entry)
+            except Exception as e:
+                print(
+                    "[WARN] prediction card write failed in "
+                    "sync_jackal_live_events: "
+                    + type(e).__name__
+                    + ": "
+                    + str(e),
+                    file=sys.stderr,
+                )
             candidate_jobs.append((deepcopy(entry), event_id, external_key))
             synced += 1
     for entry, event_id, external_key in candidate_jobs:

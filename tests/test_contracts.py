@@ -306,6 +306,7 @@ class TestPR5ExternalDataVisibility(unittest.TestCase):
     EXPECTED_JACKAL_TABLES = {
         "jackal_shadow_signals",
         "jackal_live_events",
+        "jackal_prediction_cards",
         "jackal_shadow_batches",
         "jackal_weight_snapshots",
         "jackal_recommendations",
