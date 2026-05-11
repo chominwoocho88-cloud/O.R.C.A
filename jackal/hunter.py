@@ -12,7 +12,6 @@ Jackal Hunter — 100→50→25→10→5 단계별 스윙 타점 탐색
 
 포트폴리오 종목 제외 — 항상 새 종목만 발굴
 """
-
 import os
 import sys
 import json
@@ -26,6 +25,7 @@ import httpx
 import pandas as pd
 from shared.build_info import get_build_info
 from shared.llm.client import LLMClient
+from shared.market_data.stock_name import format_stock_display
 from shared.paths import (
     DATA_DIR,
     JACKAL_HUNT_COOLDOWN_FILE,
@@ -1572,7 +1572,7 @@ def _stage4_full_analysis(top10: list, aria: dict) -> list:
         final = _apply_historical_context(final, historical_context)
         diag_str = format_final_diag(final)
 
-        log.info(f"  {ticker:12} A:{analyst['analyst_score']} "
+        log.info(f"  {format_stock_display(ticker, name):24} A:{analyst['analyst_score']} "
                  f"D:{devil['devil_score']}({devil.get('verdict','?')}) "
                  f"→ F:{final['final_score']:.0f} {final['label']}"
                  + (
@@ -1717,7 +1717,7 @@ def _build_alert(item: dict, aria: dict) -> str:
     lines = [
         f"🎯 <b>Jackal Hunter — 스윙 타점</b>",
         "━━━━━━━━━━━━━━━━━━━━",
-        f"<b>{name} ({ticker})</b>",
+        f"<b>{format_stock_display(ticker, name)}</b>",
         f"💰 {cur}{price_str}  1일:{tech['change_1d']:+.1f}%  5일:{tech['change_5d']:+.1f}%",
         "━━━━━━━━━━━━━━━━━━━━",
         f"🤖 <b>{final['final_score']:.0f}/100</b>  {final['label']}  [{final.get('mode','일반')}]",
@@ -1765,7 +1765,7 @@ def _build_summary(top5: list, aria: dict) -> str:
         icon  = {"강한반등":"🔥","반등가능":"🟢","중립":"⚪","추가하락":"🔴"}.get(setup,"⚪")
         div_mark = "★" if tech.get("bullish_div") else ""
         lines.append(
-            f"{icon} <b>{x['name']}</b>({x['ticker']}) {div_mark} "
+            f"{icon} <b>{format_stock_display(x['ticker'], x.get('name'))}</b> {div_mark} "
             f"{f['final_score']:.0f}점 | RSI {tech['rsi']} | "
             f"5일 {tech['change_5d']:+.1f}% | {setup}"
         )
