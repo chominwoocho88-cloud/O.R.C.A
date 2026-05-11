@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-10 15:19 KST",
+  "collected_at": "2026-05-11 09:16 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,46 +12,40 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Goldman Sachs rates Nvidia a strong buy with $250 price target ahead of Q1 earnings; stock trading below historical valuations despite AI market dominance",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "Nvidia commits $40B+ to equity investments in AI companies, securing $3.4B in future revenue from IREN data center partnership",
+      "headline": "Wall Street analysts view NVDA as undervalued with median target price of $267.50, implying 24% upside potential",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix shares rally amid AI demand surge and foreign buying, supported by strong Q1 earnings with 71.5% operating margin",
+      "headline": "LS Securities raised SK Hynix price target from 1.5M won to 2.1M won on strong April DRAM contract prices",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung reaches $1 trillion market valuation on booming AI chip demand, but faces 18-day strike threat from workers demanding AI windfall share",
-      "impact": "neutral",
+      "headline": "Samsung Electronics estimated Q2 2026 operating profit at 80.9 trillion won, up 1630% YoY, driven by AI chip demand",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom surges 5% on $35B private credit financing deal with Apollo and Blackstone; reverses losses from OpenAI AI chip deal financing snag",
+      "headline": "Broadcom stock rallied 4.3% on reports of potential $35-55 billion financing from Apollo and Blackstone for AI buildout",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao announces OpenAI partnership as part of Stargate AI expansion initiative, positioning company for AI growth",
+      "headline": "Kakao Corp achieved record Q4 2025 revenue of 2.13 trillion won with ChatGPT for Kakao reaching 8 million users",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "Shinhan Sol Shipbuilding Top3 Plus ETF shows 154% annual return but faces near-term weakness with strong sell signals; portfolio tracks HD Hyundai, Samsung Heavy Industries, Hanwha Ocean",
-      "impact": "bearish",
+      "headline": "SOL Korea High Dividend ETF assets exceeded 5 trillion won with monthly dividend of approximately 6% annualized yield",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 7
+  "total": 6
 }
