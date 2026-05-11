@@ -27,6 +27,7 @@ VALID_MEMORY_MODES = {MEMORY_MODE_OFF, MEMORY_MODE_SHADOW, MEMORY_MODE_ON}
 MIN_GLOBAL_RESOLVED = 20
 MIN_PATTERN_RESOLVED = 5
 MAX_STATS_BLOCK_CHARS = 1000
+MAX_INJECTION_BLOCK_CHARS = 1000
 SHADOW_LOG_FILE = JACKAL_LEGACY_DIR / "memory_context_shadow.log"
 MEMORY_CONTEXT_SHADOW_SCHEMA = _shadow_store.SCHEMA_SQL
 
@@ -110,6 +111,19 @@ def log_shadow_memory_context(
         )
     except Exception:
         pass
+    injection_block = compose_memory_injection_block(memory_context, entry["role"])
+    if injection_block:
+        try:
+            record_memory_injection_shadow(
+                ticker=ticker,
+                role=entry["role"],
+                injection_block=injection_block,
+                memory_context=memory_context,
+                memory_mode=entry["mode"],
+                timestamp=entry["timestamp"],
+            )
+        except Exception:
+            pass
 
 
 def record_memory_context_shadow(
@@ -138,6 +152,59 @@ def record_memory_context_shadow(
         )
 
 
+def record_memory_injection_shadow(
+    ticker: str,
+    role: str,
+    injection_block: str,
+    memory_context: dict[str, Any] | None,
+    memory_mode: str,
+    *,
+    build_hash: str | None = None,
+    timestamp: str | None = None,
+) -> str | None:
+    """Persist one dry-run memory injection block to JACKAL DB."""
+    if not injection_block:
+        return None
+    state.init_state_db()
+    timestamp = timestamp or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    with state._connect_jackal() as conn:
+        return _shadow_store.record_memory_injection_shadow_conn(
+            conn,
+            timestamp=timestamp,
+            ticker=ticker,
+            role=_normalize_role(role),
+            injection_block=injection_block,
+            memory_context=memory_context,
+            memory_mode=memory_mode,
+            build_hash=build_hash,
+        )
+
+
+def compose_memory_injection_block(memory_context: dict[str, Any] | None, role: str) -> str | None:
+    """Compose the exact learned-memory block for a future prompt injection."""
+    if not memory_context:
+        return None
+    stats_block = _compact_text(memory_context.get("stats_block"))
+    if not stats_block:
+        return None
+
+    role = _normalize_role(role)
+    if role == "devil":
+        intro = "[과거 학습 통계 (참고용, 본인 반론 평가 우선)]"
+    else:
+        intro = "[과거 학습 통계 (참고용, 본인 평가 우선)]"
+    sample_size = memory_context.get("sample_size", 0)
+    source = memory_context.get("source", "unknown")
+    caution = f"(표본: {sample_size}건, 출처: {source}) 통계는 참고만, 현재 가격/뉴스/레짐 증거를 우선하세요."
+    block = "\n".join([intro, stats_block, caution])
+    if len(block) <= MAX_INJECTION_BLOCK_CHARS:
+        return block
+
+    budget = max(0, MAX_INJECTION_BLOCK_CHARS - len(intro) - len(caution) - 8)
+    trimmed_stats = (stats_block[:budget].rstrip() + "...") if budget > 3 else ""
+    return "\n".join([intro, trimmed_stats, caution])[:MAX_INJECTION_BLOCK_CHARS]
+
+
 def shadow_memory_context(ticker: str, aria: dict[str, Any] | None, role: str) -> dict[str, Any] | None:
     """Build and log memory context when the feature flag is not off."""
     try:
@@ -159,6 +226,10 @@ def _shadow_log_path() -> Path:
 def _normalize_role(role: str) -> str:
     role = str(role or "").strip().lower()
     return role if role in {"analyst", "devil"} else "analyst"
+
+
+def _compact_text(value: Any) -> str:
+    return " ".join(str(value or "").split())
 
 
 def _count_resolved_predictions() -> int:
@@ -381,13 +452,19 @@ def cli_main(argv: list[str] | None = None) -> int:
     parser.add_argument("--role", choices=["analyst", "devil"], default="analyst")
     parser.add_argument("--regime", default="")
     parser.add_argument("--fear-greed", type=int, default=None)
+    parser.add_argument("--show-injection", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
     aria = {"regime": args.regime, "fear_greed": args.fear_greed}
     context = build_memory_context(args.ticker, aria, args.role)
+    injection_block = compose_memory_injection_block(context, args.role)
     if args.json:
-        print(json.dumps(context, ensure_ascii=False, indent=2, sort_keys=True))
+        payload = dict(context or {})
+        payload["injection_block"] = injection_block
+        print(json.dumps(payload or None, ensure_ascii=False, indent=2, sort_keys=True))
+    elif args.show_injection:
+        print(injection_block or "No memory injection block available.")
     elif context:
         print(context["stats_block"])
     else:
