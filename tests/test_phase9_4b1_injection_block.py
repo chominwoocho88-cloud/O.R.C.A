@@ -1,4 +1,3 @@
-import inspect
 import shutil
 import tempfile
 import unittest
@@ -73,13 +72,11 @@ class TestMemoryInjectionBlock(unittest.TestCase):
         self.assertLessEqual(len(block), memory.MAX_INJECTION_BLOCK_CHARS)
         self.assertLessEqual(len(block.splitlines()), 3)
 
-    def test_compose_truncates_too_long(self):
+    def test_compose_returns_none_when_too_long(self):
         long_stats = " ".join(["긴통계"] * 800)
         block = memory.compose_memory_injection_block(self._context(long_stats), "devil")
 
-        self.assertLessEqual(len(block), memory.MAX_INJECTION_BLOCK_CHARS)
-        self.assertLessEqual(len(block.splitlines()), 3)
-        self.assertIn("...", block)
+        self.assertIsNone(block)
 
     def test_record_injection_shadow_inserts_row(self):
         block = memory.compose_memory_injection_block(self._context(), "analyst")
@@ -102,13 +99,13 @@ class TestMemoryInjectionBlock(unittest.TestCase):
         self.assertEqual(row["source"], "candidate_lessons")
 
     def test_actual_prompt_unchanged(self):
-        analyst_source = inspect.getsource(hunter._analyst_swing)
-        devil_source = inspect.getsource(hunter._devil_swing)
+        with patch.object(memory, "get_memory_mode", return_value=memory.MEMORY_MODE_SHADOW), patch.object(
+            memory, "shadow_memory_context", return_value=self._context()
+        ):
+            content = memory.compose_prompt_user_content("NVDA", {}, "analyst", "market", "prompt")
 
-        self.assertIn('user=market_psychology + "\\n\\n" + prompt', analyst_source)
-        self.assertIn('user=market_psychology + "\\n\\n" + prompt', devil_source)
-        self.assertNotIn("compose_memory_injection_block", analyst_source)
-        self.assertNotIn("compose_memory_injection_block", devil_source)
+        self.assertEqual(content, "market\n\nprompt")
+        self.assertIs(hunter._memory_context, memory)
 
 
 if __name__ == "__main__":

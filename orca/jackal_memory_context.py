@@ -181,7 +181,7 @@ def record_memory_injection_shadow(
 
 
 def compose_memory_injection_block(memory_context: dict[str, Any] | None, role: str) -> str | None:
-    """Compose the exact learned-memory block for a future prompt injection."""
+    """Compose the exact learned-memory block for opt-in prompt injection."""
     if not memory_context:
         return None
     stats_block = _compact_text(memory_context.get("stats_block"))
@@ -199,10 +199,23 @@ def compose_memory_injection_block(memory_context: dict[str, Any] | None, role: 
     block = "\n".join([intro, stats_block, caution])
     if len(block) <= MAX_INJECTION_BLOCK_CHARS:
         return block
+    return None
 
-    budget = max(0, MAX_INJECTION_BLOCK_CHARS - len(intro) - len(caution) - 8)
-    trimmed_stats = (stats_block[:budget].rstrip() + "...") if budget > 3 else ""
-    return "\n".join([intro, trimmed_stats, caution])[:MAX_INJECTION_BLOCK_CHARS]
+
+def compose_prompt_user_content(
+    ticker: str,
+    aria: dict[str, Any] | None,
+    role: str,
+    market_psychology: str,
+    prompt: str,
+) -> str:
+    """Return Hunter LLM user content, injecting memory only in opt-in ON mode."""
+    memory_context = shadow_memory_context(ticker, aria, role)
+    injection_block = None
+    if get_memory_mode() == MEMORY_MODE_ON:
+        injection_block = compose_memory_injection_block(memory_context, role)
+    suffix = "\n\n" + injection_block if injection_block else ""
+    return f"{market_psychology}\n\n{prompt}{suffix}"
 
 
 def shadow_memory_context(ticker: str, aria: dict[str, Any] | None, role: str) -> dict[str, Any] | None:
