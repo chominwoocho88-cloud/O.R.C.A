@@ -38,6 +38,7 @@ from orca.state import (
     record_jackal_weight_snapshot,
     sync_jackal_live_events,
 )
+from orca.jackal_memory_context import shadow_memory_context as _shadow_memory_context
 from .explanation import build_hunter_explanation_lines
 from .final_diagnostics import build_final_diag, format_final_diag
 from .families import canonical_family_key, family_label
@@ -1159,6 +1160,7 @@ def _analyst_swing(ticker: str, name: str, tech: dict,
     # 티커 관련 ARIA 뉴스 추출
     relevant_news = _extract_relevant_news(ticker, name, aria)
     market_psychology = _format_market_psychology_context(aria, role="analyst")
+    _shadow_memory_context(ticker, aria, "analyst")
 
     prompt = f"""당신은 단기 스윙 트레이딩 전문 분석가입니다.
 {name}({ticker})의 1~5일 스윙 반등 가능성을 분석하세요. JSON만 반환하세요.
@@ -1289,6 +1291,7 @@ def _devil_swing(ticker: str, tech: dict, analyst: dict, aria: dict, cur: str) -
 
     relevant_news = _extract_relevant_news(ticker, ticker, aria)
     market_psychology = _format_market_psychology_context(aria, role="devil")
+    _shadow_memory_context(ticker, aria, "devil")
 
     prompt = f"""당신은 비판적 리스크 분석가입니다.
 Analyst가 {ticker}({cur}{price_str}) 스윙 매수를 추천합니다. 반드시 반박하세요. JSON만 반환.
