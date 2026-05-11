@@ -31,7 +31,7 @@ class DevilMaxTokensTests(unittest.TestCase):
             _llm_call_block(content, "jackal.hunter.analyst"),
         )
         self.assertIn(
-            "max_tokens=1000,",
+            "max_tokens=1500,",
             _llm_call_block(content, "jackal.hunter.devil"),
         )
 

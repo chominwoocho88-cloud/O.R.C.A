@@ -1330,7 +1330,7 @@ BB: {tech['bb_pos']:.0f}% (하단 터치가 반등 보장 아님)
     raw = ""
     response = _llm_client.call(
         model=MODEL_H,
-        max_tokens=1000,
+        max_tokens=1500,
         system="",
         user=market_psychology + "\n\n" + prompt,
         call_site="jackal.hunter.devil",
