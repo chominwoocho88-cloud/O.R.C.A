@@ -5,7 +5,12 @@ import json
 import sqlite3
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Callable
+
+from orca import contract_shadow_audit as _contract_shadow_audit
+from orca.contract_shadow_audit import file_and_db_audit_logger
+from shared.contracts import AlphaSignal
+from shared.contracts.validation import shadow_validate
 
 
 KST = timezone(timedelta(hours=9))
@@ -201,6 +206,52 @@ def _alpha_signal_payload_from_prediction_card_values(
     return payload
 
 
+def _shadow_validate_alpha_signal_card(
+    values: dict[str, Any],
+    raw_payload: dict[str, Any] | None,
+    *,
+    audit_logger: Callable[[dict[str, Any]], None] = file_and_db_audit_logger,
+) -> None:
+    """Validate AlphaSignal projection in fail-open shadow mode."""
+    try:
+        payload = _alpha_signal_payload_from_prediction_card_values(
+            values,
+            raw_payload=raw_payload,
+        )
+        shadow_validate(
+            AlphaSignal,
+            payload,
+            on_error="warn",
+            context="jackal_prediction_cards.record_jackal_prediction_card_conn",
+            audit_logger=audit_logger,
+        )
+    except Exception:
+        pass
+
+
+def _contract_shadow_audit_logger_for_conn(
+    conn: sqlite3.Connection,
+) -> Callable[[dict[str, Any]], None]:
+    def _logger(event: dict[str, Any]) -> None:
+        full_event = _contract_shadow_audit._audit_event_with_storage_metadata(event)
+        try:
+            _contract_shadow_audit.file_jsonl_audit_logger(full_event)
+        except Exception:
+            pass
+        try:
+            _contract_shadow_audit.record_contract_shadow_audit_conn(conn, full_event)
+        except Exception:
+            pass
+
+    return _logger
+
+
+def _alpha_signal_audit_logger(conn: sqlite3.Connection) -> Callable[[dict[str, Any]], None]:
+    if getattr(conn, "in_transaction", False):
+        return _contract_shadow_audit_logger_for_conn(conn)
+    return file_and_db_audit_logger
+
+
 def _prediction_card_values(
     event_id: str,
     event_kind: str,
@@ -288,6 +339,12 @@ def record_jackal_prediction_card_conn(
     values = _prediction_card_values(event_id, event_kind, payload, build_hash=build_hash)
     if not values:
         return None
+
+    _shadow_validate_alpha_signal_card(
+        values,
+        payload,
+        audit_logger=_alpha_signal_audit_logger(conn),
+    )
 
     columns = list(values.keys())
     placeholders = ", ".join("?" for _ in columns)
