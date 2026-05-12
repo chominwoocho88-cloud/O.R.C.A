@@ -1,62 +1,44 @@
 {
   "ranking": [
     [
-      "반도체·메모리 글로벌 ETF",
+      "HBM 메모리 ETF·SK하이닉스",
       3
     ],
     [
-      "에너지 의존 신흥국 (한국 포함)",
+      "AMD — 반도체 설계",
+      3
+    ],
+    [
+      "TSMC — 파운드리",
+      3
+    ],
+    [
+      "S&P500 전반 — 실적 모멘텀",
+      3
+    ],
+    [
+      "삼성전자 — HBM4 신제품 모멘텀",
+      2
+    ],
+    [
+      "CoreWeave — AI 클라우드 인프라",
       -2
     ],
     [
-      "코스피 현물 (외국인)",
+      "외국인 코스피 전체",
       -3
     ],
     [
-      "EWY (한국 ETF)",
+      "iShares MSCI Korea ETF (EWY) — 광의 한국 ETF",
       -3
     ]
   ],
   "rotation_signal": {
-    "from": "EWY (한국 ETF)",
-    "to": "반도체·메모리 글로벌 ETF",
+    "from": "iShares MSCI Korea ETF (EWY) — 광의 한국 ETF",
+    "to": "HBM 메모리 ETF·SK하이닉스",
     "strength": "강함"
   },
   "history": [
-    {
-      "date": "2026-05-06",
-      "ranking": [
-        [
-          "반도체·AI 섹터 (SK하이닉스, HBM)",
-          3
-        ],
-        [
-          "Mag-7 / 미국 빅테크",
-          3
-        ],
-        [
-          "코스피 외국인 수급",
-          1
-        ],
-        [
-          "미국 국채 / 안전자산",
-          -2
-        ],
-        [
-          "코스피 고점 차익실현 압력",
-          -2
-        ],
-        [
-          "엔비디아 / 중국 노출 반도체",
-          -3
-        ]
-      ],
-      "rotation_signal": {
-        "from": "엔비디아 / 중국 노출 반도체",
-        "to": "반도체·AI 섹터 (SK하이닉스, HBM)",
-        "strength": "강함"
-      }
-    },
     {
       "date": "2026-05-06",
       "ranking": [
@@ -1048,6 +1030,48 @@
       "rotation_signal": {
         "from": "EWY (한국 ETF)",
         "to": "반도체·메모리 글로벌 ETF",
+        "strength": "강함"
+      }
+    },
+    {
+      "date": "2026-05-12",
+      "ranking": [
+        [
+          "HBM 메모리 ETF·SK하이닉스",
+          3
+        ],
+        [
+          "AMD — 반도체 설계",
+          3
+        ],
+        [
+          "TSMC — 파운드리",
+          3
+        ],
+        [
+          "S&P500 전반 — 실적 모멘텀",
+          3
+        ],
+        [
+          "삼성전자 — HBM4 신제품 모멘텀",
+          2
+        ],
+        [
+          "CoreWeave — AI 클라우드 인프라",
+          -2
+        ],
+        [
+          "외국인 코스피 전체",
+          -3
+        ],
+        [
+          "iShares MSCI Korea ETF (EWY) — 광의 한국 ETF",
+          -3
+        ]
+      ],
+      "rotation_signal": {
+        "from": "iShares MSCI Korea ETF (EWY) — 광의 한국 ETF",
+        "to": "HBM 메모리 ETF·SK하이닉스",
         "strength": "강함"
       }
     }

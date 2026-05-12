@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-11 09:16 KST",
+  "collected_at": "2026-05-12 10:19 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Wall Street analysts view NVDA as undervalued with median target price of $267.50, implying 24% upside potential",
+      "headline": "NVIDIA stock up 15% YTD; Wall Street analysts still view as undervalued with median target $267.50",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "LS Securities raised SK Hynix price target from 1.5M won to 2.1M won on strong April DRAM contract prices",
+      "headline": "SK Hynix jumps 13% on strong April server DRAM pricing; LS Securities raises target to 2.1M KRW",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics estimated Q2 2026 operating profit at 80.9 trillion won, up 1630% YoY, driven by AI chip demand",
+      "headline": "Samsung Electronics up 6.33%; KOSPI hits record 7,822 amid semiconductor boom",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom stock rallied 4.3% on reports of potential $35-55 billion financing from Apollo and Blackstone for AI buildout",
+      "headline": "Broadcom stock gains 4.23% on semiconductor enthusiasm; Q1 revenue $19.3B beats estimates",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp achieved record Q4 2025 revenue of 2.13 trillion won with ChatGPT for Kakao reaching 8 million users",
+      "headline": "Kakao stock up 3.37%; analysts maintain Buy rating with 58% upside potential",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF assets exceeded 5 trillion won with monthly dividend of approximately 6% annualized yield",
+      "headline": "SOL Korea High Dividend ETF records 1.75 trillion KRW inflows; ranks #1 among domestic dividend ETFs",
       "impact": "bullish",
       "source": "web_search"
     }
