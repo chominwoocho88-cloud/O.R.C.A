@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-12 10:19 KST",
+  "collected_at": "2026-05-12 22:28 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,37 +12,37 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA stock up 15% YTD; Wall Street analysts still view as undervalued with median target $267.50",
+      "headline": "NVIDIA stock rose 3% on Trump China visit announcement, approaching 52-week high of $222.18 amid easing export restriction expectations",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix jumps 13% on strong April server DRAM pricing; LS Securities raises target to 2.1M KRW",
+      "headline": "SK Hynix up 2.71-3.40% as memory chip demand surge expected through 2027 amid AI expansion",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics up 6.33%; KOSPI hits record 7,822 amid semiconductor boom",
-      "impact": "bullish",
+      "headline": "Samsung Electronics led Kospi rally amid semiconductor rally, flat at 285,500 KRW with union strike threat May 21-June 7",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom stock gains 4.23% on semiconductor enthusiasm; Q1 revenue $19.3B beats estimates",
-      "impact": "bullish",
+      "headline": "Broadcom secures $35B private credit financing talks with Apollo and Blackstone, but OpenAI custom chip deal faces $18B financing snag",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao stock up 3.37%; analysts maintain Buy rating with 58% upside potential",
+      "headline": "Kakao Corp analyst rating 'Buy' with 58% upside potential to 73,160 KRW target, though technical indicators show falling trend",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF records 1.75 trillion KRW inflows; ranks #1 among domestic dividend ETFs",
+      "headline": "SOL Korea High Dividend ETF achieved 500B won AUM in 5 months, receiving 1.7T won individual investor inflows as top dividend ETF",
       "impact": "bullish",
       "source": "web_search"
     }
