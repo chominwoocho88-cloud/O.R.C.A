@@ -11,6 +11,7 @@ from .paths import JACKAL_DB_FILE, PACKAGE_DIR, STATE_DB_FILE
 
 KST = timezone(timedelta(hours=9))
 REPO_ROOT = PACKAGE_DIR.parent
+CONTRACT_SHADOW_AUDIT_TABLE = "contract_shadow_audit"
 JACKAL_TABLES = (
     "jackal_shadow_signals",
     "jackal_live_events",
@@ -19,6 +20,7 @@ JACKAL_TABLES = (
     "jackal_recommendations",
     "jackal_accuracy_projection",
     "jackal_cooldowns",
+    CONTRACT_SHADOW_AUDIT_TABLE,
 )
 
 
@@ -107,13 +109,73 @@ def _jackal_table_counts(path: Path) -> tuple[dict[str, int | None] | None, str 
     return counts, None
 
 
+def _empty_contract_shadow_audit_summary() -> dict[str, Any]:
+    return {
+        "row_count": 0,
+        "by_validation_status": {},
+        "latest_timestamp": None,
+    }
+
+
+def _contract_shadow_audit_summary(path: Path) -> tuple[dict[str, Any] | None, str | None]:
+    if not path.exists():
+        return None, None
+
+    try:
+        connection = sqlite3.connect(path)
+    except sqlite3.Error as exc:
+        _warn(f"open failed for {_display_path(path)}", exc)
+        return None, _single_line(str(exc))
+
+    try:
+        connection.execute("SELECT name FROM sqlite_master LIMIT 1").fetchall()
+        if not _table_exists(connection, CONTRACT_SHADOW_AUDIT_TABLE):
+            return _empty_contract_shadow_audit_summary(), None
+
+        row = connection.execute(
+            f"SELECT COUNT(*) FROM {CONTRACT_SHADOW_AUDIT_TABLE}"
+        ).fetchone()
+        status_rows = connection.execute(
+            f"""
+            SELECT validation_status, COUNT(*)
+              FROM {CONTRACT_SHADOW_AUDIT_TABLE}
+             GROUP BY validation_status
+             ORDER BY validation_status
+            """
+        ).fetchall()
+        latest_row = connection.execute(
+            f"SELECT MAX(timestamp) FROM {CONTRACT_SHADOW_AUDIT_TABLE}"
+        ).fetchone()
+    except sqlite3.Error as exc:
+        _warn(f"audit summary failed for {_display_path(path)}", exc)
+        return None, _single_line(str(exc))
+    finally:
+        connection.close()
+
+    return {
+        "row_count": int(row[0]) if row else 0,
+        "by_validation_status": {
+            str(status): int(count)
+            for status, count in status_rows
+            if status is not None
+        },
+        "latest_timestamp": latest_row[0] if latest_row else None,
+    }, None
+
+
 def collect_dual_db_state() -> dict[str, Any]:
     """Collect a read-only runtime snapshot for ORCA and JACKAL state DBs."""
     try:
         orca_snapshot = _base_snapshot(STATE_DB_FILE)
         jackal_snapshot = _base_snapshot(JACKAL_DB_FILE)
         table_counts, error = _jackal_table_counts(JACKAL_DB_FILE)
+        audit_summary = None
+        if table_counts is not None:
+            audit_summary, audit_error = _contract_shadow_audit_summary(JACKAL_DB_FILE)
+            if error is None and audit_error is not None:
+                error = audit_error
         jackal_snapshot["tables"] = table_counts
+        jackal_snapshot["contract_shadow_audit"] = audit_summary
         if error is not None:
             jackal_snapshot["error"] = error
 
@@ -126,6 +188,7 @@ def collect_dual_db_state() -> dict[str, Any]:
         fallback_orca = _base_snapshot(STATE_DB_FILE)
         fallback_jackal = _base_snapshot(JACKAL_DB_FILE)
         fallback_jackal["tables"] = None
+        fallback_jackal["contract_shadow_audit"] = None
         fallback_jackal["error"] = _single_line(str(exc))
         return {
             "orca_state_db": fallback_orca,

@@ -26,6 +26,7 @@ JACKAL_TABLES = (
     "jackal_recommendations",
     "jackal_accuracy_projection",
     "jackal_cooldowns",
+    "contract_shadow_audit",
 )
 
 
@@ -38,6 +39,17 @@ def _create_empty_jackal_db(path: Path) -> None:
     connection = sqlite3.connect(path)
     try:
         for table_name in JACKAL_TABLES:
+            if table_name == "contract_shadow_audit":
+                connection.execute(
+                    """
+                    CREATE TABLE contract_shadow_audit (
+                        audit_id TEXT PRIMARY KEY,
+                        timestamp TEXT,
+                        validation_status TEXT
+                    )
+                    """
+                )
+                continue
             connection.execute(f"CREATE TABLE {table_name} (id INTEGER PRIMARY KEY)")
         connection.commit()
     finally:
@@ -66,6 +78,10 @@ class TestDualDBSnapshotHelper(unittest.TestCase):
         self.assertIsNone(payload["orca_state_db"]["mtime_iso"], "Missing ORCA DB mtime should be None")
         self.assertFalse(payload["jackal_state_db"]["exists"], "Missing JACKAL DB should report exists=False")
         self.assertIsNone(payload["jackal_state_db"]["tables"], "Missing JACKAL DB tables should be None")
+        self.assertIsNone(
+            payload["jackal_state_db"]["contract_shadow_audit"],
+            "Missing JACKAL DB audit summary should be None",
+        )
         self.assertNotIn("error", payload["jackal_state_db"], "Missing JACKAL DB should not report corruption")
 
     def test_empty_jackal_db_reports_zero_counts_and_mtime(self):
@@ -101,6 +117,11 @@ class TestDualDBSnapshotHelper(unittest.TestCase):
             {table_name: 0 for table_name in JACKAL_TABLES},
             "Empty JACKAL DB should report zero rows for every tracked table",
         )
+        self.assertEqual(
+            jackal_db["contract_shadow_audit"],
+            {"row_count": 0, "by_validation_status": {}, "latest_timestamp": None},
+            "Empty JACKAL DB should report an empty contract audit summary",
+        )
 
     def test_corrupt_jackal_db_reports_error_and_no_table_counts(self):
         snapshot = _import_module("orca.dual_db_snapshot")
@@ -122,6 +143,10 @@ class TestDualDBSnapshotHelper(unittest.TestCase):
         jackal_db = payload["jackal_state_db"]
         self.assertTrue(jackal_db["exists"], "Corrupt JACKAL DB file should still report exists=True")
         self.assertIsNone(jackal_db["tables"], "Corrupt JACKAL DB should report tables=None")
+        self.assertIsNone(
+            jackal_db["contract_shadow_audit"],
+            "Corrupt JACKAL DB should report audit summary=None",
+        )
         self.assertIn("error", jackal_db, "Corrupt JACKAL DB should surface an error field")
         self.assertTrue(jackal_db["error"], "Corrupt JACKAL DB error field should not be empty")
 
