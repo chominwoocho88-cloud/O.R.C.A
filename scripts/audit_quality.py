@@ -209,6 +209,7 @@ def collect_state_metrics() -> dict[str, Any]:
             ),
             "session": get_provider_quality_summary(),
         },
+        "dual_db_state": research_report.collect_dual_db_state(),
         "jackal_operational_intake": collect_operational_intake(),
         "jackal_row_counts": jackal_counts,
         "prediction_status_counts": prediction_counts,
@@ -346,6 +347,9 @@ def render_markdown(audit: dict[str, Any]) -> str:
     operational_intake = metrics.get("jackal_operational_intake", {})
     provider_quality = metrics.get("market_provider_quality", {})
     provider_latest = provider_quality.get("latest_backtest", {})
+    contract_audit_summary = research_report._format_contract_audit_summary(
+        metrics.get("dual_db_state", {})
+    )
     requirements_drift = audit.get("checks", {}).get("requirements_drift", {})
     lines = [
         "# ORCA/JACKAL Quality Audit",
@@ -398,6 +402,7 @@ def render_markdown(audit: dict[str, Any]) -> str:
             f"- JACKAL operational intake status: `{operational_intake.get('status', 'n/a')}`",
             f"- Market provider quality: status=`{provider_latest.get('status')}`, "
             f"failure_rate=`{provider_latest.get('failure_rate')}`, stats=`{json.dumps(provider_latest.get('fetch_stats', {}), ensure_ascii=False, sort_keys=True)}`",
+            f"- {contract_audit_summary}",
             f"- JACKAL row counts: `{json.dumps(metrics.get('jackal_row_counts', {}), ensure_ascii=False, sort_keys=True)}`",
             f"- Prediction status counts: `{json.dumps(metrics.get('prediction_status_counts', {}), ensure_ascii=False, sort_keys=True)}`",
         ]
