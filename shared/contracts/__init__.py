@@ -2,6 +2,13 @@
 
 from .alpha import AlphaSignal
 from .base import ContractModel, EventEnvelope
+from .memory import MemoryContext
 from .outcomes import PredictionOutcome
 
-__all__ = ["ContractModel", "EventEnvelope", "AlphaSignal", "PredictionOutcome"]
+__all__ = [
+    "ContractModel",
+    "EventEnvelope",
+    "AlphaSignal",
+    "PredictionOutcome",
+    "MemoryContext",
+]
