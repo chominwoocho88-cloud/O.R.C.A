@@ -1,5 +1,9 @@
+import os
+import shutil
+import tempfile
 import types
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 
@@ -58,6 +62,25 @@ def _analyst() -> dict:
 
 
 class Phase8h15PromptRegimeTests(unittest.TestCase):
+    def setUp(self):
+        self.tmpdir = Path(tempfile.mkdtemp())
+        self.patches = [
+            patch("orca.state.STATE_DB_FILE", self.tmpdir / "orca_state.db"),
+            patch("orca.state.JACKAL_DB_FILE", self.tmpdir / "jackal_state.db"),
+            patch(
+                "orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
+                self.tmpdir / "contract_shadow_audit.log",
+            ),
+            patch.dict(os.environ, {"JACKAL_MEMORY_SHADOW_LOG": str(self.tmpdir / "memory_context_shadow.log")}),
+        ]
+        for item in self.patches:
+            item.start()
+
+    def tearDown(self):
+        for item in reversed(self.patches):
+            item.stop()
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
     def test_market_psychology_context_differs_between_greed_and_fear(self):
         from jackal import hunter
 

@@ -35,9 +35,11 @@ class TestOutcomeResolver(unittest.TestCase):
         self.tmpdir = Path(tempfile.mkdtemp())
         self.state_db = self.tmpdir / "orca_state.db"
         self.jackal_db = self.tmpdir / "jackal_state.db"
+        self.audit_log = self.tmpdir / "contract_shadow_audit.log"
         self.patches = [
             patch.object(state, "STATE_DB_FILE", self.state_db),
             patch.object(state, "JACKAL_DB_FILE", self.jackal_db),
+            patch("orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG", self.audit_log),
         ]
         for item in self.patches:
             item.start()

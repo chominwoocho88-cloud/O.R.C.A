@@ -230,7 +230,10 @@ def _temporary_state_db_pair(state):
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
         state_db = Path(tmpdir) / "orca_state.db"
         jackal_db = Path(tmpdir) / "jackal_state.db"
-        with patch.object(state, "STATE_DB_FILE", state_db), patch.object(state, "JACKAL_DB_FILE", jackal_db):
+        audit_log = Path(tmpdir) / "contract_shadow_audit.log"
+        with patch.object(state, "STATE_DB_FILE", state_db), patch.object(
+            state, "JACKAL_DB_FILE", jackal_db
+        ), patch("orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG", audit_log):
             state.clear_health_events()
             state.init_state_db()
             try:

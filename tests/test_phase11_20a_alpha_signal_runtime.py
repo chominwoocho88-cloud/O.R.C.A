@@ -1,7 +1,10 @@
 """Phase 11.20a AlphaSignal runtime shadow validation tests."""
 
+import shutil
 import sqlite3
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from orca import jackal_prediction_cards as cards
@@ -10,12 +13,21 @@ from shared.contracts import AlphaSignal
 
 class AlphaSignalRuntimeShadowValidationTests(unittest.TestCase):
     def setUp(self):
+        self.tmpdir = Path(tempfile.mkdtemp())
+        self.audit_log = self.tmpdir / "contract_shadow_audit.log"
+        self.audit_log_patcher = patch(
+            "orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
+            self.audit_log,
+        )
+        self.audit_log_patcher.start()
         self.conn = sqlite3.connect(":memory:")
         self.conn.row_factory = sqlite3.Row
         cards.migrate_jackal_prediction_cards(self.conn)
 
     def tearDown(self):
         self.conn.close()
+        self.audit_log_patcher.stop()
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def _payload(self, **overrides):
         payload = {

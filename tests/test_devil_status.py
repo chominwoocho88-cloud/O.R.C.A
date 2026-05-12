@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import importlib
+import os
+import shutil
 import sys
+import tempfile
 import types
 import unittest
 from pathlib import Path
@@ -215,6 +218,25 @@ class HunterDevilStatusTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.hunter = _import_target("jackal.hunter")
+
+    def setUp(self):
+        self.tmpdir = Path(tempfile.mkdtemp())
+        self.patches = [
+            patch("orca.state.STATE_DB_FILE", self.tmpdir / "orca_state.db"),
+            patch("orca.state.JACKAL_DB_FILE", self.tmpdir / "jackal_state.db"),
+            patch(
+                "orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
+                self.tmpdir / "contract_shadow_audit.log",
+            ),
+            patch.dict(os.environ, {"JACKAL_MEMORY_SHADOW_LOG": str(self.tmpdir / "memory_context_shadow.log")}),
+        ]
+        for item in self.patches:
+            item.start()
+
+    def tearDown(self):
+        for item in reversed(self.patches):
+            item.stop()
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def test_hunter_status_ok_with_objection(self):
         response = (

@@ -1,7 +1,11 @@
 """Phase 8h-1.6c tests: strict Devil blocking flag definitions."""
 
+import os
+import shutil
+import tempfile
 import types
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 
@@ -69,6 +73,25 @@ def _capture_devil_prompt() -> str:
 
 
 class Phase8h16cDeadCatDefinitionTests(unittest.TestCase):
+    def setUp(self):
+        self.tmpdir = Path(tempfile.mkdtemp())
+        self.patches = [
+            patch("orca.state.STATE_DB_FILE", self.tmpdir / "orca_state.db"),
+            patch("orca.state.JACKAL_DB_FILE", self.tmpdir / "jackal_state.db"),
+            patch(
+                "orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
+                self.tmpdir / "contract_shadow_audit.log",
+            ),
+            patch.dict(os.environ, {"JACKAL_MEMORY_SHADOW_LOG": str(self.tmpdir / "memory_context_shadow.log")}),
+        ]
+        for item in self.patches:
+            item.start()
+
+    def tearDown(self):
+        for item in reversed(self.patches):
+            item.stop()
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
     def test_prompt_includes_dead_cat_strict_definition(self):
         prompt = _capture_devil_prompt()
 
