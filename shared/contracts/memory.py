@@ -1,11 +1,10 @@
-"""MemoryContext shadow contract for Phase 11.6.
+"""MemoryContext and MemoryInjection shadow contracts.
 
-This model maps Phase 9-4 jackal_memory_context outputs into a typed
-read-only context contract.
+These models describe learned-memory context payloads and the derived
+prompt-injection block used by JACKAL memory shadow flows.
 
-MemoryInjection is intentionally excluded from this phase.
-This module defines the contract only. It must not activate runtime
-validation in ORCA or JACKAL flows.
+This module defines contracts only. It must not activate runtime
+validation or prompt injection in ORCA or JACKAL flows.
 """
 
 from __future__ import annotations
