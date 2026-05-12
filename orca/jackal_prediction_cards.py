@@ -134,6 +134,73 @@ def _outcome_label(value: Any) -> str | None:
     return "win" if bool(value) else "loss"
 
 
+def _normalize_inflow_sectors(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple)):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return []
+        if text[0] in "[{":
+            try:
+                parsed = json.loads(text)
+            except Exception:
+                return []
+            if isinstance(parsed, list):
+                return _normalize_inflow_sectors(parsed)
+            return []
+        return [text]
+    return []
+
+
+def _alpha_signal_payload_from_prediction_card_values(
+    values: dict[str, Any],
+    raw_payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Project normalized prediction-card values into an AlphaSignal payload."""
+    raw_payload = raw_payload if isinstance(raw_payload, dict) else {}
+    created_at = values.get("created_at")
+    raw_inflow_sectors = raw_payload.get("inflow_sectors")
+    inflow_source = (
+        raw_inflow_sectors
+        if isinstance(raw_inflow_sectors, list)
+        else values.get("inflow_sectors")
+    )
+
+    payload = {
+        "event_id": values.get("event_id"),
+        "source_system": "jackal",
+        "event_type": "alpha_signal",
+        "occurred_at": created_at,
+        "ticker": values.get("ticker"),
+        "score": values.get("score"),
+        "name": values.get("name"),
+        "day1_score": values.get("day1_score"),
+        "swing_score": values.get("swing_score"),
+        "devil_score": values.get("devil_score"),
+        "devil_verdict": values.get("devil_verdict"),
+        "current_price": values.get("current_price"),
+        "entry_price_low": values.get("entry_price_low"),
+        "entry_price_high": values.get("entry_price_high"),
+        "target_price": values.get("target_price"),
+        "stop_price": values.get("stop_price"),
+        "horizon_days": values.get("horizon_days"),
+        "pattern_label": values.get("pattern_label"),
+        "main_reasoning": values.get("main_reasoning"),
+        "market_regime": values.get("market_regime"),
+        "fear_greed": values.get("fear_greed"),
+        "fear_greed_label": values.get("fear_greed_label"),
+        "inflow_sectors": _normalize_inflow_sectors(inflow_source),
+        "alerted": True,
+        "build_hash": values.get("build_hash"),
+    }
+    if created_at:
+        payload["analysis_date"] = str(created_at).split("T", 1)[0]
+    return payload
+
+
 def _prediction_card_values(
     event_id: str,
     event_kind: str,
@@ -238,4 +305,3 @@ def record_jackal_prediction_card_conn(
         tuple(values[column] for column in columns),
     )
     return str(values["card_id"])
-
