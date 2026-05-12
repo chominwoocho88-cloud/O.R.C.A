@@ -16,6 +16,8 @@ from typing import Any
 
 from orca import state
 from orca import jackal_memory_shadow_store as _shadow_store
+from shared.contracts import MemoryContext
+from shared.contracts.validation import shadow_validate
 from shared.paths import JACKAL_LEGACY_DIR
 
 
@@ -30,6 +32,7 @@ MAX_STATS_BLOCK_CHARS = 1000
 MAX_INJECTION_BLOCK_CHARS = 1000
 SHADOW_LOG_FILE = JACKAL_LEGACY_DIR / "memory_context_shadow.log"
 MEMORY_CONTEXT_SHADOW_SCHEMA = _shadow_store.SCHEMA_SQL
+MEMORY_CONTEXT_VALIDATION_CONTEXT = "jackal_memory_context.build_memory_context"
 
 
 def get_memory_mode() -> str:
@@ -59,7 +62,7 @@ def build_memory_context(ticker: str, aria: dict[str, Any] | None, role: str) ->
         if global_resolved >= MIN_GLOBAL_RESOLVED:
             similar = _query_similar_resolved(aria)
             if len(similar) >= MIN_PATTERN_RESOLVED:
-                return _context_from_records(
+                context = _context_from_records(
                     similar,
                     ticker=ticker,
                     aria=aria,
@@ -68,10 +71,63 @@ def build_memory_context(ticker: str, aria: dict[str, Any] | None, role: str) ->
                     global_resolved=global_resolved,
                     match_scope="regime_fear_greed",
                 )
+                _shadow_validate_memory_context(context, ticker=ticker, role=role)
+                return context
 
-        return _build_from_candidate_lessons(ticker, aria, role, global_resolved=global_resolved)
+        context = _build_from_candidate_lessons(ticker, aria, role, global_resolved=global_resolved)
+        _shadow_validate_memory_context(context, ticker=ticker, role=role)
+        return context
     except Exception:
         return None
+
+
+def _shadow_validate_memory_context(
+    memory_context: dict[str, Any] | None,
+    *,
+    ticker: str,
+    role: str,
+) -> None:
+    """Validate MemoryContext in fail-open shadow mode."""
+    if not memory_context:
+        return
+
+    try:
+        payload = _memory_context_contract_payload(memory_context, ticker=ticker, role=role)
+        shadow_validate(
+            MemoryContext,
+            payload,
+            on_error="warn",
+            context=MEMORY_CONTEXT_VALIDATION_CONTEXT,
+        )
+    except Exception:
+        pass
+
+
+def _memory_context_contract_payload(
+    memory_context: dict[str, Any],
+    *,
+    ticker: str,
+    role: str,
+) -> dict[str, Any]:
+    occurred_at = datetime.now(timezone.utc)
+    normalized_role = _normalize_role(memory_context.get("role") or role)
+    resolved_ticker = memory_context.get("ticker") or ticker
+
+    return {
+        "event_id": f"memory_context:{resolved_ticker}:{normalized_role}:{occurred_at.isoformat()}",
+        "source_system": "orca",
+        "event_type": "memory_context",
+        "occurred_at": occurred_at,
+        "ticker": resolved_ticker,
+        "stats_block": memory_context.get("stats_block", ""),
+        "sample_size": memory_context.get("sample_size", 0),
+        "win_rate": memory_context.get("win_rate", 0.0),
+        "avg_outcome": memory_context.get("avg_outcome", 0.0),
+        "source": memory_context.get("source", "candidate_lessons"),
+        "match_scope": memory_context.get("match_scope", ""),
+        "role": normalized_role,
+        "global_resolved": memory_context.get("global_resolved"),
+    }
 
 
 def log_shadow_memory_context(
