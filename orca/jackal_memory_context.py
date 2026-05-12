@@ -16,7 +16,7 @@ from typing import Any
 
 from orca import state
 from orca import jackal_memory_shadow_store as _shadow_store
-from orca.contract_shadow_audit import file_jsonl_audit_logger
+from orca.contract_shadow_audit import file_and_db_audit_logger
 from shared.contracts import MemoryContext
 from shared.contracts.validation import shadow_validate
 from shared.paths import JACKAL_LEGACY_DIR
@@ -99,7 +99,7 @@ def _shadow_validate_memory_context(
             payload,
             on_error="warn",
             context=MEMORY_CONTEXT_VALIDATION_CONTEXT,
-            audit_logger=file_jsonl_audit_logger,
+            audit_logger=file_and_db_audit_logger,
         )
     except Exception:
         pass

@@ -138,7 +138,9 @@ class MemoryContextAuditIntegrationTests(unittest.TestCase):
             log_path = Path(tmp) / "contract_shadow_audit.log"
             with patch.object(audit, "CONTRACT_SHADOW_AUDIT_LOG", log_path), patch.object(
                 memory, "_count_resolved_predictions", return_value=0
-            ), patch.object(memory, "_build_from_candidate_lessons", return_value=context):
+            ), patch.object(memory, "_build_from_candidate_lessons", return_value=context), patch.object(
+                audit, "record_contract_shadow_audit", return_value=True
+            ):
                 result = memory.build_memory_context("NVDA", {"regime": "risk_on"}, "analyst")
 
             self.assertIs(result, context)
@@ -156,7 +158,9 @@ class MemoryContextAuditIntegrationTests(unittest.TestCase):
 
         with patch("pathlib.Path.open", side_effect=OSError("disk full")), patch.object(
             memory, "_count_resolved_predictions", return_value=0
-        ), patch.object(memory, "_build_from_candidate_lessons", return_value=context):
+        ), patch.object(memory, "_build_from_candidate_lessons", return_value=context), patch.object(
+            audit, "record_contract_shadow_audit", return_value=True
+        ):
             result = memory.build_memory_context("NVDA", {}, "analyst")
 
         self.assertIs(result, context)
