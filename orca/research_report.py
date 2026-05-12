@@ -58,6 +58,38 @@ def _fmt_value(value: Any, suffix: str = "") -> str:
     return f"{value}{suffix}"
 
 
+def _int_or_zero(value: Any) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _format_contract_audit_summary(snapshot: dict[str, Any]) -> str:
+    jackal_db = snapshot.get("jackal_state_db", {}) if isinstance(snapshot, dict) else {}
+    audit = jackal_db.get("contract_shadow_audit") if isinstance(jackal_db, dict) else None
+    if not isinstance(audit, dict):
+        return "Contract audit: n/a"
+
+    row_count = _int_or_zero(audit.get("row_count"))
+    if row_count <= 0:
+        return "Contract audit: 0 rows"
+
+    by_status = audit.get("by_validation_status", {})
+    if not isinstance(by_status, dict):
+        by_status = {}
+
+    status_parts = [
+        f"pass={_int_or_zero(by_status.get('pass'))}",
+        f"fail={_int_or_zero(by_status.get('fail'))}",
+    ]
+    for status in sorted(str(key) for key in by_status if key not in {"pass", "fail"}):
+        status_parts.append(f"{status}={_int_or_zero(by_status.get(status))}")
+
+    latest = audit.get("latest_timestamp") or "n/a"
+    return f"Contract audit: {row_count} rows ({', '.join(status_parts)}), latest={latest}"
+
+
 def _provider_quality_from_orca_summary(summary: dict[str, Any]) -> dict[str, Any]:
     dynamic = summary.get("dynamic_fetch", {}) if isinstance(summary, dict) else {}
     if not isinstance(dynamic, dict):
@@ -510,6 +542,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- JACKAL DB snapshot: `{jackal_db.get('path', 'n/a')}` "
         f"(exists={jackal_db.get('exists')}, size={jackal_db.get('size_bytes')}, mtime={jackal_db.get('mtime_iso')})",
         f"- JACKAL table rows: `{json.dumps(jackal_tables, ensure_ascii=False, sort_keys=True)}`",
+        f"- {_format_contract_audit_summary(dual_db_state)}",
         "",
         "## Snapshot",
         "",
