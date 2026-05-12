@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from .base import EventEnvelope
 
@@ -32,3 +32,21 @@ class MemoryContext(EventEnvelope):
     role: Literal["analyst", "devil"]
 
     global_resolved: int | None = Field(default=None, ge=0)
+
+
+class MemoryInjection(EventEnvelope):
+    """Prompt injection block produced from learned memory context."""
+
+    event_type: Literal["memory_injection"] = "memory_injection"
+
+    injection_block: str = Field(min_length=1, max_length=1000)
+    injection_block_chars: int = Field(ge=0, le=1000)
+    role: Literal["analyst", "devil"]
+    source: Literal["prediction_cards", "candidate_lessons"]
+    sample_size: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def _block_length_matches(self) -> "MemoryInjection":
+        if self.injection_block_chars != len(self.injection_block):
+            raise ValueError("injection_block_chars must match len(injection_block)")
+        return self
