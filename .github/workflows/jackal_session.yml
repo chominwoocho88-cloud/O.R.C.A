@@ -10,13 +10,13 @@ concurrency:
   cancel-in-progress: false
 
 on:
-  schedule:
+#   schedule:
     # Korean session
-    - cron: "35 0 * * 1-5"    # KST 09:35  full session (Hunter -> Scanner)
-    - cron: "30 4 * * 1-5"    # KST 13:30  scanner refresh
+#     - cron: "35 0 * * 1-5"    # KST 09:35  full session (Hunter -> Scanner)
+#     - cron: "30 4 * * 1-5"    # KST 13:30  scanner refresh
     # US session
-    - cron: "35 14 * * 1-5"   # KST 23:35  full session (Hunter -> Scanner)
-    - cron: "30 18 * * 1-5"   # KST 03:30  scanner refresh (next KST day)
+#     - cron: "35 14 * * 1-5"   # KST 23:35  full session (Hunter -> Scanner)
+#     - cron: "30 18 * * 1-5"   # KST 03:30  scanner refresh (next KST day)
 
   workflow_dispatch:
     inputs:

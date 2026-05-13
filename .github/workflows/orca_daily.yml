@@ -5,11 +5,11 @@ concurrency:
   cancel-in-progress: false
 
 on:
-  schedule:
-    - cron: "30 23 * * 0-4"
-    - cron: "0 14 * * 1-5"
-    - cron: "0 22 * * 6"
-    - cron: "0 21 1 * *"
+#   schedule:
+#     - cron: "30 23 * * 0-4"
+#     - cron: "0 14 * * 1-5"
+#     - cron: "0 22 * * 6"
+#     - cron: "0 21 1 * *"
   workflow_dispatch:
     inputs:
       mode:
