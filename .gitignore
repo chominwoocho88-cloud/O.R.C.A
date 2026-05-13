@@ -30,6 +30,7 @@ reports/orca_policy_promotion.json
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 
 # Local environment files
 .env
