@@ -1,4 +1,4 @@
-﻿"""orca_dashboard.py — ORCA Dashboard v4.1 (Dark Warm Fix)"""
+"""orca_dashboard.py — ORCA Dashboard v4.1 (Dark Warm Fix)"""
 import json
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -6,7 +6,7 @@ from pathlib import Path
 from .brand import JACKAL_NAME, ORCA_FULL_NAME, ORCA_NAME
 
 KST = timezone(timedelta(hours=9))
-from .paths import (
+from shared.paths import (
     SENTIMENT_FILE, ACCURACY_FILE, ROTATION_FILE,
     MEMORY_FILE, COST_FILE, DASHBOARD_FILE as OUTPUT_FILE,
     PATTERN_DB_FILE, DATA_FILE,

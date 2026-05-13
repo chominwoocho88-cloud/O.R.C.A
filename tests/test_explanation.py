@@ -57,7 +57,7 @@ def _install_stub_modules() -> None:
 
 def _import_target(module_name: str):
     _install_stub_modules()
-    if module_name == "jackal.scanner":
+    if module_name == "apps.jackal.scanner":
         sys.modules.pop("jackal.market_data", None)
     sys.modules.pop(module_name, None)
     return importlib.import_module(module_name)
@@ -340,8 +340,8 @@ class ExplanationIntegrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.explanation = importlib.import_module("jackal.explanation")
-        cls.hunter = _import_target("jackal.hunter")
-        cls.scanner = _import_target("jackal.scanner")
+        cls.hunter = _import_target("apps.jackal.hunter")
+        cls.scanner = _import_target("apps.jackal.scanner")
         cls.scanner.weights = {}
 
     def test_hunter_alert_includes_explanation_block_and_truncates_regime(self):

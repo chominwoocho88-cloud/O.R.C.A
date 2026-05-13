@@ -11,7 +11,7 @@ from ._analysis_common import _load, _now, _save, _today
 from .compat import get_orca_env
 from .data import load_market_data
 from shared.llm.client import LLMClient
-from .paths import LESSONS_FILE
+from shared.paths import LESSONS_FILE
 
 
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")

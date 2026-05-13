@@ -285,7 +285,7 @@ class TestPR4ReviewScoreWeights(unittest.TestCase):
     }
 
     def test_review_score_weights_match_committed_contract(self):
-        analysis = importlib.import_module("orca.analysis")
+        analysis = importlib.import_module("apps.orca.analysis")
         actual = analysis._REVIEW_SCORE_WEIGHTS
 
         self.assertEqual(
@@ -371,7 +371,7 @@ class TestPR5ExternalDataVisibility(unittest.TestCase):
                 "tables": {name: 0 for name in sorted(self.EXPECTED_JACKAL_TABLES)},
             },
         }
-        persist = _import_module("orca.persist")
+        persist = _import_module("apps.orca.persist")
 
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(
             persist,
@@ -426,7 +426,7 @@ class TestPhase5RoutingHelpers(unittest.TestCase):
     """Phase 5: routing helper availability invariant."""
 
     def test_routing_helpers_are_importable_and_callable(self):
-        state = _import_module("orca.state")
+        state = _import_module("apps.orca.state")
 
         self.assertTrue(
             any(callable(getattr(state, name, None)) for name in ("_connect_orca", "_connect")),

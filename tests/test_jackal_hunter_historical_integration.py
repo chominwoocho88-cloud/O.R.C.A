@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from jackal import historical_context
-from jackal import hunter
+from apps.jackal import hunter
 
 
 def _features() -> dict:

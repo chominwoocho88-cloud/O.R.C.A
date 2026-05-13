@@ -1,10 +1,10 @@
-﻿"""
+"""
 adapter.py — ORCA ↔ JACKAL 인터페이스 레이어
 """
 import json
 import logging
 
-from orca.state import load_latest_jackal_weight_snapshot
+from apps.orca.state import load_latest_jackal_weight_snapshot
 from shared.paths import (
     BASELINE_FILE,
     DATA_DIR,

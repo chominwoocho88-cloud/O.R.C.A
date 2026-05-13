@@ -6,7 +6,7 @@ import sqlite3
 from copy import deepcopy
 from typing import Any
 
-from . import state
+from apps.orca import state
 
 
 def load_latest_jackal_weight_snapshot_metadata() -> dict[str, Any] | None:

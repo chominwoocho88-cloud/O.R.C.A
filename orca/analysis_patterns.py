@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from ._analysis_common import _load, _save, _today
-from .paths import PATTERN_DB_FILE
+from shared.paths import PATTERN_DB_FILE
 
 
 def update_pattern_db(memory: list) -> None:

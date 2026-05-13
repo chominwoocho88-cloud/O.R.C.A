@@ -13,9 +13,9 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from orca import state
+from apps.orca import state
 from orca.lesson_archive_store import COLD_ARCHIVE_DB_FILE, migrate_to_cold, vacuum_sqlite_database
-from orca.paths import STATE_DB_FILE
+from shared.paths import STATE_DB_FILE
 
 
 def _mb(path: Path) -> float | None:

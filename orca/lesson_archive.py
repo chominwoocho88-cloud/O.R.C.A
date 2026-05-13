@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Any
 from uuid import uuid4
 
-from . import state
+from apps.orca import state
 
 
 QUALITY_WEIGHTS = {

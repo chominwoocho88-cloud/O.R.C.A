@@ -5,7 +5,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from . import state
+from apps.orca import state
 
 KST = timezone(timedelta(hours=9))
 

@@ -17,8 +17,8 @@ if str(ROOT) not in sys.path:
 
 
 def _import_snapshot():
-    sys.modules.pop("orca.dual_db_snapshot", None)
-    return importlib.import_module("orca.dual_db_snapshot")
+    sys.modules.pop("shared.snapshot.dual_db_snapshot", None)
+    return importlib.import_module("shared.snapshot.dual_db_snapshot")
 
 
 def _create_orca_db(path: Path) -> None:

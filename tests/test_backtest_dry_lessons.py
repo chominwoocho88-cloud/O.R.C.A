@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from orca import backtest
+from apps.orca import backtest
 
 
 class BacktestDryLessonDebugTests(unittest.TestCase):
@@ -15,7 +15,7 @@ class BacktestDryLessonDebugTests(unittest.TestCase):
             "kospi_change": "+0.40%",
         }
 
-        with patch("orca.backtest._load_lessons_context", return_value=lesson_context):
+        with patch("apps.orca.backtest._load_lessons_context", return_value=lesson_context):
             result = backtest.generate_analysis(backtest.DATES[1], market_data, dry=True)
 
         self.assertTrue(result["debug_lessons_present"])

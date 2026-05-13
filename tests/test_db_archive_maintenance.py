@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from orca import lesson_archive_store
-from orca import state
+from apps.orca import state
 
 
 class DbArchiveMaintenanceTests(unittest.TestCase):

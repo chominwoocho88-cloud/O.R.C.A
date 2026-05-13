@@ -60,7 +60,7 @@ class TestDualDBSnapshotHelper(unittest.TestCase):
     """Low-level snapshot structure and degradation semantics."""
 
     def test_missing_db_files_report_exists_false_and_none_metadata(self):
-        snapshot = _import_module("orca.dual_db_snapshot")
+        snapshot = _import_module("shared.snapshot.dual_db_snapshot")
 
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(
             snapshot,
@@ -85,7 +85,7 @@ class TestDualDBSnapshotHelper(unittest.TestCase):
         self.assertNotIn("error", payload["jackal_state_db"], "Missing JACKAL DB should not report corruption")
 
     def test_empty_jackal_db_reports_zero_counts_and_mtime(self):
-        snapshot = _import_module("orca.dual_db_snapshot")
+        snapshot = _import_module("shared.snapshot.dual_db_snapshot")
 
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(
             snapshot,
@@ -124,7 +124,7 @@ class TestDualDBSnapshotHelper(unittest.TestCase):
         )
 
     def test_corrupt_jackal_db_reports_error_and_no_table_counts(self):
-        snapshot = _import_module("orca.dual_db_snapshot")
+        snapshot = _import_module("shared.snapshot.dual_db_snapshot")
 
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(
             snapshot,
@@ -155,7 +155,7 @@ class TestDualDBSnapshotIntegration(unittest.TestCase):
     """Append-only integration into daily and research reports."""
 
     def test_save_report_appends_dual_db_state_without_removing_pr5_fields(self):
-        persist = _import_module("orca.persist")
+        persist = _import_module("apps.orca.persist")
         snapshot = {
             "orca_state_db": {
                 "path": "data/orca_state.db",
@@ -200,7 +200,7 @@ class TestDualDBSnapshotIntegration(unittest.TestCase):
         self.assertEqual(report["dual_db_state"], snapshot, "save_report must append the collected dual_db_state")
 
     def test_research_report_keeps_legacy_state_db_and_adds_dual_db_state(self):
-        research_report = _import_module("orca.research_report")
+        research_report = _import_module("apps.orca.research.research_report")
         snapshot = {
             "orca_state_db": {
                 "path": "data/orca_state.db",

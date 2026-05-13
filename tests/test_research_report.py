@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from orca import research_report
+from apps.orca.research import research_report
 
 
 class ResearchReportSummaryTests(unittest.TestCase):

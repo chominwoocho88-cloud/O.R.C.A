@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from .paths import atomic_write_json
+from shared.paths import atomic_write_json
 
 
 KST = timezone(timedelta(hours=9))

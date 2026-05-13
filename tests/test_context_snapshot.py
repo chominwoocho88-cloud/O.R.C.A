@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from orca import context_snapshot
-from orca import state
+from apps.orca import state
 
 
 def _series(values: list[float]) -> list[tuple[str, float]]:

@@ -16,7 +16,7 @@ if str(ROOT) not in sys.path:
 
 
 TARGET_FILES = [
-    ROOT / "orca" / "analysis.py",
+    ROOT / "apps" / "orca" / "analysis.py",
     ROOT / "orca" / "data.py",
     ROOT / "orca" / "notify.py",
 ]
@@ -88,10 +88,10 @@ class ImportStructureTests(unittest.TestCase):
 
     def test_analysis_data_notify_import_at_module_level(self):
         _install_stub_modules()
-        for module_name in ("orca.analysis", "orca.data", "orca.notify"):
+        for module_name in ("apps.orca.analysis", "orca.data", "orca.notify"):
             sys.modules.pop(module_name, None)
 
-        analysis = importlib.import_module("orca.analysis")
+        analysis = importlib.import_module("apps.orca.analysis")
         data = importlib.import_module("orca.data")
         notify = importlib.import_module("orca.notify")
 

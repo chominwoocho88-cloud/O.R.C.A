@@ -33,12 +33,12 @@ from shared.paths import (
     JACKAL_LEGACY_DIR,
     JACKAL_WATCHLIST_FILE,
 )
-from orca.paths import atomic_write_json
-from orca.state import (
+from shared.paths import atomic_write_json
+from apps.orca.state import (
     record_jackal_weight_snapshot,
     sync_jackal_live_events,
 )
-from orca import jackal_memory_context as _memory_context
+from apps.jackal import memory_context as _memory_context
 from jackal.explanation import build_hunter_explanation_lines
 from jackal.final_diagnostics import build_final_diag, format_final_diag
 from jackal.families import canonical_family_key, family_label
@@ -64,7 +64,7 @@ HUNT_LOG_FILE  = JACKAL_HUNT_LOG_FILE
 HUNT_COOL_FILE = JACKAL_HUNT_COOLDOWN_FILE
 JACKAL_WATCHLIST = JACKAL_WATCHLIST_FILE
 
-from jackal.adapter import (
+from apps.jackal.pipeline.adapter import (
     load_orca_context as _load_orca_context,
     orca_baseline_exists as _orca_baseline_exists,
 )

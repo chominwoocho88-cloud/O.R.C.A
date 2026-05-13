@@ -1,4 +1,4 @@
-"""modules.orca.pipeline: ORCA 4-agent 파이프라인.
+"""apps.orca.pipeline: ORCA 4-agent 파이프라인.
 
 agents 정의 + Hunter/Analyst/Devil/Reporter 호출 순서.
 """

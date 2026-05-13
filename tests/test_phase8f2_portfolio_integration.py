@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from jackal import hunter, scanner
+from apps.jackal import hunter, scanner
 from orca import analysis_market
 
 

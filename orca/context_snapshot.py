@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-from .paths import BASELINE_FILE
+from shared.paths import BASELINE_FILE
 from . import context_market_data
-from . import state
+from apps.orca import state
 
 
 VALID_SOURCE_EVENT_TYPES = {
@@ -122,7 +122,7 @@ def _normalize_regime_value(regime: str | None) -> str | None:
     if not regime:
         return None
     try:
-        from .backtest import _normalize_regime
+        from apps.orca.backtest import _normalize_regime
 
         normalized = _normalize_regime(str(regime))
     except Exception:

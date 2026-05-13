@@ -65,10 +65,10 @@ class Phase8h15PromptRegimeTests(unittest.TestCase):
     def setUp(self):
         self.tmpdir = Path(tempfile.mkdtemp())
         self.patches = [
-            patch("orca.state.STATE_DB_FILE", self.tmpdir / "orca_state.db"),
-            patch("orca.state.JACKAL_DB_FILE", self.tmpdir / "jackal_state.db"),
+            patch("apps.orca.state.STATE_DB_FILE", self.tmpdir / "orca_state.db"),
+            patch("apps.orca.state.JACKAL_DB_FILE", self.tmpdir / "jackal_state.db"),
             patch(
-                "orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
+                "shared.audit.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
                 self.tmpdir / "contract_shadow_audit.log",
             ),
             patch.dict(os.environ, {"JACKAL_MEMORY_SHADOW_LOG": str(self.tmpdir / "memory_context_shadow.log")}),
@@ -82,7 +82,7 @@ class Phase8h15PromptRegimeTests(unittest.TestCase):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def test_market_psychology_context_differs_between_greed_and_fear(self):
-        from jackal import hunter
+        from apps.jackal import hunter
 
         greed = hunter._format_market_psychology_context(
             _aria("위험선호", "80", "Extreme Greed"),
@@ -101,7 +101,7 @@ class Phase8h15PromptRegimeTests(unittest.TestCase):
         self.assertNotEqual(greed, fear)
 
     def test_analyst_prompt_includes_orca_regime_and_fear_greed(self):
-        from jackal import hunter
+        from apps.jackal import hunter
 
         fake = _CapturingLLMClient(
             '{"analyst_score": 71, "day1_score": 68, "swing_score": 73}'
@@ -123,7 +123,7 @@ class Phase8h15PromptRegimeTests(unittest.TestCase):
         self.assertIn("Analyst 지침", prompt)
 
     def test_devil_prompt_includes_regime_fear_greed_and_preserves_role(self):
-        from jackal import hunter
+        from apps.jackal import hunter
 
         fake = _CapturingLLMClient(
             '{"devil_score": 64, "verdict": "부분동의", '

@@ -60,7 +60,7 @@ def _aria() -> dict:
 
 
 def _capture_devil_prompt() -> str:
-    from jackal import hunter
+    from apps.jackal import hunter
 
     fake = _CapturingLLMClient(
         '{"devil_score": 38, "verdict": "부분동의", "main_risk": "", '
@@ -76,10 +76,10 @@ class Phase8h16cDeadCatDefinitionTests(unittest.TestCase):
     def setUp(self):
         self.tmpdir = Path(tempfile.mkdtemp())
         self.patches = [
-            patch("orca.state.STATE_DB_FILE", self.tmpdir / "orca_state.db"),
-            patch("orca.state.JACKAL_DB_FILE", self.tmpdir / "jackal_state.db"),
+            patch("apps.orca.state.STATE_DB_FILE", self.tmpdir / "orca_state.db"),
+            patch("apps.orca.state.JACKAL_DB_FILE", self.tmpdir / "jackal_state.db"),
             patch(
-                "orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
+                "shared.audit.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
                 self.tmpdir / "contract_shadow_audit.log",
             ),
             patch.dict(os.environ, {"JACKAL_MEMORY_SHADOW_LOG": str(self.tmpdir / "memory_context_shadow.log")}),

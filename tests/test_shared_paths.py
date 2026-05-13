@@ -62,7 +62,7 @@ class SharedPathsTests(unittest.TestCase):
     def test_consistency_with_orca_paths(self):
         """shared.paths가 orca.paths와 동일한 경로를 가리켜야 함"""
         import shared.paths as sp
-        import orca.paths as op
+        import shared.paths as op
 
         self.assertEqual(sp.PACKAGE_DIR, op.PACKAGE_DIR)
         self.assertEqual(sp.DATA_DIR, op.DATA_DIR)

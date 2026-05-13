@@ -8,7 +8,7 @@ from typing import Any, Callable
 
 import pandas as pd
 
-from orca import state
+from apps.orca import state
 from shared.market_data.fetch import fetch_daily_history
 
 

@@ -1,6 +1,6 @@
 import unittest
 
-from orca import research_gate
+from apps.orca import research_gate
 
 
 class ResearchGateSampleQualityTests(unittest.TestCase):

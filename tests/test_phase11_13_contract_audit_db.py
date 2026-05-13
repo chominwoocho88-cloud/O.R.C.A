@@ -9,12 +9,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from orca import contract_shadow_audit as audit
+from shared.audit import contract_shadow_audit as audit
 
 
 class ContractShadowAuditDBTests(unittest.TestCase):
     def setUp(self):
-        self.state = importlib.import_module("orca.state")
+        self.state = importlib.import_module("apps.orca.state")
         self.tmpdir = Path(tempfile.mkdtemp())
         self.state_db = self.tmpdir / "orca_state.db"
         self.jackal_db = self.tmpdir / "jackal_state.db"

@@ -6,7 +6,7 @@ import os
 import sys
 from typing import Any
 
-from orca import state
+from apps.orca import state
 from orca.lesson_retrieval import retrieve_similar_lessons_for_features
 
 

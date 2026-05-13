@@ -36,15 +36,15 @@ class DevilMaxTokensTests(unittest.TestCase):
         )
 
     def test_scanner_imports_unchanged(self):
-        """jackal.scanner still imports normally."""
-        import jackal.scanner
+        """apps.jackal.scanner imports normally."""
+        import apps.jackal.scanner
 
-        self.assertTrue(hasattr(jackal.scanner, "__name__"))
+        self.assertTrue(hasattr(apps.jackal.scanner, "__name__"))
 
     def test_b35b_build_info_intact(self):
         """Phase B-3.5b build footer behavior remains intact."""
         os.environ["GITHUB_SHA"] = "abc1234567890"
-        from jackal.scanner import _append_build_info
+        from apps.jackal.scanner import _append_build_info
 
         result = _append_build_info("test")
         self.assertIn("build:", result)

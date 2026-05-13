@@ -1,4 +1,4 @@
-"""Backward-compatible alias for modules.jackal.pipeline.shield.
+"""Backward-compatible alias for apps.jackal.pipeline.shield.
 
 Phase D-2 마이그레이션 결과:
 - 실제 코드: modules/jackal/pipeline/shield.py

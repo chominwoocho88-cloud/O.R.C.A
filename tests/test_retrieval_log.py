@@ -11,7 +11,7 @@ from unittest.mock import patch
 from jackal import backtest as jackal_backtest
 from jackal import historical_context as jackal_historical_context
 from orca import lesson_retrieval
-from orca import state
+from apps.orca import state
 
 
 class RetrievalLogTests(unittest.TestCase):

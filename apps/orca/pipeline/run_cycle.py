@@ -22,9 +22,10 @@ from datetime import datetime, timedelta, timezone
 
 from apps.orca.pipeline import pipeline
 
-from orca import persist, postprocess, present
-from orca import state as state_module
-from orca.analysis import (
+from orca import postprocess, present
+from apps.orca import persist
+from apps.orca import state as state_module
+from apps.orca.analysis import (
     build_baseline_context,
     build_lessons_prompt,
     extract_dawn_lessons,
@@ -34,9 +35,9 @@ from orca.analysis import (
 from orca.brand import ORCA_NAME
 from orca.compat import get_orca_flag
 from orca.data import fetch_all_market_data, get_monthly_cost_summary, update_cost
-from orca.paths import REPORTS_DIR
-from orca.state import finish_run as state_finish_run
-from orca.state import start_run as state_start_run
+from shared.paths import REPORTS_DIR
+from apps.orca.state import finish_run as state_finish_run
+from apps.orca.state import start_run as state_start_run
 
 KST = timezone(timedelta(hours=9))
 
@@ -379,7 +380,7 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
             print("\n=== Verifying yesterday predictions ===")
             accuracy = run_verification()
             try:
-                from orca.analysis import update_weights_from_accuracy
+                from apps.orca.analysis import update_weights_from_accuracy
 
                 changes = update_weights_from_accuracy(accuracy)
                 if changes:

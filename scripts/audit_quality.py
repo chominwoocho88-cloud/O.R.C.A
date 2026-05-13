@@ -16,7 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from orca import research_report, state  # noqa: E402
+from apps.orca.research import research_report  # noqa: E402
+from apps.orca import state  # noqa: E402  # noqa: E402
 from orca.jackal_accuracy_projection import describe_jackal_accuracy_projection_state  # noqa: E402
 from orca.jackal_quality import (  # noqa: E402
     describe_jackal_recommendation_accuracy_state,
@@ -233,7 +234,7 @@ def run_research_artifacts(*, dry_run: bool) -> list[dict[str, Any]]:
                 [
                     sys.executable,
                     "-m",
-                    "orca.research_report",
+                    "apps.orca.research.research_report",
                     "--output-md",
                     str(report_md),
                     "--output-json",
@@ -245,7 +246,7 @@ def run_research_artifacts(*, dry_run: bool) -> list[dict[str, Any]]:
                 [
                     sys.executable,
                     "-m",
-                    "orca.research_gate",
+                    "apps.orca.research_gate",
                     "--report-json",
                     str(report_json),
                     "--output-md",
@@ -259,7 +260,7 @@ def run_research_artifacts(*, dry_run: bool) -> list[dict[str, Any]]:
                 [
                     sys.executable,
                     "-m",
-                    "orca.policy_promote",
+                    "apps.orca.policy_promote",
                     "--gate-json",
                     str(gate_json),
                     "--output-md",

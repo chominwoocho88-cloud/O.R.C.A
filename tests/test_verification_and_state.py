@@ -53,13 +53,13 @@ def _install_stub_modules() -> None:
 
 def _import_analysis():
     _install_stub_modules()
-    sys.modules.pop("orca.analysis", None)
-    return importlib.import_module("orca.analysis")
+    sys.modules.pop("apps.orca.analysis", None)
+    return importlib.import_module("apps.orca.analysis")
 
 
 def _import_state():
-    sys.modules.pop("orca.state", None)
-    return importlib.import_module("orca.state")
+    sys.modules.pop("apps.orca.state", None)
+    return importlib.import_module("apps.orca.state")
 
 
 class VerificationBehaviorTests(unittest.TestCase):

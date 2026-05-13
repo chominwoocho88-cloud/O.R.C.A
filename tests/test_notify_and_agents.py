@@ -123,7 +123,7 @@ class NotifyAccuracyDisplayTests(unittest.TestCase):
 
 class VerificationReportTests(unittest.TestCase):
     def test_verification_report_uses_na_when_accuracy_is_empty(self):
-        analysis = _import_module("orca.analysis")
+        analysis = _import_module("apps.orca.analysis")
         captured = []
 
         fake_today = datetime(2026, 4, 21, 9, 0, tzinfo=analysis.KST)
@@ -145,7 +145,7 @@ class VerificationReportTests(unittest.TestCase):
 
 class ReporterFallbackTests(unittest.TestCase):
     def test_reporter_keeps_valid_devil_thesis_killers_when_reporter_omits_them(self):
-        agents = _import_module("orca.agents")
+        agents = _import_module("apps.orca.pipeline.agents")
 
         devil_tk = {
             "event": "나스닥",

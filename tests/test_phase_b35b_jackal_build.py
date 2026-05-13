@@ -11,30 +11,30 @@ class JackalBuildInfoTests(unittest.TestCase):
         self.assertTrue(callable(get_build_info))
 
     def test_jackal_hunter_build_in_message(self):
-        """jackal.hunter 텔레그램 메시지에 build 포함"""
-        from jackal import hunter
+        """apps.jackal.hunter 텔레그램 메시지에 build 포함"""
+        from apps.jackal import hunter
 
         response = MagicMock()
         response.json.return_value = {"ok": True}
         with patch.dict(os.environ, {"GITHUB_SHA": "test12345abcdef"}):
             with patch.object(hunter, "TELEGRAM_TOKEN", "token"):
                 with patch.object(hunter, "TELEGRAM_CHAT_ID", "chat"):
-                    with patch("jackal.hunter.httpx.post", return_value=response) as mock_post:
+                    with patch("apps.jackal.hunter.httpx.post", return_value=response) as mock_post:
                         self.assertTrue(hunter._send_telegram("hunter alert"))
 
         payload = mock_post.call_args.kwargs["json"]
         self.assertIn("<code>build: test123</code>", payload["text"])
 
     def test_jackal_scanner_build_in_message(self):
-        """jackal.scanner 텔레그램 메시지에 build 포함"""
-        from jackal import scanner
+        """apps.jackal.scanner 텔레그램 메시지에 build 포함"""
+        from apps.jackal import scanner
 
         response = MagicMock()
         response.json.return_value = {"ok": True}
         with patch.dict(os.environ, {"GITHUB_SHA": "test12345abcdef"}):
             with patch.object(scanner, "TELEGRAM_TOKEN", "token"):
                 with patch.object(scanner, "TELEGRAM_CHAT_ID", "chat"):
-                    with patch("jackal.scanner.httpx.post", return_value=response) as mock_post:
+                    with patch("apps.jackal.scanner.httpx.post", return_value=response) as mock_post:
                         self.assertTrue(scanner._send_telegram("scanner alert"))
 
         payload = mock_post.call_args.kwargs["json"]
@@ -42,7 +42,7 @@ class JackalBuildInfoTests(unittest.TestCase):
 
     def test_jackal_tracker_build_in_message(self):
         """jackal.tracker 텔레그램 메시지에 build 포함"""
-        from jackal import tracker
+        from apps.jackal import tracker
 
         stats = {
             "confirmed": 1,

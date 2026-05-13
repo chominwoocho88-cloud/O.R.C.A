@@ -47,7 +47,7 @@ class SharedPathsAtomicTests(unittest.TestCase):
     def test_shared_atomic_equals_orca_atomic(self):
         """shared.paths의 atomic 함수가 orca.paths의 함수와 동작 일치"""
         from shared.paths import atomic_write_json as shared_func
-        from orca.paths import atomic_write_json as orca_func
+        from shared.paths import atomic_write_json as orca_func
 
         data = {"test": True, "value": 123}
 

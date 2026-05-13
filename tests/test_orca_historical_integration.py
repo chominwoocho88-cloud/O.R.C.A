@@ -12,7 +12,7 @@ from rich.panel import Panel
 from orca import dashboard
 from orca import historical_context
 from orca import notify
-from orca import pipeline
+from apps.orca.pipeline import pipeline
 from orca import present
 
 

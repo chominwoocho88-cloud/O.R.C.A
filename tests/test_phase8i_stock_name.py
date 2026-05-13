@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from jackal import hunter
+from apps.jackal import hunter
 from shared.market_data import stock_name
 
 

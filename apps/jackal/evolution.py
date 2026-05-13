@@ -1,4 +1,4 @@
-﻿"""
+"""
 JACKAL evolution module.
 Jackal Evolution — 강화된 자체 학습
 
@@ -23,8 +23,8 @@ from shared.paths import (
     JACKAL_LEGACY_DIR,
     JACKAL_WEIGHTS_FILE,
 )
-from orca.paths import atomic_write_json
-from orca.state import (
+from shared.paths import atomic_write_json
+from apps.orca.state import (
     list_jackal_recommendations,
     list_jackal_live_events,
     list_pending_jackal_shadow_signals,

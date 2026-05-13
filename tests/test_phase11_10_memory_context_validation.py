@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from shared.contracts import MemoryContext
-from orca import jackal_memory_context as memory
+from apps.jackal import memory_context as memory
 
 
 class Phase11_10MemoryContextValidationTests(unittest.TestCase):

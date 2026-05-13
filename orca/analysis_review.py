@@ -11,7 +11,7 @@ from .learning_policy import (
     MIN_SAMPLES,
     TRUSTED_EFFECTIVE_WIN_RATE,
 )
-from .state import (
+from apps.orca.state import (
     list_candidates,
     record_candidate_review,
     summarize_candidate_probabilities,

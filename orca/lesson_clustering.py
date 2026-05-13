@@ -16,7 +16,7 @@ from uuid import uuid4
 
 import numpy as np
 
-from . import state
+from apps.orca import state
 
 
 NUMERICAL_FEATURES = (

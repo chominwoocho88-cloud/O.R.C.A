@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from jackal import probability
-from orca import state
+from apps.orca import state
 
 
 class ProbabilityStateIntegrationTests(unittest.TestCase):

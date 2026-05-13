@@ -9,7 +9,7 @@ import re
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-from .analysis import get_active_lessons, load_lessons
+from apps.orca.analysis import get_active_lessons, load_lessons
 from .brand import ORCA_FULL_NAME, ORCA_NAME
 from .compat import get_orca_env
 from shared.build_info import get_build_info
@@ -22,7 +22,7 @@ sys.stderr.reconfigure(encoding="utf-8")
 
 KST = timezone(timedelta(hours=9))
 
-from .paths import (
+from shared.paths import (
     MEMORY_FILE, ACCURACY_FILE, SENTIMENT_FILE,
     ROTATION_FILE, BREAKING_FILE, LESSONS_FILE, atomic_write_json,
 )

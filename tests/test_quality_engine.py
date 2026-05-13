@@ -369,10 +369,10 @@ def _install_scanner_stubs() -> None:
 
 def _load_modules():
     _install_scanner_stubs()
-    for name in ("jackal.scanner", "jackal.quality_engine"):
+    for name in ("apps.jackal.scanner", "jackal.quality_engine"):
         sys.modules.pop(name, None)
     quality_engine = importlib.import_module("jackal.quality_engine")
-    scanner = importlib.import_module("jackal.scanner")
+    scanner = importlib.import_module("apps.jackal.scanner")
     return scanner, quality_engine
 
 

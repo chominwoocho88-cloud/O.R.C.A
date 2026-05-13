@@ -93,7 +93,7 @@ def _patch_module_attributes(module_name: str, stub_module: types.ModuleType, at
 
 
 def _load_state_module():
-    return importlib.import_module("orca.state")
+    return importlib.import_module("apps.orca.state")
 
 
 def _seed_in_memory_db(kind: str):

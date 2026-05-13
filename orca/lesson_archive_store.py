@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from .paths import DATA_DIR
+from shared.paths import DATA_DIR
 
 
 KST = timezone(timedelta(hours=9))
@@ -301,7 +301,7 @@ def migrate_to_cold(
     """
     owns_conn = conn is None
     if conn is None:
-        from .paths import STATE_DB_FILE
+        from shared.paths import STATE_DB_FILE
 
         conn = sqlite3.connect(STATE_DB_FILE)
         conn.row_factory = sqlite3.Row
@@ -336,7 +336,7 @@ def migrate_to_cold(
         if owns_conn:
             conn.close()
     if vacuum:
-        from .paths import STATE_DB_FILE
+        from shared.paths import STATE_DB_FILE
 
         vacuum_sqlite_database(STATE_DB_FILE)
         vacuum_sqlite_database(cold_path)
@@ -357,7 +357,7 @@ def restore_from_cold(
     """Copy cold archive rows back into the hot DB for rollback."""
     owns_conn = conn is None
     if conn is None:
-        from .paths import STATE_DB_FILE
+        from shared.paths import STATE_DB_FILE
 
         conn = sqlite3.connect(STATE_DB_FILE)
         conn.row_factory = sqlite3.Row

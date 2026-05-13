@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from orca import state  # noqa: E402
+from apps.orca import state  # noqa: E402  # noqa: E402
 from orca.jackal_quality import (  # noqa: E402
     backfill_shadow_batches_from_resolved_signals,
     describe_jackal_shadow_state,

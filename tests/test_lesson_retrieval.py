@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from orca import lesson_clustering
 from orca import lesson_retrieval
-from orca import state
+from apps.orca import state
 
 
 class LessonRetrievalTests(unittest.TestCase):

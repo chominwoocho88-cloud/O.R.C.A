@@ -55,7 +55,7 @@ class Phase4Sprint22bTelegramTests(unittest.TestCase):
         self.assertEqual(_build_phase4_drift_badge({}), "")
 
     def test_run_cycle_returns_drift_info(self):
-        from modules.orca.pipeline.run_cycle import _run_phase4_drift_check
+        from apps.orca.pipeline.run_cycle import _run_phase4_drift_check
 
         data = json.loads(Path("data/accuracy.json").read_text(encoding="utf-8"))
         with patch("builtins.print"):

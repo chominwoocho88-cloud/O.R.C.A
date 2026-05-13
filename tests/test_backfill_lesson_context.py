@@ -11,7 +11,7 @@ import pandas as pd
 
 from orca import context_snapshot
 from orca import context_market_data
-from orca import state
+from apps.orca import state
 
 
 def _points(values: list[float], *, start_day: int = 1) -> list[tuple[str, float]]:

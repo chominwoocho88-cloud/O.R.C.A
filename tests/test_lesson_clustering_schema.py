@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from orca import state
+from apps.orca import state
 
 
 class LessonClusteringSchemaTests(unittest.TestCase):
@@ -386,7 +386,7 @@ class LessonClusteringSchemaTests(unittest.TestCase):
         self.assertEqual(archives, 0)
 
     def test_import_clear_clustering_data(self):
-        from orca.state import clear_clustering_data
+        from apps.orca.state import clear_clustering_data
 
         self.assertTrue(callable(clear_clustering_data))
 

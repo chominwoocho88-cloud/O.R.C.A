@@ -1,4 +1,4 @@
-﻿"""
+"""
 Reset ORCA and JACKAL runtime state.
 
 Examples:
@@ -13,7 +13,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from .brand import JACKAL_NAME, ORCA_NAME
-from .paths import LESSONS_FILE, WEIGHTS_FILE, atomic_write_json
+from shared.paths import LESSONS_FILE, WEIGHTS_FILE, atomic_write_json
 
 ROOT      = Path(__file__).resolve().parent.parent
 DATA_DIR  = ROOT / "data"

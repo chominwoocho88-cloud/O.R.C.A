@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Any
 
 from . import lesson_clustering
-from . import state
+from apps.orca import state
 
 
 RELEVANCE_WEIGHTS = {

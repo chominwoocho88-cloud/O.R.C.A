@@ -7,8 +7,8 @@ from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable
 
-from orca import contract_shadow_audit as _contract_shadow_audit
-from orca.contract_shadow_audit import file_and_db_audit_logger
+from shared.audit import contract_shadow_audit as _contract_shadow_audit
+from shared.audit.contract_shadow_audit import file_and_db_audit_logger
 from shared.contracts import AlphaSignal
 from shared.contracts.validation import shadow_validate
 

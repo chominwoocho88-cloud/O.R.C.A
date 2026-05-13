@@ -10,7 +10,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from jackal import evolution, hunter, scanner
+from apps.jackal import hunter, scanner
+from apps.jackal import evolution
 from shared.llm.client import LLMClient
 
 

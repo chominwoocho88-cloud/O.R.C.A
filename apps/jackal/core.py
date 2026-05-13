@@ -1,4 +1,4 @@
-﻿"""
+"""
 JACKAL core module.
 Jackal Core — 새 스윙 기회 탐색 엔진
 
@@ -18,7 +18,7 @@ import argparse
 from datetime import datetime
 
 from shared.paths import JACKAL_LEGACY_DIR, JACKAL_WEIGHTS_FILE
-from orca.state import load_latest_jackal_weight_snapshot
+from apps.orca.state import load_latest_jackal_weight_snapshot
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 if hasattr(sys.stdout, "reconfigure"):

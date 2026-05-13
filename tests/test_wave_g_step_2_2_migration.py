@@ -13,7 +13,8 @@ if getattr(sys.modules.get("pandas"), "__file__", None) is None:
     sys.modules.pop("pandas", None)
 pd = importlib.import_module("pandas")
 
-from jackal import backtest, market_data, tracker
+from jackal import backtest, market_data
+from apps.jackal import tracker
 
 
 def _history(rows: int = 80, *, start: str = "2026-04-01") -> pd.DataFrame:
@@ -46,7 +47,7 @@ class WaveGStep22MigrationTests(unittest.TestCase):
 
     def test_jackal_backtest_uses_market_fetch(self):
         frame = _history(30)
-        with patch("orca.market_fetch.fetch_daily_history", return_value=frame) as mocked:
+        with patch("shared.market_data.fetch.fetch_daily_history", return_value=frame) as mocked:
             result = backtest._fetch_yf_cached("AAPL")
 
         self.assertIsNotNone(result)
@@ -55,7 +56,7 @@ class WaveGStep22MigrationTests(unittest.TestCase):
         self.assertEqual(mocked.call_args.args[0], "AAPL")
 
     def test_jackal_backtest_lru_cache_preserved(self):
-        with patch("orca.market_fetch.fetch_daily_history", return_value=_history(30)) as mocked:
+        with patch("shared.market_data.fetch.fetch_daily_history", return_value=_history(30)) as mocked:
             first = backtest._fetch_yf_cached("MSFT")
             second = backtest._fetch_yf_cached("MSFT")
 
@@ -63,12 +64,12 @@ class WaveGStep22MigrationTests(unittest.TestCase):
         mocked.assert_called_once()
 
     def test_jackal_backtest_returns_none_on_fetch_failure(self):
-        with patch("orca.market_fetch.fetch_daily_history", return_value=None):
+        with patch("shared.market_data.fetch.fetch_daily_history", return_value=None):
             self.assertIsNone(backtest._fetch_yf_cached("BAD"))
 
     def test_jackal_tracker_uses_market_fetch(self):
         frame = _history(5, start="2026-04-01")
-        with patch("orca.market_fetch.fetch_daily_history", return_value=frame) as mocked:
+        with patch("shared.market_data.fetch.fetch_daily_history", return_value=frame) as mocked:
             closes = tracker._fetch_post_hunt_closes("AAPL", "2026-04-01T09:00:00+09:00", max_days=3)
 
         self.assertIsNotNone(closes)
@@ -78,7 +79,7 @@ class WaveGStep22MigrationTests(unittest.TestCase):
 
     def test_jackal_tracker_extracts_close_after_hunt_ts(self):
         frame = _history(4, start="2026-04-10")
-        with patch("orca.market_fetch.fetch_daily_history", return_value=frame):
+        with patch("shared.market_data.fetch.fetch_daily_history", return_value=frame):
             closes = tracker._fetch_post_hunt_closes("NVDA", "2026-04-10T21:00:00+09:00", max_days=2)
 
         self.assertIsNotNone(closes)
@@ -86,11 +87,11 @@ class WaveGStep22MigrationTests(unittest.TestCase):
         self.assertEqual(float(closes.iloc[0]), 101.0)
 
     def test_jackal_tracker_returns_none_on_failure(self):
-        with patch("orca.market_fetch.fetch_daily_history", return_value=None):
+        with patch("shared.market_data.fetch.fetch_daily_history", return_value=None):
             self.assertIsNone(tracker._fetch_post_hunt_closes("BAD", "2026-04-01T09:00:00+09:00"))
 
     def test_jackal_market_data_uses_market_fetch(self):
-        with patch("orca.market_fetch.fetch_daily_history", return_value=_history(80)) as mocked:
+        with patch("shared.market_data.fetch.fetch_daily_history", return_value=_history(80)) as mocked:
             technicals = market_data.fetch_technicals("AAPL")
 
         self.assertIsNotNone(technicals)
@@ -99,7 +100,7 @@ class WaveGStep22MigrationTests(unittest.TestCase):
         self.assertFalse(technicals["from_cache"])
 
     def test_jackal_market_data_computes_technicals_from_wrapper(self):
-        with patch("orca.market_fetch.fetch_daily_history", return_value=_history(280)):
+        with patch("shared.market_data.fetch.fetch_daily_history", return_value=_history(280)):
             technicals = market_data.fetch_technicals("AAPL")
 
         self.assertIsNotNone(technicals)
@@ -111,7 +112,7 @@ class WaveGStep22MigrationTests(unittest.TestCase):
         cached = {"price": 123.0, "rsi": 45.0, "from_cache": False}
         market_data._store_cached_technicals("AAPL", cached)
 
-        with patch("orca.market_fetch.fetch_daily_history", return_value=None):
+        with patch("shared.market_data.fetch.fetch_daily_history", return_value=None):
             technicals = market_data.fetch_technicals("AAPL")
 
         self.assertIsNotNone(technicals)
@@ -128,7 +129,7 @@ class WaveGStep22MigrationTests(unittest.TestCase):
         }
         market_data.TECHNICAL_CACHE_FILE.write_text(json.dumps(payload), encoding="utf-8")
 
-        with patch("orca.market_fetch.fetch_daily_history", side_effect=RuntimeError("provider down")):
+        with patch("shared.market_data.fetch.fetch_daily_history", side_effect=RuntimeError("provider down")):
             technicals = market_data.fetch_technicals("AAPL")
 
         self.assertIsNotNone(technicals)

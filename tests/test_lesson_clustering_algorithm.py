@@ -9,7 +9,7 @@ from unittest.mock import patch
 import numpy as np
 
 from orca import lesson_clustering
-from orca import state
+from apps.orca import state
 
 
 class LessonClusteringAlgorithmTests(unittest.TestCase):

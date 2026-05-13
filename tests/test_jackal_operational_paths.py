@@ -4,8 +4,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from jackal import scanner
-from orca import jackal_quality, research_gate, research_report, state
+from apps.jackal import scanner
+from orca import jackal_quality
+from apps.orca import research_gate, state
+from apps.orca.research import research_report
 from scripts import audit_quality, backfill_jackal_shadow
 
 
@@ -102,7 +104,7 @@ class JackalOperationalPathTests(unittest.TestCase):
             }
         }
 
-        with patch("orca.market_fetch.fetch_latest_close", return_value=(100.0, 0.0, "fixture")), \
+        with patch("shared.market_data.fetch.fetch_latest_close", return_value=(100.0, 0.0, "fixture")), \
             patch.object(scanner, "_send_telegram", return_value=None):
             scanner._send_orca_extra_message(extra, aria)
 

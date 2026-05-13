@@ -14,9 +14,9 @@ from pathlib import Path
 from statistics import mean
 from typing import Any
 
-from orca import state
+from apps.orca import state
 from orca import jackal_memory_shadow_store as _shadow_store
-from orca.contract_shadow_audit import file_and_db_audit_logger
+from shared.audit.contract_shadow_audit import file_and_db_audit_logger
 from shared.contracts import MemoryContext
 from shared.contracts.validation import shadow_validate
 from shared.paths import JACKAL_LEGACY_DIR

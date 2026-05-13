@@ -47,17 +47,17 @@ FILE_SIZE_BUDGET = {
 
 
 FORBIDDEN_IMPORT_PREFIXES = {
-    "orca/analysis_market.py": ("orca.notify", "orca.analysis"),
-    "orca/analysis_review.py": ("orca.notify", "orca.analysis"),
-    "orca/analysis_lessons.py": ("orca.notify", "orca.analysis"),
-    "orca/analysis_patterns.py": ("orca.notify", "orca.analysis"),
-    "orca/analysis_verification.py": ("orca.notify", "orca.analysis"),
-    "jackal/quality_engine.py": ("jackal.scanner",),
+    "orca/analysis_market.py": ("orca.notify", "apps.orca.analysis"),
+    "orca/analysis_review.py": ("orca.notify", "apps.orca.analysis"),
+    "orca/analysis_lessons.py": ("orca.notify", "apps.orca.analysis"),
+    "orca/analysis_patterns.py": ("orca.notify", "apps.orca.analysis"),
+    "orca/analysis_verification.py": ("orca.notify", "apps.orca.analysis"),
+    "jackal/quality_engine.py": ("apps.jackal.scanner",),
 }
 
 
 ALLOWED_LOCAL_IMPORTS = {
-    "orca/_analysis_common.py": {"orca.paths"},
+    "orca/_analysis_common.py": set(),
 }
 
 

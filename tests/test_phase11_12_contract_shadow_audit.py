@@ -8,8 +8,8 @@ from unittest.mock import MagicMock, patch
 
 from shared.contracts import AlphaSignal, EventEnvelope
 from shared.contracts.validation import _hash_payload, shadow_validate
-from orca import contract_shadow_audit as audit
-from orca import jackal_memory_context as memory
+from shared.audit import contract_shadow_audit as audit
+from apps.jackal import memory_context as memory
 
 
 class FileJsonlAuditLoggerTests(unittest.TestCase):

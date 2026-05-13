@@ -22,9 +22,9 @@ def main(argv: list[str] | None = None) -> int:
         print("DRY RUN monthly report runner OK")
         return 0
 
-    from orca.analysis import extract_monthly_lessons
+    from apps.orca.analysis import extract_monthly_lessons
     from orca.notify import send_monthly_report
-    from orca.paths import ACCURACY_FILE, MEMORY_FILE
+    from shared.paths import ACCURACY_FILE, MEMORY_FILE
 
     send_monthly_report()
     memory = json.loads(MEMORY_FILE.read_text(encoding="utf-8")) if MEMORY_FILE.exists() else []

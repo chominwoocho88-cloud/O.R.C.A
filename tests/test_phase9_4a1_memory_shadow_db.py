@@ -6,8 +6,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from orca import jackal_memory_context as memory
-from orca import state
+from apps.jackal import memory_context as memory
+from apps.orca import state
 
 
 class TestMemoryShadowDB(unittest.TestCase):

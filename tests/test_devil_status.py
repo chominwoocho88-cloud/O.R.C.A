@@ -82,7 +82,7 @@ def _install_stub_modules() -> None:
 
 def _import_target(module_name: str):
     _install_stub_modules()
-    if module_name == "jackal.scanner":
+    if module_name == "apps.jackal.scanner":
         sys.modules.pop("jackal.market_data", None)
     sys.modules.pop(module_name, None)
     return importlib.import_module(module_name)
@@ -217,15 +217,15 @@ def _scanner_final() -> dict:
 class HunterDevilStatusTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.hunter = _import_target("jackal.hunter")
+        cls.hunter = _import_target("apps.jackal.hunter")
 
     def setUp(self):
         self.tmpdir = Path(tempfile.mkdtemp())
         self.patches = [
-            patch("orca.state.STATE_DB_FILE", self.tmpdir / "orca_state.db"),
-            patch("orca.state.JACKAL_DB_FILE", self.tmpdir / "jackal_state.db"),
+            patch("apps.orca.state.STATE_DB_FILE", self.tmpdir / "orca_state.db"),
+            patch("apps.orca.state.JACKAL_DB_FILE", self.tmpdir / "jackal_state.db"),
             patch(
-                "orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
+                "shared.audit.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
                 self.tmpdir / "contract_shadow_audit.log",
             ),
             patch.dict(os.environ, {"JACKAL_MEMORY_SHADOW_LOG": str(self.tmpdir / "memory_context_shadow.log")}),
@@ -340,7 +340,7 @@ class HunterDevilStatusTests(unittest.TestCase):
 class ScannerDevilStatusTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.scanner = _import_target("jackal.scanner")
+        cls.scanner = _import_target("apps.jackal.scanner")
         cls.scanner.weights = {}
 
     def test_scanner_status_ok_with_objection(self):

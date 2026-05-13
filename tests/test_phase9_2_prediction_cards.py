@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from orca import state
+from apps.orca import state
 
 
 class TestJackalPredictionCards(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestJackalPredictionCards(unittest.TestCase):
         self.patches = [
             patch.object(state, "STATE_DB_FILE", self.state_db),
             patch.object(state, "JACKAL_DB_FILE", self.jackal_db),
-            patch("orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG", self.audit_log),
+            patch("shared.audit.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG", self.audit_log),
         ]
         for item in self.patches:
             item.start()

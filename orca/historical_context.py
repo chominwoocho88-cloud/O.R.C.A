@@ -11,7 +11,7 @@ import os
 import sys
 from typing import Any
 
-from . import state
+from apps.orca import state
 from .lesson_retrieval import retrieve_similar_lessons_for_features
 
 

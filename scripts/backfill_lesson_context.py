@@ -16,7 +16,7 @@ if str(ROOT) not in sys.path:
 
 
 def _create_backup() -> Path:
-    from orca.paths import STATE_DB_FILE
+    from shared.paths import STATE_DB_FILE
 
     backup_path = STATE_DB_FILE.with_name(
         f"{STATE_DB_FILE.name}.backup-pre-backfill-{int(time.time())}"
@@ -26,7 +26,7 @@ def _create_backup() -> Path:
 
 
 def _print_verification_counts() -> None:
-    from orca.paths import STATE_DB_FILE
+    from shared.paths import STATE_DB_FILE
 
     conn = sqlite3.connect(STATE_DB_FILE)
     try:

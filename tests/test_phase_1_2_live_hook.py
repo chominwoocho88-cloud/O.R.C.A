@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from orca import context_snapshot
-from orca import state
+from apps.orca import state
 
 
 class Phase12LiveHookTests(unittest.TestCase):

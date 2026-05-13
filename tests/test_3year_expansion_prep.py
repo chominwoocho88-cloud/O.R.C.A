@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 from jackal import backtest
 from jackal import backtest_materialization as materialization
-from orca import state
+from apps.orca import state
 
 
 ROOT = Path(__file__).resolve().parents[1]

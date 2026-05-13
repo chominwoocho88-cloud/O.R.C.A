@@ -1,6 +1,6 @@
 import unittest
 
-from jackal.hunter import _final
+from apps.jackal.hunter import _final
 
 
 class Phase8h16aDiagLoggingTests(unittest.TestCase):

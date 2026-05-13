@@ -4,7 +4,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from orca import jackal_quality, state
+from orca import jackal_quality
+from apps.orca import state
 
 
 class JackalQualityDiagnosticsTests(unittest.TestCase):

@@ -7,25 +7,25 @@ class Phase51OrcaMaxTokensTests(unittest.TestCase):
 
     def test_hunter_max_tokens_increased(self):
         """orca.hunter call budget is at least 4000."""
-        from modules.orca.pipeline.agents import _TOK
+        from apps.orca.pipeline.agents import _TOK
 
         self.assertGreaterEqual(_TOK["HUNTER"], 4000)
 
     def test_analyst_max_tokens_increased(self):
         """orca.analyst call budget is at least 2500."""
-        from modules.orca.pipeline.agents import _TOK
+        from apps.orca.pipeline.agents import _TOK
 
         self.assertGreaterEqual(_TOK["ANALYST"], 2500)
 
     def test_devil_max_tokens_increased(self):
         """orca.devil call budget is at least 2500."""
-        from modules.orca.pipeline.agents import _TOK
+        from apps.orca.pipeline.agents import _TOK
 
         self.assertGreaterEqual(_TOK["DEVIL"], 2500)
 
     def test_reporter_max_tokens_increased(self):
         """orca.reporter MORNING call budget is at least 4500."""
-        from modules.orca.pipeline.agents import _TOK
+        from apps.orca.pipeline.agents import _TOK
 
         self.assertGreaterEqual(_TOK["REPORTER_FULL"], 4500)
 

@@ -103,27 +103,27 @@ def _import_module(module_name: str):
 
 def _import_run_cycle():
     _reset_modules(
-        "orca.run_cycle",
-        "orca.persist",
+        "apps.orca.pipeline.run_cycle",
+        "apps.orca.persist",
         "orca.present",
         "orca.notify",
-        "orca.pipeline",
+        "apps.orca.pipeline.pipeline",
         "orca.postprocess",
         "orca.data",
-        "orca.analysis",
-        "orca.agents",
+        "apps.orca.analysis",
+        "apps.orca.pipeline.agents",
     )
-    return _import_module("orca.run_cycle")
+    return _import_module("apps.orca.pipeline.run_cycle")
 
 
 def _import_persist():
-    _reset_modules("orca.persist", "orca.present", "orca.notify")
-    return _import_module("orca.persist")
+    _reset_modules("apps.orca.persist", "orca.present", "orca.notify")
+    return _import_module("apps.orca.persist")
 
 
 def _import_state():
-    _reset_modules("orca.state")
-    return importlib.import_module("orca.state")
+    _reset_modules("apps.orca.state")
+    return importlib.import_module("apps.orca.state")
 
 
 def _exercise_market_data(
@@ -233,7 +233,7 @@ def _temporary_state_db_pair(state):
         audit_log = Path(tmpdir) / "contract_shadow_audit.log"
         with patch.object(state, "STATE_DB_FILE", state_db), patch.object(
             state, "JACKAL_DB_FILE", jackal_db
-        ), patch("orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG", audit_log):
+        ), patch("shared.audit.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG", audit_log):
             state.clear_health_events()
             state.init_state_db()
             try:

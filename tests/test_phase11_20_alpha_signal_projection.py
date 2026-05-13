@@ -4,7 +4,7 @@ import unittest
 
 from pydantic import ValidationError
 
-from orca import jackal_prediction_cards as cards
+from apps.jackal import prediction_cards as cards
 from shared.contracts import AlphaSignal
 
 

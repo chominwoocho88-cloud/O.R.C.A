@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 class Phase8h1FearGreedAriaTests(unittest.TestCase):
     def test_scanner_context_loads_fear_greed_from_baseline_snapshot(self):
-        from jackal import scanner
+        from apps.jackal import scanner
 
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
@@ -39,7 +39,7 @@ class Phase8h1FearGreedAriaTests(unittest.TestCase):
         self.assertEqual(ctx["fear_greed_label"], "Extreme Fear")
 
     def test_scanner_context_falls_back_to_sentiment_fear_greed(self):
-        from jackal import scanner
+        from apps.jackal import scanner
 
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
@@ -63,7 +63,7 @@ class Phase8h1FearGreedAriaTests(unittest.TestCase):
         self.assertEqual(ctx["fear_greed"], 37.0)
 
     def test_adapter_context_loads_fear_greed_from_baseline_snapshot(self):
-        from modules.jackal.pipeline import adapter
+        from apps.jackal.pipeline import adapter
 
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
@@ -94,7 +94,7 @@ class Phase8h1FearGreedAriaTests(unittest.TestCase):
         self.assertEqual(ctx["fear_greed_label"], "Greed")
 
     def test_adapter_context_falls_back_to_sentiment_fear_greed(self):
-        from modules.jackal.pipeline import adapter
+        from apps.jackal.pipeline import adapter
 
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)

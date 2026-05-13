@@ -35,8 +35,8 @@ from shared.paths import (
     ROTATION_FILE,
     SENTIMENT_FILE,
 )
-from orca.paths import DATA_FILE, atomic_write_json
-from orca.state import (
+from shared.paths import DATA_FILE, atomic_write_json
+from apps.orca.state import (
     list_jackal_recommendations,
     list_candidates,
     load_jackal_cooldown_state,

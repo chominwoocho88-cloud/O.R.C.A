@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 from orca import lesson_archive
 from orca import lesson_retrieval
-from orca import state
+from apps.orca import state
 
 
 class LessonArchiveTests(unittest.TestCase):

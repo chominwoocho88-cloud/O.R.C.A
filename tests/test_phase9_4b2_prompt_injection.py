@@ -7,9 +7,9 @@ from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
 
-from jackal import hunter
-from orca import jackal_memory_context as memory
-from orca import state
+from apps.jackal import hunter
+from apps.jackal import memory_context as memory
+from apps.orca import state
 
 
 class _CapturingLLMClient:

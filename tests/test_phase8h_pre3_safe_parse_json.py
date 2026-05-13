@@ -1,6 +1,6 @@
 import unittest
 
-from jackal.hunter import _safe_parse_json
+from apps.jackal.hunter import _safe_parse_json
 
 
 class Phase8hPre3SafeParseJsonTests(unittest.TestCase):

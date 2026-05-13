@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from orca import jackal_prediction_cards as cards
+from apps.jackal import prediction_cards as cards
 from shared.contracts import AlphaSignal
 
 
@@ -16,7 +16,7 @@ class AlphaSignalRuntimeShadowValidationTests(unittest.TestCase):
         self.tmpdir = Path(tempfile.mkdtemp())
         self.audit_log = self.tmpdir / "contract_shadow_audit.log"
         self.audit_log_patcher = patch(
-            "orca.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
+            "shared.audit.contract_shadow_audit.CONTRACT_SHADOW_AUDIT_LOG",
             self.audit_log,
         )
         self.audit_log_patcher.start()

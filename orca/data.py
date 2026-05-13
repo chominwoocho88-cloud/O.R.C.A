@@ -1,4 +1,4 @@
-﻿import os, sys, json, re, time, httpx
+import os, sys, json, re, time, httpx
 import importlib
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -8,7 +8,7 @@ sys.stderr.reconfigure(encoding="utf-8")
 KST=timezone(timedelta(hours=9))
 from shared.market_data.fetch import fetch_latest_close, fetch_put_call_ratio_summary
 from .notify_transport import send_message
-from .paths import COST_FILE, DATA_FILE
+from shared.paths import COST_FILE, DATA_FILE
 _CORE={"sp500","nasdaq","vix","kospi"}
 KisClient = None
 

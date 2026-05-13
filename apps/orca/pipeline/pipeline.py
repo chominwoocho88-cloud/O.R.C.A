@@ -6,7 +6,7 @@ Stage: Step 2-2 (body copy)
 
 Hunter -> Analyst -> Devil -> Reporter pipeline composition.
 """
-# Allowed imports: modules.orca.pipeline.agents
+# Allowed imports: apps.orca.pipeline.agents
 # Forbidden imports: orca.analysis, orca.state, orca.persist, orca.present, orca.notify, orca.dashboard
 
 from __future__ import annotations

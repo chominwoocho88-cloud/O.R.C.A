@@ -24,13 +24,13 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from . import state as state_module
-from .analysis import review_recent_candidates, run_portfolio, run_rotation, run_sentiment, save_baseline
+from apps.orca import state as state_module
+from apps.orca.analysis import review_recent_candidates, run_portfolio, run_rotation, run_sentiment, save_baseline
 from .brand import JACKAL_NAME
 from .learning_policy import MIN_SAMPLES
-from .paths import DATA_DIR, atomic_write_json
+from shared.paths import DATA_DIR, atomic_write_json
 from .present import console
-from .state import summarize_candidate_probabilities
+from apps.orca.state import summarize_candidate_probabilities
 
 KST = timezone(timedelta(hours=9))
 
@@ -175,7 +175,7 @@ def run_secondary_analyses(report: dict, market_data: dict) -> None:
 
 
 def update_pattern_database(memory: list, health_tracker: Any) -> None:
-    from .analysis import update_pattern_db
+    from apps.orca.analysis import update_pattern_db
     from .present import console
 
     try:
@@ -197,7 +197,7 @@ def collect_jackal_news(hunter_data: dict) -> None:
     ORCA Hunter의 웹서치 결과에서 JACKAL 추천 종목 관련 헤드라인 추출.
     비용: Claude Haiku 1회 (약 $0.002)
     """
-    from .paths import DATA_DIR
+    from shared.paths import DATA_DIR
     watchlist_file = DATA_DIR / "jackal_watchlist.json"
     news_file      = DATA_DIR / "jackal_news.json"
 
@@ -236,7 +236,7 @@ def collect_jackal_news(hunter_data: dict) -> None:
     # Hunter 결과가 부족하면 Haiku로 보완 검색
     if len(relevant) < 3:
         try:
-            from .agents import call_api, MODEL_HUNTER
+            from apps.orca.pipeline.agents import call_api, MODEL_HUNTER
             ticker_str = ", ".join([
                 f"{t}({details.get(t, {}).get('name', t)})" for t in tickers
             ])

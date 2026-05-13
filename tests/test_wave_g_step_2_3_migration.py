@@ -11,8 +11,8 @@ if getattr(sys.modules.get("pandas"), "__file__", None) is None:
     sys.modules.pop("pandas", None)
 pd = importlib.import_module("pandas")
 
-from jackal import hunter
-from orca import backtest as orca_backtest
+from apps.jackal import hunter
+from apps.orca import backtest as orca_backtest
 from orca import context_market_data
 
 
@@ -82,7 +82,7 @@ class WaveGStep23MigrationTests(unittest.TestCase):
             }
             return _history(values[ticker])
 
-        with patch("orca.market_fetch.fetch_daily_history", side_effect=fake_fetch) as mocked:
+        with patch("shared.market_data.fetch.fetch_daily_history", side_effect=fake_fetch) as mocked:
             macro = hunter._fetch_macro_gate({"regime": ""})
 
         self.assertEqual([call.args[0] for call in mocked.call_args_list], ["^VIX", "^TNX", "^IRX", "HYG"])
@@ -91,7 +91,7 @@ class WaveGStep23MigrationTests(unittest.TestCase):
         self.assertLess(macro["hy_chg5"], 0)
 
     def test_hunter_macro_gate_failsafe_on_failure(self):
-        with patch("orca.market_fetch.fetch_daily_history", side_effect=RuntimeError("provider down")):
+        with patch("shared.market_data.fetch.fetch_daily_history", side_effect=RuntimeError("provider down")):
             macro = hunter._fetch_macro_gate({"regime": ""})
 
         self.assertEqual(macro["vix"], 20.0)
@@ -109,7 +109,7 @@ class WaveGStep23MigrationTests(unittest.TestCase):
                 return _history([100.0, 99.5, 99.0, 98.0, 97.0, 96.0])
             return _history([5.0, 5.0, 5.0])
 
-        with patch("orca.market_fetch.fetch_daily_history", side_effect=fake_fetch):
+        with patch("shared.market_data.fetch.fetch_daily_history", side_effect=fake_fetch):
             macro = hunter._fetch_macro_gate({"regime": ""})
 
         self.assertEqual(macro["vix"], 30.0)
@@ -118,7 +118,7 @@ class WaveGStep23MigrationTests(unittest.TestCase):
 
     def test_hunter_etf_returns_uses_market_fetch_batch(self):
         data = {etf: _history([100, 101, 102, 103, 104, 105]) for etf in set(hunter.SECTOR_ETF.values())}
-        with patch("orca.market_fetch.fetch_daily_history_batch", return_value=data) as mocked:
+        with patch("shared.market_data.fetch.fetch_daily_history_batch", return_value=data) as mocked:
             returns = hunter._fetch_etf_returns()
 
         self.assertEqual(set(mocked.call_args.args[0]), set(hunter.SECTOR_ETF.values()))
@@ -129,14 +129,14 @@ class WaveGStep23MigrationTests(unittest.TestCase):
         etfs = set(hunter.SECTOR_ETF.values())
         one = next(iter(etfs))
         data = {one: _history([100, 101, 102, 103, 104, 110])}
-        with patch("orca.market_fetch.fetch_daily_history_batch", return_value=data):
+        with patch("shared.market_data.fetch.fetch_daily_history_batch", return_value=data):
             returns = hunter._fetch_etf_returns()
 
         self.assertEqual(returns, {one: 10.0})
 
     def test_hunter_batch_technicals_uses_market_fetch_batch(self):
         data = {"AAPL": _history([100.0 + idx for idx in range(80)])}
-        with patch("orca.market_fetch.fetch_daily_history_batch", return_value=data) as mocked:
+        with patch("shared.market_data.fetch.fetch_daily_history_batch", return_value=data) as mocked:
             result = hunter._batch_technicals(["AAPL", "BAD"])
 
         self.assertEqual(mocked.call_args.args[0], ["AAPL", "BAD"])
@@ -144,7 +144,7 @@ class WaveGStep23MigrationTests(unittest.TestCase):
         self.assertIsNone(result["BAD"])
 
     def test_hunter_batch_technicals_partial_failure(self):
-        with patch("orca.market_fetch.fetch_daily_history_batch", return_value={}):
+        with patch("shared.market_data.fetch.fetch_daily_history_batch", return_value={}):
             result = hunter._batch_technicals(["AAPL", "MSFT"])
 
         self.assertEqual(result, {"AAPL": None, "MSFT": None})
@@ -154,7 +154,7 @@ class WaveGStep23MigrationTests(unittest.TestCase):
             ticker: _history([100.0, 101.0, 102.0], start="2026-04-20")
             for ticker in ("^GSPC", "^IXIC", "^VIX", "^KS11", "USDKRW=X", "000660.KS", "005930.KS", "NVDA")
         }
-        with patch("orca.market_fetch.fetch_daily_history_batch", return_value=data) as mocked:
+        with patch("shared.market_data.fetch.fetch_daily_history_batch", return_value=data) as mocked:
             summary = orca_backtest._fetch_dynamic_hist(months=1)
 
         self.assertEqual(set(mocked.call_args.args[0]), set(data))
@@ -162,7 +162,7 @@ class WaveGStep23MigrationTests(unittest.TestCase):
         self.assertGreaterEqual(summary["added_days"], 1)
 
     def test_orca_backtest_dynamic_hist_3year_range(self):
-        with patch("orca.market_fetch.fetch_daily_history_batch", return_value={}) as mocked:
+        with patch("shared.market_data.fetch.fetch_daily_history_batch", return_value={}) as mocked:
             orca_backtest._fetch_dynamic_hist(months=36)
 
         start = date.fromisoformat(mocked.call_args.args[1])
@@ -175,17 +175,17 @@ class WaveGStep23MigrationTests(unittest.TestCase):
             "^IXIC": _history([200.0, 201.0, 202.0], start="2026-04-20"),
             "^VIX": _history([20.0, 19.0, 18.0], start="2026-04-20"),
         }
-        with patch("orca.market_fetch.fetch_daily_history_batch", return_value=data):
+        with patch("shared.market_data.fetch.fetch_daily_history_batch", return_value=data):
             summary = orca_backtest._fetch_dynamic_hist(months=1)
 
         self.assertEqual(summary["ticker_observations"].get("USDKRW=X"), 0)
         self.assertGreaterEqual(summary["added_days"], 1)
 
     def test_orca_backtest_dynamic_hist_records_provider_diagnostics_on_empty(self):
-        with patch("orca.market_fetch.fetch_daily_history_batch", return_value={}), patch(
-            "orca.market_fetch.get_fetch_stats",
+        with patch("shared.market_data.fetch.fetch_daily_history_batch", return_value={}), patch(
+            "shared.market_data.fetch.get_fetch_stats",
             return_value={"fdr_success": 0, "alpha_vantage_success": 0, "failed": 8, "total": 8},
-        ), patch("orca.market_fetch._last_fetch_source", return_value="failed"), patch.dict(
+        ), patch("shared.market_data.fetch._last_fetch_source", return_value="failed"), patch.dict(
             os.environ,
             {"USE_FDR_MAIN": "1", "ALPHA_VANTAGE_API_KEY": "key"},
         ):

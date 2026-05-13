@@ -1,4 +1,4 @@
-﻿"""
+"""
 JACKAL tracker module.
 Jackal Outcome Tracker — 타점 결과 추적 + 가중치 실시간 학습
 
@@ -47,8 +47,8 @@ from shared.paths import (
     JACKAL_LEGACY_DIR,
     JACKAL_WEIGHTS_FILE,
 )
-from orca.paths import atomic_write_json
-from orca.state import (
+from shared.paths import atomic_write_json
+from apps.orca.state import (
     list_jackal_live_events,
     load_latest_jackal_weight_snapshot,
     record_jackal_weight_snapshot,

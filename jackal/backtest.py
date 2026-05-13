@@ -41,7 +41,7 @@ from shared.paths import (
     MEMORY_FILE as SHARED_MEMORY_FILE,
     REPO_ROOT,
 )
-from orca.state import (
+from apps.orca.state import (
     finish_backtest_session,
     get_latest_backtest_session,
     load_backtest_state,
@@ -95,7 +95,7 @@ JACKAL_HISTORY_DAYS = _env_int("JACKAL_HISTORY_DAYS", 750)
 YF_HISTORY_PERIOD = f"{JACKAL_HISTORY_DAYS}d"
 
 # ── 실운용 상수 import (Universe 정의) ────────────────────────────
-from .hunter import SECTOR_POOLS, get_portfolio_exclusions
+from apps.jackal.hunter import SECTOR_POOLS, get_portfolio_exclusions
 
 
 # ══════════════════════════════════════════════════════════════════

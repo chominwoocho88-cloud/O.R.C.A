@@ -114,7 +114,7 @@ def record_contract_shadow_audit(audit_event: dict[str, Any]) -> bool:
     Fail-open: DB write failure must not break runtime flow.
     """
     try:
-        from orca import state
+        from apps.orca import state
 
         state.init_state_db()
         with state._connect_jackal() as conn:

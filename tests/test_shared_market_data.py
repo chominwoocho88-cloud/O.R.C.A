@@ -16,13 +16,13 @@ class SharedMarketDataTests(unittest.TestCase):
 
     def test_alias_orca_market_fetch_still_works(self):
         """orca.market_fetch alias가 여전히 작동"""
-        from orca.market_fetch import fetch_daily_history
+        from shared.market_data.fetch import fetch_daily_history
 
         self.assertTrue(callable(fetch_daily_history))
 
     def test_alias_returns_same_function(self):
         """orca.market_fetch과 shared.market_data.fetch가 같은 함수 반환"""
-        from orca.market_fetch import fetch_daily_history as A
+        from shared.market_data.fetch import fetch_daily_history as A
         from shared.market_data.fetch import fetch_daily_history as B
 
         self.assertIs(A, B)

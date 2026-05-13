@@ -17,7 +17,7 @@ if str(ROOT) not in sys.path:
 
 
 def _create_backup() -> Path:
-    from orca import state
+    from apps.orca import state
 
     db_path = state.STATE_DB_FILE
     if not db_path.exists():
@@ -47,7 +47,7 @@ def _source_filter_sql(source_event_type: str | None, alias: str = "") -> tuple[
 
 
 def _print_preflight(conn: sqlite3.Connection, source_event_type: str | None) -> dict[str, Any]:
-    from orca import state
+    from apps.orca import state
 
     source_filter, source_params = _source_filter_sql(source_event_type)
     snapshots = conn.execute(
@@ -380,7 +380,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.dry_run:
         print("MODE: DRY RUN (no DB changes)")
 
-    from orca import lesson_clustering, state
+    from orca import lesson_clustering
+    from apps.orca import state
 
     state.init_state_db()
     conn = state._connect_orca()

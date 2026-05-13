@@ -8,9 +8,9 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from orca import contract_shadow_audit as audit
-from orca import jackal_memory_context as memory
-from orca import state
+from shared.audit import contract_shadow_audit as audit
+from apps.jackal import memory_context as memory
+from apps.orca import state
 
 
 class Phase11_14MemoryContextAuditDBTests(unittest.TestCase):

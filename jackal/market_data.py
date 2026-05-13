@@ -1,4 +1,4 @@
-﻿"""
+"""
 JACKAL market data helpers.
 
 This module keeps the JACKAL data contract small and explicit:
@@ -18,7 +18,7 @@ from pathlib import Path
 
 import httpx
 
-from orca.paths import SENTIMENT_FILE, atomic_write_json
+from shared.paths import SENTIMENT_FILE, atomic_write_json
 
 log = logging.getLogger("jackal_market_data")
 

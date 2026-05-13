@@ -6,7 +6,7 @@ import importlib
 
 from ._analysis_common import _load, _now, _save, _today
 from .data import load_market_data
-from .paths import (
+from shared.paths import (
     BASELINE_FILE,
     ROTATION_FILE,
     SENTIMENT_FILE,

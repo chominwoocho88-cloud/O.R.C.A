@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from orca import state
+from apps.orca import state
 from scripts import build_lesson_clusters
 
 

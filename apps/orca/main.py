@@ -14,7 +14,7 @@ from apps.orca.persist import load_memory
 from orca.brand import ORCA_FULL_NAME, ORCA_NAME
 from orca.compat import get_orca_env
 from orca.present import print_history, print_start_banner
-from orca.run_cycle import run_orca_cycle
+from apps.orca.pipeline.run_cycle import run_orca_cycle
 
 MODE = get_orca_env("ORCA_MODE", "MORNING")
 LLM_REQUIRED_MODES = {"MORNING", "EVENING", "DAWN", "AFTERNOON", "WEEKLY", "MONTHLY"}

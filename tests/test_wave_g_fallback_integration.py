@@ -11,7 +11,8 @@ if getattr(sys.modules.get("pandas"), "__file__", None) is None:
     sys.modules.pop("pandas", None)
 import pandas as pd
 
-from orca import context_market_data, market_fetch
+from orca import context_market_data
+from shared.market_data import fetch as market_fetch
 
 
 ROOT = Path(__file__).resolve().parents[1]

@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from orca import backtest
+from apps.orca import backtest
 
 
 class _FakeTextDelta:
@@ -157,8 +157,8 @@ class GenerateAnalysisModeTests(unittest.TestCase):
         market_data = _sample_market_data()
         fake_module = _anthropic_module('{"analysis_date":')
         with patch.dict(sys.modules, {"anthropic": fake_module}), \
-             patch("orca.backtest._load_lessons_context", return_value=""), \
-             patch("orca.backtest._build_trend_context", return_value=""):
+             patch("apps.orca.backtest._load_lessons_context", return_value=""), \
+             patch("apps.orca.backtest._build_trend_context", return_value=""):
             result = backtest.generate_analysis(backtest.DATES[1], market_data, strict_json=False)
 
         self.assertTrue(result["_parse_failed"])
@@ -168,8 +168,8 @@ class GenerateAnalysisModeTests(unittest.TestCase):
         market_data = _sample_market_data()
         fake_module = _anthropic_module('{"analysis_date":')
         with patch.dict(sys.modules, {"anthropic": fake_module}), \
-             patch("orca.backtest._load_lessons_context", return_value=""), \
-             patch("orca.backtest._build_trend_context", return_value=""):
+             patch("apps.orca.backtest._load_lessons_context", return_value=""), \
+             patch("apps.orca.backtest._build_trend_context", return_value=""):
             with self.assertRaises(ValueError) as ctx:
                 backtest.generate_analysis(backtest.DATES[1], market_data, strict_json=True)
 
@@ -207,7 +207,7 @@ class RunPhaseDatesGracefulTests(unittest.TestCase):
              patch.object(backtest, "HIST_DATA", hist), \
              patch.object(backtest, "MAX_PARSE_FAILURES", 0.50), \
              patch.object(backtest, "STRICT_JSON", False), \
-             patch("orca.backtest.generate_analysis", side_effect=analyses), \
+             patch("apps.orca.backtest.generate_analysis", side_effect=analyses), \
              self._common_patches():
             acc, judged, correct, results, parse_failures = backtest._run_phase_dates(
                 dates, "Final", dry=False, save_accuracy=False
@@ -237,7 +237,7 @@ class RunPhaseDatesGracefulTests(unittest.TestCase):
              patch.object(backtest, "HIST_DATA", hist), \
              patch.object(backtest, "MAX_PARSE_FAILURES", 0.25), \
              patch.object(backtest, "STRICT_JSON", False), \
-             patch("orca.backtest.generate_analysis", side_effect=analyses), \
+             patch("apps.orca.backtest.generate_analysis", side_effect=analyses), \
              self._common_patches():
             with self.assertRaises(ValueError) as ctx:
                 backtest._run_phase_dates(dates, "Final", dry=False, save_accuracy=False)

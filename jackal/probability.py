@@ -5,7 +5,7 @@ from copy import deepcopy
 from typing import Any
 
 from orca.learning_policy import MIN_SAMPLES, suggest_probability_adjustment
-from orca.state import summarize_candidate_probabilities
+from apps.orca.state import summarize_candidate_probabilities
 
 
 BACKTEST_PROBABILITY_WINDOW_DAYS = 400

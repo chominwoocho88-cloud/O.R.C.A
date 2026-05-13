@@ -14,8 +14,8 @@ if str(ROOT) not in sys.path:
 
 
 def _import_report():
-    sys.modules.pop("orca.research_report", None)
-    return importlib.import_module("orca.research_report")
+    sys.modules.pop("apps.orca.research.research_report", None)
+    return importlib.import_module("apps.orca.research.research_report")
 
 
 def _snapshot(audit):
