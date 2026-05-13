@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-12 22:28 KST",
+  "collected_at": "2026-05-13 10:26 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,38 +12,38 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA stock rose 3% on Trump China visit announcement, approaching 52-week high of $222.18 amid easing export restriction expectations",
+      "headline": "Wells Fargo Hikes NVIDIA Price Target to $315 Ahead of Earnings; NVIDIA stock rose +3% touching new 52-week high",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix up 2.71-3.40% as memory chip demand surge expected through 2027 amid AI expansion",
+      "headline": "SK Hynix forecasts stronger Q2 profits as DRAM ASPs rise ~40% QoQ; HSBC raised 2Q and 2026 operating profit forecasts",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics led Kospi rally amid semiconductor rally, flat at 285,500 KRW with union strike threat May 21-June 7",
-      "impact": "neutral",
+      "headline": "Samsung Electronics shares fell as union threatened walkout in pay negotiations; labor dispute threatens semiconductor supply",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom secures $35B private credit financing talks with Apollo and Blackstone, but OpenAI custom chip deal faces $18B financing snag",
-      "impact": "neutral",
+      "headline": "Broadcom price target raised to $500 from $475 at Citi; Citi analyst maintains Buy rating amid strong AI accelerator growth",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp analyst rating 'Buy' with 58% upside potential to 73,160 KRW target, though technical indicators show falling trend",
+      "headline": "Kakao delivered strong Q1 2026 results with consolidated revenue up 11% YoY and operating profit surging 66% YoY",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF achieved 500B won AUM in 5 months, receiving 1.7T won individual investor inflows as top dividend ETF",
-      "impact": "bullish",
+      "headline": "SOL Shipbuilding TOP3 Plus ETF showing technical strong sell signal on moving averages; sector facing headwinds",
+      "impact": "bearish",
       "source": "web_search"
     }
   ],

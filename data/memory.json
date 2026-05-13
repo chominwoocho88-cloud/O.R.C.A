@@ -10675,103 +10675,175 @@
   },
   {
     "analysis_date": "2026-05-13",
-    "analysis_time": "01:19 KST",
-    "mode": "EVENING",
-    "mode_label": "저녁 마감",
-    "one_line_summary": "코스피 7,643 사상최고권 돌파·나스닥 25,862 강세 지속에도 CPI 3.8% 쇼크·에너지 충격·Fed 리더십 교체 3중 불확실성으로 블랙스완 경보 발령, 추격매수 자제 국면",
+    "analysis_time": "10:26 KST",
+    "mode": "MORNING",
+    "mode_label": "아침 풀분석",
+    "one_line_summary": "코스피 외국인 4일 누적 20.53조원 순매도 쇼크 속 나스닥 26088 고공행진, QCOM -11% 반도체 급락·CPI 3.8% 상회로 금리 인상 확률 37% 급등하며 혼조 국면 심화",
     "market_regime": "혼조",
-    "trend_phase": "상승추세",
+    "trend_phase": "횡보추세",
     "trend_strategy": {
-      "recommended": "반도체·AI 섹터 핵심 보유 유지, 에너지 쇼크 헤지 병행",
-      "caution": "CPI 3.8% 재가속·파월 퇴임 후 와르시 체제 불확실성·호르무즈 공급 차질 3중 리스크 — 신규 추격매수 자제, 고점 근방 포지션 축소 검토",
+      "recommended": "반도체·AI(HBM) 섹터 핵심 포지션 유지, 단기 변동성 활용 부분 익절 전략. 코스피 7,400 지지선 확인 후 비중 재조정",
+      "caution": "코스피 5월 +18.5% 급등 후 외국인 4일 누적 20.53조원 이탈 진행 중 — 개인 고가매수 역발상 위험, 추가 하락 리스크 경계",
       "difficulty": "어려움"
     },
     "confidence_overall": "보통",
-    "consensus_level": "낮음",
+    "consensus_level": "보통",
     "top_headlines": [
       {
-        "headline": "코스피 7,643.15 사상최고권 재경신, 3일 연속 상승 지속",
-        "signal_tag": "BULLISH",
+        "headline": "코스피 장중 7,999 터치 후 7,643 급반전(-2.29%), 외국인 단일일 5.66조원 순매도",
+        "signal_tag": "🔴 강한 매도 신호",
         "impact": "높음"
       },
       {
-        "headline": "CPI 3.8% 서프라이즈·Core CPI 0.4% MoM — Fed 금리 인하 기대 재후퇴",
-        "signal_tag": "BEARISH",
+        "headline": "4월 CPI 3.8% 예상치 상회, 연준 금리 인상 확률 37%로 급등",
+        "signal_tag": "🔴 금리 리스크 재부각",
         "impact": "높음"
       },
       {
-        "headline": "인텔+15% 급등, 애플 파운드리 계약 확보 — TSMC 고객 이탈 현실화",
-        "signal_tag": "MIXED",
+        "headline": "퀄컴 -11% (2020년 이후 최대 낙폭), SMH 반도체 ETF -3~5% 급락",
+        "signal_tag": "🔴 반도체 섹터 충격",
         "impact": "높음"
       },
       {
-        "headline": "파월 5월15일 퇴임·와르시 상원 인준 임박 — Fed 정책 불연속성 리스크",
-        "signal_tag": "RISK",
+        "headline": "S&P500 Q1 2026 EPS 성장률 27.7% YoY — 2021년 Q4 이후 최고 어닝 서프라이즈",
+        "signal_tag": "🟢 펀더멘털 지지",
         "impact": "높음"
       },
       {
-        "headline": "OPEC 4월 산출 20.04M bpd 26년 최저, 아람코 CEO 2026년 내내 공급 차질 경고",
-        "signal_tag": "BEARISH",
-        "impact": "높음"
+        "headline": "WTI +4.2% $102.18, 이란 긴장·호르무즈 봉쇄 우려로 에너지 급등",
+        "signal_tag": "🟡 공급 리스크 프리미엄",
+        "impact": "보통"
       },
       {
-        "headline": "S&P Q1 어닝 블렌디드 +27.7% YoY, EPS 비트율 84% — 2021년 이후 최고",
-        "signal_tag": "BULLISH",
+        "headline": "HBM 수요 공급 3배 초과, TSMC '부족·부족·여전히 부족' — AI 인프라 구조적 강세 지속",
+        "signal_tag": "🟢 AI 수요 모멘텀",
         "impact": "보통"
       }
     ],
     "volatility_index": {
       "vkospi": "데이터 미제공",
-      "vix": "18.91",
-      "fear_greed": "데이터 미제공",
+      "vix": "17.99",
+      "fear_greed": "미제공 (중립~탐욕 구간 추정)",
       "level": "중립",
-      "interpretation": "VIX 18.91은 공포 임계(20) 직하로 표면적 안정 유지. 그러나 CPI 쇼크·에너지 충격·Fed 리더십 교체가 동시 진행 중으로 숫자만으로 안심 금지. 잠재 변동성이 압축되어 있어 트리거 발생 시 급격한 VIX 스파이크 가능. FG 지수 20 이상 구간 도달 시 백테스트 방향 정확도 17%로 급락 경고."
+      "interpretation": "VIX 17.99는 표면상 공포 국면 아님. 그러나 코스피 장중 578포인트 스윙·반도체 급락을 감안하면 표면 안정과 실제 변동성 간 괴리 존재. VIX 단독 방향 판단 신뢰도 32% — 보조 지표로만 활용 권고"
     },
     "retail_reversal_signal": {
-      "retail_behavior": "코스피 사상최고권 돌파 후 개인투자자 추격매수 유입 징후. 5월7일 외국인 역대 최대 순매도(-7.15조) 구간에서 개인이 물량 흡수.",
-      "contrarian_implication": "개인이 고점 근방 집중 매수 시 단기 과열 신호. 외국인 5월8일 +3.1조 복귀는 20.5조 이탈의 15% 회복에 불과. 외국인 보유비율 36.45% 하락 추세 지속으로 추가 이탈 여지 존재 — 개인의 고점 매수는 역방향 지표로 해석 가능.",
+      "retail_behavior": "코스피 개인투자자 단일일 6.68조원 순매수 — 외국인 대규모 이탈 구간에서 고가 매수 집중",
+      "contrarian_implication": "개인 대규모 매수 + 외국인·기관 동반 순매도 = 역발상 관점에서 단기 추가 하락 경보. 외국인 4일 20조원 이탈 중 개인 저점 매수는 역사적 성공 확률 낮음",
       "reliability": "보통"
     },
     "outflows": [
       {
-        "zone": "원유·에너지 소비 업종 (항공·화학·운송)",
-        "reason": "OPEC 산출 26년 최저(20.04M bpd), 아람코 CEO 주간 1억 배럴 손실 경고, 호르무즈 공급 차질 장기화. 에너지 가격 상승은 CPI 추가 상방 압력으로 Fed 인하 경로 추가 제약",
+        "zone": "코스피 / 한국 주식시장",
+        "reason": "외국인 5월 13일 단일일 5.66조원 순매도, 4일 누적 20.53조원 이탈. 5월 +18.5% 급등 후 차익실현 매물 집중",
         "severity": "높음",
-        "data_point": "OPEC 4월 산출량 20.04M bpd (-830k YoY); 한국 원유 중동 의존도 70%+ — 한국 이익마진 직접 타격"
+        "data_point": "외국인 일별 -5.66조원 / 4일 누적 -20.53조원 (한국거래소)"
       },
       {
-        "zone": "Fed 금리 민감 성장주 (비반도체 테크)",
-        "reason": "CPI 3.8% 서프라이즈로 금리 인하 기대 재후퇴. 와르시 체제 출범 시 정책 불확실성 증폭. Core CPI 연환산 4.8%는 Fed 2% 목표 대비 심각한 괴리",
-        "severity": "보통",
-        "data_point": "Core CPI 0.4% MoM (est 0.3% 상회); 임금 2.8% vs CPI 3.8% → 실질임금 -1.0%p"
+        "zone": "반도체 섹터 (QCOM·SMH 중심)",
+        "reason": "퀄컴 -11%+ (2020년 이후 최대 낙폭), SMH 반도체 ETF -3~5%. 스마트폰 수요 둔화 가이던스 실망으로 섹터 전반 매도 압력",
+        "severity": "높음",
+        "data_point": "QCOM -11%+, SMH -3~5% (CNBC)"
       },
       {
-        "zone": "TSM·파운드리 섹터",
-        "reason": "인텔-애플 제조 계약 체결로 TSMC 고객 이탈 위험 현실화. 삼성전자 파운드리 연쇄 수주 취소 가능성 잠재",
+        "zone": "금리 민감 성장주",
+        "reason": "4월 CPI 3.8% 예상치 상회, 연준 금리 인상 확률 37%로 급등. 성장주 밸류에이션 재할인 압력 재부각",
         "severity": "보통",
-        "data_point": "TSM -1.5% vs 인텔 +15% (5월12일); 삼성전자 파운드리 -4%+ 급락 트리거 시나리오 존재"
+        "data_point": "CPI 3.8% vs 컨센서스 3.7%, 금리 인상 확률 37% (CNBC)"
+      }
+    ],
+    "inflows": [
+      {
+        "zone": "AI 인프라 / HBM 메모리 공급망",
+        "reason": "TSMC 3nm 가동률 100%+ 초과, HBM 수요 공급 3배 초과. 서버가 메모리 수요 60~70% 점유, AI 빌드아웃 구조적 수혜 지속",
+        "momentum": "강함",
+        "data_point": "TSMC CEO '부족, 부족, 여전히 부족'; 서버 메모리 비중 30%→60~70% (Jefferies)"
+      },
+      {
+        "zone": "중국 반도체 수출 / IC 공급망",
+        "reason": "중국 IC 수출 4월 YoY +100.1% (사상 첫 2배 달성). AI 주도 메모리 가격 상승이 공급망 전반으로 확산",
+        "momentum": "강함",
+        "data_point": "중국 반도체 수출 +100.1% YoY (Digitimes, 중국세관)"
+      },
+      {
+        "zone": "에너지 / 원유 관련 자산",
+        "reason": "이란 긴장 고조·호르무즈 해협 봉쇄 우려로 공급 리스크 프리미엄 급등. 단기 수급 쏠림 주의",
+        "momentum": "강함",
+        "data_point": "WTI $102.18 (+4.2%), 브렌트 $107.77 (+3.4%) (Bloomberg)"
+      },
+      {
+        "zone": "S&P500 어닝 모멘텀",
+        "reason": "Q1 2026 블렌디드 EPS 성장률 27.7% YoY — 11개 섹터 중 10개 YoY 성장으로 광범위한 이익 개선",
+        "momentum": "강함",
+        "data_point": "S&P500 어닝 성장 27.7% vs 5년 평균 16.4% (FactSet)"
+      }
+    ],
+    "neutral_waiting": [
+      {
+        "zone": "코스피 7,400~7,600 구간",
+        "catalyst_needed": "외국인 순매도 규모 일별 2조원 이하로 축소 확인, 또는 한국은행 통화정책 완화 시그널"
+      },
+      {
+        "zone": "나스닥 반도체 섹터 (엔비디아·AMD)",
+        "catalyst_needed": "5월 14일 AMAT 실적 발표 결과, QCOM 쇼크의 섹터 전이 여부 확인"
+      },
+      {
+        "zone": "연준 통화정책 방향",
+        "catalyst_needed": "5월 FOMC 의사록 또는 추가 CPI 데이터로 금리 인상 vs 동결 방향 명확화"
+      }
+    ],
+    "hidden_signals": [
+      {
+        "signal": "코스피 장중 7,999 고점 → 종가 7,643 급반전: 3주+ 연속 상승 후 전형적 고점 이탈 패턴",
+        "implication": "외국인 4일 20조원 이탈과 결합 시 코스피 7,400 지지선 테스트 가능성 높음. 단, 급락(-3%+) 다음날 반등 확률 83% 법칙 동시 적용으로 단기 기술적 반등 시도 가능",
+        "confidence": "높음"
+      },
+      {
+        "signal": "QCOM -11% vs HBM 수요 공급 3배 초과 — 반도체 내 스마트폰·서버 수요 디커플링 심화",
+        "implication": "QCOM 가이던스 쇼크는 스마트폰 수요 둔화 이슈로 HBM·서버 메모리와 완전히 분리. SK하이닉스는 QCOM 익스포저 없어 낙폭 제한 가능성. 단순 베타 연동 적용은 과대평가",
+        "confidence": "보통"
+      },
+      {
+        "signal": "WTI $102 돌파 + CPI 3.8% 복합 — 에너지발 인플레 재점화 우려",
+        "implication": "원유 급등이 지속될 경우 CPI 추가 상승 → Fed 금리 인상 기대 강화 → 성장주 추가 할인 악순환 리스크. 에너지 섹터 단기 수혜와 전체 시장 리스크 동시 점검 필요",
+        "confidence": "보통"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1,498.88원 (달러 강세 지속, 1,500원 근접 심리적 저항)",
+      "kospi_flow": "외국인 4일 누적 -20.53조원 (5.66조원/일), 개인 +6.68조원 역매수. 순매도 규모 감소 여부가 단기 방향 결정",
+      "sk_hynix": "HBM 수요 디커플링으로 QCOM 연동 하락 제한 예상. TSMC '부족' 발언으로 HBM3E 파이프라인 견조. 당일 ±4% 변동성 구간 주목",
+      "samsung": "스마트폰 수요 둔화(QCOM 쇼크) 일부 영향 가능. 그러나 서버·HBM 포트폴리오로 하방 제한 기대. 외국인 이탈 직격 여부 확인 필요",
+      "assessment": "코스피는 7,643 지지 여부가 단기 핵심. 외국인 이탈 지속 시 7,400 테스트 불가피하나, 개인 6.68조 역매수·HBM 구조적 강세가 하방 완충 역할. 원화 1,500원 근접은 추가 외국인 이탈 촉매 가능 — 환율 모니터링 필수"
+    },
+    "counterarguments": [
+      {
+        "against": "외국인 4일 20.53조원 이탈 = 추가 조정 불가피 신호",
+        "because": "60거래일 백테스트에서 급락(-3%+) 다음날 반등 확률 83%. 대규모 이탈 직후 역발상 매수(기관·개인) 패턴 반복. 7,400 지지선 이탈 전까지는 '패닉셀 완료' 시그널로 재해석 가능",
+        "risk_level": "높음"
+      },
+      {
+        "against": "QCOM -11% → SK하이닉스 베타 1.36x 연동 하방 압력",
+        "because": "QCOM 쇼크는 스마트폰 수요 둔화 기인, HBM·서버 메모리와 수요 구조 완전 분리. SK하이닉스 HBM3E 파이프라인은 QCOM 익스포저 없음. 단순 베타 적용은 과대 추정",
+        "risk_level": "보통"
+      },
+      {
+        "against": "CPI 3.8% 상회 → 금리 인상 확률 37% → 성장주 재할인 압력",
+        "because": "컨센서스 대비 0.1%p 초과로 금리 인상 확률이 37%로 급등한 것은 시장 과잉반응 가능성. 단일 CPI 데이터 하나로 Fed 피벗 기대가 완전 소멸하는 시나리오는 37% 자체가 과대 추정일 수 있음",
+        "risk_level": "보통"
+      },
+      {
+        "against": "코스피 3주+ 연속 상승 후 블랙스완 경보 = 추가 조정 확률 높음",
+        "because": "60거래일 백테스트에서 연속 상승 3일+ 후 충격 발생 빈도 7/60일(11.7%). 역으로 88.3%는 추가 충격 없이 횡보·상승 전환. 7,643 종가가 이미 고점 대비 -4.4% 조정 완료 상태로 블랙스완 리스크 상당 부분 가격 반영 가능",
+        "risk_level": "높음"
       }
     ],
     "thesis_killers": [
       {
-        "event": "나스닥",
-        "timeframe": "향후 2거래일",
-        "confirms_if": "나스닥 +1% 이상 종가 유지 및 26,500pt 상향 돌파",
-        "invalidates_if": "나스닥 -1.5% 이하 종가 이탈 (CPI·Fed 우려 재점화)",
-        "quality": "ok"
-      },
-      {
-        "event": "코스피",
-        "timeframe": "향후 3거래일",
-        "confirms_if": "코스피 7,600pt 이상 종가 유지 + 외국인 2거래일 연속 순매수",
-        "invalidates_if": "코스피 7,400pt 이하 이탈 (외국인 재이탈 재개 확인)",
-        "quality": "ok"
-      },
-      {
-        "event": "SK하이닉스",
-        "timeframe": "향후 2거래일",
-        "confirms_if": "SK하이닉스 +2% 이상 상승 및 신고가 경신",
-        "invalidates_if": "SK하이닉스 -3% 이하 급락 (나스닥 조정 × 베타 1.36 현실화)",
+        "event": "코스피 지지선 테스트",
+        "timeframe": "당일 종가",
+        "confirms_if": "코스피 7,750pt 이상 종가 회복 (기술적 반등 83% 패턴 실현)",
+        "invalidates_if": "코스피 7,400pt 이하 이탈 (지지선 붕괴, 추가 하락 가속)",
         "quality": "ok"
       }
     ],
@@ -10789,7 +10861,7 @@
           "peak_pct": 42.98,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7532483865769355,
+          "relevance_score": 0.7530998695431904,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10802,7 +10874,7 @@
           "peak_pct": 10.46,
           "peak_day": 3,
           "quality_tier": "high",
-          "relevance_score": 0.7502382169736568,
+          "relevance_score": 0.7501307254509642,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10815,7 +10887,7 @@
           "peak_pct": 11.92,
           "peak_day": 4,
           "quality_tier": "high",
-          "relevance_score": 0.7372417822642168,
+          "relevance_score": 0.7370964849844654,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10828,7 +10900,7 @@
           "peak_pct": 13.04,
           "peak_day": 3,
           "quality_tier": "high",
-          "relevance_score": 0.729574406564854,
+          "relevance_score": 0.7295254413269447,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10841,7 +10913,7 @@
           "peak_pct": 7.45,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7230399849576834,
+          "relevance_score": 0.7229267497906564,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10854,7 +10926,7 @@
           "peak_pct": 18.4,
           "peak_day": 6,
           "quality_tier": "high",
-          "relevance_score": 0.722829953995863,
+          "relevance_score": 0.7227911612252992,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10867,7 +10939,7 @@
           "peak_pct": 21.62,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7222882858201572,
+          "relevance_score": 0.7222313573512994,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10880,7 +10952,7 @@
           "peak_pct": 9.21,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7218286396572682,
+          "relevance_score": 0.721721442228845,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10893,7 +10965,7 @@
           "peak_pct": 16.84,
           "peak_day": 2,
           "quality_tier": "high",
-          "relevance_score": 0.7205271413031048,
+          "relevance_score": 0.7205035154048828,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10906,7 +10978,7 @@
           "peak_pct": 8.97,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7200645383816437,
+          "relevance_score": 0.7199567519578389,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10919,7 +10991,7 @@
           "peak_pct": 18.63,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.719121495919774,
+          "relevance_score": 0.7190647232058636,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10932,7 +11004,7 @@
           "peak_pct": 18.79,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7184410936036597,
+          "relevance_score": 0.7183989776892216,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10945,7 +11017,7 @@
           "peak_pct": 20.06,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7176958613655011,
+          "relevance_score": 0.7176533978663888,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10958,7 +11030,7 @@
           "peak_pct": 19.48,
           "peak_day": 5,
           "quality_tier": "high",
-          "relevance_score": 0.7169954367760303,
+          "relevance_score": 0.716956537578179,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10971,7 +11043,7 @@
           "peak_pct": 19.31,
           "peak_day": 5,
           "quality_tier": "high",
-          "relevance_score": 0.716809582361988,
+          "relevance_score": 0.7167706831641367,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10984,7 +11056,7 @@
           "peak_pct": 16.9,
           "peak_day": 6,
           "quality_tier": "high",
-          "relevance_score": 0.7155772152695984,
+          "relevance_score": 0.7155271649733825,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -10997,7 +11069,7 @@
           "peak_pct": 9.04,
           "peak_day": 3,
           "quality_tier": "high",
-          "relevance_score": 0.7126110152890276,
+          "relevance_score": 0.7125690146027376,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -11010,7 +11082,7 @@
           "peak_pct": 8.02,
           "peak_day": 1,
           "quality_tier": "high",
-          "relevance_score": 0.7122816095739786,
+          "relevance_score": 0.7122315592777627,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -11023,7 +11095,7 @@
           "peak_pct": 14.79,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7109307604760198,
+          "relevance_score": 0.71090229634134,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         },
@@ -11036,7 +11108,7 @@
           "peak_pct": 7.73,
           "peak_day": 3,
           "quality_tier": "high",
-          "relevance_score": 0.710764562102053,
+          "relevance_score": 0.7107207994023853,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c03",
           "cluster_label": "medium_vix_bullish_riskon_defensive"
         }
@@ -11046,6 +11118,14 @@
       "high_quality_count": 20
     },
     "data_quality": "ok",
+    "phase4_drift": {
+      "drift_detected": false,
+      "reason": "stable",
+      "recent_accuracy": 0.8666666666666667,
+      "baseline_accuracy": 0.8421052631578947,
+      "flag_enabled": false,
+      "correction": {}
+    },
     "jackal_candidate_review": {
       "analysis_date": "2026-05-13",
       "market_bias": "mixed",
