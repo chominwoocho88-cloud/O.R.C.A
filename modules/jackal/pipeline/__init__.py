@@ -1,5 +1,4 @@
-"""JACKAL pipeline (modular monolith).
+"""Phase 0.1 compatibility shim. Will be removed in Phase 0.2."""
+from apps.jackal.pipeline import adapter, shield
 
-Migrated from jackal/ in Phase D.
-"""
-
+__all__ = ["adapter", "shield"]

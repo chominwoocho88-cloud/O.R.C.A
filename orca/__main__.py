@@ -1,7 +1,4 @@
-"""Allow `python -m orca` to run the main ORCA workflow."""
-
-from .main import main
-
-
-if __name__ == "__main__":
-    main()
+"""Phase 0.1 compatibility shim. Will be removed in Phase 0.2."""
+import sys
+from apps.orca import __main__ as _real
+sys.modules[__name__] = _real

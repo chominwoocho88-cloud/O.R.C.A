@@ -125,7 +125,7 @@ class Phase8d2AgentsSourceBranchTests(unittest.TestCase):
 
     def test_agents_source_branch_contains_kis(self):
         """agents.py excludes kis source from flow-data penalties."""
-        source = Path("modules/orca/pipeline/agents.py").read_text(encoding="utf-8")
+        source = Path("apps/orca/pipeline/agents.py").read_text(encoding="utf-8")
 
         self.assertIn('md.get("krx_flow_source") == "kis"', source)
         self.assertNotIn("krx_api", source)

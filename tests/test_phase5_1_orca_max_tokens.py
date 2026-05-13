@@ -31,7 +31,7 @@ class Phase51OrcaMaxTokensTests(unittest.TestCase):
 
     def test_jackal_devil_hotfix_unchanged(self):
         """JACKAL Devil/Analyst max_tokens hotfix remains intact."""
-        content = Path("jackal/scanner.py").read_text(encoding="utf-8")
+        content = Path("apps/jackal/scanner.py").read_text(encoding="utf-8")
         self.assertEqual(content.count("max_tokens=1000"), 2)
 
 

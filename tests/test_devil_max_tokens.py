@@ -14,13 +14,13 @@ def _llm_call_block(content: str, call_site: str) -> str:
 class DevilMaxTokensTests(unittest.TestCase):
     def test_scanner_devil_analyst_max_tokens_increased(self):
         """Scanner Devil/Analyst calls no longer use the 400-token limit."""
-        content = Path("jackal/scanner.py").read_text(encoding="utf-8")
+        content = Path("apps/jackal/scanner.py").read_text(encoding="utf-8")
         self.assertNotIn("max_tokens=400", content)
         self.assertEqual(content.count("max_tokens=1000"), 2)
 
     def test_hunter_stage4_max_tokens_increased(self):
         """Hunter Stage 4 calls have enough output budget for JSON parsing."""
-        content = Path("jackal/hunter.py").read_text(encoding="utf-8")
+        content = Path("apps/jackal/hunter.py").read_text(encoding="utf-8")
 
         self.assertIn(
             "max_tokens=500,",

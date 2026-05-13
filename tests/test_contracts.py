@@ -187,22 +187,23 @@ class TestPR1HealthCodes(unittest.TestCase):
 
     def test_expected_unique_health_codes_exist(self):
         actual = set()
-        for py_file in (ROOT / "orca").rglob("*.py"):
-            module = _parse_module(py_file)
-            for node in ast.walk(module):
-                if not isinstance(node, ast.Call) or not node.args:
-                    continue
-                first_arg = node.args[0]
-                if not isinstance(first_arg, ast.Constant) or not isinstance(first_arg.value, str):
-                    continue
-                func = node.func
-                if isinstance(func, ast.Name) and func.id == "_record_health_event":
-                    actual.add(first_arg.value)
-                    continue
-                if isinstance(func, ast.Attribute) and func.attr in {"record", "record_exception"}:
-                    base = func.value
-                    if isinstance(base, ast.Name) and base.id in {"health_tracker", "health"}:
+        for source_root in (ROOT / "orca", ROOT / "apps" / "orca"):
+            for py_file in source_root.rglob("*.py"):
+                module = _parse_module(py_file)
+                for node in ast.walk(module):
+                    if not isinstance(node, ast.Call) or not node.args:
+                        continue
+                    first_arg = node.args[0]
+                    if not isinstance(first_arg, ast.Constant) or not isinstance(first_arg.value, str):
+                        continue
+                    func = node.func
+                    if isinstance(func, ast.Name) and func.id == "_record_health_event":
                         actual.add(first_arg.value)
+                        continue
+                    if isinstance(func, ast.Attribute) and func.attr in {"record", "record_exception"}:
+                        base = func.value
+                        if isinstance(base, ast.Name) and base.id in {"health_tracker", "health"}:
+                            actual.add(first_arg.value)
 
         self.assertEqual(
             actual,
@@ -262,12 +263,12 @@ class TestPR3MainThinCoordinator(unittest.TestCase):
     """PR 3: main.py thin coordinator invariant."""
 
     def test_main_py_stays_under_50_lines(self):
-        main_path = ROOT / "orca" / "main.py"
+        main_path = ROOT / "apps" / "orca" / "main.py"
         line_count = len(_read_text(main_path).splitlines())
         self.assertLessEqual(
             line_count,
             50,
-            f"PR 3 drift: orca/main.py is {line_count} lines; limit is 50",
+            f"PR 3 drift: apps/orca/main.py is {line_count} lines; limit is 50",
         )
 
 
@@ -477,7 +478,7 @@ class TestPhase52PhaseWriteMitigation(unittest.TestCase):
     )
 
     def test_2phase_write_functions_keep_best_effort_secondary_semantics(self):
-        state_path = ROOT / "orca" / "state.py"
+        state_path = ROOT / "apps" / "orca" / "state.py"
         for function_name in self.EXPECTED_FUNCTIONS:
             with self.subTest(function=function_name):
                 source = _get_function_source(state_path, function_name)

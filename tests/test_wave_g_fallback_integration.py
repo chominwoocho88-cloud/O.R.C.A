@@ -341,7 +341,7 @@ class WaveGMigrationGuardTests(unittest.TestCase):
         self.assertEqual(offenders, [])
 
     def test_orca_backtest_stale_yfinance_no_data_message_removed(self):
-        text = (ROOT / "orca" / "backtest.py").read_text(encoding="utf-8")
+        text = (ROOT / "apps" / "orca" / "backtest.py").read_text(encoding="utf-8")
         self.assertNotIn("yfinance 데이터 없음", text)
         self.assertIn("market data fallback 데이터 없음", text)
 

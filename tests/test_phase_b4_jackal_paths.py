@@ -31,10 +31,10 @@ class PhaseB4JackalPathsTests(unittest.TestCase):
     def test_no_path_file_in_4_files(self):
         """4 files no longer use the Path(__file__) migration blocker."""
         files = [
-            "jackal/evolution.py",
-            "jackal/tracker.py",
-            "jackal/scanner.py",
-            "jackal/hunter.py",
+            "apps/jackal/evolution.py",
+            "apps/jackal/tracker.py",
+            "apps/jackal/scanner.py",
+            "apps/jackal/hunter.py",
         ]
         for file_path in files:
             content = Path(file_path).read_text(encoding="utf-8")
