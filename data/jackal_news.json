@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-13 10:26 KST",
+  "collected_at": "2026-05-15 00:49 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,38 +12,38 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Wells Fargo Hikes NVIDIA Price Target to $315 Ahead of Earnings; NVIDIA stock rose +3% touching new 52-week high",
+      "headline": "Nvidia CEO Jensen Huang joins Trump's China trip; earnings scheduled for May 20 with 90% implied beat probability on Polymarket",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix forecasts stronger Q2 profits as DRAM ASPs rise ~40% QoQ; HSBC raised 2Q and 2026 operating profit forecasts",
+      "headline": "SK hynix stock target lifted at Macquarie on worsening memory shortage; stock surged 200% YTD amid AI chip demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics shares fell as union threatened walkout in pay negotiations; labor dispute threatens semiconductor supply",
-      "impact": "bearish",
+      "headline": "Samsung Electronics shows strong gains amid Trump-Xi Beijing summit discussions on semiconductor export controls; union threatens 18-day walkout May 21-June 7",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom price target raised to $500 from $475 at Citi; Citi analyst maintains Buy rating amid strong AI accelerator growth",
-      "impact": "bullish",
+      "headline": "Broadcom pulled back 6% as financing concerns emerge from OpenAI partnership; Citi raised price target to $500 but elevated valuations persist",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao delivered strong Q1 2026 results with consolidated revenue up 11% YoY and operating profit surging 66% YoY",
-      "impact": "bullish",
+      "headline": "Kakao stock faces continued analyst price target cuts; domestic IT companies struggling to demonstrate AI-era performance",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Shipbuilding TOP3 Plus ETF showing technical strong sell signal on moving averages; sector facing headwinds",
-      "impact": "bearish",
+      "headline": "SOL Korea High Dividend ETF portfolio benefiting from financial stocks' strength and low PBR value stocks' reassessment amid government value-up programs",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
