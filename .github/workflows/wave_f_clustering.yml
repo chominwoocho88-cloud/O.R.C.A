@@ -171,7 +171,7 @@ jobs:
           python - <<'PY'
           import os
           import sqlite3
-          from orca import state
+          from apps.orca import state
 
           state.init_state_db()
           conn = sqlite3.connect('data/orca_state.db')
@@ -246,7 +246,7 @@ jobs:
           python - <<'PY'
           import os
           import sqlite3
-          from orca import state
+          from apps.orca import state
 
           expected_clusters = int(os.environ['CLUSTER_N_CLUSTERS'])
           expected_snapshots = int(os.environ.get('EXPECTED_SNAPSHOTS', '758'))

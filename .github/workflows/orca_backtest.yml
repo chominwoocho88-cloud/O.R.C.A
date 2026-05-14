@@ -131,7 +131,7 @@ jobs:
           import os
           import sqlite3
           from pathlib import Path
-          from orca import state
+          from apps.orca import state
 
           state.init_state_db()
           db = Path("data/orca_state.db")
