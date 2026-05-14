@@ -157,12 +157,12 @@ jobs:
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
         run: |
           # Default path remains:
-          # python -m orca.backtest --months 36 --walk-forward --fail-on-empty-dynamic-fetch
+          # python -m apps.orca.backtest --months 36 --walk-forward --fail-on-empty-dynamic-fetch
           ARGS="--months $ORCA_BACKTEST_MONTHS --fail-on-empty-dynamic-fetch"
           if [ "$ORCA_BACKTEST_WALK_FORWARD" = "true" ]; then
             ARGS="$ARGS --walk-forward"
           fi
-          python -m orca.backtest $ARGS
+          python -m apps.orca.backtest $ARGS
 
       - name: Run JACKAL Backtest
         if: env.ORCA_BACKTEST_RUN_MODE == 'live_backtest'

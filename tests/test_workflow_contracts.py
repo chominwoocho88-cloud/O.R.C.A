@@ -177,7 +177,7 @@ class TestTrackerWorkflowQualityContracts(unittest.TestCase):
         self.assertIn("Resolve Tracker inputs", text)
         self.assertIn("TRACKER_ARGS", text)
         self.assertIn("TRACKER_WILL_SAVE_RESULTS", text)
-        self.assertIn("python -m jackal.tracker ${TRACKER_ARGS}", text)
+        self.assertIn("python -m apps.jackal.tracker ${TRACKER_ARGS}", text)
         self.assertIn("Dry-run persistence skipped", text)
         self.assertIn("state persistence intentionally skipped", text)
         self.assertIn("if: env.TRACKER_WILL_SAVE_RESULTS == 'true'", text)
@@ -709,7 +709,7 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
     def test_orca_backtest_uses_3year_defaults(self):
         text = _read_text(_workflow_path("orca_backtest.yml"))
         self.assertIn(
-            "python -m orca.backtest --months 36 --walk-forward --fail-on-empty-dynamic-fetch",
+            "python -m apps.orca.backtest --months 36 --walk-forward --fail-on-empty-dynamic-fetch",
             text,
         )
         self.assertIn("run_mode:", text)

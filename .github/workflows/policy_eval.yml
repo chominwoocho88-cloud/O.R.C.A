@@ -70,12 +70,12 @@ jobs:
       - name: Build Research Comparison Report
         env:
           PYTHONIOENCODING: utf-8
-        run: python -m orca.research_report
+        run: python -m apps.orca.research.research_report
 
       - name: Evaluate Research Gate
         env:
           PYTHONIOENCODING: utf-8
-        run: python -m orca.research_gate
+        run: python -m apps.orca.research_gate
 
       - name: Capture gate outputs
         id: capture

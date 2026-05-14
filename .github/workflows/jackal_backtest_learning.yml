@@ -290,7 +290,7 @@ jobs:
           USE_UNIFIED_FETCH: "1"
           USE_FDR_MAIN: "1"
         run: |
-          python -m orca.backtest --months "${ORCA_BACKTEST_MONTHS}" --walk-forward --fail-on-empty-dynamic-fetch
+          python -m apps.orca.backtest --months "${ORCA_BACKTEST_MONTHS}" --walk-forward --fail-on-empty-dynamic-fetch
 
       - name: Run JACKAL backtest learning
         env:
@@ -330,7 +330,7 @@ jobs:
           PY
 
           python - <<'PY'
-          from orca.state import checkpoint_jackal_db
+          from apps.orca.state import checkpoint_jackal_db
 
           checkpoint_jackal_db()
           PY

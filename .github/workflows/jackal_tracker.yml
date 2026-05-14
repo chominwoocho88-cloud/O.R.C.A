@@ -139,7 +139,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           echo "Running tracker with TRACKER_ARGS=${TRACKER_ARGS:-<none>}"
-          python -m jackal.tracker ${TRACKER_ARGS}
+          python -m apps.jackal.tracker ${TRACKER_ARGS}
 
       - name: Dry-run persistence skipped
         if: env.TRACKER_WILL_SAVE_RESULTS != 'true'
@@ -170,7 +170,7 @@ jobs:
           PY
 
           python - <<'PY'
-          from orca.state import checkpoint_jackal_db
+          from apps.orca.state import checkpoint_jackal_db
           checkpoint_jackal_db()
           PY
 

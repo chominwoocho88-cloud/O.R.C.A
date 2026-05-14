@@ -159,7 +159,7 @@ jobs:
         run: |
           case "$ORCA_RUN_MODE" in
             MORNING|EVENING)
-              ORCA_MODE="$ORCA_RUN_MODE" python -m orca.main
+              ORCA_MODE="$ORCA_RUN_MODE" python -m apps.orca.main
               ;;
             WEEKLY)
               python scripts/run_weekly_report.py
@@ -221,7 +221,7 @@ jobs:
           PY
 
           python - <<'PY'
-          from orca.state import checkpoint_jackal_db
+          from apps.orca.state import checkpoint_jackal_db
           checkpoint_jackal_db()
           PY
 

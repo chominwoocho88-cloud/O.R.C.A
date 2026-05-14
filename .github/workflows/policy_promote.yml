@@ -57,7 +57,7 @@ jobs:
       - name: Build policy promotion decision
         env:
           PYTHONIOENCODING: utf-8
-        run: python -m orca.policy_promote
+        run: python -m apps.orca.policy_promote
 
       - name: Capture promotion outputs
         id: capture
