@@ -649,40 +649,65 @@
       "divergence": false,
       "fred_score": 50,
       "fred_indicators": {}
+    },
+    {
+      "date": "2026-05-16",
+      "score": 60,
+      "level": "중립",
+      "emoji": "😐",
+      "components": {
+        "시장레짐": 70,
+        "추세방향": 50,
+        "변동성지수": 72,
+        "자금흐름": 50,
+        "반론강도": 65,
+        "한국시장": 40,
+        "숨은시그널": 41
+      },
+      "regime": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+      "trend": "횡보추세",
+      "vix_level": "중립~탐욕 경계",
+      "vix_val": 18.13,
+      "vkospi_val": 15.0,
+      "fear_greed": 65.0,
+      "internal_raw": 57.91044776119403,
+      "divergence": false,
+      "fred_score": 50,
+      "fred_indicators": {}
     }
   ],
   "current": {
-    "date": "2026-05-15",
-    "score": 55,
+    "date": "2026-05-16",
+    "score": 60,
     "level": "중립",
     "emoji": "😐",
     "components": {
       "시장레짐": 70,
-      "추세방향": 30,
+      "추세방향": 50,
       "변동성지수": 72,
       "자금흐름": 50,
-      "반론강도": 55,
-      "한국시장": 32,
-      "숨은시그널": 46
+      "반론강도": 65,
+      "한국시장": 40,
+      "숨은시그널": 41
     },
-    "regime": "위험선호 표면 / 내부 균열 심화 (미-한 극단적 디커플링)",
-    "trend": "하락추세",
-    "vix_level": "공포 (한국) / 탐욕 (미국) 이중 구조",
-    "vix_val": 18.59,
+    "regime": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+    "trend": "횡보추세",
+    "vix_level": "중립~탐욕 경계",
+    "vix_val": 18.13,
     "vkospi_val": 15.0,
-    "fear_greed": 61.0,
-    "internal_raw": 52.98507462686567,
+    "fear_greed": 65.0,
+    "internal_raw": 57.91044776119403,
     "divergence": false,
     "fred_score": 50,
     "fred_indicators": {}
   },
   "trend": {
-    "direction": "stable",
-    "change": -4.9,
-    "avg_7d": 59.9,
+    "direction": "deteriorating",
+    "change": -6.2,
+    "avg_7d": 59.4,
     "min_30d": 55,
     "max_30d": 64,
-    "avg_30d": 60.8
+    "avg_30d": 60.7
   },
-  "last_updated": "2026-05-15T20:15:25.659163+09:00"
+  "last_updated": "2026-05-16T01:56:05.564310+09:00"
 }
