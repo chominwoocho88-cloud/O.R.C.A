@@ -793,6 +793,30 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         self.assertIn("python -m jackal.backtest", text)
         self.assertIn('--mode "${BACKTEST_MODE}"', text)
 
+    def test_orca_daily_cron_schedule_is_restored(self):
+        text = _read_text(_workflow_path("orca_daily.yml"))
+        self.assertIn("schedule:", text)
+        for cron in (
+            'cron: "30 23 * * 0-4"',
+            'cron: "0 14 * * 1-5"',
+            'cron: "0 22 * * 6"',
+            'cron: "0 21 1 * *"',
+        ):
+            with self.subTest(cron=cron):
+                self.assertIn(cron, text)
+        self.assertIn("workflow_dispatch:", text)
+
+    def test_jackal_tracker_cron_schedule_is_restored(self):
+        text = _read_text(_workflow_path("jackal_tracker.yml"))
+        self.assertIn("schedule:", text)
+        for cron in (
+            'cron: "0 3  * * *"',
+            'cron: "0 21 * * *"',
+        ):
+            with self.subTest(cron=cron):
+                self.assertIn(cron, text)
+        self.assertIn("workflow_dispatch:", text)
+
     def test_jackal_backtest_learning_supports_artifact_handoff(self):
         text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
         self.assertIn("artifact_run_id:", text)
