@@ -285,8 +285,17 @@ jobs:
           # Root fix: PR 5 (persistence boundary).
           git config user.name  "JACKAL Session"
           git config user.email "jackal-session@orca-agent"
+
+          DIAG_DIR="${RUNNER_TEMP:-/tmp}"
+          PRE_RESET_STATUS="$DIAG_DIR/jackal_session_pre_reset_status.txt"
+          POST_RESET_STATUS="$DIAG_DIR/jackal_session_post_reset_status.txt"
+          REAPPLIED_STATUS="$DIAG_DIR/jackal_session_reapplied_status.txt"
+          DISCARDED_CANDIDATES="$DIAG_DIR/jackal_session_discarded_candidates.txt"
+          PRE_RESET_DIFF="$DIAG_DIR/jackal_session_pre_reset.diff"
+          PRE_RESET_UNTRACKED="$DIAG_DIR/jackal_session_pre_reset_untracked.txt"
+
           echo "Git status before staging:"
-          git status --short
+          git status --short | tee "$PRE_RESET_STATUS"
 
           # Persistent artifacts owned by JACKAL. Safe to reapply after reset.
           JACKAL_FILES=(
@@ -316,6 +325,46 @@ jobs:
           BACKUP_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/jackal-save-XXXXXX")"
           STASH_NAME="jackal-save-$(date +%s)"
           COPIED=0
+
+          is_jackal_owned_path() {
+            local candidate="$1"
+            local path
+            for path in "${JACKAL_FILES[@]}"; do
+              [ "$candidate" = "$path" ] && return 0
+            done
+            for path in "${JACKAL_DIRS[@]}"; do
+              [ "$candidate" = "$path" ] && return 0
+              case "$candidate" in
+                "$path"/*) return 0 ;;
+              esac
+            done
+            return 1
+          }
+
+          git diff > "$PRE_RESET_DIFF" || true
+          git ls-files --others --exclude-standard > "$PRE_RESET_UNTRACKED" || true
+          {
+            echo "JACKAL-owned reapply allowlist:"
+            printf '  file: %s\n' "${JACKAL_FILES[@]}"
+            printf '  dir: %s\n' "${JACKAL_DIRS[@]}"
+            echo
+            echo "Discarded candidates before reset:"
+            DISCARDED=0
+            while IFS= read -r line; do
+              path="${line:3}"
+              case "$path" in
+                *" -> "*) path="${path##* -> }" ;;
+              esac
+              if is_jackal_owned_path "$path"; then
+                continue
+              fi
+              printf '%s\n' "$line"
+              DISCARDED=1
+            done < <(git status --porcelain)
+            if [ "$DISCARDED" -eq 0 ]; then
+              echo "(none)"
+            fi
+          } | tee "$DISCARDED_CANDIDATES"
 
           # Back up JACKAL-owned outputs before resetting to origin/main.
           for path in "${JACKAL_FILES[@]}"; do
@@ -352,6 +401,10 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             git clean -fd
+            {
+              echo "Git status after reset:"
+              git status --short
+            } | tee "$POST_RESET_STATUS"
 
             # Reapply only JACKAL-owned artifacts after aligning with origin/main.
             for path in "${JACKAL_FILES[@]}"; do
@@ -368,6 +421,10 @@ jobs:
                 cp -a "$BACKUP_DIR/$path" "$path"
               fi
             done
+            {
+              echo "Git status after reapplying JACKAL-owned state:"
+              git status --short
+            } | tee "$REAPPLIED_STATUS"
 
             git add -- "${JACKAL_FILES[@]}" "${JACKAL_DIRS[@]}" 2>/dev/null || true
             echo "Staged state diff:"
@@ -397,3 +454,17 @@ jobs:
 
           echo "JACKAL session save failed after 3 attempts" >&2
           exit 1
+
+      - name: Upload JACKAL session diagnostics
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: jackal-session-diagnostics
+          path: |
+            ${{ runner.temp }}/jackal_session_pre_reset_status.txt
+            ${{ runner.temp }}/jackal_session_post_reset_status.txt
+            ${{ runner.temp }}/jackal_session_reapplied_status.txt
+            ${{ runner.temp }}/jackal_session_discarded_candidates.txt
+            ${{ runner.temp }}/jackal_session_pre_reset.diff
+            ${{ runner.temp }}/jackal_session_pre_reset_untracked.txt
+          if-no-files-found: ignore

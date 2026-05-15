@@ -422,11 +422,16 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
     DB_STATE_WORKFLOW_PATHS = {
         "db_vacuum.yml": ("data/orca_state.db",),
         "jackal_backtest_learning.yml": ("data/orca_state.db", "data/jackal_state.db"),
-        "orca_daily.yml": ("data/orca_state.db", "data/jackal_state.db"),
+        "orca_daily.yml": ("data/orca_state.db",),
         "jackal_session.yml": ("data/orca_state.db", "data/jackal_state.db"),
         "wave_f_archive.yml": ("data/orca_state.db",),
         "wave_f_backfill.yml": ("data/orca_state.db",),
         "wave_f_clustering.yml": ("data/orca_state.db",),
+    }
+
+    OWNER_BOUNDARY_FORBIDDEN_STAGING = {
+        "orca_daily.yml": "git add -f data/jackal_state.db",
+        "jackal_tracker.yml": "git add -f data/orca_state.db",
     }
 
     RESET_STATE_PATHS = (
@@ -454,6 +459,12 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
                 text = _read_text(_workflow_path(workflow_name))
                 for path in paths:
                     self.assertIn(path, text)
+
+    def test_owner_boundary_forbidden_db_staging_is_absent(self):
+        for workflow_name, forbidden in self.OWNER_BOUNDARY_FORBIDDEN_STAGING.items():
+            with self.subTest(workflow=workflow_name):
+                text = _read_text(_workflow_path(workflow_name))
+                self.assertNotIn(forbidden, text)
 
     def test_reset_state_paths_are_preserved(self):
         text = _read_text(_workflow_path("orca_reset.yml"))
@@ -495,6 +506,9 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
             "Aligning with origin/main before replaying JACKAL-owned state",
             "git fetch origin main",
             "git reset --hard origin/main",
+            "Discarded candidates before reset:",
+            "jackal_session_discarded_candidates.txt",
+            "Git status after reapplying JACKAL-owned state:",
             "Staged state diff:",
             "git diff --cached --name-status",
             "no state changes to commit",
@@ -532,6 +546,25 @@ class TestHighRiskArtifactContracts(unittest.TestCase):
         self.assertIn("${{ runner.temp }}/requirements_drift.json", block)
         self.assertIn("${{ runner.temp }}/jackal_operational_intake.json", block)
         self.assertIn("${{ runner.temp }}/orca_audit_smoke.json", block)
+        self.assertIn("if-no-files-found: ignore", block)
+
+    def test_jackal_session_diagnostics_artifact_contract_is_preserved(self):
+        block = _extract_step_block(
+            _workflow_path("jackal_session.yml"),
+            "Upload JACKAL session diagnostics",
+        )
+        self.assertIn("uses: actions/upload-artifact@v6", block)
+        self.assertIn("if: always()", block)
+        self.assertIn("name: jackal-session-diagnostics", block)
+        for artifact_path in (
+            "${{ runner.temp }}/jackal_session_pre_reset_status.txt",
+            "${{ runner.temp }}/jackal_session_post_reset_status.txt",
+            "${{ runner.temp }}/jackal_session_reapplied_status.txt",
+            "${{ runner.temp }}/jackal_session_discarded_candidates.txt",
+            "${{ runner.temp }}/jackal_session_pre_reset.diff",
+            "${{ runner.temp }}/jackal_session_pre_reset_untracked.txt",
+        ):
+            self.assertIn(artifact_path, block)
         self.assertIn("if-no-files-found: ignore", block)
 
 

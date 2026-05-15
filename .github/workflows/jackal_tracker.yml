@@ -176,7 +176,6 @@ jobs:
 
           git add jackal/hunt_log.json       2>/dev/null || true
           git add jackal/jackal_weights.json 2>/dev/null || true
-          git add -f data/orca_state.db      2>/dev/null || true
           git add -f data/jackal_state.db    2>/dev/null || true
 
           echo "Git status after initial staging:"
@@ -193,7 +192,6 @@ jobs:
 
           git add jackal/hunt_log.json       2>/dev/null || true
           git add jackal/jackal_weights.json 2>/dev/null || true
-          git add -f data/orca_state.db      2>/dev/null || true
           git add -f data/jackal_state.db    2>/dev/null || true
 
           echo "Git status after rebase/restage:"
