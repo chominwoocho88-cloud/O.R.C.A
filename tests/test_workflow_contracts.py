@@ -520,6 +520,16 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
         ):
             self.assertIn(marker, text)
 
+    def test_jackal_session_persists_shadow_audit_and_stock_name_cache(self):
+        text = _read_text(_workflow_path("jackal_session.yml"))
+        for path in (
+            "jackal/contract_shadow_audit.log",
+            "jackal/memory_context_shadow.log",
+            "data/stock_name_cache.json",
+        ):
+            with self.subTest(path=path):
+                self.assertIn(path, text)
+
 
 class TestHighRiskArtifactContracts(unittest.TestCase):
     def test_learning_artifact_handoff_contract_is_preserved(self):

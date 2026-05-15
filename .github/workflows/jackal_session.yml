@@ -299,6 +299,8 @@ jobs:
 
           # Persistent artifacts owned by JACKAL. Safe to reapply after reset.
           JACKAL_FILES=(
+            "jackal/contract_shadow_audit.log"
+            "jackal/memory_context_shadow.log"
             "jackal/hunt_log.json"
             "jackal/hunt_cooldown.json"
             "jackal/jackal_weights.json"
@@ -309,6 +311,7 @@ jobs:
             "jackal/jackal_usage_log.json"
             "data/jackal_watchlist.json"
             "data/jackal_state.db"
+            "data/stock_name_cache.json"
           )
 
           # JACKAL skill/lesson directories. Reapplied wholesale.
