@@ -31,6 +31,7 @@ from shared.paths import (
     JACKAL_HUNT_COOLDOWN_FILE,
     JACKAL_HUNT_LOG_FILE,
     JACKAL_LEGACY_DIR,
+    JACKAL_WEIGHTS_FILE,
     JACKAL_WATCHLIST_FILE,
 )
 from shared.paths import atomic_write_json
@@ -1954,8 +1955,7 @@ def run_hunt(force: bool = False) -> dict:
 
     # macro 결과를 jackal_weights.json에 저장 (dashboard 실시간 표시용)
     try:
-        from pathlib import Path as _P
-        _wf = _P(__file__).parent / "jackal_weights.json"
+        _wf = JACKAL_WEIGHTS_FILE
         import json as _j
         _w = _j.loads(_wf.read_text(encoding="utf-8")) if _wf.exists() else {}
         _w["last_macro_gate"] = {**macro, "checked_at": datetime.now(KST).isoformat()}
