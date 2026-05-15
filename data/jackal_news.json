@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-15 11:10 KST",
+  "collected_at": "2026-05-15 14:58 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,64 +12,40 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "US government approved H200 chip sales to 10 Chinese tech firms including Alibaba, Tencent, ByteDance",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "CEO Jensen Huang joins Trump delegation to Beijing for Xi summit as part of China chip export breakthrough effort",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "BofA raises price target to $320 on 1.7 trillion TAM for AI data centers through 2030",
+      "headline": "Nvidia Stock Price Target Raised to $350 amid China H200 News; Analysts Remain Optimistic on AI Chip Position",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix stock rises 1% ahead of 2M won level amid Trump-Xi summit optimism on AI chip demand",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix CEO stock value jumps 10-fold in 6 months as company dominates 50% of HBM market",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "Macquarie lifts SK Hynix price target on worsening memory shortage supporting AI demand",
+      "headline": "SK Hynix Analyst Price Target Raised to KRW 1,964,410; Stock Up 5.55% Over Past Week Amid AI Chip Demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics gains 4% amid Trump-Xi Beijing summit as investors bet on semiconductor export controls relief",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung unveiled next-gen HBM4 memory aiming to strengthen AI accelerator grip amid SK Hynix competition",
-      "impact": "bullish",
+      "headline": "Samsung Electronics Passed $1 Trillion Market Cap; Union Strike Threat from May 21 Raises Labor Concerns",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom shares jump 4.3% on bullish analyst upgrades with Wells Fargo raising price target to $545",
+      "headline": "Broadcom Stock Jumps 4.3% on Bullish Analyst Ratings; Wells Fargo Raises Price Target to $545 Amid AI Revenue Optimism",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "AVGO",
-      "headline": "AI semiconductor revenue at Broadcom running 30-40% higher than anticipated per Wells Fargo analysis",
+      "ticker": "035720.KS",
+      "headline": "Kakao Corp Trading Near Lower End of Range; Analyst Target Suggests 58% Upside Potential",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "466920.KS",
+      "headline": "SOL Korea High Dividend ETF Attracts Strong Individual Investor Interest; Net Assets Grow to 243 Billion Won",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 13
+  "total": 6
 }
