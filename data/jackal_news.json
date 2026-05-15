@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-15 14:58 KST",
+  "collected_at": "2026-05-15 20:15 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,40 +12,64 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nvidia Stock Price Target Raised to $350 amid China H200 News; Analysts Remain Optimistic on AI Chip Position",
+      "headline": "Nvidia stock price target raised to $350 amid China H200 news and analyst upgrades",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Nvidia earnings report scheduled for May 20 with market expectations for steady growth",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK Hynix stock surged 12.52% to record high as AI spending optimism lifts semiconductor stocks",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix Analyst Price Target Raised to KRW 1,964,410; Stock Up 5.55% Over Past Week Amid AI Chip Demand",
+      "headline": "SK Hynix completes HBM4 development for AI market, confirming memory leadership",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics Passed $1 Trillion Market Cap; Union Strike Threat from May 21 Raises Labor Concerns",
-      "impact": "neutral",
+      "headline": "Samsung Electronics labor union threatens 18-day strike from May 21 over pay disagreement",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics passed $1 trillion market cap milestone amid strong AI chip demand",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom Stock Jumps 4.3% on Bullish Analyst Ratings; Wells Fargo Raises Price Target to $545 Amid AI Revenue Optimism",
+      "headline": "Broadcom stock jumped 4.3% after Wells Fargo raised price target to $545 citing AI revenue upside",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom AI semiconductor revenue running 30-40% higher than previously anticipated",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp Trading Near Lower End of Range; Analyst Target Suggests 58% Upside Potential",
-      "impact": "neutral",
+      "headline": "Kakao signed partnership deal with OpenAI as part of Stargate initiative expansion",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF Attracts Strong Individual Investor Interest; Net Assets Grow to 243 Billion Won",
+      "ticker": "035720.KS",
+      "headline": "Kakao Corp recorded Q4 2025 improved results with record revenue and strategic AI partnerships",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 6
+  "total": 12
 }
