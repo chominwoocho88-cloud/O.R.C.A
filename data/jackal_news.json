@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-16 01:56 KST",
+  "collected_at": "2026-05-16 12:29 KST",
   "tickers": [
     "NVDA",
     "000660.KS",
@@ -12,61 +12,61 @@
   "news_items": [
     {
       "ticker": "NVDA",
-      "headline": "Nasdaq fell 1.3% with NVDA down 3% on inflation concerns amid Trump-Xi summit conclusion",
+      "headline": "NVDA sank 4% on Friday amid rising bond yields and inflation worries despite approval for chip sales to China",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "NVDA",
-      "headline": "Nvidia earnings report May 20 expected to deliver blowout quarter but limited near-term stock impact",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom shares jumped 4.3% after bullish analyst ratings with Wells Fargo raising price target to $545 from $430",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Wells Fargo analysis suggests Broadcom's AI-related semiconductor revenue running 30-40% higher than expected",
+      "headline": "NVDA earnings report expected May 20; prediction markets show 90% probability of beat",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix stock up 21.45% week-over-week; completed HBM4 development for AI, first mass production",
+      "headline": "SK Hynix target price raised to 300M KRW; DRAM and NAND prices expected to surge 194% and 244% YoY",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix dividend ex-date May 28, 2026 with 375 won dividend; analysts rating upgraded to Buy",
+      "headline": "SK Hynix shares soared 200-1000% YTD amid strong AI chip demand; market cap approaches $1 trillion",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics stock slid on Friday with labor union threatening 18-day strike over bonuses",
+      "headline": "Samsung Electronics issued public apology over labor union disputes; stock declined 8.61%",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics facing production disruption risk from May 21 planned labor strike",
+      "headline": "Samsung Electronics on track to match SK Hynix HBM market share by 2027",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom price targets raised to $545 by Wells Fargo and $500 by TD Cowen; AI revenue running 30-40% higher than anticipated",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom retreated from record highs due to China export restrictions and geopolitical risks impacting semiconductor sector",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao signed partnership deal with OpenAI CEO Sam Altman for AI expansion and Stargate initiative",
-      "impact": "bullish",
+      "headline": "Kakao stock down 23.46% YTD due to unclear AI business growth prospects despite good earnings",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao Corp analyst rating shows Buy consensus with 58% upside potential; 21 analysts recommend buying",
+      "headline": "Kakao analysts maintain positive outlook with 58% upside potential and Buy rating from 21 analysts",
       "impact": "bullish",
       "source": "web_search"
     }
