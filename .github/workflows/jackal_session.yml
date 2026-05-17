@@ -327,6 +327,7 @@ jobs:
             "jackal/recommendation_log.json"
             "jackal/compact_log.json"
             "jackal/jackal_usage_log.json"
+            "data/llm_log.jsonl"
             "data/jackal_watchlist.json"
             "data/jackal_state.db"
             "data/stock_name_cache.json"

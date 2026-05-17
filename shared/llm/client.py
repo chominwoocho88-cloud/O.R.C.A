@@ -28,6 +28,8 @@ class LLMResponse:
     cache_read_tokens: int = 0
     cache_creation_tokens: int = 0
     web_search_count: int = 0
+    server_tool_use_web_search_requests: int = 0
+    service_tier: str = ""
     stop_reason: str = ""
     elapsed_ms: int = 0
     attempt: int = 1
@@ -133,6 +135,7 @@ class LLMClient:
                     web_search_count = self._count_tool_use_blocks(final_message)
 
                 usage = getattr(final_message, "usage", None)
+                server_tool_use = self._usage_value(usage, "server_tool_use")
                 stop_reason = str(getattr(final_message, "stop_reason", "") or "")
                 elapsed_ms = self._elapsed_ms(start)
                 response = LLMResponse(
@@ -151,6 +154,11 @@ class LLMClient:
                         "cache_creation_input_tokens",
                     ),
                     web_search_count=web_search_count,
+                    server_tool_use_web_search_requests=self._usage_int(
+                        server_tool_use,
+                        "web_search_requests",
+                    ),
+                    service_tier=str(self._usage_value(usage, "service_tier") or ""),
                     stop_reason=stop_reason,
                     elapsed_ms=elapsed_ms,
                     attempt=attempt,
@@ -221,6 +229,7 @@ class LLMClient:
             "call_site": call_site,
             **asdict(response),
         }
+        payload["web_search_requests"] = payload.pop("server_tool_use_web_search_requests")
         payload.pop("text", None)
         payload.pop("success", None)
         self._append_jsonl(payload)
@@ -264,15 +273,22 @@ class LLMClient:
         if usage is None:
             return 0
         for name in names:
-            value = getattr(usage, name, None)
-            if value is None and isinstance(usage, dict):
-                value = usage.get(name)
+            value = LLMClient._usage_value(usage, name)
             if value is not None:
                 try:
                     return int(value)
                 except Exception:
                     return 0
         return 0
+
+    @staticmethod
+    def _usage_value(usage, name: str):
+        if usage is None:
+            return None
+        value = getattr(usage, name, None)
+        if value is None and isinstance(usage, dict):
+            value = usage.get(name)
+        return value
 
     @staticmethod
     def _text_from_message(message) -> str:

@@ -45,6 +45,15 @@ class _FakeUsage:
     output_tokens = 567
     cache_read_input_tokens = 7
     cache_creation_input_tokens = 11
+    service_tier = "standard"
+
+    class server_tool_use:
+        web_search_requests = 2
+
+
+class _MinimalUsage:
+    input_tokens = 10
+    output_tokens = 5
 
 
 class _FakeMessage:
@@ -182,11 +191,16 @@ class LLMClientTests(unittest.TestCase):
             self.assertEqual(response.output_tokens, 567)
             self.assertEqual(response.cache_read_tokens, 7)
             self.assertEqual(response.cache_creation_tokens, 11)
+            self.assertEqual(response.server_tool_use_web_search_requests, 2)
+            self.assertEqual(response.service_tier, "standard")
 
             event = json.loads(log_path.read_text(encoding="utf-8").strip())
             self.assertEqual(event["type"], "success")
             self.assertEqual(event["call_site"], "orca.test")
             self.assertEqual(event["input_tokens"], 1234)
+            self.assertEqual(event["web_search_requests"], 2)
+            self.assertEqual(event["service_tier"], "standard")
+            self.assertNotIn("server_tool_use_web_search_requests", event)
 
     def test_call_auth_failure_logs_and_raises_with_standard_message(self):
         llm = self._client_module()
@@ -266,6 +280,49 @@ class LLMClientTests(unittest.TestCase):
                 call_site="orca.search",
             )
             self.assertEqual(response.web_search_count, 3)
+
+    def test_call_success_defaults_missing_usage_extensions(self):
+        llm = self._client_module()
+
+        class _MinimalMessage:
+            usage = _MinimalUsage()
+            stop_reason = "end_turn"
+            content = [_FakeTextBlock("minimal")]
+
+        class _MinimalStream:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def __iter__(self):
+                yield _FakeEvent("content_block_delta", text="minimal")
+
+            def get_final_message(self):
+                return _MinimalMessage()
+
+        def stream_factory(_kwargs):
+            return _MinimalStream()
+
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir, _patched_anthropic(
+            _anthropic_module(stream_factory=stream_factory)
+        ):
+            log_path = Path(tmpdir) / "llm.jsonl"
+            client = llm.LLMClient("test-key", log_path=log_path)
+            response = client.call(
+                system="sys",
+                user="user",
+                model="claude-test",
+                max_tokens=100,
+                call_site="orca.minimal",
+            )
+
+            self.assertEqual(response.server_tool_use_web_search_requests, 0)
+            self.assertEqual(response.service_tier, "")
+            event = json.loads(log_path.read_text(encoding="utf-8").strip())
+            self.assertEqual(event["web_search_requests"], 0)
+            self.assertEqual(event["service_tier"], "")
 
     def test_log_jsonl_format(self):
         llm = self._client_module()

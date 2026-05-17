@@ -473,6 +473,12 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
                 text = _read_text(_workflow_path(workflow_name))
                 self.assertNotIn(forbidden, text)
 
+    def test_llm_usage_ledger_is_persisted_by_llm_workflows(self):
+        orca_text = _read_text(_workflow_path("orca_daily.yml"))
+        jackal_text = _read_text(_workflow_path("jackal_session.yml"))
+        self.assertIn("git add data/llm_log.jsonl", orca_text)
+        self.assertIn('"data/llm_log.jsonl"', jackal_text)
+
     def test_reset_state_paths_are_preserved(self):
         text = _read_text(_workflow_path("orca_reset.yml"))
         for path in self.RESET_STATE_PATHS:
