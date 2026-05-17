@@ -429,7 +429,27 @@ jobs:
               git status --short
             } | tee "$REAPPLIED_STATUS"
 
-            git add -- "${JACKAL_FILES[@]}" "${JACKAL_DIRS[@]}" 2>/dev/null || true
+            STAGED_PATHS=0
+
+            stage_jackal_path() {
+              local path="$1"
+              if [ -e "$path" ] || git ls-files --error-unmatch "$path" >/dev/null 2>&1; then
+                git add -A -- "$path"
+                STAGED_PATHS=$((STAGED_PATHS + 1))
+              else
+                echo "Skipping missing optional JACKAL path: $path"
+              fi
+            }
+
+            for path in "${JACKAL_FILES[@]}"; do
+              stage_jackal_path "$path"
+            done
+
+            for path in "${JACKAL_DIRS[@]}"; do
+              stage_jackal_path "$path"
+            done
+
+            echo "Staged JACKAL paths: $STAGED_PATHS"
             echo "Staged state diff:"
             git diff --cached --stat
             git diff --cached --name-status
