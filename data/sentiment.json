@@ -674,11 +674,36 @@
       "divergence": false,
       "fred_score": 50,
       "fred_indicators": {}
+    },
+    {
+      "date": "2026-05-18",
+      "score": 59,
+      "level": "중립",
+      "emoji": "😐",
+      "components": {
+        "시장레짐": 70,
+        "추세방향": 50,
+        "변동성지수": 72,
+        "자금흐름": 50,
+        "반론강도": 55,
+        "한국시장": 40,
+        "숨은시그널": 46
+      },
+      "regime": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+      "trend": "횡보추세",
+      "vix_level": "중립~탐욕",
+      "vix_val": 18.43,
+      "vkospi_val": 15.0,
+      "fear_greed": 63.0,
+      "internal_raw": 57.16417910447761,
+      "divergence": false,
+      "fred_score": 50,
+      "fred_indicators": {}
     }
   ],
   "current": {
-    "date": "2026-05-16",
-    "score": 60,
+    "date": "2026-05-18",
+    "score": 59,
     "level": "중립",
     "emoji": "😐",
     "components": {
@@ -686,7 +711,7 @@
       "추세방향": 50,
       "변동성지수": 72,
       "자금흐름": 50,
-      "반론강도": 65,
+      "반론강도": 55,
       "한국시장": 40,
       "숨은시그널": 46
     },
@@ -696,18 +721,18 @@
     "vix_val": 18.43,
     "vkospi_val": 15.0,
     "fear_greed": 63.0,
-    "internal_raw": 58.656716417910445,
+    "internal_raw": 57.16417910447761,
     "divergence": false,
     "fred_score": 50,
     "fred_indicators": {}
   },
   "trend": {
-    "direction": "deteriorating",
-    "change": -6.2,
-    "avg_7d": 59.4,
+    "direction": "stable",
+    "change": -2.9,
+    "avg_7d": 59.0,
     "min_30d": 55,
     "max_30d": 64,
     "avg_30d": 60.7
   },
-  "last_updated": "2026-05-16T12:29:10.409019+09:00"
+  "last_updated": "2026-05-18T00:35:41.888622+09:00"
 }

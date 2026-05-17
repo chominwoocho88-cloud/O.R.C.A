@@ -1,10 +1,10 @@
 {
-  "total": 41,
-  "correct": 34,
+  "total": 43,
+  "correct": 35,
   "by_category": {
     "ok": {
-      "total": 41,
-      "correct": 34
+      "total": 43,
+      "correct": 35
     }
   },
   "history": [
@@ -199,6 +199,15 @@
     },
     {
       "date": "2026-05-16",
+      "total": 2,
+      "correct": 1,
+      "accuracy": 50.0,
+      "dir_correct": 1,
+      "dir_accuracy": 50.0,
+      "full_correct": 1
+    },
+    {
+      "date": "2026-05-18",
       "total": 2,
       "correct": 1,
       "accuracy": 50.0,
@@ -400,18 +409,27 @@
           "correct": 1
         }
       }
+    },
+    {
+      "date": "2026-05-18",
+      "by_category": {
+        "ok": {
+          "total": 2,
+          "correct": 1
+        }
+      }
     }
   ],
   "weak_areas": [],
   "strong_areas": [
-    "ok (83%)"
+    "ok (81%)"
   ],
-  "dir_total": 41,
-  "dir_correct": 34,
-  "dir_accuracy_pct": 82.9,
-  "score_total": 41.0,
-  "score_earned": 33.0,
-  "score_accuracy": 80.5,
+  "dir_total": 43,
+  "dir_correct": 35,
+  "dir_accuracy_pct": 81.4,
+  "score_total": 43.0,
+  "score_earned": 34.0,
+  "score_accuracy": 79.1,
   "_reset_at": "2026-04-16T16:44:01.994399+09:00",
   "_note": "aria_reset.py 실행으로 초기화됨"
 }

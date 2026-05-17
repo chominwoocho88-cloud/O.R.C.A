@@ -1,75 +1,41 @@
 {
-  "collected_at": "2026-05-16 12:29 KST",
+  "collected_at": "2026-05-18 00:35 KST",
   "tickers": [
+    "252670.KS",
+    "114800.KS",
+    "252710.KS",
+    "Q530036",
+    "003280.KS",
+    "462330.KS",
+    "001740.KS",
+    "018880.KS",
+    "251340.KS",
+    "233740.KS",
+    "RIVN",
+    "NOC",
+    "WFC",
+    "373220.KS",
+    "PFE",
+    "BAC",
+    "JPM",
+    "068270.KS",
+    "207940.KS",
+    "086520.KS",
     "NVDA",
     "000660.KS",
     "005930.KS",
     "AVGO",
-    "035720.KS",
-    "466920.KS"
+    "466920.KS",
+    "035720.KS"
   ],
   "regime": "",
   "news_items": [
     {
-      "ticker": "NVDA",
-      "headline": "NVDA sank 4% on Friday amid rising bond yields and inflation worries despite approval for chip sales to China",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "NVDA earnings report expected May 20; prediction markets show 90% probability of beat",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix target price raised to 300M KRW; DRAM and NAND prices expected to surge 194% and 244% YoY",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix shares soared 200-1000% YTD amid strong AI chip demand; market cap approaches $1 trillion",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics issued public apology over labor union disputes; stock declined 8.61%",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics on track to match SK Hynix HBM market share by 2027",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom price targets raised to $545 by Wells Fargo and $500 by TD Cowen; AI revenue running 30-40% higher than anticipated",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom retreated from record highs due to China export restrictions and geopolitical risks impacting semiconductor sector",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "035720.KS",
-      "headline": "Kakao stock down 23.46% YTD due to unclear AI business growth prospects despite good earnings",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "035720.KS",
-      "headline": "Kakao analysts maintain positive outlook with 58% upside potential and Buy rating from 21 analysts",
-      "impact": "bullish",
-      "source": "web_search"
+      "ticker": "JPM",
+      "headline": "Dell scheduled to report Q1 2026 results May 28; JPMorgan expects 25% FY27 earnings growth guidance raise",
+      "source": "CNBC/24/7 Wall St (May 15)",
+      "data_pt": "May 28 earnings date; supply visibility constraints on AI server demand cited by JPMorgan"
     }
   ],
-  "total": 11
+  "total": 1
 }
