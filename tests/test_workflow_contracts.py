@@ -820,6 +820,36 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
                 self.assertIn(cron, text)
         self.assertIn("workflow_dispatch:", text)
 
+    def test_jackal_session_cron_schedule_is_restored(self):
+        text = _read_text(_workflow_path("jackal_session.yml"))
+        self.assertIn("schedule:", text)
+        for cron in (
+            'cron: "35 0 * * 1-5"',
+            'cron: "30 4 * * 1-5"',
+            'cron: "35 14 * * 1-5"',
+            'cron: "30 18 * * 1-5"',
+        ):
+            with self.subTest(cron=cron):
+                self.assertIn(cron, text)
+        self.assertIn("workflow_dispatch:", text)
+
+    def test_jackal_session_schedule_maps_cron_to_mode(self):
+        text = _read_text(_workflow_path("jackal_session.yml"))
+        self.assertIn('EVENT_SCHEDULE="${{ github.event.schedule }}"', text)
+        for marker in (
+            'elif [ "$EVENT_SCHEDULE" = "35 0 * * 1-5" ]; then\n            SESSION_MODE_VALUE="full"',
+            'elif [ "$EVENT_SCHEDULE" = "30 4 * * 1-5" ]; then\n            SESSION_MODE_VALUE="scanner_only"',
+            'elif [ "$EVENT_SCHEDULE" = "35 14 * * 1-5" ]; then\n            SESSION_MODE_VALUE="full"',
+            'elif [ "$EVENT_SCHEDULE" = "30 18 * * 1-5" ]; then\n            SESSION_MODE_VALUE="scanner_only"',
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, text)
+
+    def test_jackal_session_scanner_only_skips_hunter_for_all_event_types(self):
+        text = _read_text(_workflow_path("jackal_session.yml"))
+        self.assertIn('if [ "$JACKAL_SESSION_MODE" = "scanner_only" ]; then', text)
+        self.assertNotIn('${{ github.event_name }}" = "workflow_dispatch" ] && [ "$JACKAL_SESSION_MODE"', text)
+
     def test_jackal_backtest_learning_supports_artifact_handoff(self):
         text = _read_text(_workflow_path("jackal_backtest_learning.yml"))
         self.assertIn("artifact_run_id:", text)

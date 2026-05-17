@@ -10,13 +10,13 @@ concurrency:
   cancel-in-progress: false
 
 on:
-#   schedule:
+  schedule:
     # Korean session
-#     - cron: "35 0 * * 1-5"    # KST 09:35  full session (Hunter -> Scanner)
-#     - cron: "30 4 * * 1-5"    # KST 13:30  scanner refresh
+    - cron: "35 0 * * 1-5"    # KST 09:35 full session
+    - cron: "30 4 * * 1-5"    # KST 13:30 scanner_only
     # US session
-#     - cron: "35 14 * * 1-5"   # KST 23:35  full session (Hunter -> Scanner)
-#     - cron: "30 18 * * 1-5"   # KST 03:30  scanner refresh (next KST day)
+    - cron: "35 14 * * 1-5"   # KST 23:35 full session
+    - cron: "30 18 * * 1-5"   # KST 03:30 scanner_only
 
   workflow_dispatch:
     inputs:
@@ -102,10 +102,26 @@ jobs:
             fi
           }
 
-          SESSION_MODE_VALUE="$(trim_workflow_input "${{ inputs.session_mode }}")"
+          INPUT_SESSION_MODE="$(trim_workflow_input "${{ inputs.session_mode }}")"
           FORCE_HUNT_VALUE="$(normalize_bool "${{ inputs.force_hunt }}")"
           FORCE_SCAN_VALUE="$(normalize_bool "${{ inputs.force_scan }}")"
           FORCE_EVOLVE_VALUE="$(normalize_bool "${{ inputs.force_evolve }}")"
+          EVENT_NAME="${{ github.event_name }}"
+          EVENT_SCHEDULE="${{ github.event.schedule }}"
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            SESSION_MODE_VALUE="$INPUT_SESSION_MODE"
+          elif [ "$EVENT_SCHEDULE" = "35 0 * * 1-5" ]; then
+            SESSION_MODE_VALUE="full"
+          elif [ "$EVENT_SCHEDULE" = "30 4 * * 1-5" ]; then
+            SESSION_MODE_VALUE="scanner_only"
+          elif [ "$EVENT_SCHEDULE" = "35 14 * * 1-5" ]; then
+            SESSION_MODE_VALUE="full"
+          elif [ "$EVENT_SCHEDULE" = "30 18 * * 1-5" ]; then
+            SESSION_MODE_VALUE="scanner_only"
+          else
+            SESSION_MODE_VALUE="full"
+          fi
 
           [ -z "$SESSION_MODE_VALUE" ] && SESSION_MODE_VALUE="full"
 
@@ -115,6 +131,8 @@ jobs:
           echo "JACKAL_FORCE_EVOLVE=$FORCE_EVOLVE_VALUE" >> "$GITHUB_ENV"
 
           echo "Resolved inputs:"
+          echo "  event_name=$EVENT_NAME"
+          echo "  event_schedule=$EVENT_SCHEDULE"
           echo "  session_mode=$SESSION_MODE_VALUE"
           echo "  force_hunt=$FORCE_HUNT_VALUE"
           echo "  force_scan=$FORCE_SCAN_VALUE"
@@ -160,7 +178,7 @@ jobs:
           KIS_CMW_ACCOUNT_NUMBER_PAPER: ${{ secrets.KIS_CMW_ACCOUNT_NUMBER_PAPER }}
           KIS_IS_PAPER: ${{ env.KIS_IS_PAPER }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "$JACKAL_SESSION_MODE" = "scanner_only" ]; then
+          if [ "$JACKAL_SESSION_MODE" = "scanner_only" ]; then
             echo "Skipping Hunter because session_mode=scanner_only"
             exit 0
           fi
