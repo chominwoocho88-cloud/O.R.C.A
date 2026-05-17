@@ -12,11 +12,11 @@ concurrency:
 on:
   schedule:
     # Korean session
-    - cron: "35 0 * * 1-5"    # KST 09:35 full session
-    - cron: "30 4 * * 1-5"    # KST 13:30 scanner_only
+    - cron: "0 23 * * 0-4"    # KST 08:00 full session
+    - cron: "0 3 * * 1-5"     # KST 12:00 scanner_only
     # US session
-    - cron: "35 14 * * 1-5"   # KST 23:35 full session
-    - cron: "30 18 * * 1-5"   # KST 03:30 scanner_only
+    - cron: "30 12 * * 1-5"   # KST 21:30 full session
+    - cron: "0 16 * * 1-5"    # KST 01:00 scanner_only (화-토)
 
   workflow_dispatch:
     inputs:
@@ -111,13 +111,13 @@ jobs:
 
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             SESSION_MODE_VALUE="$INPUT_SESSION_MODE"
-          elif [ "$EVENT_SCHEDULE" = "35 0 * * 1-5" ]; then
+          elif [ "$EVENT_SCHEDULE" = "0 23 * * 0-4" ]; then
             SESSION_MODE_VALUE="full"
-          elif [ "$EVENT_SCHEDULE" = "30 4 * * 1-5" ]; then
+          elif [ "$EVENT_SCHEDULE" = "0 3 * * 1-5" ]; then
             SESSION_MODE_VALUE="scanner_only"
-          elif [ "$EVENT_SCHEDULE" = "35 14 * * 1-5" ]; then
+          elif [ "$EVENT_SCHEDULE" = "30 12 * * 1-5" ]; then
             SESSION_MODE_VALUE="full"
-          elif [ "$EVENT_SCHEDULE" = "30 18 * * 1-5" ]; then
+          elif [ "$EVENT_SCHEDULE" = "0 16 * * 1-5" ]; then
             SESSION_MODE_VALUE="scanner_only"
           else
             SESSION_MODE_VALUE="full"

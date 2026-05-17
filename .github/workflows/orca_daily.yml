@@ -6,8 +6,8 @@ concurrency:
 
 on:
   schedule:
-    - cron: "30 23 * * 0-4"
-    - cron: "0 14 * * 1-5"
+    - cron: "30 22 * * 0-4"
+    - cron: "0 12 * * 1-5"
     - cron: "0 22 * * 6"
     - cron: "0 21 1 * *"
   workflow_dispatch:
@@ -87,9 +87,9 @@ jobs:
 
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             ORCA_RUN_MODE="$INPUT_MODE"
-          elif [ "$EVENT_SCHEDULE" = "30 23 * * 0-4" ]; then
+          elif [ "$EVENT_SCHEDULE" = "30 22 * * 0-4" ]; then
             ORCA_RUN_MODE="MORNING"
-          elif [ "$EVENT_SCHEDULE" = "0 14 * * 1-5" ]; then
+          elif [ "$EVENT_SCHEDULE" = "0 12 * * 1-5" ]; then
             ORCA_RUN_MODE="EVENING"
           elif [ "$EVENT_SCHEDULE" = "0 22 * * 6" ]; then
             ORCA_RUN_MODE="WEEKLY"
