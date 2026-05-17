@@ -188,23 +188,42 @@ class LLMClientTests(unittest.TestCase):
             self.assertEqual(event["call_site"], "orca.test")
             self.assertEqual(event["input_tokens"], 1234)
 
-    def test_call_auth_failure_logs_and_raises(self):
+    def test_call_auth_failure_logs_and_raises_with_standard_message(self):
         llm = self._client_module()
-        module = _anthropic_module(exception_name="AuthenticationError")
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir, _patched_anthropic(module):
-            log_path = Path(tmpdir) / "llm.jsonl"
-            client = llm.LLMClient("test-key", log_path=log_path)
-            with self.assertRaises(module.AuthenticationError):
-                client.call(
-                    system="sys",
-                    user="user",
-                    model="claude-test",
-                    max_tokens=100,
-                    call_site="orca.auth",
-                )
-            event = json.loads(log_path.read_text(encoding="utf-8").strip())
-            self.assertEqual(event["type"], "failure")
-            self.assertEqual(event["error_type"], "auth_failed")
+        cases = (
+            ("AuthenticationError", "auth_failed"),
+            ("PermissionDeniedError", "permission_denied"),
+            ("NotFoundError", "not_found"),
+        )
+        for exception_name, error_type in cases:
+            with self.subTest(exception_name=exception_name):
+                module = _anthropic_module(exception_name=exception_name)
+                with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir, _patched_anthropic(module):
+                    log_path = Path(tmpdir) / "llm.jsonl"
+                    client = llm.LLMClient("test-key", log_path=log_path)
+                    expected_error = getattr(module, exception_name)
+                    with self.assertRaises(expected_error) as caught:
+                        client.call(
+                            system="sys",
+                            user="user",
+                            model="claude-test",
+                            max_tokens=100,
+                            call_site="orca.auth",
+                        )
+
+                    message = str(caught.exception)
+                    self.assertIn("LLM authentication failure at", message)
+                    self.assertIn("orca.auth", message)
+                    self.assertIn("model=claude-test", message)
+                    self.assertIn("attempt=1", message)
+                    self.assertIn(exception_name, message)
+                    self.assertIn("ANTHROPIC_API_KEY", message)
+                    self.assertIn("GitHub Secret", message)
+
+                    event = json.loads(log_path.read_text(encoding="utf-8").strip())
+                    self.assertEqual(event["type"], "failure")
+                    self.assertEqual(event["error_type"], error_type)
+                    self.assertEqual(event["message"], message)
 
     def test_call_retry_exhausted(self):
         llm = self._client_module()

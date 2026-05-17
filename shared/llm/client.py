@@ -164,10 +164,18 @@ class LLMClient:
                 return response
             except auth_errors as exc:  # type: ignore[misc]
                 elapsed_ms = self._elapsed_ms(start)
+                standard_message = self._format_auth_failure_message(
+                    call_site=call_site,
+                    model=model,
+                    attempt=attempt,
+                    error_class=type(exc).__name__,
+                    original_msg=str(exc),
+                )
+                exc.args = (standard_message,)
                 failure = LLMFailure(
                     call_site=call_site,
                     error_type=self._error_type(exc, auth_error=True),
-                    message=str(exc),
+                    message=standard_message,
                     attempt=attempt,
                     elapsed_ms=elapsed_ms,
                     model=model,
@@ -312,6 +320,22 @@ class LLMClient:
         if name == "InternalServerError":
             return "server_error"
         return name or "unknown_error"
+
+    @staticmethod
+    def _format_auth_failure_message(
+        *,
+        call_site: str,
+        model: str,
+        attempt: int,
+        error_class: str,
+        original_msg: str,
+    ) -> str:
+        return (
+            f"LLM authentication failure at {call_site} "
+            f"(model={model}, attempt={attempt}): "
+            f"{error_class}: {original_msg}. "
+            "Check ANTHROPIC_API_KEY / GitHub Secret ANTHROPIC_API_KEY."
+        )
 
     def _append_jsonl(self, payload: dict[str, Any]) -> None:
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
