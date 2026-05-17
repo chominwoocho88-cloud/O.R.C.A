@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-18 00:35 KST",
+  "collected_at": "2026-05-18 07:49 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
@@ -29,13 +29,6 @@
     "035720.KS"
   ],
   "regime": "",
-  "news_items": [
-    {
-      "ticker": "JPM",
-      "headline": "Dell scheduled to report Q1 2026 results May 28; JPMorgan expects 25% FY27 earnings growth guidance raise",
-      "source": "CNBC/24/7 Wall St (May 15)",
-      "data_pt": "May 28 earnings date; supply visibility constraints on AI server demand cited by JPMorgan"
-    }
-  ],
-  "total": 1
+  "news_items": [],
+  "total": 0
 }
