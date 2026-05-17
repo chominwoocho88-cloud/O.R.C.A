@@ -93,6 +93,17 @@ MODEL_H          = os.environ.get("SUBAGENT_MODEL", "claude-haiku-4-5-20251001")
 API_KEY          = os.environ.get("ANTHROPIC_API_KEY", "")
 _llm_client      = LLMClient(API_KEY, fail_fast=False)
 
+
+def _check_llm_credentials() -> None:
+    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError(
+            "ANTHROPIC_API_KEY environment variable is required. "
+            "JACKAL Scanner requires LLM access. "
+            "Set the GitHub Secret ANTHROPIC_API_KEY to proceed."
+        )
+
+
 _SCANNER = THRESHOLDS["scanner"]
 _SCANNER_COOLDOWN = _SCANNER["cooldown"]
 _SCANNER_SCHD = _SCANNER["schd_regime"]
@@ -1717,6 +1728,8 @@ run_scan.__wrapped__ = run_scan
 
 
 def main() -> None:
+    _check_llm_credentials()
+
     parser = argparse.ArgumentParser(description="JACKAL Scanner")
     parser.add_argument(
         "--force",

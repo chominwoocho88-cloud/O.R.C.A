@@ -18,6 +18,17 @@ sys.stderr.reconfigure(encoding="utf-8")
 KST     = timezone(timedelta(hours=9))
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
+
+def _check_llm_credentials() -> None:
+    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError(
+            "ANTHROPIC_API_KEY environment variable is required. "
+            "ORCA Backtest requires LLM access. "
+            "Set the GitHub Secret ANTHROPIC_API_KEY to proceed."
+        )
+
+
 from shared.paths import (
     MEMORY_FILE, ACCURACY_FILE, LESSONS_FILE, WEIGHTS_FILE,
 )
@@ -2660,6 +2671,8 @@ def main():
     parser.add_argument("--verbose-parse-errors", action="store_true",
                         help="Log full raw/extracted response on JSON parse failure")
     args = parser.parse_args()
+    _check_llm_credentials()
+
     MAX_PARSE_FAILURES = args.max_parse_failures
     STRICT_JSON = args.strict_json
     VERBOSE_PARSE_ERRORS = args.verbose_parse_errors

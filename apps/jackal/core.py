@@ -39,6 +39,16 @@ log = logging.getLogger("jackal_core")
 _BASE = JACKAL_LEGACY_DIR
 
 
+def _check_llm_credentials() -> None:
+    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError(
+            "ANTHROPIC_API_KEY environment variable is required. "
+            "JACKAL Hunter cycle requires LLM access. "
+            "Set the GitHub Secret ANTHROPIC_API_KEY to proceed."
+        )
+
+
 class JackalCore:
 
     def __init__(self):
@@ -143,6 +153,8 @@ class JackalCore:
 
 
 def main() -> None:
+    _check_llm_credentials()
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--force-hunt",   action="store_true",
                         help="장 마감 무시 강제 실행")
