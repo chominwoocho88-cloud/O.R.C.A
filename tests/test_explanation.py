@@ -344,7 +344,7 @@ class ExplanationIntegrationTests(unittest.TestCase):
         cls.scanner = _import_target("apps.jackal.scanner")
         cls.scanner.weights = {}
 
-    def test_hunter_alert_includes_explanation_block_and_truncates_regime(self):
+    def test_hunter_alert_splits_market_context_without_truncating_flow(self):
         alert = self.hunter._build_alert(_hunter_item(), _hunter_aria())
         self.assertIn("🧭 추천 이유", alert)
         self.assertIn("섹터로테이션", alert)
@@ -352,7 +352,24 @@ class ExplanationIntegrationTests(unittest.TestCase):
 
         regime_line = next(line for line in alert.splitlines() if line.startswith("시장 맥락:"))
         self.assertLessEqual(len(regime_line), self.explanation.HUNTER_LINE_BUDGETS["regime"])
-        self.assertIn("...", regime_line)
+        self.assertEqual(regime_line, "시장 맥락: ORCA risk-on")
+        flow_line = next(line for line in alert.splitlines() if line.startswith("유입:"))
+        self.assertIn("반도체/AI 테마로 이어지는 대형 성장주 수급 유입", flow_line)
+        self.assertIn("전력/인프라 관련 보조 수급", flow_line)
+        self.assertIn("역풍: 장기채와 방어주 선호", flow_line)
+        self.assertNotIn("...", regime_line)
+        self.assertNotIn("...", flow_line)
+
+    def test_hunter_summary_adds_star_legend_only_when_divergence_present(self):
+        item_without_div = _hunter_item()
+        summary = self.hunter._build_summary([item_without_div], _hunter_aria())
+        self.assertNotIn("★ = RSI 강세다이버전스", summary)
+
+        item_with_div = _hunter_item()
+        item_with_div["tech"] = {**item_with_div["tech"], "bullish_div": True}
+        summary = self.hunter._build_summary([item_with_div], _hunter_aria())
+        self.assertIn("★", summary)
+        self.assertIn("★ = RSI 강세다이버전스", summary)
 
     def test_scanner_alert_and_payload_include_reason_detail_components(self):
         quality = _scanner_quality()
@@ -376,7 +393,13 @@ class ExplanationIntegrationTests(unittest.TestCase):
 
         regime_line = next(line for line in alert.splitlines() if line.startswith("시장 맥락:"))
         self.assertLessEqual(len(regime_line), self.explanation.SCANNER_LINE_BUDGETS["regime"])
-        self.assertIn("...", regime_line)
+        self.assertEqual(regime_line, "시장 맥락: ORCA risk-on | 추세 상승추세")
+        flow_line = next(line for line in alert.splitlines() if line.startswith("유입:"))
+        self.assertIn("반도체/AI 테마로 이어지는 대형 성장주 수급 유입", flow_line)
+        self.assertIn("전력 인프라 테마 동반 강세", flow_line)
+        self.assertIn("역풍: 장기채와 방어주 선호", flow_line)
+        self.assertNotIn("...", regime_line)
+        self.assertNotIn("...", flow_line)
 
         entry = self.scanner._build_scan_log_entry(
             now_kst=self.scanner.datetime.now(self.scanner.KST),

@@ -175,22 +175,14 @@ def historical_alert_lines(
     lines = [
         "━━━━━━━━━━━━━━━━━━━━",
         "Historical Context",
-        f"Cluster: {historical_context.get('cluster_label') or historical_context.get('cluster_id')}",
-        f"Win rate (top 5): {float(historical_context.get('win_rate', 0.0)) * 100:.0f}%",
-        f"Avg value: {float(historical_context.get('avg_value', 0.0)):+.2f}%",
+        (
+            f"Win rate: {float(historical_context.get('win_rate', 0.0)) * 100:.0f}%"
+            f" | Avg: {float(historical_context.get('avg_value', 0.0)):+.2f}%"
+        ),
     ]
     adjustment = (final or {}).get("historical_adjustment")
     if historical_context.get("mode") == "adjust" and adjustment is not None:
         lines.append(f"Score adjustment: {float(adjustment):+.2f}")
-    examples = historical_context.get("lessons") or []
-    if examples:
-        lines.append("Similar examples:")
-        for lesson in examples[:3]:
-            value = float(lesson.get("lesson_value") or 0.0)
-            date = str(lesson.get("analysis_date") or "")[:10]
-            lines.append(
-                f"  - {lesson.get('ticker')} ({date}): {value:+.2f}% [{lesson.get('quality_tier')}]"
-            )
     return lines
 
 

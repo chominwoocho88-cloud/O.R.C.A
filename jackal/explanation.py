@@ -33,14 +33,14 @@ HUNTER_LINE_BUDGETS = {
     "family": 60,
     "core": 112,
     "swing": 72,
-    "regime": 82,
+    "regime": 120,
 }
 
 SCANNER_LINE_BUDGETS = {
     "family": 62,
     "core": 116,
     "swing": 88,
-    "regime": 88,
+    "regime": 120,
 }
 
 SCANNER_SWING_DEFAULTS = {
@@ -231,18 +231,22 @@ def build_scanner_peak_line(best_info: dict) -> str:
 
 
 def _join_market_labels(values: Iterable[str] | None, *, limit: int) -> str:
-    labels = [truncate_text(value, 16) for value in values or [] if str(value or "").strip()]
+    labels = [re.sub(r"\s+", " ", str(value or "")).strip() for value in values or [] if str(value or "").strip()]
     return ", ".join(labels[:limit])
 
 
 def _format_hunter_regime_context(aria: dict) -> str:
-    parts = [f"ORCA {str(aria.get('regime', '') or '').strip()}"]
+    return f"ORCA {str(aria.get('regime', '') or '').strip()}".strip()
+
+
+def _format_hunter_flow_context(aria: dict) -> str:
+    parts = []
     inflows = _join_market_labels(aria.get("key_inflows", []), limit=2)
     outflows = _join_market_labels(aria.get("key_outflows", []), limit=1)
     if inflows:
-        parts.append(f"유입 {inflows}")
+        parts.append(f"유입: {inflows}")
     if outflows:
-        parts.append(f"역풍 {outflows}")
+        parts.append(f"역풍: {outflows}")
     return " | ".join(_unique_nonempty(parts))
 
 
@@ -255,12 +259,17 @@ def _format_scanner_regime_context(aria: dict) -> str:
         sentiment_score = aria.get("sentiment_score")
         if sentiment_score not in (None, ""):
             parts.append(f"심리 {sentiment_score}")
+    return " | ".join(_unique_nonempty(parts))
+
+
+def _format_scanner_flow_context(aria: dict) -> str:
+    parts = []
     inflows = _join_market_labels(aria.get("key_inflows", []), limit=2)
     outflows = _join_market_labels(aria.get("key_outflows", []), limit=1)
     if inflows:
-        parts.append(f"유입 {inflows}")
+        parts.append(f"유입: {inflows}")
     if outflows:
-        parts.append(f"역풍 {outflows}")
+        parts.append(f"역풍: {outflows}")
     return " | ".join(_unique_nonempty(parts))
 
 
@@ -294,6 +303,9 @@ def build_hunter_explanation_lines(
     regime_context = _format_hunter_regime_context(aria)
     if regime_context:
         lines.append(_labeled_line("시장 맥락: ", regime_context, HUNTER_LINE_BUDGETS["regime"]))
+    flow_context = _format_hunter_flow_context(aria)
+    if flow_context:
+        lines.append(flow_context)
     return lines
 
 
@@ -322,6 +334,9 @@ def build_scanner_explanation_lines(
     regime_context = _format_scanner_regime_context(aria)
     if regime_context:
         lines.append(_labeled_line("시장 맥락: ", regime_context, SCANNER_LINE_BUDGETS["regime"]))
+    flow_context = _format_scanner_flow_context(aria)
+    if flow_context:
+        lines.append(flow_context)
     return lines
 
 

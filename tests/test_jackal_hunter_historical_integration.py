@@ -252,8 +252,11 @@ class HunterHistoricalIntegrationTests(unittest.TestCase):
             alert = hunter._build_alert(item, _aria())
 
         self.assertIn("Historical Context", alert)
-        self.assertIn("Similar examples", alert)
-        self.assertIn("AAA", alert)
+        self.assertIn("Win rate: 80% | Avg: +6.50%", alert)
+        self.assertNotIn("Cluster:", alert)
+        self.assertNotIn("Similar examples", alert)
+        self.assertNotIn("2026-04-01", alert)
+        self.assertNotIn("[high]", alert)
 
     def test_stage4_hunt_log_includes_historical_context(self):
         item = {
@@ -269,6 +272,7 @@ class HunterHistoricalIntegrationTests(unittest.TestCase):
         entry = hunter._build_hunt_log_entry(item, _aria())
 
         self.assertEqual(entry["historical_context"]["cluster_id"], "cluster_c00")
+        self.assertEqual(entry["historical_context"]["lessons"][0]["ticker"], "AAA")
         self.assertEqual(entry["historical_adjustment"], 2.5)
 
 

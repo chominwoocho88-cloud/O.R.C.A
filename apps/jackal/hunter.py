@@ -1768,6 +1768,8 @@ def _build_summary(top5: list, aria: dict) -> str:
             f"{f['final_score']:.0f}점 | RSI {tech['rsi']} | "
             f"5일 {tech['change_5d']:+.1f}% | {setup}"
         )
+    if any(x.get("tech", {}).get("bullish_div") for x in top5):
+        lines.append("★ = RSI 강세다이버전스")
     lines += [
         "━━━━━━━━━━━━━━━━━━━━",
         f"🌐 {aria['regime'][:35]}",
