@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-18 07:49 KST",
+  "collected_at": "2026-05-18 08:13 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
@@ -29,6 +29,19 @@
     "035720.KS"
   ],
   "regime": "",
-  "news_items": [],
-  "total": 0
+  "news_items": [
+    {
+      "ticker": "JPM",
+      "headline": "Dell Q1 earnings May 28; JPMorgan expects 25%+ EPS guidance raise on AI server strength",
+      "source": "24/7 Wall St, CNBC",
+      "data_pt": "Dell post May 28; supply visibility catching up to demand; JPMorgan $280 price target"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom (AVGO) -3.32% YTD; valuation pressure amid memory shortage concerns",
+      "source": "Market data provided",
+      "data_pt": "Broadcom: 425.19 (-3.32% from provided baseline); consolidation risk on 32% premium to 50-day MA in semiconductor sector"
+    }
+  ],
+  "total": 2
 }
