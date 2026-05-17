@@ -364,12 +364,51 @@ class ExplanationIntegrationTests(unittest.TestCase):
         item_without_div = _hunter_item()
         summary = self.hunter._build_summary([item_without_div], _hunter_aria())
         self.assertNotIn("★ = RSI 강세다이버전스", summary)
+        self.assertNotIn("[Devil:", summary)
 
         item_with_div = _hunter_item()
         item_with_div["tech"] = {**item_with_div["tech"], "bullish_div": True}
         summary = self.hunter._build_summary([item_with_div], _hunter_aria())
         self.assertIn("★", summary)
         self.assertIn("★ = RSI 강세다이버전스", summary)
+
+    def test_hunter_summary_marks_block_reason_priority(self):
+        item = _hunter_item()
+        item["final"] = {**item["final"], "mode": "차단", "final_score": 24}
+
+        item["devil"] = {
+            **item["devil"],
+            "thesis_killer_hit": True,
+            "is_dead_cat": True,
+            "structural_decline": True,
+            "main_risk": "실적 훼손",
+        }
+        summary = self.hunter._build_summary([item], _hunter_aria())
+        self.assertIn("24점 [Devil:TK]", summary)
+
+        item["devil"] = {
+            **item["devil"],
+            "thesis_killer_hit": False,
+            "is_dead_cat": True,
+        }
+        summary = self.hunter._build_summary([item], _hunter_aria())
+        self.assertIn("24점 [Devil:dead_cat]", summary)
+
+        item["devil"] = {
+            **item["devil"],
+            "is_dead_cat": False,
+            "structural_decline": True,
+        }
+        summary = self.hunter._build_summary([item], _hunter_aria())
+        self.assertIn("24점 [Devil:decline]", summary)
+
+        item["devil"] = {
+            **item["devil"],
+            "structural_decline": False,
+            "main_risk": "수급 약화",
+        }
+        summary = self.hunter._build_summary([item], _hunter_aria())
+        self.assertIn("24점 [Devil:risk]", summary)
 
     def test_scanner_alert_and_payload_include_reason_detail_components(self):
         quality = _scanner_quality()

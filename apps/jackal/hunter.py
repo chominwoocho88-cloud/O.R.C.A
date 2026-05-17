@@ -1692,6 +1692,25 @@ def _build_hunter_devil_line(devil: dict) -> str:
     return ""
 
 
+def _hunter_summary_block_badge(item: dict) -> str:
+    final = item.get("final", {}) or {}
+    devil = item.get("devil", {}) or {}
+    if "차단" not in str(final.get("mode", "")):
+        return ""
+
+    if devil.get("thesis_killer_hit"):
+        reason = "TK"
+    elif devil.get("is_dead_cat"):
+        reason = "dead_cat"
+    elif devil.get("structural_decline"):
+        reason = "decline"
+    elif str(devil.get("main_risk", "") or "").strip():
+        reason = "risk"
+    else:
+        reason = "차단"
+    return f" [Devil:{reason}]"
+
+
 def _build_alert(item: dict, aria: dict) -> str:
     ticker = item["ticker"]
     name = item["name"]
@@ -1763,9 +1782,10 @@ def _build_summary(top5: list, aria: dict) -> str:
         setup = x["analyst"].get("swing_setup","중립")
         icon  = {"강한반등":"🔥","반등가능":"🟢","중립":"⚪","추가하락":"🔴"}.get(setup,"⚪")
         div_mark = "★" if tech.get("bullish_div") else ""
+        block_badge = _hunter_summary_block_badge(x)
         lines.append(
             f"{icon} <b>{format_stock_display(x['ticker'], x.get('name'))}</b> {div_mark} "
-            f"{f['final_score']:.0f}점 | RSI {tech['rsi']} | "
+            f"{f['final_score']:.0f}점{block_badge} | RSI {tech['rsi']} | "
             f"5일 {tech['change_5d']:+.1f}% | {setup}"
         )
     if any(x.get("tech", {}).get("bullish_div") for x in top5):
@@ -1873,13 +1893,18 @@ def _build_hunt_log_entry(item: dict, aria: dict) -> dict:
         "signals_fired":     item["analyst"].get("signals_fired",[]),
         "devil_verdict":     devil.get("verdict",""),
         "devil_score":       devil["devil_score"],
+        "main_risk":         devil.get("main_risk", ""),
         "thesis_killer_hit": devil.get("thesis_killer_hit",False),
+        "is_dead_cat":       devil.get("is_dead_cat", False),
+        "structural_decline": devil.get("structural_decline", False),
         "devil_called":      devil.get("devil_called", True),
         "devil_parse_ok":    devil.get("devil_parse_ok", False),
         "devil_status":      devil.get("devil_status", devil_status),
         "devil_raw_excerpt": devil.get("devil_raw_excerpt"),
         "devil_render_mode": devil.get("devil_render_mode", _hunter_devil_render_mode(devil_status)),
         "final_score":       final["final_score"],
+        "final_label":       final.get("label", ""),
+        "final_diag":        final.get("diag"),
         "probability_adjustment": final.get("probability_adjustment", 0),
         "probability_samples": final.get("probability_samples", 0),
         "probability_win_rate": final.get("probability_win_rate"),

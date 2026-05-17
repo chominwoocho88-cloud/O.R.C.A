@@ -336,6 +336,41 @@ class HunterDevilStatusTests(unittest.TestCase):
         self.assertTrue(entry["devil_called"])
         self.assertFalse(entry["devil_parse_ok"])
 
+    def test_hunter_log_entry_persists_block_observability_fields(self):
+        item = {
+            "ticker": "TSM",
+            "name": "테스트종목",
+            "tech": _hunter_tech(),
+            "analyst": _hunter_analyst(),
+            "devil": {
+                "devil_score": 72,
+                "verdict": "반대",
+                "main_risk": "추세 재확인 전까지 위험",
+                "thesis_killer_hit": False,
+                "is_dead_cat": True,
+                "structural_decline": True,
+            },
+            "final": {
+                "final_score": 24,
+                "is_entry": False,
+                "mode": "차단",
+                "label": "Devil 차단",
+                "diag": {"block_reason": "dead_cat"},
+            },
+            "signal_family": "technical_oversold",
+            "raw_signal_family": "기술적과매도",
+            "s1_score": 91,
+            "s2_score": 99,
+        }
+        entry = self.hunter._build_hunt_log_entry(item, _hunter_aria())
+        self.assertEqual(entry["main_risk"], "추세 재확인 전까지 위험")
+        self.assertFalse(entry["thesis_killer_hit"])
+        self.assertTrue(entry["is_dead_cat"])
+        self.assertTrue(entry["structural_decline"])
+        self.assertEqual(entry["devil_verdict"], "반대")
+        self.assertEqual(entry["final_label"], "Devil 차단")
+        self.assertEqual(entry["final_diag"], {"block_reason": "dead_cat"})
+
 
 class ScannerDevilStatusTests(unittest.TestCase):
     @classmethod
