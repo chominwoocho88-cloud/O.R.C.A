@@ -4,17 +4,17 @@
 
 ### ORCA
 
-- `orca.main`: collects market data, runs the ORCA multi-agent analysis, stores reports, and reviews recent JACKAL candidates.
-- `orca.analysis`: builds baseline context, verification, lessons, and candidate-review logic.
-- `orca.state`: central SQLite spine for runs, predictions, backtests, candidate registry, candidate reviews, outcomes, and lessons.
-- `orca.research_report` / `orca.research_gate` / `orca.policy_promote`: research comparison, regression gating, and promotion decision flow.
+- `apps.orca.main`: collects market data, runs the ORCA multi-agent analysis, stores reports, and reviews recent JACKAL candidates.
+- `apps.orca.analysis`: builds baseline context, verification, lessons, and candidate-review logic.
+- `apps.orca.state`: central SQLite spine for runs, predictions, backtests, candidate registry, candidate reviews, outcomes, and lessons.
+- `apps.orca.research.research_report` / `apps.orca.research_gate` / `apps.orca.policy_promote`: research comparison, regression gating, and promotion decision flow.
 
 ### JACKAL
 
-- `jackal.hunter`: discovers candidate entries.
-- `jackal.scanner`: scores candidates with Analyst -> Devil -> Final logic.
-- `jackal.tracker`: resolves outcomes and refreshes weights.
-- `jackal.evolution`: updates learning state from completed outcomes.
+- `apps.jackal.hunter`: discovers candidate entries.
+- `apps.jackal.scanner`: scores candidates with Analyst -> Devil -> Final logic.
+- `apps.jackal.tracker`: resolves outcomes and refreshes weights.
+- `apps.jackal.evolution`: updates learning state from completed outcomes.
 - `jackal.probability`: reads candidate-lesson summaries and applies small score adjustments.
 - `jackal.families`: canonical signal-family taxonomy shared across Hunter, Scanner, and ORCA.
 
@@ -90,10 +90,10 @@ Before pushing to GitHub:
 2. Verify that no live secrets exist in tracked files.
 3. Run:
    - `python -m py_compile orca/*.py jackal/*.py`
-   - `python -m orca.research_report`
-   - `python -m orca.research_gate`
+   - `python -m apps.orca.research.research_report`
+   - `python -m apps.orca.research_gate`
 4. If API keys are available, run:
-   - `python -m orca.backtest --months 6 --walk-forward`
+   - `python -m apps.orca.backtest --months 6 --walk-forward`
    - `python -m jackal.backtest`
 5. Confirm that generated runtime artifacts are ignored by `.gitignore`.
 6. Push from a machine that has Git installed.

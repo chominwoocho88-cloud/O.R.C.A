@@ -103,7 +103,7 @@
 ### 위험 3: GitHub Actions 워크플로 깨짐
 
 대응:
-- python -m orca.main 같은 진입점 경로 변경 시 yml도 같이 수정
+- python -m apps.orca.main 같은 진입점 경로 변경 시 yml도 같이 수정
 - yml 변경은 같은 commit에 포함
 - 자동 cycle 결과 모니터링 필수
 

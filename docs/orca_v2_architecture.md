@@ -24,7 +24,7 @@
 
 ```mermaid
 flowchart LR
-  A["Scheduler / Manual Run"] --> B["python -m orca.main"]
+  A["Scheduler / Manual Run"] --> B["python -m apps.orca.main"]
   B --> C["Market Data Load"]
   C --> D["Verify Previous Predictions"]
   D --> E["Lessons / Baseline Injection"]
@@ -43,12 +43,12 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  A["Scheduler / GitHub Action"] --> B["python -m jackal.core"]
+  A["Scheduler / GitHub Action"] --> B["python -m apps.jackal.core"]
   B --> C["Shield"]
   C --> D["Hunter"]
   D --> E["Compact"]
   E --> F["Evolution"]
-  G["python -m jackal.tracker"] --> F
+  G["python -m apps.jackal.tracker"] --> F
   D --> H["hunt_log.json"]
   F --> I["jackal_weights.json"]
   F --> J["jackal_shadow_log.json"]
@@ -70,7 +70,7 @@ flowchart LR
 
 ### 3.1 Interface Drift
 
-- `orca.main`은 `build_baseline_context(MODE)`를 호출하지만, `orca.analysis`의 `build_baseline_context`는 `memory: list`를 기대한다.
+- `apps.orca.main`은 `build_baseline_context(MODE)`를 호출하지만, `apps.orca.analysis`의 `build_baseline_context`는 `memory: list`를 기대한다.
 - 이는 `MORNING` 이외 모드에서 baseline 로딩 경로가 실제 런타임 오류로 이어질 수 있음을 의미한다.
 - 이 문제는 "에이전트가 잘못 판단한다" 수준이 아니라 "파이프라인 인터페이스 계약이 느슨하다"는 더 큰 구조 문제의 신호다.
 

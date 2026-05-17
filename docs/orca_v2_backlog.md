@@ -1,4 +1,4 @@
-# ORCA v2 Execution Backlog
+﻿# ORCA v2 Execution Backlog
 
 이 문서는 `ORCA v2 Architecture Blueprint`를 실제 작업 단위로 쪼갠 실행용 백로그다.
 
@@ -107,7 +107,7 @@
 - 사용자 직접 요청 (`2026-04-21`)
 - Cross-sectional momentum factor (`Jegadeesh & Titman 1993` 이후 실증 축)
 - Summary Map `☐ Cross-stock correlation matrix`
-  - `docs/jackal/current-signals.md`
+  - `docs/archive/phase6/current-signals.md`
 
 왜 Phase 5 후인가:
 - Phase 5 없으면 scheduled run 에서 새 factor 의 shadow batch 누적이 이어지지 않음
@@ -128,7 +128,7 @@
 - `O'Neil CANSLIM` 의 relative strength 축
 - `Jegadeesh-Titman` momentum 실증 축
 - Summary Map `☐ Market benchmark relative strength line`
-  - `docs/jackal/current-signals.md`
+  - `docs/archive/phase6/current-signals.md`
 - 현재 sector ETF 대비 상대낙폭은 Hunter 에 부분 구현
   - `jackal/hunter.py:678-692`
 
@@ -154,7 +154,7 @@
 - 사용자 질문 `그래프 수렴 → 터짐`
 - Bollinger squeeze 는 breakout 임박 구간 탐지 패턴으로 자주 사용됨
 - Summary Map `☐ Squeeze 감지`
-  - `docs/jackal/current-signals.md`
+  - `docs/archive/phase6/current-signals.md`
 - 현재 구현은 `bb_width`, `bb_expanding` 까지 존재
   - `jackal/market_data.py:380-387`
   - `jackal/scanner.py:915-919`
@@ -179,11 +179,11 @@
 중복 확인:
 - 이 문서 내에 `Cross-stock correlation`, `Relative strength vs market`, `Squeeze + breakout direction` 항목은 기존에 없음
 - 현재 repo 에서 위 세 항목은 backlog 로 등록된 상태가 아니라 조사 문서의 현재 상태 설명으로만 존재
-  - `docs/jackal/current-signals.md:1004`
-  - `docs/jackal/current-signals.md:1052`
-  - `docs/jackal/current-signals.md:1086`
-  - `docs/jackal/current-signals.md:1090`
-  - `docs/jackal/current-signals.md:1096`
+  - `docs/archive/phase6/current-signals.md:1004`
+  - `docs/archive/phase6/current-signals.md:1052`
+  - `docs/archive/phase6/current-signals.md:1086`
+  - `docs/archive/phase6/current-signals.md:1090`
+  - `docs/archive/phase6/current-signals.md:1096`
 
 충돌 확인:
 - 직접 충돌하는 기존 backlog 항목은 없음

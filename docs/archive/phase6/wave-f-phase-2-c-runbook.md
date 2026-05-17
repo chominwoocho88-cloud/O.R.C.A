@@ -1,3 +1,6 @@
+﻿> 📦 Archived: 이 문서의 path는 Phase 0.2 이전 구조 기준입니다.
+> 현재 위치는 apps/orca/, apps/jackal/입니다.
+
 # Wave F Phase 2-C Runbook: Clustering CLI and Workflow
 
 ## 목적

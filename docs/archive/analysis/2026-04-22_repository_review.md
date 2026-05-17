@@ -1,3 +1,6 @@
+﻿> 📦 Archived: 이 문서의 path는 Phase 0.2 이전 구조 기준입니다.
+> 현재 위치는 apps/orca/, apps/jackal/입니다.
+
 # ARIA/JACKAL Repository Review
 이 문서는 `ARIA + JACKAL` 리포지터리의 현재 상태를 정적 코드 분석과 현재 워크스페이스 스냅샷 기준으로 정리한 참고 리포트다.
 작성 범위는 사용자 요청에 명시된 읽기 전용 입력 자료와 현재 레포 HEAD 기준 소스/워크플로우/테스트/보고 산출물이다.

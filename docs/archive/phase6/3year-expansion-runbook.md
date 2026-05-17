@@ -1,3 +1,6 @@
+﻿> 📦 Archived: 이 문서의 path는 Phase 0.2 이전 구조 기준입니다.
+> 현재 위치는 apps/orca/, apps/jackal/입니다.
+
 # 3년 Backtest Expansion Runbook
 
 Wave A 1년 bootstrap을 보존하면서 ORCA/JACKAL backtest 범위를 3년으로 확장하기 위한 운영 절차입니다. 이 문서는 Phase 6 P16 STEP 2-A에서 추가한 코드 인프라와 이후 실행 순서를 정리합니다.

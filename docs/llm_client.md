@@ -69,16 +69,16 @@ orca.lessons
 orca.breaking
 orca.calendar
 orca.postprocess
-orca.backtest
-jackal.hunter.suggest
-jackal.hunter.quick_scan
-jackal.hunter.analyst
-jackal.hunter.devil
-jackal.scanner.analyst
-jackal.scanner.devil
-jackal.scanner.suggest
-jackal.evolution
-jackal.compact
+apps.orca.backtest
+apps.jackal.hunter.suggest
+apps.jackal.hunter.quick_scan
+apps.jackal.hunter.analyst
+apps.jackal.hunter.devil
+apps.jackal.scanner.analyst
+apps.jackal.scanner.devil
+apps.jackal.scanner.suggest
+apps.jackal.evolution
+apps.jackal.compact
 ```
 
 ## Fail-Fast Mode
@@ -105,7 +105,7 @@ LLM credential is missing.
 - Call-site migration completed (Day 4). All ORCA and JACKAL callers import
   `shared.llm.client` directly.
 - Create `shared/broker/kis.py`.
-- Review deprecation of `jackal.shield.log_usage()` after JACKAL JSONL logging
+- Review deprecation of `apps.jackal.pipeline.shield.log_usage()` after JACKAL JSONL logging
   settles in production.
 - Build a dashboard comparing estimated cost in `orca_cost.json` with observed
   token usage in `llm_log.jsonl`.

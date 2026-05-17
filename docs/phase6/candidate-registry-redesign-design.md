@@ -1,4 +1,4 @@
-# Phase 6 Design: candidate_registry Redesign
+﻿# Phase 6 Design: candidate_registry Redesign
 Date: `2026-04-23`
 Authoring mode: `design analysis only`
 Implementation status: `not started`
@@ -21,7 +21,7 @@ It was not accepted as the long-term architecture.
 Evidence:
 - `docs/phase5/02-path-decision.md:24-32`
 - `docs/phase5/02-path-decision.md:90-97`
-- `docs/analysis/2026-04-22_repository_review.md:805-812`
+- `docs/archive/analysis/2026-04-22_repository_review.md:805-812`
 ### 0.2 Non-goals
 This document does not:
 - apply a schema migration
@@ -51,11 +51,11 @@ Those secondary writes are best-effort only.
 If `jackal_state.db` succeeds and candidate propagation fails, the system keeps the JACKAL state and only logs a warning to `stderr`.
 That means the persistence strategy is operationally stable but structurally incomplete.
 Evidence:
-- `docs/phase5/03-design.md:563-574`
+- `docs/archive/phase5/03-design.md:563-574`
 - `orca/state.py:1227-1243`
 - `orca/state.py:1352-1367`
 - `orca/state.py:1540-1555`
-- `docs/analysis/2026-04-22_repository_review.md:601-611`
+- `docs/archive/analysis/2026-04-22_repository_review.md:601-611`
 ### 0.5 Reader expectations
 A later implementation session should be able to read this document and then:
 - identify current owners and callers
@@ -240,7 +240,7 @@ Documented FK relationships:
 - `candidate_reviews.candidate_id -> candidate_registry.candidate_id`
 - `candidate_reviews.run_id -> runs.run_id`
 Evidence:
-- `docs/phase5/01-db-audit.md:333-342`
+- `docs/archive/phase5/01-db-audit.md:333-342`
 The design implication is important:
 - `candidate_registry` is the shared identity anchor
 - `candidate_outcomes` is subordinate to that identity
@@ -248,7 +248,7 @@ The design implication is important:
 - `candidate_reviews` connects candidate identity to ORCA runs
 This means ownership cannot be decided table-by-table without checking the graph.
 Evidence:
-- `docs/phase5/01-db-audit.md:451-462`
+- `docs/archive/phase5/01-db-audit.md:451-462`
 ### 1.4 Candidate-related helper functions in `orca/state.py`
 Current helper inventory:
 | Function | Lines | Purpose | Notes |
@@ -350,7 +350,7 @@ Failure policy:
 - do not raise new exception after primary commit
 Evidence:
 - `orca/state.py:1227-1243`
-- `docs/phase5/03-design.md:568-574`
+- `docs/archive/phase5/03-design.md:568-574`
 #### 1.7.2 `resolve_jackal_shadow_signal(...)`
 Definition:
 - `orca/state.py:1306-1472`
@@ -467,7 +467,7 @@ It is generated from JACKAL-origin event payloads during secondary propagation.
 At the same time, it is later used by ORCA-side review/lesson logic.
 That makes it neither a clean JACKAL learning table nor a clean ORCA-only review table.
 Evidence:
-- `docs/phase5/01-db-audit.md:852-858`
+- `docs/archive/phase5/01-db-audit.md:852-858`
 - `orca/state.py:2353-2463`
 - `orca/state.py:2544-2606`
 ### 1.13 Current ownership signals by table
@@ -525,8 +525,8 @@ Repository review identifies:
 - `record_candidate()` fan-in through the three bridge functions
 - cross-DB secondary propagation
 Evidence:
-- `docs/analysis/2026-04-22_repository_review.md:784-790`
-- `docs/analysis/2026-04-22_repository_review.md:810-812`
+- `docs/archive/analysis/2026-04-22_repository_review.md:784-790`
+- `docs/archive/analysis/2026-04-22_repository_review.md:810-812`
 Why that matters:
 - multiple runtime origins feed one shared sink
 - ownership is hard to reason about
@@ -537,7 +537,7 @@ Blind spot 1 from the review is specific:
 - candidate secondary write may fail
 - only `stderr` warning is recorded
 Evidence:
-- `docs/analysis/2026-04-22_repository_review.md:601-611`
+- `docs/archive/analysis/2026-04-22_repository_review.md:601-611`
 Operational meaning:
 - JACKAL learning loop can appear healthy
 - ORCA candidate spine can be empty or stale
@@ -546,8 +546,8 @@ Operational meaning:
 Schema ambiguity:
 - audit marked `candidate_outcomes`, `candidate_lessons`, and `candidate_reviews` as unclear-design tables
 Evidence:
-- `docs/phase5/01-db-audit.md:852-863`
-- `docs/phase5/01-db-audit.md:888-891`
+- `docs/archive/phase5/01-db-audit.md:852-863`
+- `docs/archive/phase5/01-db-audit.md:888-891`
 Code ambiguity:
 - `orca/state.py` contains both persistence plumbing and candidate-domain derivation logic
 - bridge functions route JACKAL writes into ORCA candidate tables
@@ -588,7 +588,7 @@ Current line count is not the point by itself.
 The structural point is that the candidate cluster keeps a large shared adapter alive.
 Repository review lists this explicitly as debt.
 Evidence:
-- `docs/analysis/2026-04-22_repository_review.md:805-812`
+- `docs/archive/analysis/2026-04-22_repository_review.md:805-812`
 This means candidate redesign is not isolated cleanup.
 It is also a prerequisite for removing or shrinking the shared adapter later.
 ### 2.9 Problem 8: migration complexity increases over time
@@ -658,7 +658,7 @@ Evidence:
 - `candidate_reviews.run_id -> runs.run_id` ties reviews to ORCA run tracking.
 - `candidate_lessons` and probability summaries are currently closer to ORCA analytics.
 Evidence:
-- `docs/phase5/01-db-audit.md:340-342`
+- `docs/archive/phase5/01-db-audit.md:340-342`
 - `orca/analysis_review.py:318-505`
 - `orca/postprocess.py:72-106`
 #### 3.1.5 PR 1 to PR 5 impact
@@ -702,7 +702,7 @@ Current table graph already leans ORCA in several places:
 - lessons feed ORCA postprocess and review logic
 Evidence:
 - `orca/state.py:268-353`
-- `docs/phase5/01-db-audit.md:340-342`
+- `docs/archive/phase5/01-db-audit.md:340-342`
 - `orca/analysis_review.py:318-505`
 - `orca/postprocess.py:72-106`
 #### 3.2.3 Potential advantages
@@ -767,8 +767,8 @@ Lessons and outcomes sit in between.
 - `candidate_reviews` also points back to `candidate_registry`.
 - Split ownership would introduce join boundaries across DBs or require denormalization.
 Evidence:
-- `docs/phase5/01-db-audit.md:333-342`
-- `docs/phase5/01-db-audit.md:451-462`
+- `docs/archive/phase5/01-db-audit.md:333-342`
+- `docs/archive/phase5/01-db-audit.md:451-462`
 #### 3.3.5 PR 1 to PR 5 impact
 PR 1:
 - no direct contract change, but more boundary failures become possible
@@ -1029,7 +1029,7 @@ Current fact:
 - candidate logic is one of the main reasons it remains shared
 Evidence:
 - `docs/phase5/02-path-decision.md:27`
-- `docs/analysis/2026-04-22_repository_review.md:805-812`
+- `docs/archive/analysis/2026-04-22_repository_review.md:805-812`
 - `orca/state.py:1174-1657`
 - `orca/state.py:2223-3247`
 As of `2026-04-23`, `docs/phase6/shared-adapter-split-design.md` is not present.
@@ -1162,14 +1162,14 @@ The final implementation should leave behind updated ownership notes, updated pe
 The redesign should be considered incomplete if candidate writes still depend on hidden secondary propagation with no explicit domain boundary, if PR 4 review behavior becomes implicit or broken, if ownership remains arguable after the migration, or if the shared adapter is still required specifically because candidate logic stayed ambiguous.
 ## Section 8: 참고 자료
 ### 8.1 Phase 5 source documents
-- `docs/phase5/01-db-audit.md`
+- `docs/archive/phase5/01-db-audit.md`
 - `docs/phase5/02-path-decision.md`
-- `docs/phase5/03-design.md`
+- `docs/archive/phase5/03-design.md`
 - `docs/phase5/04-workflow-design.md`
 ### 8.2 Repository review references
-- `docs/analysis/2026-04-22_repository_review.md:601-611`
-- `docs/analysis/2026-04-22_repository_review.md:784-790`
-- `docs/analysis/2026-04-22_repository_review.md:805-812`
+- `docs/archive/analysis/2026-04-22_repository_review.md:601-611`
+- `docs/archive/analysis/2026-04-22_repository_review.md:784-790`
+- `docs/archive/analysis/2026-04-22_repository_review.md:805-812`
 ### 8.3 Backlog reference
 - `docs/orca_v2_backlog.md:241-249`
 ### 8.4 Core code references

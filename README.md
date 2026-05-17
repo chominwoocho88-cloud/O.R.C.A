@@ -26,49 +26,49 @@
 python -m pip install -r requirements.txt
 
 python -m orca
-python -m orca.main
-python -m orca.backtest --months 6 --walk-forward
+python -m apps.orca.main
+python -m apps.orca.backtest --months 6 --walk-forward
 python -m orca.reset --orca
 
 python -m jackal
-python -m jackal.core
-python -m jackal.scanner
+python -m apps.jackal.core
+python -m apps.jackal.scanner
 python -m jackal.backtest
-python -m jackal.tracker
+python -m apps.jackal.tracker
 ```
 
 ## ORCA Package Map
 
-- `orca/main.py`: live orchestration and report assembly
-- `orca/analysis.py`: verification, lessons, baseline, candidate review
-- `orca/agents.py`: Hunter -> Analyst -> Devil -> Reporter
+- `apps/orca/main.py`: live orchestration and report assembly
+- `apps/orca/analysis.py`: verification, lessons, baseline, candidate review
+- `apps/orca/pipeline/agents.py`: Hunter -> Analyst -> Devil -> Reporter
 - `orca/data.py`: market-data collection and cost tracking
 - `orca/notify.py`: Telegram and scheduled notifications
-- `orca/state.py`: SQLite state spine, candidate registry, research history
-- `orca/research_report.py`: research comparison report
-- `orca/research_gate.py`: regression gate evaluation
-- `orca/policy_promote.py`: promotion decision builder
+- `apps/orca/state.py`: SQLite state spine, candidate registry, research history
+- `apps/orca/research/research_report.py`: research comparison report
+- `apps/orca/research_gate.py`: regression gate evaluation
+- `apps/orca/policy_promote.py`: promotion decision builder
 - `orca/dashboard.py`: dashboard renderer
-- `orca/paths.py`: canonical runtime paths
+- `shared/paths.py`: canonical runtime paths
 
 ## JACKAL Package Map
 
-- `jackal/core.py`: live opportunity-engine entrypoint
-- `jackal/hunter.py`: candidate discovery pipeline
-- `jackal/scanner.py`: watchlist timing evaluation (portfolio + candidate registry + recent recommendations)
-- `jackal/tracker.py`: outcome tracking and weight refresh
-- `jackal/evolution.py`: learning and weight evolution
+- `apps/jackal/core.py`: live opportunity-engine entrypoint
+- `apps/jackal/hunter.py`: candidate discovery pipeline
+- `apps/jackal/scanner.py`: watchlist timing evaluation (portfolio + candidate registry + recent recommendations)
+- `apps/jackal/tracker.py`: outcome tracking and weight refresh
+- `apps/jackal/evolution.py`: learning and weight evolution
 - `jackal/probability.py`: candidate lesson probability adjustment
 - `jackal/families.py`: canonical signal-family taxonomy
-- `jackal/shield.py`: budget and secret checks
-- `jackal/compact.py`: context compaction
+- `apps/jackal/pipeline/shield.py`: budget and secret checks
+- `apps/jackal/compact.py`: context compaction
 - `jackal/market_data.py`: market-data collection
-- `jackal/adapter.py`: ORCA context bridge
+- `apps/jackal/pipeline/adapter.py`: ORCA context bridge
 
 ## Learning Loop
 
 1. `JACKAL` finds candidates from hunt / scan / shadow flows.
-2. Candidates are written into `candidate_registry` inside `orca.state`.
+2. Candidates are written into `candidate_registry` inside `apps.orca.state`.
 3. `ORCA` reviews recent candidates against the current market regime.
 4. Tracker and shadow resolution write D1 / swing / follow-up outcomes.
 5. Candidate lessons are generated as `aligned_win`, `opposed_loss`, and similar labels.

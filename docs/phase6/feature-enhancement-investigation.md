@@ -1,4 +1,4 @@
-# Phase 6 Feature Enhancement Investigation
+﻿# Phase 6 Feature Enhancement Investigation
 작성 시점:
 2026-04-23
 상태:
@@ -99,7 +99,7 @@ Appendix E 요청별 체크리스트
 주요 조사 파일:
 `orca/run_cycle.py`
 보조 문서:
-`docs/jackal/current-signals.md`
+`docs/archive/phase6/current-signals.md`
 보조 문서:
 `docs/orca_v2_backlog.md`
 샘플 산출물:
@@ -1541,7 +1541,7 @@ RS signal 설계 + backtest 범위 정의
 - sample report probability summary empty: `reports/2026-04-22_morning.json:148-166`
 - backlog RS note: `docs/orca_v2_backlog.md:115-134`
 - backlog squeeze note: `docs/orca_v2_backlog.md:136-160`
-- current-signals baseline map: `docs/jackal/current-signals.md:1065-1093`
+- current-signals baseline map: `docs/archive/phase6/current-signals.md:1065-1093`
 # Appendix B: 학문 참고 문헌 메모
 - Jegadeesh & Titman (1993)
 - 메모: momentum factor의 대표 고전이다.

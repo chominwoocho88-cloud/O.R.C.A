@@ -1,4 +1,4 @@
-# External Review: 2026-04-22
+﻿# External Review: 2026-04-22
 
 **Status**: Reference material only. NOT authoritative.
 
@@ -24,7 +24,7 @@
 실제 진행 중인 작업 맥락은 다음 문서 참조:
 - docs/phase5/ 전체 (Phase 5 Path B)
 - docs/orca_v2_backlog.md (실행 대상 Backlog)
-- docs/jackal/current-signals.md (JACKAL 현재 신호)
+- docs/archive/phase6/current-signals.md (JACKAL 현재 신호)
 
 이 문서는 이하 원본 그대로 보존한다.
 

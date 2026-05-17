@@ -1,12 +1,12 @@
-# Phase 5-D-a: Workflow Preservation Design
+﻿# Phase 5-D-a: Workflow Preservation Design
 
 Date: `2026-04-22`  
 Scope decision: `Path B` workflow design only  
 Implementation status: `design only`  
 Related documents:
-- [01-db-audit.md](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/docs/phase5/01-db-audit.md)
+- [01-db-audit.md](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/docs/archive/phase5/01-db-audit.md)
 - [02-path-decision.md](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/docs/phase5/02-path-decision.md)
-- [03-design.md](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/docs/phase5/03-design.md)
+- [03-design.md](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/docs/archive/phase5/03-design.md)
 - [orca_v2_backlog.md](/C:/Users/skyco/OneDrive/문서/GitHub/O.R.C.A/docs/orca_v2_backlog.md)
 
 ## Section 1: 4 workflow 현재 구조 인벤토리
