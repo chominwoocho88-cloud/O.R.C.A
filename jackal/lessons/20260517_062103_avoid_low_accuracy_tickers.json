@@ -1,0 +1,7 @@
+{
+  "name": "avoid_low_accuracy_tickers",
+  "warning": "Do not issue strong buy signals on tickers with swing_accuracy below 56% such as 010950.KS at 53.5% or 003550.KS at 56.1%",
+  "reason": "Tickers below 56% accuracy generate more losing trades than winning ones, eroding portfolio performance over time",
+  "regime_context": "All regimes, especially 위험선호 where over-optimism inflates signal count",
+  "timestamp": "2026-05-17T06:21:03.967501"
+}

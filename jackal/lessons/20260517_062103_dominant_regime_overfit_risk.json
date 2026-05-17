@@ -1,0 +1,7 @@
+{
+  "name": "dominant_regime_overfit_risk",
+  "warning": "Avoid over-weighting signals calibrated purely on 위험선호 regime data given its 2225 sample dominance skewing overall model",
+  "reason": "The 위험선호 regime represents the vast majority of training samples at 69.7% accuracy, causing the model to subtly underfit minority regimes",
+  "regime_context": "위험선호",
+  "timestamp": "2026-05-17T06:21:03.967941"
+}

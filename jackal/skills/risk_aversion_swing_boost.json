@@ -1,7 +1,7 @@
 {
   "name": "risk_aversion_swing_boost",
   "description": "Increase signal confidence during 위험회피 regime due to above-average swing accuracy",
-  "trigger": "regime == 위험회피 AND swing_accuracy >= 75.0 AND sample_count >= 400",
-  "action": "Boost signal weight by +0.10 and prioritize momentum-reversal setups",
-  "created_at": "2026-05-17T05:21:56.072903"
+  "trigger": "regime == 위험회피 AND swing_accuracy >= 75.6 AND sample_count >= 455",
+  "action": "Apply +0.08 confidence multiplier to swing signals in 위험회피 regime",
+  "created_at": "2026-05-17T06:21:03.966656"
 }

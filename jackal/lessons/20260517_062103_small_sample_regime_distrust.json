@@ -1,0 +1,7 @@
+{
+  "name": "small_sample_regime_distrust",
+  "warning": "Do not rely on 100% accuracy readings from regimes with sample_count below 10 such as 위험선호(전환 경계) and 위험선호/위험회피 전환중",
+  "reason": "Sample sizes of 5 are statistically insignificant and 100% accuracy is an artifact of insufficient data, not genuine predictive power",
+  "regime_context": "위험선호(전환 경계), 위험선호/위험회피 전환중",
+  "timestamp": "2026-05-17T06:21:03.967708"
+}
