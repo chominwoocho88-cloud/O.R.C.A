@@ -821,7 +821,7 @@
     "outcome_swing_hit": null
   },
   {
-    "timestamp": "2026-05-17T14:21:30.197398+09:00",
+    "timestamp": "2026-05-17T19:07:20.717681+09:00",
     "ticker": "PFE",
     "name": "PFE",
     "price_at_hunt": 25.33,
@@ -848,11 +848,11 @@
     "signals_fired": [
       "rsi_oversold",
       "bullish_div",
-      "ma_support_proximity"
+      "bb_touch"
     ],
     "devil_verdict": "반대",
-    "devil_score": 72,
-    "thesis_killer_hit": false,
+    "devil_score": 68,
+    "thesis_killer_hit": true,
     "devil_called": true,
     "devil_parse_ok": true,
     "devil_status": "ok_with_objection",
@@ -941,7 +941,7 @@
     "outcome_swing_hit": null
   },
   {
-    "timestamp": "2026-05-17T14:21:30.237446+09:00",
+    "timestamp": "2026-05-17T19:07:20.774558+09:00",
     "ticker": "373220.KS",
     "name": "373220.KS",
     "price_at_hunt": 417000.0,
@@ -973,7 +973,7 @@
     ],
     "devil_verdict": "반대",
     "devil_score": 72,
-    "thesis_killer_hit": true,
+    "thesis_killer_hit": false,
     "devil_called": true,
     "devil_parse_ok": true,
     "devil_status": "ok_with_objection",
@@ -1182,7 +1182,7 @@
     "outcome_swing_hit": null
   },
   {
-    "timestamp": "2026-05-17T15:20:40.486302+09:00",
+    "timestamp": "2026-05-17T19:07:20.830501+09:00",
     "ticker": "WFC",
     "name": "WFC",
     "price_at_hunt": 73.42,
@@ -1211,7 +1211,7 @@
       "bb_touch"
     ],
     "devil_verdict": "반대",
-    "devil_score": 62,
+    "devil_score": 68,
     "thesis_killer_hit": false,
     "devil_called": true,
     "devil_parse_ok": true,
@@ -1301,7 +1301,7 @@
     "outcome_swing_hit": null
   },
   {
-    "timestamp": "2026-05-17T15:20:40.533373+09:00",
+    "timestamp": "2026-05-17T19:07:20.886267+09:00",
     "ticker": "NOC",
     "name": "NOC",
     "price_at_hunt": 540.69,
@@ -1320,15 +1320,15 @@
     "signal_family": "divergence",
     "signal_family_raw": "강세다이버전스",
     "signal_family_label": "강세다이버전스",
-    "analyst_score": 62,
-    "day1_score": 48,
+    "analyst_score": 58,
+    "day1_score": 42,
     "swing_score": 68,
     "entry_mode": "차단",
     "swing_setup": "반등가능",
     "signals_fired": [
       "rsi_oversold",
       "bullish_div",
-      "bb_extreme_touch"
+      "bb_extremelow"
     ],
     "devil_verdict": "반대",
     "devil_score": 72,
@@ -1421,7 +1421,7 @@
     "outcome_swing_hit": null
   },
   {
-    "timestamp": "2026-05-17T15:20:40.582880+09:00",
+    "timestamp": "2026-05-17T19:07:20.943478+09:00",
     "ticker": "RIVN",
     "name": "RIVN",
     "price_at_hunt": 13.79,

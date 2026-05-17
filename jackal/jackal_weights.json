@@ -1363,5 +1363,14 @@
       "source_type": "jackal_backtest_summary",
       "total": 3780
     }
+  },
+  "last_macro_gate": {
+    "risk_level": "normal",
+    "score_penalty": 5,
+    "vix": 18.4,
+    "yield_curve": 0.0,
+    "hy_chg5": -0.85,
+    "reason": "ARIA위험회피",
+    "checked_at": "2026-05-17T19:04:30.181013+09:00"
   }
 }
