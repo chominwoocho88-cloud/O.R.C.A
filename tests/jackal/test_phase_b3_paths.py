@@ -45,6 +45,11 @@ class PhaseB3PathsTests(unittest.TestCase):
         self.assertEqual(_USAGE_LOG.name, "jackal_usage_log.json")
         self.assertEqual(_USAGE_LOG.parent.name, "jackal")
 
+    def test_llm_log_is_shared_usage_ledger(self):
+        from shared.paths import DATA_DIR, LLM_LOG_FILE
+        self.assertEqual(LLM_LOG_FILE.parent, DATA_DIR)
+        self.assertEqual(LLM_LOG_FILE.name, "llm_log.jsonl")
+
 
 if __name__ == "__main__":
     unittest.main()

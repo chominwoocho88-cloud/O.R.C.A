@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from shared.paths import JACKAL_LEGACY_DIR, JACKAL_USAGE_LOG_FILE
+from shared.llm.usage_reader import read_jackal_today_tokens, read_jackal_tokens_by_date
 
 log = logging.getLogger("jackal_shield")
 
@@ -123,23 +124,17 @@ class JackalShield:
     # ?? ?좏겙 ?덉궛 泥댄겕 (Bug Fix: usage_log ?곗꽑) ??????????????????
     def _check_budget(self) -> dict:
         """
-        [Fix] jackal_usage_log.json?먯꽌 ?ㅻ뒛 ??API ?좏겙 ?⑹궛.
-        usage_log ?놁쑝硫?compact_log濡??대갚 (援щ쾭???명솚).
+        Read actual JACKAL usage from data/llm_log.jsonl.
+        Fall back to compact_log when no shared LLM ledger entries exist.
         """
         today = datetime.now().date().isoformat()
 
-        # 1?쒖쐞: usage_log (?ㅼ젣 API ?좏겙)
-        usage_logs = self._load_usage_log()
-        if usage_logs:
-            today_tokens = sum(
-                e.get("total_tokens", 0)
-                for e in usage_logs
-                if e.get("timestamp", "")[:10] == today
-            )
+        today_tokens = read_jackal_today_tokens(today=today)
+        if today_tokens > 0:
             return {
                 "today_tokens": today_tokens,
                 "exceeded":     today_tokens > _DAILY_TOKEN_BUDGET,
-                "source":       "usage_log",
+                "source":       "llm_log",
             }
 
         # ?대갚: compact_log
@@ -161,18 +156,17 @@ class JackalShield:
         yesterday = (today - timedelta(days=1)).isoformat()
         today_str = today.isoformat()
 
-        usage_logs = self._load_usage_log()
-        if usage_logs:
-            token_key = "total_tokens"
-            logs      = usage_logs
+        usage_by_date = read_jackal_tokens_by_date()
+        if usage_by_date:
+            today_t = usage_by_date.get(today_str, 0)
+            yest_t = usage_by_date.get(yesterday, 0)
         else:
             token_key = "tokens_before"
             logs      = self._load_compact_log()
-
-        today_t = sum(e.get(token_key, 0) for e in logs
-                      if e.get("timestamp", "")[:10] == today_str)
-        yest_t  = sum(e.get(token_key, 0) for e in logs
-                      if e.get("timestamp", "")[:10] == yesterday)
+            today_t = sum(e.get(token_key, 0) for e in logs
+                          if e.get("timestamp", "")[:10] == today_str)
+            yest_t  = sum(e.get(token_key, 0) for e in logs
+                          if e.get("timestamp", "")[:10] == yesterday)
 
         if yest_t == 0:
             return {"detected": False, "ratio": 0.0}
@@ -235,6 +229,12 @@ class JackalShield:
 def log_usage(caller: str, input_tokens: int, output_tokens: int,
               model: str = "unknown") -> None:
     """
+    [DEPRECATED] Use shared LLMClient logging.
+
+    JACKAL usage tracking migrated to data/llm_log.jsonl via LLMClient
+    JSONL append. This helper is preserved for backward compatibility and
+    will be removed in a future sprint after operational validation.
+
     API ?몄텧 ?좏겙??jackal_usage_log.json??湲곕줉.
     Shield._check_budget()?????뚯씪???쎌뼱 ?ㅻ퉬?⑹쓣 異붿쟻?쒕떎.
 

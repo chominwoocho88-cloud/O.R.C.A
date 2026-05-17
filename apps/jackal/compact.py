@@ -17,6 +17,7 @@ import os
 from datetime import datetime, date
 
 from shared.llm.client import LLMClient
+from shared.llm.usage_reader import read_jackal_today_tokens
 from shared.paths import ACCURACY_FILE, JACKAL_LEGACY_DIR, JACKAL_USAGE_LOG_FILE
 
 log = logging.getLogger("jackal_compact")
@@ -81,9 +82,13 @@ class JackalCompact:
     # ?? ?ㅻ뒛 ?좏겙 ?먯껜 怨꾩궛 ????????????????????????????????????????
     def _get_today_tokens(self) -> int:
         """
-        jackal_usage_log.json?먯꽌 ?ㅻ뒛 ?ㅼ젣 ?뚮え ?좏겙 ?⑹궛.
-        ?뚯씪 ?놁쑝硫?0 諛섑솚.
+        Read actual JACKAL tokens from data/llm_log.jsonl.
+        Deprecated jackal_usage_log.json remains as a temporary fallback.
         """
+        llm_tokens = read_jackal_today_tokens()
+        if llm_tokens > 0:
+            return llm_tokens
+
         if not _USAGE_LOG.exists():
             return 0
         try:
