@@ -1,0 +1,7 @@
+{
+  "name": "scan_alert_accuracy_warning",
+  "warning": "Do not treat scan alerts as confirmed signals when correct and wrong counts are both 0",
+  "reason": "scan_summary shows 2 alerts with 0 correct and 0 wrong, meaning outcome is unresolved and accuracy is undefined",
+  "regime_context": "All regimes",
+  "timestamp": "2026-05-17T05:21:56.074274"
+}

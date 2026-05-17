@@ -1,0 +1,7 @@
+{
+  "name": "small_sample_overfit_guard",
+  "warning": "Do not over-weight 100% accuracy signals from regimes with sample_count <= 5",
+  "reason": "위험선호(전환 경계) and 위험선호/위험회피 전환중 show 100% accuracy but only 5 samples each, making results statistically unreliable",
+  "regime_context": "위험선호(전환 경계), 위험선호/위험회피 전환중",
+  "timestamp": "2026-05-17T05:21:56.074024"
+}

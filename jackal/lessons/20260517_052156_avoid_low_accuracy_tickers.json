@@ -1,0 +1,7 @@
+{
+  "name": "avoid_low_accuracy_tickers",
+  "warning": "Do not generate strong buy signals for tickers with swing_accuracy below 58%",
+  "reason": "Tickers like 003550.KS (56.1%) and 010950.KS (53.5%) show below-threshold accuracy indicating unreliable swing patterns",
+  "regime_context": "All regimes, especially 위험선호",
+  "timestamp": "2026-05-17T05:21:56.073717"
+}
