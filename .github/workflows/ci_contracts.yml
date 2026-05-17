@@ -32,12 +32,12 @@ jobs:
       - name: Run contract tests
         run: |
           python -m unittest \
-            tests.test_contracts_pydantic \
-            tests.test_contracts_envelope \
-            tests.test_contracts_alpha \
-            tests.test_contracts_outcome \
-            tests.test_contracts_memory \
-            tests.test_contracts_memory_injection \
+            tests.shared.test_contracts_pydantic \
+            tests.shared.test_contracts_envelope \
+            tests.shared.test_contracts_alpha \
+            tests.shared.test_contracts_outcome \
+            tests.shared.test_contracts_memory \
+            tests.shared.test_contracts_memory_injection \
             -v
 
       - name: Requirements drift report

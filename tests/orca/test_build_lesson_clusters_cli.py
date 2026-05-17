@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import contextlib
+import importlib
 import io
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,6 +16,8 @@ from scripts import build_lesson_clusters
 
 class BuildLessonClustersCliTests(unittest.TestCase):
     def setUp(self):
+        global state
+        state = importlib.import_module("apps.orca.state")
         self.tmpdir = tempfile.mkdtemp()
         self.state_db = Path(self.tmpdir) / "orca_state.db"
         self.jackal_db = Path(self.tmpdir) / "jackal_state.db"
@@ -21,6 +25,14 @@ class BuildLessonClustersCliTests(unittest.TestCase):
             patch.object(state, "STATE_DB_FILE", self.state_db),
             patch.object(state, "JACKAL_DB_FILE", self.jackal_db),
         ]
+        lesson_clustering = sys.modules.get("orca.lesson_clustering")
+        if lesson_clustering is not None and getattr(lesson_clustering, "state", None) is not state:
+            self.patchers.extend(
+                [
+                    patch.object(lesson_clustering.state, "STATE_DB_FILE", self.state_db),
+                    patch.object(lesson_clustering.state, "JACKAL_DB_FILE", self.jackal_db),
+                ]
+            )
         for patcher in self.patchers:
             patcher.start()
         state.init_state_db()

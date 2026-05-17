@@ -15,7 +15,14 @@ from orca import fdr_fetch
 from shared.market_data import fetch as market_fetch
 
 
-ROOT = Path(__file__).resolve().parents[1]
+def _repo_root() -> Path:
+    for path in Path(__file__).resolve().parents:
+        if (path / "shared" / "market_data").is_dir() and (path / "orca").is_dir():
+            return path
+    raise RuntimeError("Repository root not found from FDR integration test")
+
+
+ROOT = _repo_root()
 
 
 def _fdr_frame(values: list[float]) -> pd.DataFrame:

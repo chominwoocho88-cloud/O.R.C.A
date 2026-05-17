@@ -16,6 +16,13 @@ from orca import data as orca_data
 from shared.market_data import fetch as market_fetch
 
 
+def _repo_root() -> Path:
+    for path in Path(__file__).resolve().parents:
+        if (path / "apps" / "orca").is_dir() and (path / "shared" / "market_data").is_dir():
+            return path
+    raise RuntimeError("Repository root not found from Wave G STEP 2-4 test")
+
+
 def _history(values: list[float]) -> pd.DataFrame:
     return pd.DataFrame(
         {
@@ -95,7 +102,7 @@ class WaveGStep24MigrationTests(unittest.TestCase):
         self.assertEqual(points, [])
 
     def test_context_snapshot_and_data_have_no_direct_yfinance_contract(self):
-        root = Path(__file__).resolve().parents[1]
+        root = _repo_root()
         for relative in ("orca/context_snapshot.py", "orca/data.py"):
             text = (root / relative).read_text(encoding="utf-8")
             self.assertNotIn("import yfinance", text)

@@ -10,7 +10,14 @@ import unittest
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+def _repo_root() -> Path:
+    for path in Path(__file__).resolve().parents:
+        if (path / "apps" / "orca").is_dir() and (path / "orca").is_dir():
+            return path
+    raise RuntimeError("Repository root not found from import structure test")
+
+
+ROOT = _repo_root()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 

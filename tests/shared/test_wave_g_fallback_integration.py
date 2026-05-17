@@ -15,7 +15,14 @@ from orca import context_market_data
 from shared.market_data import fetch as market_fetch
 
 
-ROOT = Path(__file__).resolve().parents[1]
+def _repo_root() -> Path:
+    for path in Path(__file__).resolve().parents:
+        if (path / ".github" / "workflows").is_dir():
+            return path
+    raise RuntimeError("Repository root not found from Wave G fallback test")
+
+
+ROOT = _repo_root()
 
 
 def _frame(values: list[float]) -> pd.DataFrame:

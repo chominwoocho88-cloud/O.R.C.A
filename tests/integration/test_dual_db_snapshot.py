@@ -13,7 +13,14 @@ from pathlib import Path
 from unittest.mock import patch
 
 
-ROOT = Path(__file__).resolve().parents[1]
+def _repo_root() -> Path:
+    for path in Path(__file__).resolve().parents:
+        if (path / "shared" / "snapshot").is_dir() and (path / "data").is_dir():
+            return path
+    raise RuntimeError("Repository root not found from dual DB snapshot test")
+
+
+ROOT = _repo_root()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 

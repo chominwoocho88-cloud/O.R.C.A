@@ -10,7 +10,14 @@ from pathlib import Path
 from unittest.mock import patch
 
 
-ROOT = Path(__file__).resolve().parents[1]
+def _repo_root() -> Path:
+    for path in Path(__file__).resolve().parents:
+        if (path / "apps" / "orca").is_dir() and (path / "shared").is_dir():
+            return path
+    raise RuntimeError("Repository root not found from verification and state test")
+
+
+ROOT = _repo_root()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 

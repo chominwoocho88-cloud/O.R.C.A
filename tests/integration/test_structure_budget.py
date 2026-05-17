@@ -20,7 +20,14 @@ from collections import defaultdict
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+def _repo_root() -> Path:
+    for path in Path(__file__).resolve().parents:
+        if (path / "apps").is_dir() and (path / "shared").is_dir():
+            return path
+    raise RuntimeError("Repository root not found from structure budget test")
+
+
+ROOT = _repo_root()
 
 
 FILE_SIZE_BUDGET = {

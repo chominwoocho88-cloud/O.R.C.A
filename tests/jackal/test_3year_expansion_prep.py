@@ -12,7 +12,14 @@ from jackal import backtest_materialization as materialization
 from apps.orca import state
 
 
-ROOT = Path(__file__).resolve().parents[1]
+def _repo_root() -> Path:
+    for path in Path(__file__).resolve().parents:
+        if (path / ".github" / "workflows").is_dir() and (path / "scripts").is_dir():
+            return path
+    raise RuntimeError("Repository root not found from 3-year expansion prep test")
+
+
+ROOT = _repo_root()
 
 
 def _workflow_text(name: str) -> str:
