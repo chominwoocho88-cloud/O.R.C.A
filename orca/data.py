@@ -8,6 +8,7 @@ sys.stderr.reconfigure(encoding="utf-8")
 KST=timezone(timedelta(hours=9))
 from shared.market_data.fetch import fetch_latest_close, fetch_put_call_ratio_summary
 from .notify_transport import send_message
+from shared.llm.usage_reader import read_orca_usage_by_month
 from shared.paths import COST_FILE, DATA_FILE
 _CORE={"sp500","nasdaq","vix","kospi"}
 KisClient = None
@@ -320,6 +321,17 @@ def update_cost(mode="MORNING"):
     months=sorted(cost["monthly_runs"].keys())
     for old in months[:-3]: del cost["monthly_runs"][old]
     COST_FILE.write_text(json.dumps(cost,ensure_ascii=False,indent=2),encoding="utf-8"); return cost
+
+def sync_actual_usage(cost_path=None, log_path=None):
+    """Sync ORCA actual LLM usage from data/llm_log.jsonl into orca_cost.json."""
+    path = Path(cost_path) if cost_path is not None else COST_FILE
+    if path.exists():
+        cost = json.loads(path.read_text(encoding="utf-8"))
+    else:
+        cost = {"total_runs":0,"monthly_runs":{},"estimated_cost_usd":0.0,"last_run":""}
+    cost["monthly_actual_usage"] = read_orca_usage_by_month(log_path=log_path)
+    path.write_text(json.dumps(cost, ensure_ascii=False, indent=2), encoding="utf-8")
+    return cost
 
 def get_monthly_cost_summary():
     cost=load_cost(); month=datetime.now(KST).strftime("%Y-%m"); m=cost.get("monthly_runs",{}).get(month,{})

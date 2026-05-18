@@ -190,6 +190,7 @@ class TestPR1HealthCodes(unittest.TestCase):
         "external_data_degraded",
         "notification_failed",
         "context_snapshot_failed",
+        "actual_usage_sync_failed",
     }
 
     def test_expected_unique_health_codes_exist(self):

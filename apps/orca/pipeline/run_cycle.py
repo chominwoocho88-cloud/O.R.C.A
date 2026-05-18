@@ -34,7 +34,7 @@ from apps.orca.analysis import (
 )
 from orca.brand import ORCA_NAME
 from orca.compat import get_orca_flag
-from orca.data import fetch_all_market_data, get_monthly_cost_summary, update_cost
+from orca.data import fetch_all_market_data, get_monthly_cost_summary, sync_actual_usage, update_cost
 from shared.paths import REPORTS_DIR
 from apps.orca.state import finish_run as state_finish_run
 from apps.orca.state import start_run as state_start_run
@@ -482,6 +482,17 @@ def run_orca_cycle(*, mode: str, memory: list) -> None:
         present.print_report(report, len(memory) + 1)
         _print_health_badge()
         present.send_final_report(report, len(memory) + 1)
+
+        try:
+            sync_actual_usage()
+        except Exception as usage_err:
+            health_tracker.record_exception(
+                "actual_usage_sync_failed",
+                "orca/run_cycle.py::run_orca_cycle",
+                usage_err,
+                message="actual LLM usage sync failed",
+            )
+            present.console.print("[yellow]Actual usage sync skipped: " + str(usage_err) + "[/yellow]")
 
         _finish_state(
             "completed",
