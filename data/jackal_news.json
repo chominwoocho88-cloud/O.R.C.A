@@ -1,26 +1,6 @@
 {
-  "collected_at": "2026-05-18 08:13 KST",
+  "collected_at": "2026-05-18 22:03 KST",
   "tickers": [
-    "252670.KS",
-    "114800.KS",
-    "252710.KS",
-    "Q530036",
-    "003280.KS",
-    "462330.KS",
-    "001740.KS",
-    "018880.KS",
-    "251340.KS",
-    "233740.KS",
-    "RIVN",
-    "NOC",
-    "WFC",
-    "373220.KS",
-    "PFE",
-    "BAC",
-    "JPM",
-    "068270.KS",
-    "207940.KS",
-    "086520.KS",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -31,17 +11,47 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "JPM",
-      "headline": "Dell Q1 earnings May 28; JPMorgan expects 25%+ EPS guidance raise on AI server strength",
-      "source": "24/7 Wall St, CNBC",
-      "data_pt": "Dell post May 28; supply visibility catching up to demand; JPMorgan $280 price target"
+      "ticker": "NVDA",
+      "headline": "Target and Walmart earnings scheduled Wed May 22 after NVDA earnings",
+      "source": "TheStreet May 18 2026",
+      "data_pt": "Target (TGT) reports Wed May 20; Walmart (WMT) reports Thu May 21"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Nvidia faces pullback amid bubble concerns ahead of Q1 earnings; analysts warn of valuation risks",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK Hynix surges on strong AI demand and chip price increases; Bernstein bullish on memory stocks",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics faces labor union strike threat and profit-taking pressure; government mediation ongoing",
+      "impact": "bearish",
+      "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom (AVGO) -3.32% YTD; valuation pressure amid memory shortage concerns",
-      "source": "Market data provided",
-      "data_pt": "Broadcom: 425.19 (-3.32% from provided baseline); consolidation risk on 32% premium to 50-day MA in semiconductor sector"
+      "headline": "Broadcom stock rallies on AI semiconductor demand; Wells Fargo raises price target to $545",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "466920.KS",
+      "headline": "SOL Korea High Dividend ETF surpasses 5 billion won in net assets; strong financial stock performance",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "Kakao underperforms despite strong Q1 earnings; AI business profitability concerns weigh on stock",
+      "impact": "bearish",
+      "source": "web_search"
     }
   ],
-  "total": 2
+  "total": 7
 }
