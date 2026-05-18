@@ -2,22 +2,33 @@
 
 from __future__ import annotations
 
+import importlib
 import time
-
-from anthropic import (
-    APIConnectionError,
-    APIStatusError,
-    APITimeoutError,
-    Anthropic,
-    AuthenticationError,
-    InternalServerError,
-    NotFoundError,
-    PermissionDeniedError,
-    RateLimitError,
-)
 
 from shared.llm.client import LLMResponse
 from shared.llm.providers.base import LLMProviderRequest
+
+
+_anthropic = importlib.import_module("anthropic")
+Anthropic = getattr(_anthropic, "Anthropic")
+_DEFAULT_ANTHROPIC = Anthropic
+
+
+def _exception_class(name: str) -> type[BaseException]:
+    cls = getattr(_anthropic, name, None)
+    if isinstance(cls, type) and issubclass(cls, BaseException):
+        return cls
+    return type(name, (Exception,), {})
+
+
+APIConnectionError = _exception_class("APIConnectionError")
+APIStatusError = _exception_class("APIStatusError")
+APITimeoutError = _exception_class("APITimeoutError")
+AuthenticationError = _exception_class("AuthenticationError")
+InternalServerError = _exception_class("InternalServerError")
+NotFoundError = _exception_class("NotFoundError")
+PermissionDeniedError = _exception_class("PermissionDeniedError")
+RateLimitError = _exception_class("RateLimitError")
 
 
 class AnthropicProvider:
@@ -43,7 +54,7 @@ class AnthropicProvider:
 
     def __init__(self, api_key: str) -> None:
         self.api_key = api_key
-        self._client = Anthropic(api_key=api_key)
+        self._client = self._anthropic_client_class()(api_key=api_key)
 
     def call_once(self, request: LLMProviderRequest) -> LLMResponse:
         """Make one Anthropic SDK call and return normalized response metadata."""
@@ -92,6 +103,13 @@ class AnthropicProvider:
         if request.use_search:
             kwargs["tools"] = [{"type": "web_search_20250305", "name": "web_search"}]
         return kwargs
+
+    @staticmethod
+    def _anthropic_client_class():
+        if Anthropic is not _DEFAULT_ANTHROPIC:
+            return Anthropic
+        current = getattr(importlib.import_module("anthropic"), "Anthropic", None)
+        return current or Anthropic
 
     @classmethod
     def _extract_response(

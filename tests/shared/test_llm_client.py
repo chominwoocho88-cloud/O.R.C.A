@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import io
 import importlib
 import json
 import os
@@ -99,6 +100,15 @@ def _anthropic_module(*, stream_factory=None, exception: Exception | None = None
     class InternalServerError(Exception):
         pass
 
+    class APIConnectionError(Exception):
+        pass
+
+    class APITimeoutError(Exception):
+        pass
+
+    class APIStatusError(Exception):
+        pass
+
     class RateLimitError(Exception):
         pass
 
@@ -120,6 +130,9 @@ def _anthropic_module(*, stream_factory=None, exception: Exception | None = None
     module.PermissionDeniedError = PermissionDeniedError
     module.NotFoundError = NotFoundError
     module.InternalServerError = InternalServerError
+    module.APIConnectionError = APIConnectionError
+    module.APITimeoutError = APITimeoutError
+    module.APIStatusError = APIStatusError
     module.RateLimitError = RateLimitError
 
     if exception_name is not None:
@@ -131,9 +144,28 @@ def _anthropic_module(*, stream_factory=None, exception: Exception | None = None
 def _patched_anthropic(module):
     previous = sys.modules.get("anthropic")
     sys.modules["anthropic"] = module
+    provider_module = sys.modules.get("shared.llm.providers.anthropic")
+    provider_previous = {}
+    if provider_module is not None:
+        for name in (
+            "Anthropic",
+            "AuthenticationError",
+            "PermissionDeniedError",
+            "NotFoundError",
+            "InternalServerError",
+            "APIConnectionError",
+            "APITimeoutError",
+            "APIStatusError",
+            "RateLimitError",
+        ):
+            provider_previous[name] = getattr(provider_module, name, None)
+            setattr(provider_module, name, getattr(module, name))
     try:
         yield
     finally:
+        if provider_module is not None:
+            for name, value in provider_previous.items():
+                setattr(provider_module, name, value)
         if previous is None:
             sys.modules.pop("anthropic", None)
         else:
@@ -193,6 +225,7 @@ class LLMClientTests(unittest.TestCase):
             self.assertEqual(response.cache_creation_tokens, 11)
             self.assertEqual(response.server_tool_use_web_search_requests, 2)
             self.assertEqual(response.service_tier, "standard")
+            self.assertEqual(response.attempt, 1)
 
             event = json.loads(log_path.read_text(encoding="utf-8").strip())
             self.assertEqual(event["type"], "success")
@@ -201,6 +234,25 @@ class LLMClientTests(unittest.TestCase):
             self.assertEqual(event["web_search_requests"], 2)
             self.assertEqual(event["service_tier"], "standard")
             self.assertNotIn("server_tool_use_web_search_requests", event)
+            self.assertEqual(
+                list(event.keys()),
+                [
+                    "ts",
+                    "type",
+                    "call_site",
+                    "model",
+                    "input_tokens",
+                    "output_tokens",
+                    "cache_read_tokens",
+                    "cache_creation_tokens",
+                    "web_search_count",
+                    "service_tier",
+                    "stop_reason",
+                    "elapsed_ms",
+                    "attempt",
+                    "web_search_requests",
+                ],
+            )
 
     def test_call_auth_failure_logs_and_raises_with_standard_message(self):
         llm = self._client_module()
@@ -238,6 +290,10 @@ class LLMClientTests(unittest.TestCase):
                     self.assertEqual(event["type"], "failure")
                     self.assertEqual(event["error_type"], error_type)
                     self.assertEqual(event["message"], message)
+                    self.assertEqual(
+                        list(event.keys()),
+                        ["ts", "type", "call_site", "error_type", "message", "attempt", "elapsed_ms", "model"],
+                    )
 
     def test_call_retry_exhausted(self):
         llm = self._client_module()
@@ -261,6 +317,28 @@ class LLMClientTests(unittest.TestCase):
             self.assertEqual(event["error_type"], "retry_exhausted")
             self.assertEqual(event["attempt"], 2)
 
+    def test_provider_retry_tuple_is_ignored_for_connection_errors(self):
+        llm = self._client_module()
+        module = _anthropic_module(exception_name="APIConnectionError")
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir, _patched_anthropic(module):
+            log_path = Path(tmpdir) / "llm.jsonl"
+            client = llm.LLMClient("test-key", log_path=log_path)
+            with self.assertRaises(module.APIConnectionError):
+                client.call(
+                    system="sys",
+                    user="user",
+                    model="claude-test",
+                    max_tokens=100,
+                    max_retries=2,
+                    call_site="orca.connection",
+                )
+            lines = log_path.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lines), 1)
+            event = json.loads(lines[-1])
+            self.assertEqual(event["type"], "failure")
+            self.assertEqual(event["error_type"], "APIConnectionError")
+            self.assertEqual(event["attempt"], 1)
+
     def test_call_web_search_count(self):
         llm = self._client_module()
 
@@ -271,15 +349,45 @@ class LLMClientTests(unittest.TestCase):
             _anthropic_module(stream_factory=stream_factory)
         ):
             client = llm.LLMClient("test-key", log_path=Path(tmpdir) / "llm.jsonl")
-            response = client.call(
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                response = client.call(
+                    system="sys",
+                    user="user",
+                    model="claude-test",
+                    max_tokens=100,
+                    use_search=True,
+                    call_site="orca.search",
+                )
+            self.assertEqual(response.web_search_count, 3)
+            self.assertNotIn("Search [", stdout.getvalue())
+
+    def test_call_passes_provider_request_kwargs(self):
+        llm = self._client_module()
+        captured = {}
+
+        def stream_factory(kwargs):
+            captured.update(kwargs)
+            return _FakeStream(text="provider")
+
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir, _patched_anthropic(
+            _anthropic_module(stream_factory=stream_factory)
+        ):
+            client = llm.LLMClient("test-key", log_path=Path(tmpdir) / "llm.jsonl")
+            client.call(
                 system="sys",
                 user="user",
                 model="claude-test",
                 max_tokens=100,
                 use_search=True,
-                call_site="orca.search",
+                call_site="orca.provider",
             )
-            self.assertEqual(response.web_search_count, 3)
+
+        self.assertEqual(captured["model"], "claude-test")
+        self.assertEqual(captured["max_tokens"], 100)
+        self.assertEqual(captured["system"], "sys")
+        self.assertEqual(captured["messages"], [{"role": "user", "content": "user"}])
+        self.assertEqual(captured["tools"], [{"type": "web_search_20250305", "name": "web_search"}])
 
     def test_call_success_defaults_missing_usage_extensions(self):
         llm = self._client_module()

@@ -59,7 +59,7 @@ class LLMClient:
             log_path = Path(env_log_path) if env_log_path else Path("data/llm_log.jsonl")
         self.log_path = Path(log_path)
         self._log_path = self.log_path
-        self._client = None
+        self._provider = None
 
     def call(
         self,
@@ -78,23 +78,11 @@ class LLMClient:
         of attempts, not retries after the first attempt.
         """
 
-        kwargs: dict[str, Any] = {
-            "model": model,
-            "max_tokens": max_tokens,
-            "system": system,
-            "messages": [{"role": "user", "content": user}],
-        }
-        if use_search:
-            kwargs["tools"] = [{"type": "web_search_20250305", "name": "web_search"}]
-
         total_attempts = max(1, int(max_retries or 1))
         last_exc: Exception | None = None
 
         for attempt in range(1, total_attempts + 1):
             start = time.perf_counter()
-            full = ""
-            web_search_count = 0
-            final_message = None
             auth_errors: tuple[type[BaseException], ...] = ()
             retry_errors: tuple[type[BaseException], ...] = ()
             try:
@@ -111,60 +99,19 @@ class LLMClient:
                     "RateLimitError",
                 )
 
-                stream = self._get_client().messages.stream(**kwargs)
-                with stream as s:
-                    for ev in s:
-                        ev_type = getattr(ev, "type", "")
-                        if ev_type == "content_block_start":
-                            block = getattr(ev, "content_block", None)
-                            if getattr(block, "type", "") == "tool_use":
-                                web_search_count += 1
-                                query = self._tool_query(block)
-                                if query:
-                                    print("    Search [" + str(web_search_count) + "]: " + query)
-                        elif ev_type == "content_block_delta":
-                            delta = getattr(ev, "delta", None)
-                            if getattr(delta, "type", "") == "text_delta":
-                                full += getattr(delta, "text", "")
-                    if hasattr(s, "get_final_message"):
-                        final_message = s.get_final_message()
+                from shared.llm.providers.base import LLMProviderRequest
 
-                if not full and final_message is not None:
-                    full = self._text_from_message(final_message)
-                if web_search_count == 0 and final_message is not None:
-                    web_search_count = self._count_tool_use_blocks(final_message)
-
-                usage = getattr(final_message, "usage", None)
-                server_tool_use = self._usage_value(usage, "server_tool_use")
-                stop_reason = str(getattr(final_message, "stop_reason", "") or "")
-                elapsed_ms = self._elapsed_ms(start)
-                response = LLMResponse(
-                    text=full,
+                request = LLMProviderRequest(
+                    system=system,
+                    user=user,
                     model=model,
-                    input_tokens=self._usage_int(usage, "input_tokens"),
-                    output_tokens=self._usage_int(usage, "output_tokens"),
-                    cache_read_tokens=self._usage_int(
-                        usage,
-                        "cache_read_tokens",
-                        "cache_read_input_tokens",
-                    ),
-                    cache_creation_tokens=self._usage_int(
-                        usage,
-                        "cache_creation_tokens",
-                        "cache_creation_input_tokens",
-                    ),
-                    web_search_count=web_search_count,
-                    server_tool_use_web_search_requests=self._usage_int(
-                        server_tool_use,
-                        "web_search_requests",
-                    ),
-                    service_tier=str(self._usage_value(usage, "service_tier") or ""),
-                    stop_reason=stop_reason,
-                    elapsed_ms=elapsed_ms,
-                    attempt=attempt,
+                    max_tokens=max_tokens,
+                    use_search=use_search,
                 )
+                response = self._get_provider().call_once(request)
+                response.attempt = attempt
                 self._log_success(response, call_site)
-                if stop_reason == "max_tokens":
+                if response.stop_reason == "max_tokens":
                     print(
                         "LLM warning: max_tokens reached "
                         + f"(call_site={call_site}, model={model}, max_tokens={max_tokens})"
@@ -242,10 +189,12 @@ class LLMClient:
         }
         self._append_jsonl(payload)
 
-    def _get_client(self):
-        if self._client is None:
-            self._client = self._anthropic().Anthropic(api_key=self.api_key)
-        return self._client
+    def _get_provider(self):
+        if self._provider is None:
+            from shared.llm.providers.anthropic import AnthropicProvider
+
+            self._provider = AnthropicProvider(api_key=self.api_key)
+        return self._provider
 
     @staticmethod
     def _anthropic():
@@ -289,37 +238,6 @@ class LLMClient:
         if value is None and isinstance(usage, dict):
             value = usage.get(name)
         return value
-
-    @staticmethod
-    def _text_from_message(message) -> str:
-        parts: list[str] = []
-        for block in getattr(message, "content", []) or []:
-            text = getattr(block, "text", None)
-            if text is None and isinstance(block, dict):
-                text = block.get("text")
-            if text:
-                parts.append(str(text))
-        return "".join(parts)
-
-    @staticmethod
-    def _count_tool_use_blocks(message) -> int:
-        count = 0
-        for block in getattr(message, "content", []) or []:
-            block_type = getattr(block, "type", None)
-            if block_type is None and isinstance(block, dict):
-                block_type = block.get("type")
-            if block_type == "tool_use":
-                count += 1
-        return count
-
-    @staticmethod
-    def _tool_query(block) -> str:
-        raw_input = getattr(block, "input", None)
-        if raw_input is None and isinstance(block, dict):
-            raw_input = block.get("input")
-        if isinstance(raw_input, dict):
-            return str(raw_input.get("query", "") or "")
-        return ""
 
     @staticmethod
     def _error_type(exc: Exception, *, auth_error: bool = False) -> str:
