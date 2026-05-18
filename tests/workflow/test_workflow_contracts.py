@@ -437,7 +437,6 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
     }
 
     OWNER_BOUNDARY_FORBIDDEN_STAGING = {
-        "orca_daily.yml": "git add -f data/jackal_state.db",
         "jackal_tracker.yml": "git add -f data/orca_state.db",
     }
 
@@ -478,6 +477,11 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
         jackal_text = _read_text(_workflow_path("jackal_session.yml"))
         self.assertIn("git add data/llm_log.jsonl", orca_text)
         self.assertIn('"data/llm_log.jsonl"', jackal_text)
+
+    def test_orca_daily_persists_cross_state_and_shadow_audit_outputs(self):
+        text = _read_text(_workflow_path("orca_daily.yml"))
+        self.assertIn("git add -f data/jackal_state.db", text)
+        self.assertIn("git add jackal/contract_shadow_audit.log", text)
 
     def test_reset_state_paths_are_preserved(self):
         text = _read_text(_workflow_path("orca_reset.yml"))
