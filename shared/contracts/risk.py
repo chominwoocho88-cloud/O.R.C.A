@@ -29,7 +29,7 @@ class RiskDecision(ContractModel):
     is_dead_cat: bool = False
     structural_decline: bool = False
 
-    final_score: int | None = Field(default=None, ge=0, le=100)
+    final_score: float | None = Field(default=None, ge=0, le=100)
     is_entry: bool = False
     block_reason: str | None = None
     decision_label: str | None = None

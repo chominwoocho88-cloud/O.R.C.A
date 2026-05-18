@@ -24,6 +24,9 @@ from datetime import datetime, timezone, timedelta
 import httpx
 import pandas as pd
 from shared.build_info import get_build_info
+from shared.audit.contract_shadow_audit import file_and_db_audit_logger
+from shared.contracts import RiskDecision
+from shared.contracts.validation import shadow_validate
 from shared.llm.client import LLMClient
 from shared.market_data.stock_name import format_stock_display
 from shared.paths import (
@@ -40,6 +43,7 @@ from apps.orca.state import (
     sync_jackal_live_events,
 )
 from apps.jackal import memory_context as _memory_context
+from apps.jackal.risk_projection import project_hunter_to_risk_decision
 from jackal.explanation import build_hunter_explanation_lines
 from jackal.final_diagnostics import build_final_diag, format_final_diag
 from jackal.families import canonical_family_key, family_label
@@ -1530,6 +1534,30 @@ def _final(analyst: dict, devil: dict) -> dict:
     }
 
 
+def _shadow_validate_hunter_risk_decision(
+    ticker: str,
+    analyst: dict,
+    devil: dict,
+    final: dict,
+) -> None:
+    try:
+        payload = project_hunter_to_risk_decision(
+            ticker=ticker,
+            analyst=analyst,
+            devil=devil,
+            final=final,
+        )
+        shadow_validate(
+            RiskDecision,
+            payload,
+            on_error="warn",
+            context="jackal_hunter.stage4.risk_decision",
+            audit_logger=file_and_db_audit_logger,
+        )
+    except Exception:
+        pass
+
+
 def _stage4_full_analysis(top10: list, aria: dict) -> list:
     """
     10개에 대해 Analyst → Devil → Final 적용.
@@ -1569,6 +1597,7 @@ def _stage4_full_analysis(top10: list, aria: dict) -> list:
             {"ticker": ticker, "name": name, "tech": tech, "currency": cur},
         )
         final = _apply_historical_context(final, historical_context)
+        _shadow_validate_hunter_risk_decision(ticker, analyst, devil, final)
         diag_str = format_final_diag(final)
 
         log.info(f"  {format_stock_display(ticker, name):24} A:{analyst['analyst_score']} "

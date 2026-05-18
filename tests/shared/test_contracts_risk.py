@@ -47,7 +47,7 @@ class RiskDecisionTests(unittest.TestCase):
                 "thesis_killer_hit": False,
                 "is_dead_cat": True,
                 "structural_decline": True,
-                "final_score": 24,
+                "final_score": 24.5,
                 "is_entry": False,
                 "block_reason": "dead_cat",
                 "decision_label": "Devil 차단",
@@ -61,7 +61,7 @@ class RiskDecisionTests(unittest.TestCase):
         self.assertFalse(decision.thesis_killer_hit)
         self.assertTrue(decision.is_dead_cat)
         self.assertTrue(decision.structural_decline)
-        self.assertEqual(decision.final_score, 24)
+        self.assertEqual(decision.final_score, 24.5)
         self.assertFalse(decision.is_entry)
         self.assertEqual(decision.block_reason, "dead_cat")
         self.assertEqual(decision.decision_label, "Devil 차단")
@@ -76,6 +76,8 @@ class RiskDecisionTests(unittest.TestCase):
             }
         )
 
+        RiskDecision(**{**self._base_kwargs(), "final_score": 55.7})
+
     def test_score_ranges_reject_out_of_bounds(self):
         for field_name, value in (
             ("analyst_score", -1),
@@ -85,6 +87,9 @@ class RiskDecisionTests(unittest.TestCase):
             with self.subTest(field_name=field_name):
                 with self.assertRaises(ValidationError):
                     RiskDecision(**{**self._base_kwargs(), field_name: value})
+
+        with self.assertRaises(ValidationError):
+            RiskDecision(**{**self._base_kwargs(), "final_score": 100.1})
 
     def test_score_fields_reject_non_numeric_values(self):
         for field_name in ("analyst_score", "devil_score", "final_score"):
