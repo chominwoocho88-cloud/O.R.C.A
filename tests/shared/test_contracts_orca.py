@@ -9,6 +9,7 @@ from shared.contracts import (
     OrcaAnalystOutput,
     OrcaHunterOutput,
     OrcaReporterOutput,
+    OrcaThesisKiller,
 )
 
 
@@ -182,7 +183,7 @@ class OrcaReporterOutputTests(unittest.TestCase):
         self.assertEqual(output.confidence_overall, "medium")
         self.assertEqual(output.trend_strategy["recommended"], "selective entries")
         self.assertEqual(output.inflows[0]["zone"], "semiconductors")
-        self.assertEqual(output.thesis_killers[0]["quality"], "ok")
+        self.assertEqual(output.thesis_killers[0].quality, "ok")
         self.assertEqual(output.actionable_watch[0]["ticker"], "NVDA")
 
     def test_minimal_requires_three_core_fields(self):
@@ -249,12 +250,12 @@ class OrcaReporterOutputTests(unittest.TestCase):
         )
 
         first.trend_strategy["recommended"] = "wait"
-        first.thesis_killers.append({"event": "CPI surprise"})
+        first.thesis_killers.append(OrcaThesisKiller(event="CPI surprise"))
 
         self.assertEqual(second.trend_strategy, {})
         self.assertEqual(second.thesis_killers, [])
 
-    def test_thesis_killers_accept_loose_nested_payloads(self):
+    def test_thesis_killers_accept_nested_payloads(self):
         output = OrcaReporterOutput(
             one_line_summary="Summary.",
             market_regime="neutral",
@@ -270,7 +271,23 @@ class OrcaReporterOutputTests(unittest.TestCase):
             ],
         )
 
-        self.assertTrue(output.thesis_killers[0]["extra_nested"]["kept"])
+        self.assertIsInstance(output.thesis_killers[0], OrcaThesisKiller)
+        self.assertEqual(output.thesis_killers[0].event, "Yield spike")
+        self.assertFalse(hasattr(output.thesis_killers[0], "extra_nested"))
+
+    def test_thesis_killers_reject_invalid_quality(self):
+        with self.assertRaises(ValidationError):
+            OrcaReporterOutput(
+                one_line_summary="Summary.",
+                market_regime="neutral",
+                confidence_overall="medium",
+                thesis_killers=[
+                    {
+                        "event": "Yield spike",
+                        "quality": "invalid_value",
+                    }
+                ],
+            )
 
     def test_korean_free_text_accepted(self):
         output = OrcaReporterOutput(
@@ -299,6 +316,64 @@ class OrcaReporterOutputTests(unittest.TestCase):
         )
 
         self.assertIsInstance(output, ContractModel)
+
+
+class OrcaThesisKillerTests(unittest.TestCase):
+    def test_happy_path(self):
+        thesis_killer = OrcaThesisKiller(
+            event="Nasdaq",
+            timeframe="next close",
+            confirms_if="Nasdaq closes above 26500",
+            invalidates_if="Nasdaq closes below 25900",
+            quality="ok",
+        )
+
+        self.assertEqual(thesis_killer.event, "Nasdaq")
+        self.assertEqual(thesis_killer.timeframe, "next close")
+        self.assertEqual(thesis_killer.confirms_if, "Nasdaq closes above 26500")
+        self.assertEqual(thesis_killer.invalidates_if, "Nasdaq closes below 25900")
+        self.assertEqual(thesis_killer.quality, "ok")
+
+    def test_minimal_requires_only_event(self):
+        thesis_killer = OrcaThesisKiller(event="KOSPI")
+
+        self.assertEqual(thesis_killer.event, "KOSPI")
+        self.assertIsNone(thesis_killer.timeframe)
+        self.assertIsNone(thesis_killer.confirms_if)
+        self.assertIsNone(thesis_killer.invalidates_if)
+        self.assertIsNone(thesis_killer.quality)
+
+    def test_missing_event_rejected(self):
+        with self.assertRaises(ValidationError):
+            OrcaThesisKiller()
+
+    def test_quality_literals(self):
+        self.assertEqual(OrcaThesisKiller(event="Nasdaq", quality="ok").quality, "ok")
+        self.assertEqual(
+            OrcaThesisKiller(event="Nasdaq", quality="vague").quality,
+            "vague",
+        )
+        self.assertIsNone(OrcaThesisKiller(event="Nasdaq", quality=None).quality)
+
+        with self.assertRaises(ValidationError):
+            OrcaThesisKiller(event="Nasdaq", quality="invalid_value")
+
+    def test_extra_fields_ignored(self):
+        thesis_killer = OrcaThesisKiller(event="Nasdaq", extra_field="ignored")
+
+        self.assertFalse(hasattr(thesis_killer, "extra_field"))
+
+    def test_strips_whitespace(self):
+        thesis_killer = OrcaThesisKiller(
+            event="  Nasdaq  ",
+            timeframe="  next close  ",
+        )
+
+        self.assertEqual(thesis_killer.event, "Nasdaq")
+        self.assertEqual(thesis_killer.timeframe, "next close")
+
+    def test_inherits_contract_model(self):
+        self.assertIsInstance(OrcaThesisKiller(event="Nasdaq"), ContractModel)
 
 
 if __name__ == "__main__":

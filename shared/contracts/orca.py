@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import ConfigDict, Field
 
@@ -48,6 +48,22 @@ class OrcaAnalystOutput(ContractModel):
     korea_focus: dict[str, Any] = Field(default_factory=dict)
 
 
+class OrcaThesisKiller(ContractModel):
+    """Strict-enough nested contract for ORCA Reporter thesis killers."""
+
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        str_strip_whitespace=True,
+    )
+
+    event: str
+    timeframe: str | None = None
+    confirms_if: str | None = None
+    invalidates_if: str | None = None
+    quality: Literal["ok", "vague"] | None = None
+
+
 class OrcaReporterOutput(ContractModel):
     """Loose contract for ORCA Reporter output."""
 
@@ -81,10 +97,15 @@ class OrcaReporterOutput(ContractModel):
     neutral_waiting: list[dict[str, Any]] = Field(default_factory=list)
     hidden_signals: list[dict[str, Any]] = Field(default_factory=list)
     counterarguments: list[dict[str, Any]] = Field(default_factory=list)
-    thesis_killers: list[dict[str, Any]] = Field(default_factory=list)
+    thesis_killers: list[OrcaThesisKiller] = Field(default_factory=list)
     tail_risks: list[dict[str, Any]] = Field(default_factory=list)
     tomorrow_setup: list[dict[str, Any]] = Field(default_factory=list)
     actionable_watch: list[dict[str, Any]] = Field(default_factory=list)
 
 
-__all__ = ["OrcaHunterOutput", "OrcaAnalystOutput", "OrcaReporterOutput"]
+__all__ = [
+    "OrcaHunterOutput",
+    "OrcaAnalystOutput",
+    "OrcaThesisKiller",
+    "OrcaReporterOutput",
+]
