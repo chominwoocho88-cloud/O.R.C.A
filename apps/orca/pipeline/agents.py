@@ -16,6 +16,10 @@ sys.stderr.reconfigure(encoding="utf-8")
 
 from rich.console import Console
 
+from apps.orca.risk_projection import project_orca_devil_to_risk_decision
+from shared.audit.contract_shadow_audit import file_and_db_audit_logger
+from shared.contracts import RiskDecision
+from shared.contracts.validation import shadow_validate
 from shared.llm.client import LLMClient
 
 KST     = timezone(timedelta(hours=9))
@@ -413,10 +417,29 @@ def agent_devil(analyst_data: dict, memory: list, mode: str) -> dict:
         result.get("thesis_killers", []),
         source_label="Devil",
     )
+    _shadow_validate_orca_devil_risk_decision(analyst_data, result)
 
     console.print("  [green]Done: " + str(result.get("verdict", ""))
                   + " / " + str(len(result.get("counterarguments", []))) + " counters[/green]")
     return result
+
+
+def _shadow_validate_orca_devil_risk_decision(analyst: dict, devil: dict) -> None:
+    try:
+        payload = project_orca_devil_to_risk_decision(
+            ticker=None,
+            analyst=analyst,
+            devil=devil,
+        )
+        shadow_validate(
+            RiskDecision,
+            payload,
+            on_error="warn",
+            context="orca_devil.risk_decision",
+            audit_logger=file_and_db_audit_logger,
+        )
+    except Exception:
+        pass
 
 
 # ── Agent 4: Reporter ─────────────────────────────────────────────────────────
