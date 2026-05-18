@@ -4,6 +4,7 @@ from .alpha import AlphaSignal
 from .base import ContractModel, EventEnvelope
 from .memory import MemoryContext, MemoryInjection
 from .outcomes import PredictionOutcome
+from .risk import RiskDecision
 
 __all__ = [
     "ContractModel",
@@ -12,4 +13,5 @@ __all__ = [
     "PredictionOutcome",
     "MemoryContext",
     "MemoryInjection",
+    "RiskDecision",
 ]
