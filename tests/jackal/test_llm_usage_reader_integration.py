@@ -56,7 +56,9 @@ class JackalUsageReaderIntegrationTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            with patch.object(shield, "datetime", _fake_datetime("2026-05-18")):
+            with patch.object(shield, "read_jackal_today_tokens", return_value=0), patch.object(
+                shield, "datetime", _fake_datetime("2026-05-18")
+            ):
                 result = instance._check_budget()
 
         self.assertEqual(result["today_tokens"], 12)

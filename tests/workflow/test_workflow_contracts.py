@@ -813,8 +813,8 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         text = _read_text(_workflow_path("orca_daily.yml"))
         self.assertIn("schedule:", text)
         for cron in (
-            'cron: "30 22 * * 0-4"',
-            'cron: "0 12 * * 1-5"',
+            'cron: "0 22 * * 0-4"',
+            'cron: "0 11 * * 1-5"',
             'cron: "0 22 * * 6"',
             'cron: "0 21 1 * *"',
         ):
@@ -837,9 +837,9 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         text = _read_text(_workflow_path("jackal_session.yml"))
         self.assertIn("schedule:", text)
         for cron in (
-            'cron: "0 23 * * 0-4"',
+            'cron: "30 22 * * 0-4"',
             'cron: "0 3 * * 1-5"',
-            'cron: "30 12 * * 1-5"',
+            'cron: "30 11 * * 1-5"',
             'cron: "0 16 * * 1-5"',
         ):
             with self.subTest(cron=cron):
@@ -850,9 +850,9 @@ class TestBacktestWorkflowContracts(unittest.TestCase):
         text = _read_text(_workflow_path("jackal_session.yml"))
         self.assertIn('EVENT_SCHEDULE="${{ github.event.schedule }}"', text)
         for marker in (
-            'elif [ "$EVENT_SCHEDULE" = "0 23 * * 0-4" ]; then\n            SESSION_MODE_VALUE="full"',
+            'elif [ "$EVENT_SCHEDULE" = "30 22 * * 0-4" ]; then\n            SESSION_MODE_VALUE="full"',
             'elif [ "$EVENT_SCHEDULE" = "0 3 * * 1-5" ]; then\n            SESSION_MODE_VALUE="scanner_only"',
-            'elif [ "$EVENT_SCHEDULE" = "30 12 * * 1-5" ]; then\n            SESSION_MODE_VALUE="full"',
+            'elif [ "$EVENT_SCHEDULE" = "30 11 * * 1-5" ]; then\n            SESSION_MODE_VALUE="full"',
             'elif [ "$EVENT_SCHEDULE" = "0 16 * * 1-5" ]; then\n            SESSION_MODE_VALUE="scanner_only"',
         ):
             with self.subTest(marker=marker):
