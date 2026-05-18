@@ -64,6 +64,64 @@ class OrcaThesisKiller(ContractModel):
     quality: Literal["ok", "vague"] | None = None
 
 
+class OrcaTopHeadline(ContractModel):
+    """Nested contract for ORCA Reporter top headlines."""
+
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        str_strip_whitespace=True,
+    )
+
+    headline: str
+    signal_tag: str | None = None
+    impact: Literal["높음", "보통", "낮음"] | None = None
+
+
+class OrcaOutflow(ContractModel):
+    """Nested contract for ORCA Reporter outflow items."""
+
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        str_strip_whitespace=True,
+    )
+
+    zone: str
+    reason: str | None = None
+    severity: str | None = None
+    data_point: str | None = None
+
+
+class OrcaInflow(ContractModel):
+    """Nested contract for ORCA Reporter inflow items."""
+
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        str_strip_whitespace=True,
+    )
+
+    zone: str
+    reason: str | None = None
+    momentum: str | None = None
+    data_point: str | None = None
+
+
+class OrcaCounterargument(ContractModel):
+    """Nested contract for ORCA Devil/Reporter counterarguments."""
+
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        str_strip_whitespace=True,
+    )
+
+    against: str
+    because: str | None = None
+    risk_level: Literal["높음", "보통", "낮음"] | None = None
+
+
 class OrcaReporterOutput(ContractModel):
     """Loose contract for ORCA Reporter output."""
 
@@ -91,12 +149,12 @@ class OrcaReporterOutput(ContractModel):
     agent_consensus: dict[str, Any] = Field(default_factory=dict)
     meta_improvement: dict[str, Any] = Field(default_factory=dict)
 
-    top_headlines: list[dict[str, Any]] = Field(default_factory=list)
-    outflows: list[dict[str, Any]] = Field(default_factory=list)
-    inflows: list[dict[str, Any]] = Field(default_factory=list)
+    top_headlines: list[OrcaTopHeadline] = Field(default_factory=list)
+    outflows: list[OrcaOutflow] = Field(default_factory=list)
+    inflows: list[OrcaInflow] = Field(default_factory=list)
     neutral_waiting: list[dict[str, Any]] = Field(default_factory=list)
     hidden_signals: list[dict[str, Any]] = Field(default_factory=list)
-    counterarguments: list[dict[str, Any]] = Field(default_factory=list)
+    counterarguments: list[OrcaCounterargument] = Field(default_factory=list)
     thesis_killers: list[OrcaThesisKiller] = Field(default_factory=list)
     tail_risks: list[dict[str, Any]] = Field(default_factory=list)
     tomorrow_setup: list[dict[str, Any]] = Field(default_factory=list)
@@ -107,5 +165,9 @@ __all__ = [
     "OrcaHunterOutput",
     "OrcaAnalystOutput",
     "OrcaThesisKiller",
+    "OrcaTopHeadline",
+    "OrcaOutflow",
+    "OrcaInflow",
+    "OrcaCounterargument",
     "OrcaReporterOutput",
 ]

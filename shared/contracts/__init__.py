@@ -5,9 +5,13 @@ from .base import ContractModel, EventEnvelope
 from .memory import MemoryContext, MemoryInjection
 from .orca import (
     OrcaAnalystOutput,
+    OrcaCounterargument,
     OrcaHunterOutput,
+    OrcaInflow,
+    OrcaOutflow,
     OrcaReporterOutput,
     OrcaThesisKiller,
+    OrcaTopHeadline,
 )
 from .outcomes import PredictionOutcome
 from .risk import RiskDecision
@@ -22,6 +26,10 @@ __all__ = [
     "OrcaHunterOutput",
     "OrcaAnalystOutput",
     "OrcaThesisKiller",
+    "OrcaTopHeadline",
+    "OrcaOutflow",
+    "OrcaInflow",
+    "OrcaCounterargument",
     "OrcaReporterOutput",
     "RiskDecision",
 ]
