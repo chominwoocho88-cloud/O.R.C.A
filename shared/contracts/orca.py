@@ -48,4 +48,43 @@ class OrcaAnalystOutput(ContractModel):
     korea_focus: dict[str, Any] = Field(default_factory=dict)
 
 
-__all__ = ["OrcaHunterOutput", "OrcaAnalystOutput"]
+class OrcaReporterOutput(ContractModel):
+    """Loose contract for ORCA Reporter output."""
+
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        str_strip_whitespace=True,
+    )
+
+    one_line_summary: str
+    market_regime: str
+    confidence_overall: str
+
+    analysis_date: str | None = None
+    analysis_time: str | None = None
+    mode: str | None = None
+    mode_label: str | None = None
+    trend_phase: str | None = None
+    consensus_level: str | None = None
+
+    trend_strategy: dict[str, Any] = Field(default_factory=dict)
+    volatility_index: dict[str, Any] = Field(default_factory=dict)
+    retail_reversal_signal: dict[str, Any] = Field(default_factory=dict)
+    korea_focus: dict[str, Any] = Field(default_factory=dict)
+    agent_consensus: dict[str, Any] = Field(default_factory=dict)
+    meta_improvement: dict[str, Any] = Field(default_factory=dict)
+
+    top_headlines: list[dict[str, Any]] = Field(default_factory=list)
+    outflows: list[dict[str, Any]] = Field(default_factory=list)
+    inflows: list[dict[str, Any]] = Field(default_factory=list)
+    neutral_waiting: list[dict[str, Any]] = Field(default_factory=list)
+    hidden_signals: list[dict[str, Any]] = Field(default_factory=list)
+    counterarguments: list[dict[str, Any]] = Field(default_factory=list)
+    thesis_killers: list[dict[str, Any]] = Field(default_factory=list)
+    tail_risks: list[dict[str, Any]] = Field(default_factory=list)
+    tomorrow_setup: list[dict[str, Any]] = Field(default_factory=list)
+    actionable_watch: list[dict[str, Any]] = Field(default_factory=list)
+
+
+__all__ = ["OrcaHunterOutput", "OrcaAnalystOutput", "OrcaReporterOutput"]
