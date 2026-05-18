@@ -80,10 +80,6 @@ JACKAL_WATCHLIST_FILE = DATA_DIR / "jackal_watchlist.json"
 # 이 파일들은 JACKAL 모듈 내부 상태이며 jackal/ 에 그대로 유지된다.
 # Phase B-3 ~ B-5에서 jackal/ 코드가 이 상수를 import하도록 마이그레이션.
 JACKAL_WEIGHTS_FILE = JACKAL_LEGACY_DIR / "jackal_weights.json"
-# DEPRECATED: jackal_usage_log.json migrated to data/llm_log.jsonl.
-# This constant is preserved for backward compatibility and will be removed
-# in a future sprint after operational validation.
-JACKAL_USAGE_LOG_FILE = JACKAL_LEGACY_DIR / "jackal_usage_log.json"
 JACKAL_HUNT_LOG_FILE = JACKAL_LEGACY_DIR / "hunt_log.json"
 JACKAL_HUNT_COOLDOWN_FILE = JACKAL_LEGACY_DIR / "hunt_cooldown.json"
 
@@ -152,7 +148,6 @@ __all__ = [
     "JACKAL_WATCHLIST_FILE",
     # JACKAL legacy
     "JACKAL_WEIGHTS_FILE",
-    "JACKAL_USAGE_LOG_FILE",
     "JACKAL_HUNT_LOG_FILE",
     "JACKAL_HUNT_COOLDOWN_FILE",
     # Reports

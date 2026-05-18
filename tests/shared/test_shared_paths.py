@@ -48,12 +48,11 @@ class SharedPathsTests(unittest.TestCase):
     def test_jackal_legacy_files(self):
         from shared.paths import (
             JACKAL_LEGACY_DIR,
-            JACKAL_WEIGHTS_FILE, JACKAL_USAGE_LOG_FILE,
+            JACKAL_WEIGHTS_FILE,
             JACKAL_HUNT_LOG_FILE, JACKAL_HUNT_COOLDOWN_FILE,
         )
         for path in [
             JACKAL_WEIGHTS_FILE,
-            JACKAL_USAGE_LOG_FILE,
             JACKAL_HUNT_LOG_FILE,
             JACKAL_HUNT_COOLDOWN_FILE,
         ]:

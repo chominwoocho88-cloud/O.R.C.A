@@ -8,17 +8,17 @@ Jackal Compact - Context Rot 諛⑹? ?먮룞 ?뺤텞 ?쒖뒪??
 
 [Bug Fix 6] check_and_compact()媛 usage_log?먯꽌 ?ㅻ뒛 ?좏겙 ?먯껜 怨꾩궛
   湲곗〈: ?몃??먯꽌 current_tokens瑜?諛쏆쓬 ??Actions?먯꽌 0???꾨떖????긽 skip
-  ?섏젙: current_tokens=0?대㈃ jackal_usage_log.json?먯꽌 ?ㅻ뒛 ?ㅼ궗?⑸웾 ?⑹궛
+  ?섏젙: current_tokens=0?대㈃ data/llm_log.jsonl?먯꽌 ?ㅻ뒛 ?ㅼ궗?⑸웾 ?⑹궛
 """
 
 import json
 import logging
 import os
-from datetime import datetime, date
+from datetime import datetime
 
 from shared.llm.client import LLMClient
 from shared.llm.usage_reader import read_jackal_today_tokens
-from shared.paths import ACCURACY_FILE, JACKAL_LEGACY_DIR, JACKAL_USAGE_LOG_FILE
+from shared.paths import ACCURACY_FILE, JACKAL_LEGACY_DIR
 
 log = logging.getLogger("jackal_compact")
 
@@ -26,7 +26,6 @@ _BASE          = JACKAL_LEGACY_DIR
 _REPO_ROOT     = JACKAL_LEGACY_DIR.parent          # jackal/ ??repo root
 _COMPACT_LOG   = _BASE / "compact_log.json"
 _COMPACT_CACHE = _BASE / "compact_cache.json"
-_USAGE_LOG     = JACKAL_USAGE_LOG_FILE   # Bug Fix 2 ?곕룞
 
 _COMPACT_THRESHOLD = int(os.getenv("JACKAL_COMPACT_THRESHOLD", "60000"))
 _TARGET_RATIO      = 0.30
@@ -81,27 +80,8 @@ class JackalCompact:
 
     # ?? ?ㅻ뒛 ?좏겙 ?먯껜 怨꾩궛 ????????????????????????????????????????
     def _get_today_tokens(self) -> int:
-        """
-        Read actual JACKAL tokens from data/llm_log.jsonl.
-        Deprecated jackal_usage_log.json remains as a temporary fallback.
-        """
-        llm_tokens = read_jackal_today_tokens()
-        if llm_tokens > 0:
-            return llm_tokens
-
-        if not _USAGE_LOG.exists():
-            return 0
-        try:
-            logs  = json.loads(_USAGE_LOG.read_text(encoding="utf-8"))
-            today = date.today().isoformat()
-            return sum(
-                e.get("total_tokens", 0)
-                for e in logs
-                if e.get("timestamp", "")[:10] == today
-            )
-        except Exception as e:
-            log.warning(f"usage_log ?쎄린 ?ㅽ뙣: {e}")
-            return 0
+        """Read actual JACKAL tokens from data/llm_log.jsonl."""
+        return read_jackal_today_tokens()
 
     # ?? ?뺤텞 濡쒖쭅 ??????????????????????????????????????????????????
     def _compact(self, current_tokens: int, forced: bool = False) -> dict:

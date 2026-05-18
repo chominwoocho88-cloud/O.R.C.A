@@ -81,23 +81,10 @@ class JackalUsageReaderIntegrationTests(unittest.TestCase):
         with patch.object(compact, "read_jackal_today_tokens", return_value=44):
             self.assertEqual(instance._get_today_tokens(), 44)
 
-    def test_compact_today_tokens_falls_back_to_deprecated_usage_log(self):
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
-            usage_log = Path(tmpdir) / "jackal_usage_log.json"
-            usage_log.write_text(
-                json.dumps(
-                    [
-                        {"timestamp": "2026-05-18T08:00:00", "total_tokens": 21},
-                        {"timestamp": "2026-05-17T08:00:00", "total_tokens": 99},
-                    ]
-                ),
-                encoding="utf-8",
-            )
-            instance = compact.JackalCompact()
-            with patch.object(compact, "_USAGE_LOG", usage_log), patch.object(
-                compact, "read_jackal_today_tokens", return_value=0
-            ), patch.object(compact, "date", _fake_date_class("2026-05-18")):
-                self.assertEqual(instance._get_today_tokens(), 21)
+    def test_compact_today_tokens_returns_zero_without_llm_entries(self):
+        instance = compact.JackalCompact()
+        with patch.object(compact, "read_jackal_today_tokens", return_value=0):
+            self.assertEqual(instance._get_today_tokens(), 0)
 
     @staticmethod
     def _write_jsonl(path: Path, entries: list[dict]) -> None:

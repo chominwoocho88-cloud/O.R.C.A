@@ -105,7 +105,6 @@ LLM credential is missing.
 - Call-site migration completed (Day 4). All ORCA and JACKAL callers import
   `shared.llm.client` directly.
 - Create `shared/broker/kis.py`.
-- Review deprecation of `apps.jackal.pipeline.shield.log_usage()` after JACKAL JSONL logging
-  settles in production.
+- JACKAL usage tracking now reads `data/llm_log.jsonl` as the single source.
 - Build a dashboard comparing estimated cost in `orca_cost.json` with observed
   token usage in `llm_log.jsonl`.

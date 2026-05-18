@@ -17,8 +17,6 @@ from apps.jackal.pipeline.shield import (
     _SCAN_EXTENSIONS,
     _SECRET_PATTERNS,
     _SPIKE_MULTIPLIER,
-    _USAGE_LOG,
-    log_usage,
 )
 
 __all__ = [
@@ -30,6 +28,4 @@ __all__ = [
     "_SECRET_PATTERNS",
     "_EXCLUDE_DIRS",
     "_SCAN_EXTENSIONS",
-    "_USAGE_LOG",
-    "log_usage",
 ]

@@ -2,8 +2,7 @@
 JACKAL shield module.
 Jackal Shield - 蹂댁븞 + 鍮꾩슜 ?먮룞 泥댄겕 ?쒖뒪??
 [Bug Fix 2] _check_budget()??compact_log留??쎌뼱 ??API 鍮꾩슜 誘몄쭛怨????섏젙
-  - jackal_usage_log.json ?좉퇋 ?꾩엯
-  - log_usage() ?ы띁 異붽? (Hunter/Scanner/Evolution?먯꽌 ?몄텧)
+  - data/llm_log.jsonl usage ledger ?곕룞
   - _check_budget() / _detect_spike() 紐⑤몢 usage_log ?곗꽑 ?ъ슜
 
 寃????ぉ:
@@ -20,7 +19,7 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from shared.paths import JACKAL_LEGACY_DIR, JACKAL_USAGE_LOG_FILE
+from shared.paths import JACKAL_LEGACY_DIR
 from shared.llm.usage_reader import read_jackal_today_tokens, read_jackal_tokens_by_date
 
 log = logging.getLogger("jackal_shield")
@@ -40,10 +39,6 @@ _SECRET_PATTERNS = [
 ]
 _EXCLUDE_DIRS    = {".git", "__pycache__", "node_modules", ".venv", "venv"}
 _SCAN_EXTENSIONS = {".py", ".json", ".yml", ".yaml", ".env", ".txt", ".md"}
-
-# [Fix] usage_log 寃쎈줈 異붽?
-_USAGE_LOG = JACKAL_USAGE_LOG_FILE
-
 
 class JackalShield:
     """Run repository secret scans and lightweight JACKAL budget checks."""
@@ -207,83 +202,6 @@ class JackalShield:
             return json.loads(self.compact_log.read_text(encoding="utf-8"))
         except Exception:
             return []
-
-    def _load_usage_log(self) -> list:
-        """jackal_usage_log.json 濡쒕뱶. ?놁쑝硫?鍮?由ъ뒪??"""
-        if not _USAGE_LOG.exists():
-            return []
-        try:
-            return json.loads(_USAGE_LOG.read_text(encoding="utf-8"))
-        except Exception:
-            return []
-
-
-# ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
-# [Bug Fix] log_usage() ?ы띁 ??紐⑤뱢 理쒗븯??(?대옒???몃?)
-# Hunter / Scanner / Evolution?먯꽌 import?댁꽌 API ?몄텧 ???ㅽ뻾
-# ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
-
-# log_usage: orca.llm_client.LLMClient의 JSONL 로그(data/llm_log.jsonl)와 병행 운영 중.
-# 다음 sprint에서 단일 소스로 통합 검토.
-
-def log_usage(caller: str, input_tokens: int, output_tokens: int,
-              model: str = "unknown") -> None:
-    """
-    [DEPRECATED] Use shared LLMClient logging.
-
-    JACKAL usage tracking migrated to data/llm_log.jsonl via LLMClient
-    JSONL append. This helper is preserved for backward compatibility and
-    will be removed in a future sprint after operational validation.
-
-    API ?몄텧 ?좏겙??jackal_usage_log.json??湲곕줉.
-    Shield._check_budget()?????뚯씪???쎌뼱 ?ㅻ퉬?⑹쓣 異붿쟻?쒕떎.
-
-    ?ъ슜踰?
-        from .shield import log_usage
-        response = llm_client.call(model=MODEL_H, ...)
-        log_usage("hunter_stage3", response.input_tokens,
-                   response.output_tokens, model=MODEL_H)
-
-    Args:
-        caller: ?몄텧 ?꾩튂 ?앸퀎??(?? "hunter_stage3", "evolution_review")
-        input_tokens: resp.usage.input_tokens
-        output_tokens: resp.usage.output_tokens
-        model: ?ъ슜??紐⑤뜽紐?(鍮꾩슜 ?뺥솗???μ긽)
-    """
-    # 紐⑤뜽蹂??④? (USD/token)
-    _PRICES = {
-        "claude-haiku-4-5-20251001":  (0.0000008,  0.000004),   # $0.80/$4.00 per M
-        "claude-sonnet-4-6":          (0.000003,   0.000015),   # $3.00/$15.00 per M
-        "claude-opus-4-6":            (0.000015,   0.000075),   # $15/$75 per M
-    }
-    in_price, out_price = _PRICES.get(model, (0.000003, 0.000015))  # 湲곕낯媛? Sonnet
-
-    entry = {
-        "timestamp":      datetime.now().isoformat(),
-        "caller":         caller,
-        "model":          model,
-        "input_tokens":   input_tokens,
-        "output_tokens":  output_tokens,
-        "total_tokens":   input_tokens + output_tokens,
-        "estimated_cost_usd": round(
-            input_tokens * in_price + output_tokens * out_price, 6
-        ),
-    }
-    logs: list = []
-    if _USAGE_LOG.exists():
-        try:
-            logs = json.loads(_USAGE_LOG.read_text(encoding="utf-8"))
-        except Exception:
-            pass
-    logs.append(entry)
-    logs = logs[-2000:]   # 理쒓렐 2000嫄?(??30?쇱튂)
-    try:
-        _USAGE_LOG.write_text(
-            json.dumps(logs, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
-    except Exception as e:
-        log.warning(f"usage_log 湲곕줉 ?ㅽ뙣: {e}")
-
 
 # ??? ?⑤룆 ?ㅽ뻾 ????????????????????????????????????????????????????
 if __name__ == "__main__":
