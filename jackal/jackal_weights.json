@@ -1378,11 +1378,11 @@
   "last_macro_gate": {
     "risk_level": "normal",
     "score_penalty": 5,
-    "vix": 18.0,
+    "vix": 18.1,
     "yield_curve": 0.0,
-    "hy_chg5": -0.64,
+    "hy_chg5": -0.65,
     "reason": "ARIA위험회피",
-    "checked_at": "2026-05-20T00:55:52.309242+09:00"
+    "checked_at": "2026-05-20T08:42:21.654091+09:00"
   },
   "swing_type_optimal": {
     "기술적과매도": {
