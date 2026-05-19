@@ -1376,13 +1376,13 @@
   },
   "last_evolved_at": "2026-05-19T12:48:34.799229",
   "last_macro_gate": {
-    "checked_at": "2026-05-19T08:37:12.960506+09:00",
-    "hy_chg5": -0.55,
-    "reason": "ARIA위험회피",
     "risk_level": "normal",
     "score_penalty": 5,
     "vix": 17.8,
-    "yield_curve": 0.0
+    "yield_curve": 0.0,
+    "hy_chg5": -0.68,
+    "reason": "ARIA위험회피",
+    "checked_at": "2026-05-19T23:10:02.739389+09:00"
   },
   "swing_type_optimal": {
     "기술적과매도": {
