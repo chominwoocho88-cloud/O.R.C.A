@@ -177,7 +177,9 @@ jobs:
         shell: bash
         run: |
           python - <<'PY'
+          import json
           import os
+          from datetime import datetime, timedelta, timezone
           from pathlib import Path
 
           expected_min_reports = int(os.environ.get("EXPECTED_MIN_REPORTS", "0"))
@@ -187,11 +189,28 @@ jobs:
               failures.append("Missing data/orca_state.db")
           if reports < expected_min_reports:
               failures.append(f"reports {reports} < expected {expected_min_reports}")
+          baseline_path = Path("data/morning_baseline.json")
+          if os.environ.get("ORCA_RUN_MODE") == "MORNING":
+              if not baseline_path.exists():
+                  failures.append("Missing data/morning_baseline.json (MORNING mode)")
+              else:
+                  try:
+                      baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+                      baseline_date = baseline.get("date")
+                      kst = timezone(timedelta(hours=9))
+                      today = datetime.now(kst).strftime("%Y-%m-%d")
+                      if baseline_date != today:
+                          failures.append(f"baseline date mismatch: {baseline_date} != {today}")
+                  except json.JSONDecodeError as exc:
+                      failures.append(f"Invalid JSON in baseline: {exc}")
+                  except Exception as exc:
+                      failures.append(f"baseline validation error: {exc}")
 
           print("Strict verify:")
           print(f"  mode: {os.environ.get('ORCA_RUN_MODE')}")
           print(f"  data/orca_state.db: {Path('data/orca_state.db').exists()}")
           print(f"  data/jackal_state.db: {Path('data/jackal_state.db').exists()}")
+          print(f"  data/morning_baseline.json: {baseline_path.exists()}")
           print(f"  reports_html: {reports}")
 
           if failures:
@@ -240,7 +259,7 @@ jobs:
           git add data/orca_lessons.json 2>/dev/null || true
           git add data/orca_cost.json 2>/dev/null || true
           git add data/llm_log.jsonl 2>/dev/null || true
-          git add data/morning_baseline.json 2>/dev/null || true
+          git add -f data/morning_baseline.json 2>/dev/null || true
           git add data/orca_market_data.json 2>/dev/null || true
           git add data/breaking_sent.json 2>/dev/null || true
           git add data/sentiment.json 2>/dev/null || true

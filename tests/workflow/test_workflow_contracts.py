@@ -483,6 +483,20 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
         self.assertIn("git add -f data/jackal_state.db", text)
         self.assertIn("git add jackal/contract_shadow_audit.log", text)
 
+    def test_orca_daily_persists_morning_baseline_despite_gitignore(self):
+        text = _read_text(_workflow_path("orca_daily.yml"))
+        self.assertIn("git add -f data/morning_baseline.json", text)
+
+    def test_orca_daily_strict_verify_checks_morning_baseline(self):
+        block = _extract_step_block(_workflow_path("orca_daily.yml"), "Strict verify")
+        self.assertIn('if os.environ.get("ORCA_RUN_MODE") == "MORNING":', block)
+        self.assertIn('baseline_path = Path("data/morning_baseline.json")', block)
+        self.assertIn("Missing data/morning_baseline.json (MORNING mode)", block)
+        self.assertIn('baseline = json.loads(baseline_path.read_text(encoding="utf-8"))', block)
+        self.assertIn('today = datetime.now(kst).strftime("%Y-%m-%d")', block)
+        self.assertIn("baseline date mismatch", block)
+        self.assertIn("Invalid JSON in baseline", block)
+
     def test_reset_state_paths_are_preserved(self):
         text = _read_text(_workflow_path("orca_reset.yml"))
         for path in self.RESET_STATE_PATHS:
