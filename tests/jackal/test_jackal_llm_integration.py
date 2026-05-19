@@ -140,6 +140,7 @@ class JackalLLMIntegrationTests(unittest.TestCase):
 
         self.assertEqual(result[0]["ticker"], "TSM")
         self.assertEqual(fake.calls[0]["call_site"], "jackal.hunter.suggest")
+        self.assertEqual(fake.calls[0]["max_tokens"], 1200)
         self.assertTrue(fake.calls[0]["use_search"])
 
     def test_jackal_scanner_analyst_call_site(self):

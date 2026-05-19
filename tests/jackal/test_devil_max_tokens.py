@@ -23,7 +23,11 @@ class DevilMaxTokensTests(unittest.TestCase):
         content = Path("apps/jackal/hunter.py").read_text(encoding="utf-8")
 
         self.assertIn(
-            "max_tokens=500,",
+            "max_tokens=1200,",
+            _llm_call_block(content, "jackal.hunter.suggest"),
+        )
+        self.assertIn(
+            "max_tokens=1000,",
             _llm_call_block(content, "jackal.hunter.quick_scan"),
         )
         self.assertIn(

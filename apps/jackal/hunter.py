@@ -351,7 +351,7 @@ JSON만 반환:
 
     response = _llm_client.call(
         model=MODEL_H,
-        max_tokens=600,
+        max_tokens=1200,
         system="",
         user=prompt,
         use_search=True,
@@ -992,7 +992,7 @@ JSON만: {{"top10": ["TICKER1", "TICKER2", ...]}}"""
 
     response = _llm_client.call(
         model=MODEL_H,
-        max_tokens=500,
+        max_tokens=1000,
         system="",
         user=prompt,
         call_site="jackal.hunter.quick_scan",
