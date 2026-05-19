@@ -550,6 +550,79 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertIn(path, text)
 
+    def test_jackal_session_records_session_ledger_fail_open(self):
+        text = _read_text(_workflow_path("jackal_session.yml"))
+        start_block = _extract_step_block(_workflow_path("jackal_session.yml"), "Start JACKAL session")
+        finish_block = _extract_step_block(_workflow_path("jackal_session.yml"), "Finish JACKAL session")
+
+        self.assertIn("id: start_session", start_block)
+        self.assertIn("if: always()", start_block)
+        self.assertIn('SESSION_ID="jackal_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"', start_block)
+        self.assertIn("JACKAL_SESSION_ID=$SESSION_ID", start_block)
+        self.assertIn("start_jackal_session(", start_block)
+        self.assertIn("WARNING: start_jackal_session failed", start_block)
+
+        self.assertIn("id: finish_session", finish_block)
+        self.assertIn("if: always()", finish_block)
+        self.assertIn("continue-on-error: true", finish_block)
+        self.assertIn("finish_jackal_session(", finish_block)
+        self.assertIn('commit_sha=os.environ.get("GITHUB_SHA")', finish_block)
+        self.assertIn("notes=outcomes", finish_block)
+        self.assertIn("WARNING: finish_jackal_session failed", finish_block)
+        self.assertLess(text.find("Finish JACKAL session"), text.find("Commit and push"))
+
+    def test_jackal_session_critical_steps_capture_outcomes(self):
+        path = _workflow_path("jackal_session.yml")
+        expected_steps = {
+            "Run JACKAL Hunter": "run_hunter",
+            "Run JACKAL Scanner": "run_scanner",
+            "Strict verify": "strict_verify",
+            "Smoke quality audit": "smoke_quality",
+            "Checkpoint DB": "checkpoint_db",
+            "Commit and push": "commit_push",
+        }
+        for step_name, step_id in expected_steps.items():
+            with self.subTest(step=step_name):
+                block = _extract_step_block(path, step_name)
+                self.assertIn(f"id: {step_id}", block)
+                self.assertIn("continue-on-error: true", block)
+
+        scanner_block = _extract_step_block(path, "Run JACKAL Scanner")
+        self.assertIn(
+            "if: ${{ env.JACKAL_SESSION_MODE == 'scanner_only' || steps.run_hunter.outcome == 'success' }}",
+            scanner_block,
+        )
+
+    def test_jackal_session_failure_push_is_db_only(self):
+        block = _extract_step_block(_workflow_path("jackal_session.yml"), "Commit and push")
+        self.assertIn("SESSION_FAILED=false", block)
+        self.assertIn("${{ steps.run_hunter.outcome }}", block)
+        self.assertIn("${{ steps.run_scanner.outcome }}", block)
+        self.assertIn("${{ steps.strict_verify.outcome }}", block)
+        self.assertIn("${{ steps.smoke_quality.outcome }}", block)
+        self.assertIn('if [ "$SESSION_FAILED" = "true" ]; then', block)
+        self.assertIn("Session failed - DB-only push", block)
+        self.assertIn('stage_jackal_path "data/jackal_state.db"', block)
+        self.assertIn("Session success - full push", block)
+        self.assertIn('for path in "${JACKAL_FILES[@]}"; do', block)
+
+    def test_jackal_session_final_result_restores_failed_outcomes(self):
+        block = _extract_step_block(_workflow_path("jackal_session.yml"), "Determine JACKAL session result")
+        self.assertIn("if: always()", block)
+        for outcome in (
+            "${{ steps.run_hunter.outcome }}",
+            "${{ steps.run_scanner.outcome }}",
+            "${{ steps.strict_verify.outcome }}",
+            "${{ steps.smoke_quality.outcome }}",
+            "${{ steps.finish_session.outcome }}",
+            "${{ steps.checkpoint_db.outcome }}",
+            "${{ steps.commit_push.outcome }}",
+        ):
+            self.assertIn(outcome, block)
+        self.assertIn('if [ "$outcome" = "failure" ] || [ "$outcome" = "cancelled" ]; then', block)
+        self.assertIn("JACKAL session completed with failures", block)
+        self.assertIn("exit 1", block)
+
 
 class TestHighRiskArtifactContracts(unittest.TestCase):
     def test_learning_artifact_handoff_contract_is_preserved(self):

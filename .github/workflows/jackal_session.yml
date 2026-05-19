@@ -160,7 +160,34 @@ jobs:
           conn.close()
           PY
 
+      - name: Start JACKAL session
+        id: start_session
+        if: always()
+        shell: bash
+        env:
+          GITHUB_EVENT_SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          SESSION_ID="jackal_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          export JACKAL_SESSION_ID="$SESSION_ID"
+          echo "JACKAL_SESSION_ID=$SESSION_ID" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import os
+          try:
+              from apps.jackal.session import start_jackal_session
+              session_id = start_jackal_session(
+                  session_id=os.environ["JACKAL_SESSION_ID"],
+                  mode=os.environ.get("JACKAL_SESSION_MODE", "unknown"),
+                  workflow_run_id=os.environ.get("GITHUB_RUN_ID"),
+                  cron_schedule=os.environ.get("GITHUB_EVENT_SCHEDULE", "") or None,
+              )
+              print(f"Session started: {session_id}")
+          except Exception as exc:
+              print(f"WARNING: start_jackal_session failed: {exc}")
+          PY
+
       - name: Run JACKAL Hunter
+        id: run_hunter
+        continue-on-error: true
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
@@ -189,6 +216,9 @@ jobs:
           python -m apps.jackal.core $ARGS
 
       - name: Run JACKAL Scanner
+        id: run_scanner
+        if: ${{ env.JACKAL_SESSION_MODE == 'scanner_only' || steps.run_hunter.outcome == 'success' }}
+        continue-on-error: true
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
@@ -208,6 +238,8 @@ jobs:
           python -m apps.jackal.scanner $ARGS
 
       - name: Strict verify
+        id: strict_verify
+        continue-on-error: true
         shell: bash
         run: |
           python - <<'PY'
@@ -246,6 +278,8 @@ jobs:
           PY
 
       - name: Smoke quality audit
+        id: smoke_quality
+        continue-on-error: true
         shell: bash
         run: |
           python scripts/check_requirements_drift.py \
@@ -275,6 +309,8 @@ jobs:
           if-no-files-found: ignore
 
       - name: Checkpoint DB
+        id: checkpoint_db
+        continue-on-error: true
         shell: bash
         run: |
           python - <<'PY'
@@ -292,7 +328,62 @@ jobs:
           checkpoint_jackal_db()
           PY
 
+      - name: Finish JACKAL session
+        id: finish_session
+        if: always()
+        continue-on-error: true
+        shell: bash
+        env:
+          OUTCOME_HUNTER: ${{ steps.run_hunter.outcome }}
+          OUTCOME_SCANNER: ${{ steps.run_scanner.outcome }}
+          OUTCOME_VERIFY: ${{ steps.strict_verify.outcome }}
+          OUTCOME_SMOKE: ${{ steps.smoke_quality.outcome }}
+          OUTCOME_CHECKPOINT: ${{ steps.checkpoint_db.outcome }}
+        run: |
+          python - <<'PY'
+          import os
+          try:
+              from apps.jackal.session import finish_jackal_session
+
+              outcomes = {
+                  "hunter": os.environ.get("OUTCOME_HUNTER", "skipped"),
+                  "scanner": os.environ.get("OUTCOME_SCANNER", "skipped"),
+                  "verify": os.environ.get("OUTCOME_VERIFY", "skipped"),
+                  "smoke": os.environ.get("OUTCOME_SMOKE", "skipped"),
+                  "checkpoint": os.environ.get("OUTCOME_CHECKPOINT", "skipped"),
+              }
+              critical_outcomes = [
+                  outcomes["hunter"],
+                  outcomes["scanner"],
+                  outcomes["verify"],
+                  outcomes["smoke"],
+              ]
+              has_failure = any(outcome in ("failure", "cancelled") for outcome in critical_outcomes)
+              status = "failed" if has_failure else "completed"
+              error_reason = None
+              if has_failure:
+                  failed_steps = [
+                      name for name, outcome in outcomes.items()
+                      if outcome in ("failure", "cancelled")
+                  ]
+                  error_reason = "Failed steps: " + ", ".join(failed_steps)
+
+              finish_jackal_session(
+                  session_id=os.environ["JACKAL_SESSION_ID"],
+                  status=status,
+                  error_reason=error_reason,
+                  commit_sha=os.environ.get("GITHUB_SHA"),
+                  notes=outcomes,
+              )
+              print(f"Session finished: status={status}")
+          except Exception as exc:
+              print(f"WARNING: finish_jackal_session failed: {exc}")
+          PY
+
       - name: Commit and push
+        id: commit_push
+        if: always()
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -303,6 +394,18 @@ jobs:
           # Root fix: PR 5 (persistence boundary).
           git config user.name  "JACKAL Session"
           git config user.email "jackal-session@orca-agent"
+
+          SESSION_FAILED=false
+          for outcome in \
+            "${{ steps.run_hunter.outcome }}" \
+            "${{ steps.run_scanner.outcome }}" \
+            "${{ steps.strict_verify.outcome }}" \
+            "${{ steps.smoke_quality.outcome }}"
+          do
+            if [ "$outcome" = "failure" ] || [ "$outcome" = "cancelled" ]; then
+              SESSION_FAILED=true
+            fi
+          done
 
           DIAG_DIR="${RUNNER_TEMP:-/tmp}"
           PRE_RESET_STATUS="$DIAG_DIR/jackal_session_pre_reset_status.txt"
@@ -459,13 +562,19 @@ jobs:
               fi
             }
 
-            for path in "${JACKAL_FILES[@]}"; do
-              stage_jackal_path "$path"
-            done
+            if [ "$SESSION_FAILED" = "true" ]; then
+              echo "Session failed - DB-only push"
+              stage_jackal_path "data/jackal_state.db"
+            else
+              echo "Session success - full push"
+              for path in "${JACKAL_FILES[@]}"; do
+                stage_jackal_path "$path"
+              done
 
-            for path in "${JACKAL_DIRS[@]}"; do
-              stage_jackal_path "$path"
-            done
+              for path in "${JACKAL_DIRS[@]}"; do
+                stage_jackal_path "$path"
+              done
+            fi
 
             echo "Staged JACKAL paths: $STAGED_PATHS"
             echo "Staged state diff:"
@@ -509,3 +618,29 @@ jobs:
             ${{ runner.temp }}/jackal_session_pre_reset.diff
             ${{ runner.temp }}/jackal_session_pre_reset_untracked.txt
           if-no-files-found: ignore
+
+      - name: Determine JACKAL session result
+        if: always()
+        shell: bash
+        run: |
+          FAILED=0
+          for outcome in \
+            "${{ steps.run_hunter.outcome }}" \
+            "${{ steps.run_scanner.outcome }}" \
+            "${{ steps.strict_verify.outcome }}" \
+            "${{ steps.smoke_quality.outcome }}" \
+            "${{ steps.finish_session.outcome }}" \
+            "${{ steps.checkpoint_db.outcome }}" \
+            "${{ steps.commit_push.outcome }}"
+          do
+            if [ "$outcome" = "failure" ] || [ "$outcome" = "cancelled" ]; then
+              FAILED=1
+              echo "Failed outcome detected: $outcome"
+            fi
+          done
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "JACKAL session completed with failures"
+            exit 1
+          fi
+          echo "JACKAL session completed successfully"
