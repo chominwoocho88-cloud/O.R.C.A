@@ -35,11 +35,11 @@ MODEL_REPORTER_LITE = get_orca_env("ORCA_MODEL_LITE", _DEFAULT_SONNET)
 
 # ── 토큰 예산 (비용 최적화: 실측 기반 상한 설정)
 _TOK = {
-    "HUNTER":         4000,   # max_tokens reached 대응
-    "ANALYST":        2500,   # max_tokens reached 대응
-    "DEVIL":          2500,   # max_tokens reached 대응
-    "REPORTER_FULL":  4500,   # max_tokens reached 대응 (MORNING)
-    "REPORTER_LITE":  2000,   # 2500 → 2000  (-20%) EVENING/DAWN
+    "HUNTER":         8000,   # max_tokens reached 대응
+    "ANALYST":        5000,   # max_tokens reached 대응
+    "DEVIL":          4000,   # max_tokens reached 대응
+    "REPORTER_FULL":  9000,   # max_tokens reached 대응 (MORNING)
+    "REPORTER_LITE":  4000,   # max_tokens reached 대응 (EVENING/DAWN)
 }
 
 console = Console()
