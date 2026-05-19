@@ -1,5 +1,7 @@
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 
 class Phase51OrcaMaxTokensTests(unittest.TestCase):
@@ -39,6 +41,31 @@ class Phase51OrcaMaxTokensTests(unittest.TestCase):
         """JACKAL Devil/Analyst max_tokens hotfix remains intact."""
         content = Path("apps/jackal/scanner.py").read_text(encoding="utf-8")
         self.assertEqual(content.count("max_tokens=1000"), 2)
+
+    def test_postprocess_jackal_news_budget_increased(self):
+        """orca.postprocess JACKAL news collection uses at least 2000 tokens."""
+        from orca import postprocess
+
+        captured = {}
+
+        def fake_call_api(*args, **kwargs):
+            captured.update(kwargs)
+            return '{"news_items": []}'
+
+        with TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            watchlist = tmp / "jackal_watchlist.json"
+            watchlist.write_text(
+                '{"tickers":["NVDA"],"details":{"NVDA":{"name":"Nvidia"}}}',
+                encoding="utf-8",
+            )
+            with patch("shared.paths.DATA_DIR", tmp), \
+                patch.object(postprocess.console, "print"), \
+                patch("apps.orca.pipeline.agents.call_api", side_effect=fake_call_api):
+                postprocess.collect_jackal_news({"raw_signals": []})
+
+        self.assertEqual(captured["max_tokens"], 2000)
+        self.assertEqual(captured["call_site"], "orca.postprocess")
 
 
 if __name__ == "__main__":

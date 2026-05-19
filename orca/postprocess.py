@@ -252,7 +252,7 @@ def collect_jackal_news(hunter_data: dict) -> None:
                 news_prompt,
                 use_search=True,
                 model=MODEL_HUNTER,
-                max_tokens=800,
+                max_tokens=2000,
                 call_site="orca.postprocess",
             )
             import re as _re, json as _json
