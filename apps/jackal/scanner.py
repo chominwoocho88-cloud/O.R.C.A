@@ -46,6 +46,7 @@ from apps.orca.state import (
     sync_jackal_live_events,
     sync_jackal_recommendations,
 )
+from apps.jackal.pipeline.adapter import load_orca_context as load_shared_orca_context
 from jackal.explanation import (
     build_scanner_explanation_lines,
     build_scanner_peak_line,
@@ -252,7 +253,7 @@ def _is_kr_open() -> bool:
 # ARIA 컨텍스트 로딩 (파일 읽기만)
 # ══════════════════════════════════════════════════════════════════
 
-def _load_orca_context() -> dict:
+def _load_orca_context_legacy() -> dict:
     """
     ARIA가 생성한 파일들을 읽어 시장 맥락 구성.
     파일 없으면 빈 값 반환 — ARIA에 의존하지 않음.
@@ -319,6 +320,61 @@ def _load_orca_context() -> dict:
             sig = r.get("rotation_signal", {})
             ctx["rotation_from"] = sig.get("from", "")
             ctx["rotation_to"]   = sig.get("to", "")
+    except Exception:
+        pass
+
+    return ctx
+
+
+def _load_orca_context() -> dict:
+    """Load Scanner ARIA context through the shared adapter, then overlay Scanner-only fields."""
+    ctx = load_shared_orca_context()
+    ctx.setdefault("regime", "")
+    ctx.setdefault("trend", "")
+    ctx.setdefault("confidence", "")
+    ctx.setdefault("one_line", "")
+    ctx.setdefault("thesis_killers", [])
+    ctx.setdefault("key_inflows", [])
+    ctx.setdefault("key_outflows", [])
+    ctx.setdefault("sentiment_score", 50)
+    ctx.setdefault("sentiment_level", "중립")
+    ctx.setdefault("top_sector", "")
+    ctx.setdefault("bottom_sector", "")
+    ctx.setdefault("fear_greed", "50")
+    ctx.setdefault("fear_greed_label", "Neutral")
+    ctx.setdefault("regime_source", "none")
+
+    try:
+        if ORCA_BASELINE.exists():
+            baseline = json.loads(ORCA_BASELINE.read_text(encoding="utf-8"))
+            ctx["trend"] = baseline.get("trend_phase", ctx.get("trend", ""))
+            ctx["confidence"] = baseline.get("confidence", ctx.get("confidence", ""))
+    except Exception:
+        pass
+
+    try:
+        if ORCA_SENTIMENT.exists():
+            sentiment = json.loads(ORCA_SENTIMENT.read_text(encoding="utf-8"))
+            current = sentiment.get("current", {})
+            ctx["sentiment_score"] = current.get("score", 50)
+            ctx["sentiment_level"] = current.get("level", "중립")
+            if ctx.get("fear_greed") in ("50", 50, "", None):
+                fear_greed = current.get("fear_greed")
+                if fear_greed not in (None, "", "N/A"):
+                    ctx["fear_greed"] = fear_greed
+    except Exception:
+        pass
+
+    try:
+        if ORCA_ROTATION.exists():
+            rotation = json.loads(ORCA_ROTATION.read_text(encoding="utf-8"))
+            ranking = rotation.get("ranking", [])
+            if ranking:
+                ctx["top_sector"] = ranking[0][0]
+                ctx["bottom_sector"] = ranking[-1][0]
+            signal = rotation.get("rotation_signal", {})
+            ctx["rotation_from"] = signal.get("from", "")
+            ctx["rotation_to"] = signal.get("to", "")
     except Exception:
         pass
 
@@ -1255,6 +1311,7 @@ def _build_shadow_log_entry(
         "hy_spread":        macro["fred"].get("hy_spread"),
         "yield_curve":      macro["fred"].get("yield_curve"),
         "orca_regime":      aria["regime"],
+        "orca_regime_source": aria.get("regime_source", "none"),
         "orca_sentiment":   aria["sentiment_score"],
         "orca_trend":       aria["trend"],
         "analyst_score":    None,
@@ -1342,6 +1399,7 @@ def _build_scan_log_entry(
         "hy_spread":        macro["fred"].get("hy_spread"),
         "yield_curve":      macro["fred"].get("yield_curve"),
         "orca_regime":      aria["regime"],
+        "orca_regime_source": aria.get("regime_source", "none"),
         "orca_sentiment":   aria["sentiment_score"],
         "orca_trend":       aria["trend"],
         "signal_family":    canonical_signal_family,
