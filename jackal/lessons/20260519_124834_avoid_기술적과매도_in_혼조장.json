@@ -1,0 +1,7 @@
+{
+  "name": "avoid_기술적과매도_in_혼조장",
+  "warning": "기술적과매도 신호 발생 시 즉시 매수 진입 금지",
+  "reason": "7일 데이터에서 기술적과매도 swing_accuracy 0%, avg_peak_gain -2.1%로 손실 발생. 혼조 레짐(미국 위험선호/한국 위험회피)에서 accuracy 0%",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-05-19T12:48:34.798375"
+}

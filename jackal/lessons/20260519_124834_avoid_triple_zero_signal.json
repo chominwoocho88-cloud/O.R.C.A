@@ -1,0 +1,7 @@
+{
+  "name": "avoid_triple_zero_signal",
+  "warning": "bb_touch + rsi_oversold + sector_inflow 동시 0% 정확도 구간에서 진입 금지",
+  "reason": "세 가지 핵심 신호 모두 correct 0/2로 샘플 내 완전 실패. 단기 시장 노이즈 또는 레짐 불일치 가능성",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-05-19T12:48:34.798702"
+}
