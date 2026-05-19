@@ -529,6 +529,25 @@ def _init_jackal_tables() -> None:
             CREATE INDEX IF NOT EXISTS idx_jackal_shadow_batches_recorded_at
                 ON jackal_shadow_batches(recorded_at);
 
+            CREATE TABLE IF NOT EXISTS jackal_sessions (
+                session_id TEXT PRIMARY KEY,
+                workflow_run_id TEXT,
+                cron_schedule TEXT,
+                mode TEXT,
+                started_at TEXT NOT NULL,
+                ended_at TEXT,
+                status TEXT,
+                error_reason TEXT,
+                commit_sha TEXT,
+                notes TEXT
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_jackal_sessions_started_at
+                ON jackal_sessions(started_at);
+
+            CREATE INDEX IF NOT EXISTS idx_jackal_sessions_mode
+                ON jackal_sessions(mode);
+
             CREATE TABLE IF NOT EXISTS jackal_live_events (
                 event_id TEXT PRIMARY KEY,
                 event_type TEXT NOT NULL,
