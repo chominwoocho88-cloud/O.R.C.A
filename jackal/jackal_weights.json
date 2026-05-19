@@ -1380,9 +1380,9 @@
     "score_penalty": 5,
     "vix": 18.0,
     "yield_curve": 0.0,
-    "hy_chg5": -0.69,
+    "hy_chg5": -0.64,
     "reason": "ARIA위험회피",
-    "checked_at": "2026-05-20T00:31:27.846215+09:00"
+    "checked_at": "2026-05-20T00:55:52.309242+09:00"
   },
   "swing_type_optimal": {
     "기술적과매도": {
