@@ -171,7 +171,7 @@ class TestPromptInjection(unittest.TestCase):
         ):
             hunter._devil_swing("NVDA", _tech(), _analyst(), _aria(), "$")
 
-        self.assertEqual(fake.calls[0]["max_tokens"], 1500)
+        self.assertEqual(fake.calls[0]["max_tokens"], 3000)
         self.assertLessEqual(len(memory.compose_memory_injection_block(_context(), "devil")), 1000)
 
 
