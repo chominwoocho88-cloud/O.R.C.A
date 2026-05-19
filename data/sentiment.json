@@ -724,40 +724,65 @@
       "divergence": false,
       "fred_score": 50,
       "fred_indicators": {}
+    },
+    {
+      "date": "2026-05-20",
+      "score": 60,
+      "level": "중립",
+      "emoji": "😐",
+      "components": {
+        "시장레짐": 70,
+        "추세방향": 70,
+        "변동성지수": 72,
+        "자금흐름": 60,
+        "반론강도": 40,
+        "한국시장": 40,
+        "숨은시그널": 41
+      },
+      "regime": "위험선호 (미국) / 위험회피 심화 (한국) 극단적 디커플링",
+      "trend": "상승추세",
+      "vix_level": "중립~탐욕",
+      "vix_val": 18.19,
+      "vkospi_val": 15.0,
+      "fear_greed": 63.0,
+      "internal_raw": 58.656716417910445,
+      "divergence": false,
+      "fred_score": 50,
+      "fred_indicators": {}
     }
   ],
   "current": {
-    "date": "2026-05-19",
-    "score": 48,
+    "date": "2026-05-20",
+    "score": 60,
     "level": "중립",
     "emoji": "😐",
     "components": {
-      "시장레짐": 30,
-      "추세방향": 30,
+      "시장레짐": 70,
+      "추세방향": 70,
       "변동성지수": 72,
-      "자금흐름": 40,
-      "반론강도": 65,
+      "자금흐름": 60,
+      "반론강도": 40,
       "한국시장": 40,
-      "숨은시그널": 35
+      "숨은시그널": 41
     },
-    "regime": "위험회피 (미-한 극단적 디커플링 지속)",
-    "trend": "하락추세",
-    "vix_level": "중립",
-    "vix_val": 18.0,
+    "regime": "위험선호 (미국) / 위험회피 심화 (한국) 극단적 디커플링",
+    "trend": "상승추세",
+    "vix_level": "중립~탐욕",
+    "vix_val": 18.19,
     "vkospi_val": 15.0,
-    "fear_greed": 45.0,
-    "internal_raw": 46.56716417910447,
+    "fear_greed": 63.0,
+    "internal_raw": 58.656716417910445,
     "divergence": false,
     "fred_score": 50,
     "fred_indicators": {}
   },
   "trend": {
     "direction": "stable",
-    "change": -3.4,
-    "avg_7d": 56.7,
+    "change": 0.8,
+    "avg_7d": 56.1,
     "min_30d": 48,
     "max_30d": 64,
     "avg_30d": 60.2
   },
-  "last_updated": "2026-05-19T23:00:08.776534+09:00"
+  "last_updated": "2026-05-20T00:27:11.604951+09:00"
 }
