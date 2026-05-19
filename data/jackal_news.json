@@ -1,16 +1,16 @@
 {
-  "collected_at": "2026-05-19 07:54 KST",
+  "collected_at": "2026-05-19 21:41 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
     "252710.KS",
+    "900300.KS",
     "462330.KS",
-    "251340.KS",
-    "290690.KS",
-    "233740.KS",
+    "021880.KS",
     "066430.KS",
-    "001740.KS",
-    "027360.KS",
+    "251340.KS",
+    "003280.KS",
+    "233740.KS",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -21,53 +21,65 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "066430",
-      "headline": "I Robotics achieved Q1 2026 profitability turnaround with 20.1% YoY revenue growth to 10.2B won",
+      "ticker": "900300.KS",
+      "headline": "오가닉티코스메틱, 최대주주 변경…SUNYANE이 2,300만주 취득",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "001740",
-      "headline": "SK Networks target price raised to 11,000 won on wellness robot expansion and improved IT profitability",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "290690",
-      "headline": "Solux confirms merger with ARI Bio unchanged; acquires Cha Vaccine management rights for biotech growth",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "Nvidia CEO signals hope for China AI chip exports; Veru CPUs deployed at major AI labs",
+      "ticker": "021880.KS",
+      "headline": "메이슨캐피탈, 5대1 무상감자 결정…자본감소 및 주식액면 병합 추진",
       "impact": "neutral",
       "source": "web_search"
     },
     {
-      "ticker": "000660",
-      "headline": "SK Hynix experiences profit-taking after recent rally; analyst notes rising risks despite AI demand optimism",
-      "impact": "neutral",
+      "ticker": "066430.KS",
+      "headline": "아이로보틱스, 1분기 흑자전환 성공…로봇사업 확대 본격화",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "005930",
-      "headline": "Samsung Electronics labor union negotiations continue; company faces performance incentive disputes with workforce",
+      "ticker": "003280.KS",
+      "headline": "흥아해운, MSC와 유조선사 지분 50% 인수 거래 발표…시너지 기대",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK하이닉스, AI 메모리 수요 강세로 목표가 상향…1,850,000원",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "삼성전자, 미국 반도체주 약세와 미시경제 불확실성으로 약세 흐름",
       "impact": "bearish",
       "source": "web_search"
     },
     {
-      "ticker": "AVGO",
-      "headline": "Broadcom surges 4.3% on bullish analyst upgrades; Wells Fargo raises target to $545 on AI semiconductor strength",
+      "ticker": "NVDA",
+      "headline": "Nvidia CEO 시그널, 중국 AI 칩 수입 재개 가능성 표시…Q1 실적 주목",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "035720",
-      "headline": "Kakao Corp experiencing AI-centered transformation with improved core business performance expected",
-      "impact": "neutral",
+      "ticker": "AVGO",
+      "headline": "Broadcom, AI 반도체 호황으로 목표가 대폭 상향…Wells Fargo $545",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "233740.KS",
+      "headline": "KODEX 코스닥150레버리지, 개인투자자 순매수 1위…6,727억원 유입",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "466920.KS",
+      "headline": "SOL 코리아고배당, 순자산 5,000억원 돌파…고배당 ETF 중 자금유입 1위",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 8
+  "total": 11
 }

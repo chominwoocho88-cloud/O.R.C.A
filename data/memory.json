@@ -13306,166 +13306,243 @@
   },
   {
     "analysis_date": "2026-05-19",
-    "analysis_time": "07:54 KST",
+    "analysis_time": "21:40 KST",
     "mode": "MORNING",
     "mode_label": "아침 풀분석",
-    "one_line_summary": "나스닥 26,090·S&P 7,403 고점권 유지에도 코스피 7,516 외국인 매도 지속·PCE 3.5% 재가속·Fed 인상 확률 45% 급등으로 엔비디아 실적 단일 이벤트에 시장 운명 집중된 고위험 관망 국면",
-    "market_regime": "혼조 (미국 위험선호 표면 / 한국·채권 위험회피 심화)",
-    "trend_phase": "횡보추세",
+    "one_line_summary": "코스피 -3.25% 급락·외국인 5일 누적 -24조원 매도 쇼크 속 S&P500 7,403·나스닥 26,090 고점권 유지로 미-한 극단적 디커플링 심화, VIX 18로 글로벌 패닉 아닌 한국 구조적 자금이탈 국면",
+    "market_regime": "혼조 (미국 위험선호 표면 유지 / 한국 위험회피 심화·구조적 자금이탈)",
+    "trend_phase": "하락추세",
     "trend_strategy": {
-      "recommended": "단기 차익실현 후 관망, 엔비디아 5월 20일 실적 발표 전 포지션 축소 및 현금 비중 확대",
-      "caution": "코스피 추가 조정 가능성 높음 — 외국인 매도 미전환 + 개인 레버리지 과열 + 7,300pt 이탈 시 강제청산 연쇄 리스크",
+      "recommended": "현금 비중 확대, 반도체 섹터 숏·헤지 유지, 단기 반등(83% 확률) 구간에서 분할 매도 전략",
+      "caution": "외국인 5거래일 누적 -24조원 매도 지속 중 — 개인 역매수 실탄 소진 우려, 섣부른 저가 매수 진입 금지. 코스피 7,350pt 이탈 시 추가 하락 경계",
       "difficulty": "어려움"
     },
-    "confidence_overall": "높음",
+    "confidence_overall": "보통",
     "consensus_level": "보통",
     "top_headlines": [
       {
-        "headline": "엔비디아 5월 20일 실적 발표 — Blackwell/Rubin 매출 가이던스 $1T 현실화 여부 시장 최대 관심사",
-        "signal_tag": "CATALYST_CRITICAL",
+        "headline": "코스피 -3.25% 급락(7,271.66), 외국인 단일 세션 -6.21조원·5거래일 누적 -24조원 역대급 순매도",
+        "signal_tag": "🔴 매도 압력",
         "impact": "높음"
       },
       {
-        "headline": "코스피 8,046 사상최고 터치 후 -6.12% 급락, 외국인 누적 흐름 추정(직접 데이터 미확인)조원 매도 지속",
-        "signal_tag": "OUTFLOW_SEVERE",
+        "headline": "S&P500 7,403·나스닥 26,090 고점권 유지, Q1 어닝 성장률 +27.7% YoY로 미국 증시 견조",
+        "signal_tag": "🟢 미국 강세",
         "impact": "높음"
       },
       {
-        "headline": "PCE 인플레이션 3.5% 재가속, Fed 금리인상 확률 1%→45% 급등 — 미국 10Y 4.62% 52주 최고",
-        "signal_tag": "MACRO_HAWKISH",
+        "headline": "미국 CPI 3.8% 예상 상회·Fed 금리 3.50~3.75% 동결, BofA 첫 인하 전망 2027년 7월로 후퇴",
+        "signal_tag": "🔴 긴축 장기화",
         "impact": "높음"
       },
       {
-        "headline": "S&P500 Q1 EPS 27.7% 성장·84% 어닝비트 — 펀더멘털 견조하나 이미 주가 반영",
-        "signal_tag": "EARNINGS_PRICED_IN",
+        "headline": "엔비디아 Q1 FY2026 EPS $1.78(+120% YoY)·매출 $79.2B(+79.5%), 하이퍼스케일러 capex $6,600억달러 확정",
+        "signal_tag": "🟢 AI 구조적 강세",
+        "impact": "높음"
+      },
+      {
+        "headline": "카타르 파업 헬륨 공급 20% 감소, 한국·대만 반도체 배급제 시행 — 생산 원가 상승 잠재 리스크",
+        "signal_tag": "🟡 숨겨진 리스크",
         "impact": "보통"
       },
       {
-        "headline": "엠파이어스테이트 제조업 5월 19.6 — 예상 6.2 대폭 상회, 그러나 긴축 신호로 역해석 가능",
-        "signal_tag": "MACRO_MIXED",
+        "headline": "개인투자자 단일 세션 +5.63조원 순매수로 낙폭 일부 완충, 그러나 외국인 매도 규모 대비 역부족",
+        "signal_tag": "🟡 역발상 주의",
         "impact": "보통"
-      },
-      {
-        "headline": "5월 21일 FOMC 의사록 공개 예정 — 인상 신호 명시 여부 채권·주식 동반 충격 가능성",
-        "signal_tag": "EVENT_RISK",
-        "impact": "높음"
       }
     ],
     "volatility_index": {
-      "vkospi": "코스피 -6.12% 급락 후 변동성 확대 구간 (VKOSPI 74.71 극단공포 기록)",
-      "vix": "17.82",
-      "fear_greed": "65 (Greed)",
-      "level": "중립~탐욕 (미국) / 극단공포 (한국) 극단적 디커플링",
-      "interpretation": "VIX 17.82·공포탐욕 65(탐욕)는 미국 시장의 표면적 안정을 반영하나, 코스피 VKOSPI 극단공포·PCE 3.5% 재가속·Fed 인상 확률 45%·10Y 4.62% 52주 최고 등 구조적 불안 요소가 내재. 단순 VIX 수치로 안심하기 위험한 구간이며, 엔비디아 실적 단일 이벤트에 미국 위험선호 기조 전체가 과도하게 의존한 취약 구조."
+      "vkospi": "N/A",
+      "vix": "18.01",
+      "fear_greed": "64 (Greed)",
+      "level": "중립",
+      "interpretation": "VIX 18.01은 미국 기준 중립권이며 공포탐욕 지수 64(탐욕)는 미국 시장의 낙관 심리를 반영. 그러나 코스피 -3.25% 급락은 한국 로컬 공포 수준에 해당. VIX가 낮음에도 코스피 급락이 발생한 것은 글로벌 패닉이 아닌 한국 특수 외국인 포지션 청산·구조적 자금 재배치가 주도하는 디커플링 국면을 의미"
     },
     "retail_reversal_signal": {
-      "retail_behavior": "코스피 5월 15일 개인 단일일 최대 순매수 7.18조원 — 사상최고가 8,046 도달 시 폭발적 개인 참여. 5월 7~14일 외국인 26.4조 매도 vs 개인 23.2조 매수로 외국인 매도 전량 흡수 시도",
-      "contrarian_implication": "개인 역대급 매수 집중 → 전형적인 '개인 고점 매수·기관·외국인 출구' 패턴. 외국인 매도 기조 미전환 시 추가 하락 가능. Citi 불마켓 스탠스 하향·마진거래·레버리지 ETF 과열 경고는 역발상 공매도 시그널. 단, 급락(-6.12%) 다음날 기술적 반등 확률 83% 통계도 동시에 유의",
-      "reliability": "높음"
+      "retail_behavior": "개인투자자 단일 세션 +5.63조원 순매수, 기관 +5,264억원 순매수 — 외국인 매도의 대부분을 개인이 흡수",
+      "contrarian_implication": "개인 대규모 저가 매수는 단기 지지선 형성에 기여하나, 외국인 누적 흐름 추정(직접 데이터 미확인)조원 대비 개인 실탄 소진 속도가 빠름. 역발상 신호: 개인 매수 여력 소진 후 외국인 추가 매도 시 지지선 붕괴 가속 리스크 존재. 개인 순매수 지속 여부가 핵심 모니터링 지표",
+      "reliability": "보통"
     },
     "outflows": [
       {
-        "zone": "코스피 / 한국 증시",
-        "reason": "외국인 누적 흐름 추정(직접 데이터 미확인)조원(2025년 11월 이후) 매도 지속, 5월 한 주 $13.2B 순유출로 가속화. Citi 불마켓 스탠스 하향. 개인 레버리지 과열로 추가 하락 시 강제청산 연쇄 리스크 내재",
+        "zone": "코스피 반도체 (삼성전자·SK하이닉스)",
+        "reason": "외국인 5거래일 누적 -24조원 집중 이탈. 미국 고금리 장기화(BofA 2027년 7월 첫 인하) + 이란 분쟁발 에너지 인플레 + PCE 3.5% 충격이 신흥국 고베타 반도체주 리스크 프리미엄 상승 유발. 펀더멘털(수출 +138% YoY)과 수급 극단적 디커플링",
         "severity": "높음",
-        "data_point": "외국인 누적 매도 ~80조원; 5월 15일 코스피 8,046→7,493 단일일 -6.12%; 주간 $13.2B 순유출; Citi 매도 권고"
+        "data_point": "외국인 단일 세션 -6.21조원, 누적 5세션 -24조원(약 160억달러)"
       },
       {
-        "zone": "미국 장기채 (채권시장)",
-        "reason": "10Y 수익률 4.62% 52주 최고. PCE 3.5% 재가속 + Fed 인상 확률 45% 급등으로 채권 매도 압력 지속. BofA 금리인하 전망 2027년으로 후퇴",
+        "zone": "신흥시장 전반",
+        "reason": "Fed 금리동결 장기화 + 달러 강세 환경(KRW/USD 1,507.1) + 헬륨 공급 차질로 반도체 생산 원가 상승 우려 복합 작용",
         "severity": "높음",
-        "data_point": "US 10Y 4.62% 52주 최고; PCE 헤드라인 3.5% (2월 2.8%→급등); CME FedWatch 인상 확률 1%→45%"
+        "data_point": "Fed 3.50~3.75% 동결, CPI 3.8% YoY, KRW/USD 1507.1"
       },
       {
-        "zone": "대만 증시",
-        "reason": "한국과 함께 아시아 반도체 밸류체인 외국인 자금 이탈 동조화 진행 중",
+        "zone": "미국 성장주 (나스닥 내 비AI 섹터)",
+        "reason": "고금리 장기화로 밸류에이션 부담 지속. 10년물 국채 4.62%로 주식 리스크 프리미엄 압박. 엔비디아 실적 선반영 후 '뉴스에 팔기' 패턴 발동 잠재 리스크",
         "severity": "보통",
-        "data_point": "대만 주간 $2.5B 순유출"
+        "data_point": "미국 10년물 4.62%, 나스닥 26,090 고점권 유지"
       }
     ],
     "inflows": [
       {
-        "zone": "AI 인프라 / 엔비디아 생태계",
-        "reason": "Blackwell/Rubin 매출 가이던스 $1T(2027년까지) — 기존 $500B에서 2배 상향. 하이퍼스케일러 5개사 2026년 캐펙스 전년 대비 약 2배 전망. 5월 20일 실적 발표 전 기대감 집중",
+        "zone": "AI 인프라·데이터센터 (미국 하이퍼스케일러)",
+        "reason": "5대 하이퍼스케일러 2026년 capex 6,600억달러 집행 확정. 엔비디아 Q1 FY2026 EPS $1.78(+120% YoY), 매출 $79.2B(+79.5%). AI 수요 구조적 강세 지속",
         "momentum": "강함",
-        "data_point": "엔비디아 Blackwell/Rubin 매출 가이던스 $1T through 2027; 하이퍼스케일러 capex ~2x YoY"
+        "data_point": "엔비디아 EPS $1.78, Revenue $79.2B; 하이퍼스케일러 capex $660B"
       },
       {
-        "zone": "미국 소비재 / 방어주 (Home Depot·Walmart·TJX·Lowe's)",
-        "reason": "S&P500 Q1 어닝 27.7% 성장(2021년 Q4 이후 최고), 84% EPS 비트. 실물 소비·서비스 기업 실적 견조. 5월 19~21일 대형 소비재 어닝 예정",
-        "momentum": "형성중",
-        "data_point": "S&P500 Q1 EPS 성장률 27.7%; 어닝비트율 84%; 5월 19~21일 대형 소비재 실적 발표 예정"
+        "zone": "미국 대형주·S&P500",
+        "reason": "S&P500 Q1 2026 어닝 성장률 +27.7% YoY(2021년 Q4 이후 최고). 강력한 이익 성장이 지수 7,403 지지. 공포탐욕 64 탐욕 구간 유지",
+        "momentum": "강함",
+        "data_point": "S&P500 어닝 성장률 27.7%, 지수 7,403, 공포탐욕 64"
       },
       {
-        "zone": "미국 제조업 관련주",
-        "reason": "엠파이어스테이트 제조업 지수 5월 19.6 — 예상 6.2·전월 11.0 대폭 상회. 제조업 경기 예상 외 강세 확인",
+        "zone": "HBM·고대역폭 메모리 공급업체",
+        "reason": "HBM 2026년 전용량 사전 배정 완료, 할당 2027년까지 연장. 공급 병목으로 가격 프리미엄 유지. 수요 구조적 강세는 확실하나 헬륨 공급 리스크·자금조달 비용 이중고로 단기 수급 악화",
         "momentum": "형성중",
-        "data_point": "Empire State 제조업 5월 19.6 vs 예상 6.2 vs 전월 11.0"
+        "data_point": "HBM 2026 사전 배정 100%, DRAM +249.1% YoY, NAND +377.5% YoY 수출"
+      },
+      {
+        "zone": "한국 수출 실물경제",
+        "reason": "Q1 2026 수출 2,199억달러(+37.8% YoY), 반도체 수출 785억달러(+138% YoY) 역대 최고 달성. 펀더멘털은 강하나 외국인 금융 포지션 청산과 극단적 디커플링 상태",
+        "momentum": "형성중",
+        "data_point": "한국 Q1 수출 $219.9B, 반도체 수출 $78.5B (+138% YoY)"
       }
     ],
     "neutral_waiting": [
       {
-        "zone": "나스닥 / 미국 성장주 전반",
-        "catalyst_needed": "5월 20일 엔비디아 실적 발표 — $1T 가이던스 현실화 여부 확인. 어닝 미스 시 나스닥 -3% 이상 급락 후 되돌림 리스크 vs 어닝 비트 시 나스닥 26,500pt 이상 추가 상승 가능성. 현재 26,090에서 방향 결정 대기"
+        "zone": "삼성전자·SK하이닉스 저가 매수",
+        "catalyst_needed": "외국인 순매도 전환(일일 -2조원 이하로 둔화) 또는 5거래일 연속 매도 종료 신호 확인. Fed 금리인하 시그널 재점화 또는 이란 분쟁 완화로 에너지 인플레 둔화"
       },
       {
-        "zone": "코스피 / SK하이닉스",
-        "catalyst_needed": "외국인 매도 전환(순매수 복귀) 신호 필요. 엔비디아 실적 호조→HBM 수요 확인 시 SK하이닉스 반등 가능. 코스피 7,400~7,500 지지선 유지 여부 및 기술적 반등(83% 패턴) 실현 여부 확인 필요"
+        "zone": "나스닥 추가 상승 (AI 모멘텀 연장)",
+        "catalyst_needed": "엔비디아 실적 발표 후 Q2 가이던스 $83B 이상 서프라이즈 확인 + 헬륨·전력 인프라 병목 해소 뉴스. 중국 수출 제한 확대 없음 확인"
       },
       {
-        "zone": "연준 정책 민감 섹터 (성장주·부동산)",
-        "catalyst_needed": "5월 21일 FOMC 의사록 공개 — 인상 신호 명시 여부 확인. PCE/CPI 추가 데이터로 금리인상 확률 45% 이상 추가 상승 여부 관찰. BofA 2027년 인하 시나리오 컨센서스화 여부 점검"
+        "zone": "미국 소비재 (월마트 등)",
+        "catalyst_needed": "중동 에너지 충격 완화 → 헤드라인 인플레 둔화 → 소비자 실질 구매력 회복 데이터 확인"
       }
     ],
     "hidden_signals": [
       {
-        "signal": "엔비디아 실적 단일 이벤트에 미국 위험선호 전체가 과도 의존 — '취약한 단일 기둥 구조'",
-        "implication": "엔비디아 가이던스 미달 또는 데이터센터 수요 집중도 리스크 언급 시, PCE 긴축 공포와 성장 실망이 동시 발생하는 복합 충격 가능. 나스닥 -3% 이상→SK하이닉스 -4.2% 이상→코스피 외국인 추가 이탈 연쇄 시나리오",
+        "signal": "코스피 -3.25% 급락 — 다음 거래일 반등 확률 83% (백테스트 패턴)",
+        "implication": "급락(-3%+) 다음날 기술적 반등 바이어스 존재. 단, 외국인 누적 매도 구조가 반등을 희석시킬 수 있음. 반등 발생 시 7,400~7,450pt 구간에서 추가 매도 대기 물량 주의. 반등을 추세 전환으로 오인 금지",
+        "confidence": "보통"
+      },
+      {
+        "signal": "한국 반도체 수출 펀더멘털 vs 외국인 금융 포지션 극단적 디커플링",
+        "implication": "DRAM +249%, NAND +377% 수출 성장에도 외국인 -24조원 매도는 '실적 vs 유동성' 갈등 국면. 금리 환경 해소 시 급격한 재평가 가능. 현재는 유동성이 실적을 압도하는 국면으로 타이밍 리스크 극대화",
         "confidence": "높음"
       },
       {
-        "signal": "코스피 급락(-6.12%) 다음날 기술적 반등 확률 83% — 단기 역발상 기회 내재",
-        "implication": "외국인 80조원 누적 매도는 역설적으로 '매도 소진' 신호일 수 있으며, 개인 역대급 순매수 직후 단기 기술적 반등이 통계적으로 우세. 단, 엔비디아 실적 리스크가 겹쳐 반등 지속성 불확실",
-        "confidence": "보통"
-      },
-      {
-        "signal": "엠파이어스테이트 19.6 대폭 상회 → '경기 과열→추가 긴축' 역신호 가능성",
-        "implication": "PCE 3.5%·Fed 인상 확률 45% 환경에서 제조업 서프라이즈는 인플로우 근거가 아닌 금리 추가 상승·밸류에이션 압박 요인으로 해석될 수 있음. 10Y 4.62% 52주 최고와 결합 시 성장주 할인율 부담 가중",
-        "confidence": "보통"
-      },
-      {
-        "signal": "미국 공포탐욕 65(탐욕) vs 한국 VKOSPI 극단공포 — 글로벌 심리 극단 디커플링 지속",
-        "implication": "이 디커플링이 해소되는 방향이 핵심 — 미국이 한국처럼 공포로 수렴하거나 한국이 미국처럼 탐욕으로 반전하거나. 엔비디아 실적이 분기점 역할. 해소 방향에 따라 수익률 격차 크게 발생",
+        "signal": "S&P500·나스닥 견조 속 코스피 급락 — 글로벌 리스크오프 아닌 한국 로컬 구조적 이슈",
+        "implication": "이란 분쟁 + 헬륨 쇼크 + Fed 장기동결 콤보가 한국 반도체에 집중 타격. 미국 AI 수요는 오히려 강세. 엔비디아·미국 AI 장기 포지션은 훼손 없으나 한국 반도체는 공급망 우려 + 자금조달 비용 이중고",
         "confidence": "높음"
       },
       {
-        "signal": "KRW/USD 1,488.34 — 원화 약세 지속, 외국인 수익률 추가 환손실 부담",
-        "implication": "원화 약세가 외국인의 한국 주식 투자 수익률을 추가 잠식하여 매도 기조 전환을 더욱 지연시킬 수 있음. 1,500원 돌파 여부가 외국인 매도 가속화의 심리적 트리거",
+        "signal": "헬륨 공급 차질 — 반도체 제조 원가 상승 시장 미가격 리스크",
+        "implication": "카타르 파업으로 글로벌 헬륨 공급 20% 감소, 한국·대만 배급제 시행. SK하이닉스·삼성전자 세정·리소그래피 공정 잠재 차질. 전체 원가 대비 비중은 낮으나 심리적 매도 빌미 제공 가능",
         "confidence": "보통"
+      },
+      {
+        "signal": "엔비디아 실적 발표 전후 '소문에 사고 뉴스에 팔기' 패턴 경고",
+        "implication": "나스닥 26,090 고점권에서 어닝 서프라이즈가 이미 선반영된 경우 발표 후 급락 전환 가능. 나스닥 -2%+ 시 SK하이닉스 베타 1.36x 적용 -2.8% 연동 추가 하락 경계",
+        "confidence": "보통"
+      }
+    ],
+    "korea_focus": {
+      "krw_usd": "1507.1",
+      "kospi_flow": "코스피 7,271.66 (-3.25%, -244.38pt). 외국인 -6.21조원 / 개인 +5.63조원 / 기관 +5,264억원. 외국인 5거래일 누적 -24조원(약 160억달러). 개인이 낙폭을 일부 완충했으나 외국인 매도 압력 규모 대비 역부족. 코스피 7,271 지지선 붕괴 시 7,000선 테스트 가능성 경계",
+      "sk_hynix": "직접 종가 미제공. 나스닥 대비 베타 1.36x 기준, 코스피 -3.25% 급락 + 외국인 집중 매도 감안 시 -4~5% 수준 하락 압력 추정. HBM 수요 구조적 강세 유지되나 단기 수급 급속 악화. 외국인 순매수 전환 확인 전 진입 위험",
+      "samsung": "직접 종가 미제공. 외국인 삼성전자 집중 매도 확인. Q1 반도체 수출 +138% YoY 강한 펀더멘털과 주가 이탈 디커플링 심화. 중기 저가 매수 관심은 유효하나 외국인 매도 종료 신호 확인 전 진입 고위험",
+      "assessment": "⚠️ 고위험 구간. 한국 증시는 미국 AI 호황과 단절된 독자적 하락 국면 진입. 외국인 24조원 누적 매도는 단순 차익 실현이 아닌 고금리 장기화 + 지정학 리스크 회피 목적의 구조적 자금 재배치 성격 강함. 오늘 핵심 모니터링 지표: 외국인 일일 순매도 규모 -2조원 이하 둔화 여부 및 순매수 전환 신호"
+    },
+    "counterarguments": [
+      {
+        "against": "코스피 추가 하락 지속 예측",
+        "because": "백테스트 기준 급락(-3%+) 다음날 반등 확률 83%. 코스피 7,400pt 구간에서 숏커버링 + 연기금 저가매수 유입 가능성이 하락 지속 시나리오를 희석시킴. 기술적 반등 바이어스는 무시 불가",
+        "risk_level": "높음"
+      },
+      {
+        "against": "헬륨 공급 차질이 반도체 섹터 주요 하락 thesis라는 주장",
+        "because": "헬륨은 반도체 전체 원가 대비 1% 미만. 미국·러시아·알제리 대체 공급망 존재. 주요 하락 원인으로 인과관계를 과장하는 측면 있음",
+        "risk_level": "보통"
+      },
+      {
+        "against": "외국인 -24조원 누적 매도가 구조적 이탈이라는 진단",
+        "because": "2022년 Fed 긴축 초기 유사 패턴에서도 HBM·AI 수요 확정 후 6~8주 내 외국인 순매수 전환 발생. DRAM +249%, NAND +377% 펀더멘털 유지 시 현재 매도는 포지션 조정 성격 강함",
+        "risk_level": "보통"
+      },
+      {
+        "against": "S&P500 어닝 +27.7% 성장이 지수를 지속 지지한다는 낙관론",
+        "because": "나스닥 26,090 고점권에서 엔비디아 실적 선반영 시 '소문에 사고 뉴스에 팔기' 패턴으로 -2%+ 급락 가능. 백테스트상 유사 국면 급반전 빈도 약 11.7%",
+        "risk_level": "높음"
       }
     ],
     "thesis_killers": [
       {
-        "event": "엔비디아",
-        "timeframe": "5월 20일 실적 발표 후 24시간",
-        "confirms_if": "엔비디아 시간외 +5% 이상, 다음날 종가 +3% 이상 유지",
-        "invalidates_if": "엔비디아 시간외 -3% 이하 또는 데이터센터 가이던스 $350B 미달",
+        "event": "코스피 익일 흐름",
+        "timeframe": "익일 장중",
+        "confirms_if": "코스피 7,450pt 이상 종가 유지 (83% 반등 바이어스 실현, 외국인 순매도 -2조원 이하 둔화)",
+        "invalidates_if": "코스피 7,350pt 이하 이탈 (반등 바이어스 실패, 외국인 매도 -4조원 이상 지속)",
         "quality": "ok"
       },
       {
-        "event": "나스닥",
-        "timeframe": "5월 20-21일 (연속 상승 3일+ 이후 충격 패턴)",
-        "confirms_if": "나스닥 26,500pt 이상 종가 유지",
-        "invalidates_if": "나스닥 25,500pt 이하 이탈 (현재 고점 대비 -2.6%)",
+        "event": "나스닥·엔비디아 실적 반응",
+        "timeframe": "엔비디아 실적 발표 후 24시간",
+        "confirms_if": "나스닥 26,500pt 이상 종가, 엔비디아 EPS $1.78 상회 + Q2 가이던스 $83B 이상",
+        "invalidates_if": "나스닥 25,600pt 이하 이탈, 엔비디아 가이던스 $78B 미만 또는 중국 수출 제한 확대 공시",
         "quality": "ok"
       },
       {
-        "event": "코스피",
-        "timeframe": "5월 20일 (급락 -6.12% 다음날 반등 83% 패턴)",
-        "confirms_if": "코스피 7,700pt 이상 종가 (기술적 반등 확인)",
-        "invalidates_if": "코스피 7,300pt 이하 재이탈 (추가 강제청산 연쇄 신호)",
+        "event": "SK하이닉스 수급 전환",
+        "timeframe": "향후 2거래일",
+        "confirms_if": "SK하이닉스 +3% 이상 (나스닥 반등 × 베타 1.36x 적용, 외국인 순매수 전환 확인)",
+        "invalidates_if": "SK하이닉스 -2% 이하 (나스닥 -1.5% 연동, 외국인 추가 매도 구조 확인)",
+        "quality": "ok"
+      },
+      {
+        "event": "엔비디아 실적 발표",
+        "timeframe": "실적 발표 후 장전",
+        "confirms_if": "엔비디아 +5% 이상 시가 (Q2 가이던스 $83B 이상, 데이터센터 매출 $65B 이상)",
+        "invalidates_if": "엔비디아 -3% 이하 시가 (가이던스 $78B 미만 또는 중국 수출 제한 확대 공시)",
         "quality": "ok"
       }
+    ],
+    "tail_risks": [
+      "엔비디아 실적 발표 후 가이던스 미달 시 나스닥 -3%+ → SK하이닉스 베타 1.36x 적용 -4.1% 연동 급락, 코스피 7,300pt 하방 이탈 가능성",
+      "Fed 의사록 또는 FOMC 위원 발언에서 2025년 내 추가 인상 가능성 시사 시 10년물 4.80% 돌파 → S&P500 밸류에이션 재조정 압력 급증",
+      "이란 분쟁 확전으로 유가 WTI $95 이상 돌파 시 PCE 추가 상승 우려 → Fed 인상 확률 급등, 신흥국 전반 동반 급락",
+      "코스피 -3.25% 급락 후 83% 반등 역확률 17% 시나리오: 외국인 단일 세션 -7조원 이상 출회 시 7,300pt 심리적 지지선 붕괴 및 7,000pt 테스트",
+      "개인투자자 저가 매수 실탄 소진 후 외국인 추가 매도 시 수급 진공 상태 발생 → 낙폭 가속 위험"
+    ],
+    "agent_consensus": {
+      "agreed": [
+        "미-한 디커플링 구조적 심화: S&P500·나스닥 고점권 유지 속 코스피 독자적 하락은 글로벌 패닉이 아닌 한국 로컬 외국인 포지션 청산",
+        "AI 인프라·데이터센터 수요 구조적 강세: 하이퍼스케일러 capex $660B·엔비디아 실적 서프라이즈 일관 확인",
+        "고금리 장기화(BofA 2027년 7월 첫 인하) + 달러 강세가 신흥국 자금이탈 주요 구조적 원인",
+        "한국 반도체 수출 펀더멘털(+138% YoY) 강세와 외국인 금융 매도의 극단적 디커플링 확인"
+      ],
+      "disputed": [
+        "외국인 -24조원 매도의 성격: 구조적 이탈(애널리스트) vs 포지션 조정(데블스 어드보케이트) — 향후 6~8주 데이터 확인 필요",
+        "헬륨 공급 차질의 리스크 크기: 주요 thesis(애널리스트) vs 과장된 인과관계(데블스 어드보케이트)",
+        "익일 코스피 방향: 83% 반등 바이어스(기술적) vs 외국인 추가 매도로 반등 희석(수급)"
+      ]
+    },
+    "meta_improvement": {
+      "missed_last_time": "2026-05-19 아침 분석에서 코스피 7,516 전망 대비 실제 7,271.66으로 -3.25% 하락 발생. 외국인 매도 규모(-6.21조원)가 예상 상단을 초과. 개인 역매수 완충 효과는 예측 내 포함됐으나 낙폭 완충 한계도 확인됨",
+      "accuracy_review": "최근 6거래일 누적 정확도 82.6%. 미-한 디커플링 방향성 예측 정확. 외국인 매도 규모 상단 과소추정이 반복 오류 패턴으로 확인됨",
+      "reweighting": "외국인 일일 순매도 규모 추정 시 상단 버퍼 +20% 적용 필요. 개인 역매수 완충 효과 과대평가 경향 하향 조정. 기술적 반등 확률(83%)은 외국인 누적 매도 강도로 가중 조정 필요",
+      "orca_version": "ORCA-v2.4-KR"
+    },
+    "tomorrow_setup": "코스피 7,271 저점에서 83% 확률 기술적 반등 바이어스 존재하나 외국인 추가 매도(-4~5조원 대기 추정) 출회 여부가 핵심 변수. 반등 시 7,400~7,450pt 구간에서 분할 매도 대기 전략 유효. 나스닥은 엔비디아 실적 발표 전후 변동성 극대화 구간 진입. S&P500 7,403·나스닥 26,090 유지 여부 + 엔비디아 Q2 가이던스 $83B 충족 여부가 글로벌 AI 모멘텀 연속성 판단 기준. KRW/USD 1,507 수준에서 달러 강세 지속 여부도 외국인 이탈 속도에 연동",
+    "actionable_watch": [
+      "코스피 외국인 일일 순매도 규모: -2조원 이하 둔화 시 단기 반등 진입 신호, -4조원 이상 지속 시 7,350pt 이탈 경계",
+      "엔비디아 Q2 FY2026 가이던스: $83B 이상 시 나스닥 26,500pt 타깃, $78B 미만 시 나스닥 25,600pt 하방 리스크",
+      "SK하이닉스 외국인 순매수 전환 여부: 2거래일 내 순매수 확인 시 중기 저가 매수 진입 검토 가능",
+      "미국 10년물 국채 금리: 4.80% 돌파 시 S&P500 밸류에이션 재조정 압력 급증 경계",
+      "WTI 유가: $95 이상 돌파 시 PCE 추가 상승 → Fed 인상 리스크 재부상",
+      "개인투자자 순매수 지속 여부: 실탄 소진 징후 포착 시 추가 하락 가속 리스크 선제 대비"
     ],
     "historical_context": {
       "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
@@ -13481,7 +13558,7 @@
           "peak_pct": 109.14,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7473420471521716,
+          "relevance_score": 0.7473139702786155,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13494,7 +13571,7 @@
           "peak_pct": 14.52,
           "peak_day": 6,
           "quality_tier": "high",
-          "relevance_score": 0.7384210352781396,
+          "relevance_score": 0.7383929584045835,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13507,7 +13584,7 @@
           "peak_pct": 26.05,
           "peak_day": 2,
           "quality_tier": "high",
-          "relevance_score": 0.7282907603956633,
+          "relevance_score": 0.7282692358744303,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13520,7 +13597,7 @@
           "peak_pct": 40.64,
           "peak_day": 5,
           "quality_tier": "high",
-          "relevance_score": 0.727467856445605,
+          "relevance_score": 0.7274280952505584,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13533,7 +13610,7 @@
           "peak_pct": 8.08,
           "peak_day": 5,
           "quality_tier": "high",
-          "relevance_score": 0.7246620600636994,
+          "relevance_score": 0.7245500590551458,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13546,7 +13623,7 @@
           "peak_pct": 8.01,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7241974240285936,
+          "relevance_score": 0.72408542302004,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13559,7 +13636,7 @@
           "peak_pct": 9.2,
           "peak_day": 6,
           "quality_tier": "high",
-          "relevance_score": 0.7240778972045405,
+          "relevance_score": 0.7240498203309844,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13572,7 +13649,7 @@
           "peak_pct": 8.66,
           "peak_day": 3,
           "quality_tier": "high",
-          "relevance_score": 0.7172894645989997,
+          "relevance_score": 0.717275880243019,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13585,7 +13662,7 @@
           "peak_pct": 10.51,
           "peak_day": 6,
           "quality_tier": "high",
-          "relevance_score": 0.7172116681592987,
+          "relevance_score": 0.7171717978801091,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13598,7 +13675,7 @@
           "peak_pct": 9.83,
           "peak_day": 6,
           "quality_tier": "high",
-          "relevance_score": 0.7157935315549437,
+          "relevance_score": 0.715697197398415,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13611,7 +13688,7 @@
           "peak_pct": 20.16,
           "peak_day": 3,
           "quality_tier": "high",
-          "relevance_score": 0.715355422559918,
+          "relevance_score": 0.7153312731172753,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13624,7 +13701,7 @@
           "peak_pct": 7.95,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7152150145621758,
+          "relevance_score": 0.7151101411052164,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13637,7 +13714,7 @@
           "peak_pct": 7.51,
           "peak_day": 5,
           "quality_tier": "high",
-          "relevance_score": 0.7138997977796481,
+          "relevance_score": 0.7137584272111067,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13650,7 +13727,7 @@
           "peak_pct": 15.11,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7136081200552118,
+          "relevance_score": 0.713581099711098,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13663,7 +13740,7 @@
           "peak_pct": 8.76,
           "peak_day": 5,
           "quality_tier": "high",
-          "relevance_score": 0.7100466141893363,
+          "relevance_score": 0.7100184602873689,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13676,7 +13753,7 @@
           "peak_pct": 7.81,
           "peak_day": 2,
           "quality_tier": "high",
-          "relevance_score": 0.7090891996541357,
+          "relevance_score": 0.7090755780297122,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13689,7 +13766,7 @@
           "peak_pct": 10.97,
           "peak_day": 5,
           "quality_tier": "high",
-          "relevance_score": 0.7085822260532623,
+          "relevance_score": 0.7085662146303946,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13702,7 +13779,7 @@
           "peak_pct": 10.15,
           "peak_day": 6,
           "quality_tier": "high",
-          "relevance_score": 0.7076016002201296,
+          "relevance_score": 0.7075857198586516,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13715,7 +13792,7 @@
           "peak_pct": 9.2,
           "peak_day": 7,
           "quality_tier": "high",
-          "relevance_score": 0.7063718314188839,
+          "relevance_score": 0.7063557760689576,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         },
@@ -13728,7 +13805,7 @@
           "peak_pct": 9.22,
           "peak_day": 2,
           "quality_tier": "high",
-          "relevance_score": 0.7057665000863315,
+          "relevance_score": 0.7057449755650984,
           "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
           "cluster_label": "medium_vix_bullish_riskon_growth"
         }
@@ -13739,17 +13816,17 @@
     },
     "data_quality": "ok",
     "phase4_drift": {
-      "drift_detected": false,
-      "reason": "stable",
-      "recent_accuracy": 0.7692307692307693,
+      "drift_detected": true,
+      "reason": "low_accuracy",
+      "recent_accuracy": 0.7272727272727273,
       "baseline_accuracy": 0.8260869565217391,
       "flag_enabled": false,
       "correction": {}
     },
     "jackal_candidate_review": {
       "analysis_date": "2026-05-19",
-      "market_bias": "mixed",
-      "market_bias_label": "혼조/관망",
+      "market_bias": "risk_off",
+      "market_bias_label": "위험회피",
       "reviewed_count": 0,
       "aligned_count": 0,
       "neutral_count": 0,
