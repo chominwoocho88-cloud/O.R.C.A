@@ -1,16 +1,31 @@
 {
-  "collected_at": "2026-05-19 21:41 KST",
+  "collected_at": "2026-05-20 00:27 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
     "252710.KS",
     "900300.KS",
     "462330.KS",
-    "021880.KS",
     "066430.KS",
+    "021880.KS",
     "251340.KS",
     "003280.KS",
     "233740.KS",
+    "NOC",
+    "035420.KS",
+    "096770.KS",
+    "068270.KS",
+    "247540.KS",
+    "RIVN",
+    "373220.KS",
+    "086520.KS",
+    "051910.KS",
+    "042700.KS",
+    "BA",
+    "BAC",
+    "WFC",
+    "JPM",
+    "PFE",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -21,65 +36,65 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "900300.KS",
-      "headline": "오가닉티코스메틱, 최대주주 변경…SUNYANE이 2,300만주 취득",
-      "impact": "bullish",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "Qatar Ras Laffan LNG offline since March 2; 20% global supply cut",
+      "source": "Manufacturing Dive",
+      "data_pt": "Missile/drone strikes; 20% of global LNG supply disrupted"
     },
     {
-      "ticker": "021880.KS",
-      "headline": "메이슨캐피탈, 5대1 무상감자 결정…자본감소 및 주식액면 병합 추진",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "066430.KS",
-      "headline": "아이로보틱스, 1분기 흑자전환 성공…로봇사업 확대 본격화",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "003280.KS",
-      "headline": "흥아해운, MSC와 유조선사 지분 50% 인수 거래 발표…시너지 기대",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK하이닉스, AI 메모리 수요 강세로 목표가 상향…1,850,000원",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "삼성전자, 미국 반도체주 약세와 미시경제 불확실성으로 약세 흐름",
+      "ticker": "RIVN",
+      "headline": "Rivian renegotiates DOE loan to $4.5B, cuts Georgia factory capacity to 300,000 vehicles from 400,000 amid EV demand uncertainty",
       "impact": "bearish",
       "source": "web_search"
     },
     {
+      "ticker": "005930",
+      "headline": "Samsung Electronics falls 6.93% as foreign investors dump shares; semiconductor sector pressure mounts amid chip supply concerns",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660",
+      "headline": "SK Hynix trading at 1,840,000 KRW with analyst upside potential; semiconductor demand supported by AI infrastructure buildout",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
       "ticker": "NVDA",
-      "headline": "Nvidia CEO 시그널, 중국 AI 칩 수입 재개 가능성 표시…Q1 실적 주목",
+      "headline": "Nvidia rises on AI demand strength; CEO signals hope China will allow U.S. AI chip imports; earnings call scheduled May 20",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom, AI 반도체 호황으로 목표가 대폭 상향…Wells Fargo $545",
+      "headline": "Broadcom reaches new 52-week high amid AI infrastructure boom; multiple analyst price target increases to $500-$545 range",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "233740.KS",
-      "headline": "KODEX 코스닥150레버리지, 개인투자자 순매수 1위…6,727억원 유입",
-      "impact": "bullish",
+      "ticker": "066430",
+      "headline": "I Robotics trades at 3,015 KRW, down 4.43% intraday; robotics sector gaining attention as semiconductor alternative play",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
-      "ticker": "466920.KS",
-      "headline": "SOL 코리아고배당, 순자산 5,000억원 돌파…고배당 ETF 중 자금유입 1위",
+      "ticker": "003280",
+      "headline": "Heung-A Shipping volatile; falls 21.21% on U.S.-Iran ceasefire hopes reducing maritime risk premium for Hormuz Strait",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "BA",
+      "headline": "Boeing falls 7% despite China order for 200 jets; investors disappointed by deal size falling short of expectations",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NOC",
+      "headline": "Northrop Grumman receives $325.53M Army contract for RangeHawk payload architecture development; Buy rating maintained",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 11
+  "total": 17
 }
