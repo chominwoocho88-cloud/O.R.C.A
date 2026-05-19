@@ -1,0 +1,24 @@
+[
+  {
+    "timestamp": "2026-05-18T14:45:40.116033",
+    "forced": false,
+    "tokens_before": 96787,
+    "estimated_saved": 67750,
+    "summary_chars": 559,
+    "prompt_tokens": 1960,
+    "response_tokens": 479,
+    "total_api_tokens": 2439,
+    "cost_usd": 0.003484
+  },
+  {
+    "timestamp": "2026-05-18T23:41:01.373430",
+    "forced": false,
+    "tokens_before": 123259,
+    "estimated_saved": 86281,
+    "summary_chars": 445,
+    "prompt_tokens": 1960,
+    "response_tokens": 395,
+    "total_api_tokens": 2355,
+    "cost_usd": 0.003148
+  }
+]

@@ -1,6 +1,16 @@
 {
-  "collected_at": "2026-05-18 22:03 KST",
+  "collected_at": "2026-05-19 07:54 KST",
   "tickers": [
+    "252670.KS",
+    "114800.KS",
+    "252710.KS",
+    "462330.KS",
+    "251340.KS",
+    "290690.KS",
+    "233740.KS",
+    "066430.KS",
+    "001740.KS",
+    "027360.KS",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -11,47 +21,53 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "NVDA",
-      "headline": "Target and Walmart earnings scheduled Wed May 22 after NVDA earnings",
-      "source": "TheStreet May 18 2026",
-      "data_pt": "Target (TGT) reports Wed May 20; Walmart (WMT) reports Thu May 21"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "Nvidia faces pullback amid bubble concerns ahead of Q1 earnings; analysts warn of valuation risks",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix surges on strong AI demand and chip price increases; Bernstein bullish on memory stocks",
+      "ticker": "066430",
+      "headline": "I Robotics achieved Q1 2026 profitability turnaround with 20.1% YoY revenue growth to 10.2B won",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics faces labor union strike threat and profit-taking pressure; government mediation ongoing",
+      "ticker": "001740",
+      "headline": "SK Networks target price raised to 11,000 won on wellness robot expansion and improved IT profitability",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "290690",
+      "headline": "Solux confirms merger with ARI Bio unchanged; acquires Cha Vaccine management rights for biotech growth",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Nvidia CEO signals hope for China AI chip exports; Veru CPUs deployed at major AI labs",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660",
+      "headline": "SK Hynix experiences profit-taking after recent rally; analyst notes rising risks despite AI demand optimism",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930",
+      "headline": "Samsung Electronics labor union negotiations continue; company faces performance incentive disputes with workforce",
       "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom stock rallies on AI semiconductor demand; Wells Fargo raises price target to $545",
+      "headline": "Broadcom surges 4.3% on bullish analyst upgrades; Wells Fargo raises target to $545 on AI semiconductor strength",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF surpasses 5 billion won in net assets; strong financial stock performance",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "035720.KS",
-      "headline": "Kakao underperforms despite strong Q1 earnings; AI business profitability concerns weigh on stock",
-      "impact": "bearish",
+      "ticker": "035720",
+      "headline": "Kakao Corp experiencing AI-centered transformation with improved core business performance expected",
+      "impact": "neutral",
       "source": "web_search"
     }
   ],
-  "total": 7
+  "total": 8
 }
