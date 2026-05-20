@@ -254,6 +254,22 @@ class LLMClientTests(unittest.TestCase):
                 ],
             )
 
+    def test_call_success_does_not_alert_failure(self):
+        llm = self._client_module()
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir, _patched_anthropic(
+            _anthropic_module()
+        ), patch.object(llm, "maybe_alert_failure") as alert:
+            client = llm.LLMClient("test-key", log_path=Path(tmpdir) / "llm.jsonl")
+            client.call(
+                system="sys",
+                user="user",
+                model="claude-test",
+                max_tokens=100,
+                call_site="orca.success",
+            )
+
+        alert.assert_not_called()
+
     def test_call_auth_failure_logs_and_raises_with_standard_message(self):
         llm = self._client_module()
         cases = (
@@ -295,6 +311,32 @@ class LLMClientTests(unittest.TestCase):
                         ["ts", "type", "call_site", "error_type", "message", "attempt", "elapsed_ms", "model"],
                     )
 
+    def test_call_auth_failure_alerts_once_after_failure_log(self):
+        llm = self._client_module()
+        module = _anthropic_module(exception_name="AuthenticationError")
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir, _patched_anthropic(module), patch.object(
+            llm, "maybe_alert_failure"
+        ) as alert:
+            log_path = Path(tmpdir) / "llm.jsonl"
+            client = llm.LLMClient("test-key", log_path=log_path)
+            with self.assertRaises(module.AuthenticationError):
+                client.call(
+                    system="sys",
+                    user="user",
+                    model="claude-test",
+                    max_tokens=100,
+                    call_site="orca.auth.alert",
+                )
+
+            event = json.loads(log_path.read_text(encoding="utf-8").strip())
+
+        alert.assert_called_once()
+        failure = alert.call_args.args[0]
+        self.assertEqual(failure["type"] if "type" in failure else event["type"], "failure")
+        self.assertEqual(failure["error_type"], "auth_failed")
+        self.assertEqual(failure["call_site"], "orca.auth.alert")
+        self.assertEqual(failure["attempt"], 1)
+
     def test_call_retry_exhausted(self):
         llm = self._client_module()
         module = _anthropic_module(exception_name="InternalServerError")
@@ -317,6 +359,29 @@ class LLMClientTests(unittest.TestCase):
             self.assertEqual(event["error_type"], "retry_exhausted")
             self.assertEqual(event["attempt"], 2)
 
+    def test_call_retry_exhausted_alerts_only_on_final_failure(self):
+        llm = self._client_module()
+        module = _anthropic_module(exception_name="InternalServerError")
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir, _patched_anthropic(module), patch.object(
+            llm, "maybe_alert_failure"
+        ) as alert:
+            client = llm.LLMClient("test-key", log_path=Path(tmpdir) / "llm.jsonl")
+            with self.assertRaises(module.InternalServerError):
+                client.call(
+                    system="sys",
+                    user="user",
+                    model="claude-test",
+                    max_tokens=100,
+                    max_retries=2,
+                    call_site="orca.retry.alert",
+                )
+
+        alert.assert_called_once()
+        failure = alert.call_args.args[0]
+        self.assertEqual(failure["error_type"], "retry_exhausted")
+        self.assertEqual(failure["call_site"], "orca.retry.alert")
+        self.assertEqual(failure["attempt"], 2)
+
     def test_provider_retry_tuple_is_ignored_for_connection_errors(self):
         llm = self._client_module()
         module = _anthropic_module(exception_name="APIConnectionError")
@@ -338,6 +403,48 @@ class LLMClientTests(unittest.TestCase):
             self.assertEqual(event["type"], "failure")
             self.assertEqual(event["error_type"], "APIConnectionError")
             self.assertEqual(event["attempt"], 1)
+
+    def test_call_non_retry_failure_alerts_once(self):
+        llm = self._client_module()
+        module = _anthropic_module(exception_name="APIConnectionError")
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir, _patched_anthropic(module), patch.object(
+            llm, "maybe_alert_failure"
+        ) as alert:
+            client = llm.LLMClient("test-key", log_path=Path(tmpdir) / "llm.jsonl")
+            with self.assertRaises(module.APIConnectionError):
+                client.call(
+                    system="sys",
+                    user="user",
+                    model="claude-test",
+                    max_tokens=100,
+                    max_retries=2,
+                    call_site="orca.connection.alert",
+                )
+
+        alert.assert_called_once()
+        failure = alert.call_args.args[0]
+        self.assertEqual(failure["error_type"], "APIConnectionError")
+        self.assertEqual(failure["call_site"], "orca.connection.alert")
+        self.assertEqual(failure["attempt"], 1)
+
+    def test_alert_send_failure_preserves_original_llm_exception(self):
+        llm = self._client_module()
+        alert = importlib.import_module("shared.llm.failure_alert")
+        alert.reset_for_testing()
+        module = _anthropic_module(exception_name="AuthenticationError")
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir, _patched_anthropic(module), patch(
+            "orca.notify_transport.send_message", side_effect=RuntimeError("telegram down")
+        ):
+            client = llm.LLMClient("test-key", log_path=Path(tmpdir) / "llm.jsonl")
+            with self.assertRaises(module.AuthenticationError):
+                client.call(
+                    system="sys",
+                    user="user",
+                    model="claude-test",
+                    max_tokens=100,
+                    call_site="orca.auth.telegram_down",
+                )
+        alert.reset_for_testing()
 
     def test_call_web_search_count(self):
         llm = self._client_module()

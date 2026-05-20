@@ -15,6 +15,8 @@ from pathlib import Path
 import time
 from typing import Any
 
+from shared.llm.failure_alert import maybe_alert_failure
+
 
 KST = timezone(timedelta(hours=9))
 
@@ -136,6 +138,7 @@ class LLMClient:
                     model=model,
                 )
                 self._log_failure(failure)
+                maybe_alert_failure(asdict(failure))
                 raise
             except retry_errors as exc:  # type: ignore[misc]
                 last_exc = exc
@@ -151,6 +154,7 @@ class LLMClient:
                     model=model,
                 )
                 self._log_failure(failure)
+                maybe_alert_failure(asdict(failure))
                 raise
             except Exception as exc:
                 elapsed_ms = self._elapsed_ms(start)
@@ -163,6 +167,7 @@ class LLMClient:
                     model=model,
                 )
                 self._log_failure(failure)
+                maybe_alert_failure(asdict(failure))
                 raise
 
         if last_exc is not None:
