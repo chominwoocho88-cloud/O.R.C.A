@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-20 21:22 KST",
+  "collected_at": "2026-05-21 08:12 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
@@ -11,22 +11,6 @@
     "233740.KS",
     "530036.KS",
     "011000.KS",
-    "042700.KS",
-    "051910.KS",
-    "RIVN",
-    "373220.KS",
-    "086520.KS",
-    "035420.KS",
-    "247540.KS",
-    "BA",
-    "068270.KS",
-    "META",
-    "NOC",
-    "096770.KS",
-    "BAC",
-    "WFC",
-    "JPM",
-    "PFE",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -37,23 +21,65 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "BA",
-      "headline": "Iran war triggers largest oil supply shock on record; ~1 billion barrels cumulative lost; 14M b/d production shut-in",
-      "source": "World Bank, IEA, Wikipedia",
-      "data_pt": "March-May 2026 | Supply loss exceeds 1 billion barrels; 14M b/d production shut-in; Strait Hormuz (35% seaborne crude) effectively closed; drone/missile damage Qatar LNG 20% supply loss"
+      "ticker": "252670.KS",
+      "headline": "개인투자자들이 KODEX 200선물인버스2X에 5402억원 순매수하며 코스피 하락 베팅",
+      "impact": "bearish",
+      "source": "web_search"
     },
     {
-      "ticker": "BA",
-      "headline": "South Korea positioned for 5th global export rank; semiconductor sector leading with AI demand tailwind",
-      "source": "Korea Herald, WTO data",
-      "data_pt": "Q1 2026 | South Korea $219.9B exports vs Japan $120.3B, Italy $118.3B; 5th place expected (vs 7th prior); chip boom sustains export leadership"
+      "ticker": "114800.KS",
+      "headline": "KODEX 인버스 ETF 상승으로 개인의 인버스 투자 수요 증가",
+      "impact": "bearish",
+      "source": "web_search"
     },
     {
-      "ticker": "BA",
-      "headline": "World Bank: Energy prices +24% in 2026 (highest since Ukraine 2022); developing economy inflation +100bps to 5.1%",
-      "source": "World Bank Commodity Outlook",
-      "data_pt": "April 2026 | Commodity prices +16% in 2026; energy +24% YoY; developing economy inflation 5.1% (up from 4.7% forecast pre-war); growth downside -0.4pp to 3.6%"
+      "ticker": "252710.KS",
+      "headline": "TIGER 200선물인버스2X ETF 순자산 374억원으로 인버스 상품 수요 지속",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "021880.KS",
+      "headline": "메이슨캐피탈 보통주 5대 1 무상감자 결정, 결손금 보전 및 재무구조 개선",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "462330.KS",
+      "headline": "KODEX 2차전지산업레버리지 52주 최고 3,005원, 2차전지 섹터 강세",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "900300.KS",
+      "headline": "오가닉티코스메틱 최대주주 변경, SUNYANE이 지분 5.91% 취득",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "251340.KS",
+      "headline": "KODEX 코스닥150선물인버스 개인 대량 순매수로 코스닥 하락 베팅",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "233740.KS",
+      "headline": "KODEX 코스닥150레버리지 장중 39.74% 급등, 개인투자자 6727억원 순매수",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "530036.KS",
+      "headline": "삼성 인버스 2X WTI원유 선물 ETN 기초지수 롤오버 방식 긴급 변경",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "011000.KS",
+      "headline": "진원생명과학 52주 최고 4,270원에서 현재 916원으로 조정",
+      "impact": "bearish",
+      "source": "web_search"
     }
   ],
-  "total": 3
+  "total": 16
 }
