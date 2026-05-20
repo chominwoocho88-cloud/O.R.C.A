@@ -53,5 +53,27 @@
     "response_tokens": 320,
     "total_api_tokens": 2280,
     "cost_usd": 0.002848
+  },
+  {
+    "timestamp": "2026-05-19T15:57:40.008373",
+    "forced": false,
+    "tokens_before": 191668,
+    "estimated_saved": 134167,
+    "summary_chars": 344,
+    "prompt_tokens": 1960,
+    "response_tokens": 336,
+    "total_api_tokens": 2296,
+    "cost_usd": 0.002912
+  },
+  {
+    "timestamp": "2026-05-19T23:46:33.359122",
+    "forced": false,
+    "tokens_before": 191668,
+    "estimated_saved": 134167,
+    "summary_chars": 372,
+    "prompt_tokens": 1960,
+    "response_tokens": 330,
+    "total_api_tokens": 2290,
+    "cost_usd": 0.002888
   }
 ]
