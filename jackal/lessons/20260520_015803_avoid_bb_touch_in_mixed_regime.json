@@ -1,0 +1,7 @@
+{
+  "name": "avoid_bb_touch_in_mixed_regime",
+  "warning": "Do not trigger bb_touch signals when regime is mixed (혼조) or undefined",
+  "reason": "bb_touch showed 0% accuracy over 2 samples in current 7-day window, likely compounded by unfavorable mixed regime conditions",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-05-20T01:58:03.416036"
+}

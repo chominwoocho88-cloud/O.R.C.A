@@ -1,0 +1,7 @@
+{
+  "name": "avoid_rsi_oversold_in_technical_oversold_swing",
+  "warning": "Do not rely on rsi_oversold when swing type is 기술적과매도 with negative avg_peak_gain",
+  "reason": "rsi_oversold accuracy is 0% in this period; 기술적과매도 swing type showed avg_peak_gain of -2.1%, indicating continued downside rather than reversal",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-05-20T01:58:03.416313"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "avoid_sector_inflow_without_regime_confirmation",
+  "warning": "Do not use sector_inflow signal without confirming a risk-on regime with historical accuracy above 69%",
+  "reason": "sector_inflow accuracy is 0% over 2 samples in the current window; backtested data shows strong performance only in 위험선호 and 위험회피 regimes with large sample counts",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-05-20T01:58:03.416529"
+}
