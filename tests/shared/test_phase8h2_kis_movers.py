@@ -98,12 +98,30 @@ class Phase8h2KisMoverClientTests(unittest.TestCase):
 
 
 class Phase8h2KisMoverWatchlistTests(unittest.TestCase):
+    def test_kis_pseudo_ticker_normalizes_to_korean_watchlist_ticker(self):
+        self.assertEqual(watchlist._kis_to_watchlist_ticker("Q530036"), "530036.KS")
+        self.assertEqual(watchlist._kis_to_watchlist_ticker("K123456"), "123456.KS")
+        self.assertEqual(watchlist._kis_to_watchlist_ticker("ABC123456"), "123456.KS")
+        self.assertEqual(watchlist._kis_to_watchlist_ticker("530036"), "530036.KS")
+        self.assertEqual(watchlist._kis_to_watchlist_ticker("005930.KS"), "005930.KS")
+        self.assertEqual(watchlist._kis_to_watchlist_ticker("AAPL"), "AAPL")
+
+    def test_kis_pseudo_ticker_market_is_korean_without_affecting_us_tickers(self):
+        self.assertEqual(watchlist._market_for_ticker("Q530036"), "KR")
+        self.assertEqual(watchlist._market_for_ticker("ABC123456"), "KR")
+        self.assertEqual(watchlist._market_for_ticker("005930.KS"), "KR")
+        self.assertEqual(watchlist._market_for_ticker("530036"), "KR")
+
+        for ticker in ("AAPL", "MSFT", "GOOGL", "NVDA", "META", "TSLA", "AMZN"):
+            with self.subTest(ticker=ticker):
+                self.assertEqual(watchlist._market_for_ticker(ticker), "US")
+
     def test_load_kis_movers_watchlist_merges_volume_up_and_down(self):
         client = MagicMock()
         client.is_configured.return_value = True
         client.get_volume_rank.return_value = [
             {
-                "ticker": "005930",
+                "ticker": "Q530036",
                 "name": "Samsung Electronics",
                 "volume_rank": 1,
                 "current_price": 70000,
@@ -137,7 +155,9 @@ class Phase8h2KisMoverWatchlistTests(unittest.TestCase):
         with patch("shared.broker.get_shared_kis_client", return_value=client):
             result = watchlist._load_kis_movers_watchlist()
 
-        self.assertEqual(result["005930.KS"]["source"], "kis_volume_surge")
+        self.assertEqual(result["530036.KS"]["source"], "kis_volume_surge")
+        self.assertEqual(result["530036.KS"]["market"], "KR")
+        self.assertEqual(result["530036.KS"]["currency"], "KRW")
         self.assertEqual(result["000660.KS"]["signal_type"], "price_surge")
         self.assertEqual(result["035720.KS"]["signal_type"], "price_crash")
         self.assertEqual(result["035720.KS"]["currency"], "KRW")

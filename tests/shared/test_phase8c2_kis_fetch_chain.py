@@ -4,7 +4,12 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 
 from shared.market_data import fetch as market_fetch
-from shared.market_data.fetch import _try_kis_history, fetch_daily_history, reset_fetch_stats
+from shared.market_data.fetch import (
+    _is_korean_market_ticker,
+    _try_kis_history,
+    fetch_daily_history,
+    reset_fetch_stats,
+)
 
 
 def _frame(values: list[float]) -> pd.DataFrame:
@@ -139,6 +144,17 @@ class Phase8c2KisFetchChainTests(unittest.TestCase):
         self.assertIsNotNone(result)
         mock_kis.assert_not_called()
         mock_fallback.assert_called_once()
+
+    def test_pseudo_kis_ticker_is_classified_as_korean_market(self):
+        self.assertTrue(_is_korean_market_ticker("Q530036"))
+        self.assertTrue(_is_korean_market_ticker("ABC123456"))
+        self.assertTrue(_is_korean_market_ticker("005930.KS"))
+        self.assertTrue(_is_korean_market_ticker("530036"))
+
+    def test_us_ticker_classification_unchanged(self):
+        for ticker in ("AAPL", "MSFT", "GOOGL", "NVDA", "META", "TSLA", "AMZN"):
+            with self.subTest(ticker=ticker):
+                self.assertFalse(_is_korean_market_ticker(ticker))
 
     def test_kis_stats_keys_exist(self):
         """Provider stats expose KIS counters."""

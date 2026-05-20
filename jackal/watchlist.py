@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from shared.paths import STATE_DB_FILE
+
+_KIS_PSEUDO_TICKER_RE = re.compile(r"^[A-Z]+(\d{6})$")
 
 
 def _market_for_ticker(ticker: str, fallback: str = "") -> str:
@@ -14,6 +17,8 @@ def _market_for_ticker(ticker: str, fallback: str = "") -> str:
     if fallback:
         return fallback
     if value.endswith(".KS") or value.endswith(".KQ") or (value.isdigit() and len(value) == 6):
+        return "KR"
+    if _KIS_PSEUDO_TICKER_RE.match(value):
         return "KR"
     return "US"
 
@@ -26,6 +31,9 @@ def _kis_to_watchlist_ticker(ticker: str) -> str:
     value = str(ticker or "").strip()
     if value.isdigit() and len(value) == 6:
         return value + ".KS"
+    pseudo_match = _KIS_PSEUDO_TICKER_RE.match(value.upper())
+    if pseudo_match:
+        return pseudo_match.group(1) + ".KS"
     return value
 
 

@@ -7,6 +7,7 @@ keeping rollback through USE_FDR_MAIN and USE_UNIFIED_FETCH.
 from __future__ import annotations
 
 import os
+import re
 import sys
 import time
 from datetime import datetime, timedelta
@@ -23,6 +24,7 @@ from orca import context_market_data as _context_market_data
 from shared.broker import KisClient, get_shared_kis_client
 
 _DEFAULT_KIS_CLIENT_CLASS = KisClient
+_PSEUDO_KR_TICKER_RE = re.compile(r"^[A-Z]+\d{6}$")
 
 _fetch_with_fallback = _context_market_data._fetch_with_fallback
 
@@ -563,7 +565,13 @@ def _try_alpha_vantage_history(ticker: str, start: str, end: str, av_api_key: st
 def _is_korean_market_ticker(ticker: str) -> bool:
     """Return whether Alpha Vantage should be skipped for this Korean ticker."""
     upper = str(ticker or "").strip().upper()
-    return upper.endswith(".KS") or upper.endswith(".KQ") or (upper.isdigit() and len(upper) == 6)
+    if upper.endswith(".KS") or upper.endswith(".KQ"):
+        return True
+    if upper.isdigit() and len(upper) == 6:
+        return True
+    if _PSEUDO_KR_TICKER_RE.match(upper):
+        return True
+    return False
 
 
 def _option_expiries(ticker: str, use_yfinance: bool = True) -> list[str]:
