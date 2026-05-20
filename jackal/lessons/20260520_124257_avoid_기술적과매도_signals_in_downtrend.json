@@ -1,0 +1,7 @@
+{
+  "name": "avoid_기술적과매도_signals_in_downtrend",
+  "warning": "Avoid 기술적과매도 swing type signals when avg_peak_gain is negative",
+  "reason": "기술적과매도 showed 0% swing accuracy with avg_peak_gain of -2.1%, meaning oversold signals are failing in current bear pressure environment",
+  "regime_context": "전반적 하락장 / 위험회피",
+  "timestamp": "2026-05-20T12:42:57.930695"
+}
