@@ -416,6 +416,94 @@ def _build_evening(report: dict) -> list:
         lines.append("")
     tails = report.get("tail_risks", [])
     if tails: lines.append("☠️ " + str(tails[0])[:60])
+
+    def _clean(value) -> str:
+        return str(value or "").strip()
+
+    def _short(value, limit: int = 140) -> str:
+        return _report_line_text(_clean(value), limit=limit)
+
+    def _section(header: str) -> None:
+        if lines and lines[-1] != "":
+            lines.append("")
+        lines.append(header)
+
+    headlines = report.get("top_headlines") or []
+    if headlines:
+        _section("📰 <b>주요 헤드라인</b>")
+        for item in headlines[:3]:
+            if isinstance(item, dict):
+                text = _short(item.get("headline"), 120)
+                meta = " / ".join(
+                    part for part in [_short(item.get("signal_tag"), 24), _short(item.get("impact"), 12)] if part
+                )
+                lines.append("• " + text + (" [" + meta + "]" if meta else ""))
+            else:
+                lines.append("• " + _short(item, 120))
+        lines.append("")
+
+    outflows = report.get("outflows") or []
+    if outflows:
+        _section("▼ <b>자금 이탈</b>")
+        for item in outflows[:2]:
+            if isinstance(item, dict):
+                label = _short(item.get("zone"), 70)
+                severity = _short(item.get("severity"), 12)
+                reason = _short(item.get("reason"), 150)
+                lines.append("• " + label + (" [" + severity + "]" if severity else ""))
+                if reason:
+                    lines.append("  <i>" + reason + "</i>")
+            else:
+                lines.append("• " + _short(item, 150))
+        lines.append("")
+
+    inflows = report.get("inflows") or []
+    if inflows:
+        _section("▲ <b>자금 유입</b>")
+        for item in inflows[:2]:
+            if isinstance(item, dict):
+                label = _short(item.get("zone"), 70)
+                momentum = _short(item.get("momentum"), 12)
+                reason = _short(item.get("reason"), 150)
+                lines.append("• " + label + (" [" + momentum + "]" if momentum else ""))
+                if reason:
+                    lines.append("  <i>" + reason + "</i>")
+            else:
+                lines.append("• " + _short(item, 150))
+        lines.append("")
+
+    thesis_killers = report.get("thesis_killers") or []
+    if thesis_killers:
+        _section("⚠️ <b>Thesis Killer</b>")
+        for item in thesis_killers[:3]:
+            if isinstance(item, dict):
+                event = _short(item.get("event"), 70)
+                timeframe = _short(item.get("timeframe"), 40)
+                confirms = _short(item.get("confirms_if"), 130)
+                invalidates = _short(item.get("invalidates_if"), 130)
+                lines.append("• " + event + (" [" + timeframe + "]" if timeframe else ""))
+                if confirms:
+                    lines.append("  ✓ " + confirms)
+                if invalidates:
+                    lines.append("  ✗ " + invalidates)
+            else:
+                lines.append("• " + _short(item, 150))
+        lines.append("")
+
+    hidden_signals = report.get("hidden_signals") or []
+    if hidden_signals:
+        _section("🔍 <b>Hidden Signal</b>")
+        for item in hidden_signals[:2]:
+            if isinstance(item, dict):
+                signal = _short(item.get("signal"), 120)
+                implication = _short(item.get("implication"), 150)
+                if signal:
+                    lines.append("• " + signal)
+                if implication:
+                    lines.append("  <i>" + implication + "</i>")
+            else:
+                lines.append("• " + _short(item, 150))
+        lines.append("")
     return lines
 
 
