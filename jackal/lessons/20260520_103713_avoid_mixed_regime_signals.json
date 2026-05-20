@@ -1,0 +1,7 @@
+{
+  "name": "avoid_mixed_regime_signals",
+  "warning": "Do not issue buy signals during 혼조 (미국 위험선호 표면 / 한국 위험회피 심화) regime",
+  "reason": "0% accuracy across 2 samples in this regime indicates structural divergence between US and KR markets that invalidates standard oversold triggers",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-05-20T10:37:13.376262"
+}
