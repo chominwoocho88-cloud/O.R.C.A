@@ -241,7 +241,7 @@ class WaveGFallbackFastFailTests(unittest.TestCase):
         self.assertTrue(context_market_data.was_last_yfinance_failed())
         self.assertTrue(context_market_data.was_last_yfinance_rate_limited())
 
-    def test_fetch_with_fallback_av_key_missing_warning(self):
+    def test_fetch_with_fallback_av_disabled_warning(self):
         with patch.object(
             context_market_data,
             "_fetch_yfinance_ticker_with_retry",
@@ -260,7 +260,8 @@ class WaveGFallbackFastFailTests(unittest.TestCase):
         self.assertIsNone(source)
         alpha.assert_not_called()
         printed = "\n".join(str(call.args[0]) for call in printer.call_args_list)
-        self.assertIn("ALPHA_VANTAGE_API_KEY not set", printed)
+        self.assertIn("Alpha Vantage fallback disabled for AAPL", printed)
+        self.assertIn("provider slot already attempted or key not provided", printed)
 
     def test_market_fetch_batch_switches_remaining_tickers_to_av_only(self):
         calls: list[tuple[str, bool]] = []

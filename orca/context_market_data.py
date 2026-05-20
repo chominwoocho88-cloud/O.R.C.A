@@ -218,7 +218,10 @@ def _fetch_with_fallback(
         except Exception as exc:
             errors.append(f"alpha_vantage: {type(exc).__name__}: {str(exc)[:100]}")
     else:
-        print(f"  ALPHA_VANTAGE_API_KEY not set; skipping Alpha Vantage fallback for {ticker}")
+        print(
+            f"  Alpha Vantage fallback disabled for {ticker} "
+            "(provider slot already attempted or key not provided)"
+        )
 
     print(f"  All fetches failed for {ticker}: {errors}")
     return None, None
