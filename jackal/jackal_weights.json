@@ -1,14 +1,14 @@
 {
   "signal_weights": {
-    "bb_touch": 0.65,
-    "rsi_oversold": 0.71,
+    "bb_touch": 0.5,
+    "rsi_oversold": 0.56,
     "volume_climax": 1.0,
     "ma_support": 1.0,
     "momentum_dip": 1.0,
     "vol_accumulation": 1.0,
     "sector_rebound": 1.0,
     "rsi_divergence": 1.0,
-    "sector_inflow": 0.69,
+    "sector_inflow": 0.54,
     "golden_cross": 1.06,
     "fear_regime": 1.0,
     "bullish_div": 1.0,
@@ -1208,7 +1208,7 @@
       "total": 1
     }
   },
-  "last_updated": "2026-05-20T01:58:03.417211",
+  "last_updated": "2026-05-20T10:37:13.377274",
   "rule_registry_status": {
     "sector_rebound_base": {
       "active": true,
@@ -1374,7 +1374,7 @@
     "swing_accuracy": 70.9,
     "total_tracked": 3780
   },
-  "last_evolved_at": "2026-05-20T01:58:03.417207",
+  "last_evolved_at": "2026-05-20T10:37:13.377269",
   "last_macro_gate": {
     "checked_at": "2026-05-20T08:42:21.654091+09:00",
     "hy_chg5": -0.65,

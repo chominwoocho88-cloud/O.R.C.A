@@ -1,0 +1,7 @@
+{
+  "name": "avoid_기술적과매도_in_downtrend",
+  "warning": "Suppress 기술적과매도 swing signals when avg_peak_gain is negative",
+  "reason": "기술적과매도 type showed avg_peak_gain of -2.1% with 0% swing accuracy across 2 samples, indicating the oversold condition is a falling knife rather than a reversal setup",
+  "regime_context": "전반적 하락 국면",
+  "timestamp": "2026-05-20T10:37:13.376572"
+}
