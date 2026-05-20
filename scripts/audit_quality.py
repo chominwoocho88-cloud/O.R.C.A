@@ -346,6 +346,7 @@ def render_markdown(audit: dict[str, Any]) -> str:
     shadow_state = metrics.get("jackal_shadow_state", {})
     recommendation = metrics.get("jackal_recommendation_accuracy", {})
     operational_intake = metrics.get("jackal_operational_intake", {})
+    baseline_fallback = operational_intake.get("baseline_fallback_audit", {})
     provider_quality = metrics.get("market_provider_quality", {})
     provider_latest = provider_quality.get("latest_backtest", {})
     contract_audit_summary = research_report._format_contract_audit_summary(
@@ -401,6 +402,9 @@ def render_markdown(audit: dict[str, Any]) -> str:
             f"missing=`{json.dumps(recommendation.get('missing_reasons', []), ensure_ascii=False)}`",
             f"- JACKAL recommendation source path: `{recommendation.get('source_path', 'n/a')}`",
             f"- JACKAL operational intake status: `{operational_intake.get('status', 'n/a')}`",
+            f"- JACKAL baseline fallback audit: status=`{baseline_fallback.get('status', 'n/a')}`, "
+            f"today=`{baseline_fallback.get('today_events', 'n/a')}`, "
+            f"last_7d=`{baseline_fallback.get('last_7d_events', 'n/a')}`",
             f"- Market provider quality: status=`{provider_latest.get('status')}`, "
             f"failure_rate=`{provider_latest.get('failure_rate')}`, stats=`{json.dumps(provider_latest.get('fetch_stats', {}), ensure_ascii=False, sort_keys=True)}`",
             f"- {contract_audit_summary}",

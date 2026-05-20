@@ -61,6 +61,93 @@ def _table_summary(
     return summary
 
 
+def collect_baseline_fallback_summary(
+    *,
+    audit_log_path: Path | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Summarize baseline fallback audit JSONL without failing the smoke check."""
+    from apps.jackal.baseline_audit import AUDIT_LOG_PATH
+
+    path = audit_log_path or AUDIT_LOG_PATH
+    current = now or datetime.now(KST)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=KST)
+    current = current.astimezone(KST)
+    today = current.date()
+    week_ago = today - timedelta(days=7)
+    summary: dict[str, Any] = {
+        "log_exists": False,
+        "total_events": 0,
+        "today_events": 0,
+        "last_7d_events": 0,
+        "by_component": {"hunter": 0, "scanner": 0},
+        "by_regime_source": {"memory": 0, "fallback": 0, "none": 0},
+        "latest_event": None,
+        "parse_error_count": 0,
+        "status": "ok",
+    }
+
+    if not path.exists():
+        return summary
+
+    summary["log_exists"] = True
+    latest_ts: datetime | None = None
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except Exception:
+        summary["parse_error_count"] += 1
+        summary["status"] = "warn"
+        return summary
+
+    for raw_line in lines:
+        line = raw_line.strip()
+        if not line:
+            continue
+        try:
+            entry = json.loads(line)
+        except json.JSONDecodeError:
+            summary["parse_error_count"] += 1
+            continue
+        if not isinstance(entry, dict):
+            summary["parse_error_count"] += 1
+            continue
+
+        summary["total_events"] += 1
+        component = str(entry.get("component") or "")
+        if component:
+            component_counts = summary["by_component"]
+            component_counts[component] = int(component_counts.get(component, 0)) + 1
+
+        source = str(entry.get("regime_source") or "")
+        if source:
+            source_counts = summary["by_regime_source"]
+            source_counts[source] = int(source_counts.get(source, 0)) + 1
+
+        ts_value = entry.get("ts")
+        try:
+            event_ts = datetime.fromisoformat(str(ts_value))
+            if event_ts.tzinfo is None:
+                event_ts = event_ts.replace(tzinfo=KST)
+            event_ts = event_ts.astimezone(KST)
+        except (TypeError, ValueError):
+            summary["parse_error_count"] += 1
+            continue
+
+        event_date = event_ts.date()
+        if event_date == today:
+            summary["today_events"] += 1
+        if event_date >= week_ago:
+            summary["last_7d_events"] += 1
+        if latest_ts is None or event_ts > latest_ts:
+            latest_ts = event_ts
+            summary["latest_event"] = entry
+
+    if summary["parse_error_count"] > 0 or summary["today_events"] > 0 or summary["last_7d_events"] > 0:
+        summary["status"] = "warn"
+    return summary
+
+
 def collect_operational_intake() -> dict[str, Any]:
     state.init_state_db()
     shadow_state = describe_jackal_shadow_state()
@@ -135,6 +222,7 @@ def collect_operational_intake() -> dict[str, Any]:
             ],
             "backup_note": "Non-dry backfill scripts copy data/jackal_state.db before writing unless --no-backup is used.",
         },
+        "baseline_fallback_audit": collect_baseline_fallback_summary(),
         "post_backfill_verification": {
             "projection_rows": projection_state.get("projection_rows"),
             "current_rows": projection_state.get("current_rows"),
@@ -148,6 +236,15 @@ def collect_operational_intake() -> dict[str, Any]:
 
 
 def render_markdown(report: dict[str, Any]) -> str:
+    baseline_summary = report.get("baseline_fallback_audit", {})
+    by_component = baseline_summary.get("by_component", {})
+    by_source = baseline_summary.get("by_regime_source", {})
+    latest_event = baseline_summary.get("latest_event")
+    latest_event_text = (
+        "None"
+        if latest_event is None
+        else json.dumps(latest_event, ensure_ascii=False, sort_keys=True)
+    )
     lines = [
         "# JACKAL Operational Intake",
         "",
@@ -182,6 +279,19 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"- Shadow dry-run: `{json.dumps(readiness.get('shadow', {}), ensure_ascii=False, sort_keys=True)}`",
             f"- Recommendation dry-run: `{json.dumps(readiness.get('recommendation', {}), ensure_ascii=False, sort_keys=True)}`",
             f"- Backup note: {readiness.get('backup_note')}",
+            "",
+            "## Baseline Fallback Audit",
+            "",
+            f"- Status: `{baseline_summary.get('status', 'n/a')}`",
+            f"- Log exists: `{baseline_summary.get('log_exists', False)}`",
+            f"- Total events: `{baseline_summary.get('total_events', 0)}`",
+            f"- Today events: `{baseline_summary.get('today_events', 0)}`",
+            f"- Last 7d events: `{baseline_summary.get('last_7d_events', 0)}`",
+            f"- By component: hunter=`{by_component.get('hunter', 0)}`, scanner=`{by_component.get('scanner', 0)}`",
+            f"- By regime_source: memory=`{by_source.get('memory', 0)}`, "
+            f"fallback=`{by_source.get('fallback', 0)}`, none=`{by_source.get('none', 0)}`",
+            f"- Latest event: `{latest_event_text}`",
+            f"- Parse errors: `{baseline_summary.get('parse_error_count', 0)}`",
             "",
             "## Post-Backfill Verification",
             "",

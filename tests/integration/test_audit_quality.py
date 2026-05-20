@@ -18,6 +18,7 @@ class AuditQualityScriptTests(unittest.TestCase):
         self.assertIn("jackal_recommendation_accuracy", audit["metrics"])
         self.assertIn("market_provider_quality", audit["metrics"])
         self.assertIn("Requirements drift", markdown)
+        self.assertIn("JACKAL baseline fallback audit", markdown)
         self.assertIn("ORCA/JACKAL Quality Audit", markdown)
 
 
