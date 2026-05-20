@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-20 19:28 KST",
+  "collected_at": "2026-05-20 21:22 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
@@ -11,6 +11,22 @@
     "233740.KS",
     "530036.KS",
     "011000.KS",
+    "042700.KS",
+    "051910.KS",
+    "RIVN",
+    "373220.KS",
+    "086520.KS",
+    "035420.KS",
+    "247540.KS",
+    "BA",
+    "068270.KS",
+    "META",
+    "NOC",
+    "096770.KS",
+    "BAC",
+    "WFC",
+    "JPM",
+    "PFE",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -21,65 +37,23 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "021880.KS",
-      "headline": "메이슨캐피탈, 리드코프 피인수로 주가 강세 - 주당 422원(+29.65%)",
-      "impact": "bullish",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "Iran war triggers largest oil supply shock on record; ~1 billion barrels cumulative lost; 14M b/d production shut-in",
+      "source": "World Bank, IEA, Wikipedia",
+      "data_pt": "March-May 2026 | Supply loss exceeds 1 billion barrels; 14M b/d production shut-in; Strait Hormuz (35% seaborne crude) effectively closed; drone/missile damage Qatar LNG 20% supply loss"
     },
     {
-      "ticker": "021880.KS",
-      "headline": "메이슨캐피탈, 5대1 무상감자 결정 - 재무구조 개선 조치",
-      "impact": "bearish",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "South Korea positioned for 5th global export rank; semiconductor sector leading with AI demand tailwind",
+      "source": "Korea Herald, WTO data",
+      "data_pt": "Q1 2026 | South Korea $219.9B exports vs Japan $120.3B, Italy $118.3B; 5th place expected (vs 7th prior); chip boom sustains export leadership"
     },
     {
-      "ticker": "900300.KS",
-      "headline": "오가닉티코스메틱, 최대주주 SUNYANE 변경 - 유상증자 참여로",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "900300.KS",
-      "headline": "오가닉티코스메틱, 투자경고종목 지정 예고 - 주가 급등으로",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "900300.KS",
-      "headline": "오가닉티코스메틱, 인도네시아 운동화 공급계약 263억원",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "011000.KS",
-      "headline": "진원생명과학, 동반성장투자조합 이사선임 가처분 인용",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "삼성전자, 노사 협상 결렬 - 21일 총파업 예고",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK하이닉스, 미국 실리콘밸리 산호세 건물 매입 - AI 사업 추진",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "브로드컴, 애널리스트 투자의견 상향 - AI 반도체 수익 호조",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "엔비디아, 5월 20일 실적발표 예정 - 시장 주목",
-      "impact": "neutral",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "World Bank: Energy prices +24% in 2026 (highest since Ukraine 2022); developing economy inflation +100bps to 5.1%",
+      "source": "World Bank Commodity Outlook",
+      "data_pt": "April 2026 | Commodity prices +16% in 2026; energy +24% YoY; developing economy inflation 5.1% (up from 4.7% forecast pre-war); growth downside -0.4pp to 3.6%"
     }
   ],
-  "total": 12
+  "total": 3
 }
