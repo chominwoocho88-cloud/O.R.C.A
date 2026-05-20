@@ -558,6 +558,7 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
         text = _read_text(_workflow_path("jackal_session.yml"))
         for path in (
             "jackal/contract_shadow_audit.log",
+            "jackal/baseline_fallback_audit.log",
             "jackal/memory_context_shadow.log",
             "data/stock_name_cache.json",
         ):

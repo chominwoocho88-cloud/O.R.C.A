@@ -32,6 +32,7 @@ from shared.paths import (
     JACKAL_NEWS_FILE as SHARED_JACKAL_NEWS_FILE,
     JACKAL_WATCHLIST_FILE,
     JACKAL_WEIGHTS_FILE,
+    MEMORY_FILE,
     ROTATION_FILE,
     SENTIMENT_FILE,
 )
@@ -46,6 +47,7 @@ from apps.orca.state import (
     sync_jackal_live_events,
     sync_jackal_recommendations,
 )
+from apps.jackal.baseline_audit import record_baseline_fallback
 from apps.jackal.pipeline.adapter import load_orca_context as load_shared_orca_context
 from jackal.explanation import (
     build_scanner_explanation_lines,
@@ -377,6 +379,16 @@ def _load_orca_context() -> dict:
             ctx["rotation_to"] = signal.get("to", "")
     except Exception:
         pass
+
+    regime_source = ctx.get("regime_source", "none")
+    if regime_source != "baseline":
+        record_baseline_fallback(
+            component="scanner",
+            regime_source=regime_source,
+            regime=ctx.get("regime", ""),
+            baseline_exists=BASELINE_FILE.exists(),
+            memory_exists=MEMORY_FILE.exists(),
+        )
 
     return ctx
 

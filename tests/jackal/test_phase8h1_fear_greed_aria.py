@@ -150,12 +150,15 @@ class Phase8h1FearGreedAriaTests(unittest.TestCase):
                 patch.object(adapter, "ORCA_BASELINE", baseline),
                 patch.object(adapter, "ORCA_MEMORY", memory),
                 patch.object(adapter, "JACKAL_NEWS", news),
+                patch.object(scanner, "MEMORY_FILE", memory),
+                patch.object(scanner, "record_baseline_fallback") as record,
             ):
                 ctx = scanner._load_orca_context()
 
         self.assertEqual(ctx["regime"], "memory_regime")
         self.assertEqual(ctx["regime_source"], "memory")
         self.assertEqual(ctx["key_inflows"], ["AI"])
+        record.assert_called_once()
 
     def test_scanner_context_preserves_rotation_overlay(self):
         from apps.jackal import scanner

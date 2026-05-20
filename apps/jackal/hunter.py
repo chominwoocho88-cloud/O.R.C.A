@@ -30,12 +30,14 @@ from shared.contracts.validation import shadow_validate
 from shared.llm.client import LLMClient
 from shared.market_data.stock_name import format_stock_display
 from shared.paths import (
+    BASELINE_FILE,
     DATA_DIR,
     JACKAL_HUNT_COOLDOWN_FILE,
     JACKAL_HUNT_LOG_FILE,
     JACKAL_LEGACY_DIR,
     JACKAL_WEIGHTS_FILE,
     JACKAL_WATCHLIST_FILE,
+    MEMORY_FILE,
 )
 from shared.paths import atomic_write_json
 from apps.orca.state import (
@@ -43,6 +45,7 @@ from apps.orca.state import (
     sync_jackal_live_events,
 )
 from apps.jackal import memory_context as _memory_context
+from apps.jackal.baseline_audit import record_baseline_fallback
 from apps.jackal.risk_projection import project_hunter_to_risk_decision
 from jackal.explanation import build_hunter_explanation_lines
 from jackal.final_diagnostics import build_final_diag, format_final_diag
@@ -1980,6 +1983,14 @@ def run_hunt(force: bool = False) -> dict:
 
     aria = _load_orca_context()
     regime_source = aria.get("regime_source", "none")
+    if regime_source != "baseline":
+        record_baseline_fallback(
+            component="hunter",
+            regime_source=regime_source,
+            regime=aria.get("regime", ""),
+            baseline_exists=BASELINE_FILE.exists(),
+            memory_exists=MEMORY_FILE.exists(),
+        )
 
     if not aria["regime"]:
         # fallback도 실패한 극히 드문 경우
