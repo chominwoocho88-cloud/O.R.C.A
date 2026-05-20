@@ -487,6 +487,11 @@ class TestHighRiskWorkflowStatePersistenceContracts(unittest.TestCase):
         text = _read_text(_workflow_path("orca_daily.yml"))
         self.assertIn("git add -f data/morning_baseline.json", text)
 
+    def test_orca_daily_persists_phase4_self_correction_audit_log(self):
+        text = _read_text(_workflow_path("orca_daily.yml"))
+        self.assertIn("git add -f data/self_correction_log.json", text)
+        self.assertIn("git add -f data/self_correction_log.json 2>/dev/null || true", text)
+
     def test_orca_daily_strict_verify_checks_morning_baseline(self):
         block = _extract_step_block(_workflow_path("orca_daily.yml"), "Strict verify")
         self.assertIn('if os.environ.get("ORCA_RUN_MODE") == "MORNING":', block)

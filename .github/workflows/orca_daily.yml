@@ -260,6 +260,7 @@ jobs:
           git add data/orca_cost.json 2>/dev/null || true
           git add data/llm_log.jsonl 2>/dev/null || true
           git add -f data/morning_baseline.json 2>/dev/null || true
+          git add -f data/self_correction_log.json 2>/dev/null || true
           git add data/orca_market_data.json 2>/dev/null || true
           git add data/breaking_sent.json 2>/dev/null || true
           git add data/sentiment.json 2>/dev/null || true
