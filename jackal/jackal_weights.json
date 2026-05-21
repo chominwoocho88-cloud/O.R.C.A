@@ -1,14 +1,14 @@
 {
   "signal_weights": {
-    "bb_touch": 0.35,
-    "rsi_oversold": 0.41,
+    "bb_touch": 0.3,
+    "rsi_oversold": 0.31,
     "volume_climax": 1.0,
     "ma_support": 1.0,
     "momentum_dip": 1.0,
     "vol_accumulation": 1.0,
     "sector_rebound": 1.0,
     "rsi_divergence": 1.0,
-    "sector_inflow": 0.39,
+    "sector_inflow": 0.3,
     "golden_cross": 1.06,
     "fear_regime": 1.0,
     "bullish_div": 1.0,
@@ -27,9 +27,9 @@
   },
   "signal_accuracy": {
     "bb_touch": {
-      "accuracy": 0.0,
-      "correct": 0,
-      "total": 2
+      "accuracy": 33.3,
+      "correct": 1,
+      "total": 3
     },
     "bullish_div": {
       "accuracy": 0.0,
@@ -47,19 +47,44 @@
       "total": 1
     },
     "rsi_oversold": {
-      "accuracy": 0.0,
-      "correct": 0,
-      "total": 2
+      "accuracy": 33.3,
+      "correct": 1,
+      "total": 3
     },
     "sector_inflow": {
-      "accuracy": 0.0,
-      "correct": 0,
-      "total": 2
+      "accuracy": 33.3,
+      "correct": 1,
+      "total": 3
     },
     "volume_climax": {
       "accuracy": 0.0,
       "correct": 0,
       "total": 1
+    },
+    "regime_headwind": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 100.0
+    },
+    "rsi_oversold_boundary": {
+      "correct": 0,
+      "total": 1,
+      "accuracy": 0.0
+    },
+    "bb_touch_lower": {
+      "correct": 0,
+      "total": 1,
+      "accuracy": 0.0
+    },
+    "sector_inflow_hbm": {
+      "correct": 0,
+      "total": 1,
+      "accuracy": 0.0
+    },
+    "fundamental_strength_mismatch": {
+      "correct": 0,
+      "total": 1,
+      "accuracy": 0.0
     }
   },
   "regime_accuracy": {
@@ -122,6 +147,11 @@
       "accuracy": 0.0,
       "correct": 0,
       "total": 2
+    },
+    "혼조 (미국 위험선호 표면 유지 / 한국 위험회피 심화·구조적 자금이탈)": {
+      "correct": 1,
+      "total": 2,
+      "accuracy": 50.0
     }
   },
   "ticker_accuracy": {
@@ -230,17 +260,17 @@
       "total": 67
     },
     "042700.KS": {
-      "accuracy": 75.0,
+      "accuracy": 75.3,
       "avg_peak_day": 3.9,
       "avg_peak_pct": 5.19,
-      "correct": 54,
+      "correct": 55,
       "generated_at": "2026-04-29T11:14:05.011815+09:00",
       "metric": "swing_accuracy",
       "sample_count": 72,
       "source_session_id": "bt_4d3e7c022cab43feae36c8507714f9df",
       "swing_accuracy": 75.0,
       "swing_correct": 54,
-      "total": 72
+      "total": 73
     },
     "047810.KS": {
       "accuracy": 83.7,
@@ -269,7 +299,7 @@
       "total": 36
     },
     "051910.KS": {
-      "accuracy": 69.0,
+      "accuracy": 68.2,
       "avg_peak_day": 4.1,
       "avg_peak_pct": 3.92,
       "correct": 58,
@@ -279,7 +309,7 @@
       "source_session_id": "bt_4d3e7c022cab43feae36c8507714f9df",
       "swing_accuracy": 69.0,
       "swing_correct": 58,
-      "total": 84
+      "total": 85
     },
     "055550.KS": {
       "accuracy": 75.0,
@@ -1198,9 +1228,9 @@
       "total": 0
     },
     "부분동의": {
-      "accuracy": 0.0,
-      "correct": 0,
-      "total": 1
+      "accuracy": 33.3,
+      "correct": 1,
+      "total": 3
     },
     "반대": {
       "accuracy": 100.0,
@@ -1208,7 +1238,7 @@
       "total": 1
     }
   },
-  "last_updated": "2026-05-20T12:42:57.931496",
+  "last_updated": "2026-05-21T14:27:11.609809",
   "rule_registry_status": {
     "sector_rebound_base": {
       "active": true,
@@ -1374,23 +1404,23 @@
     "swing_accuracy": 70.9,
     "total_tracked": 3780
   },
-  "last_evolved_at": "2026-05-20T12:42:57.931491",
+  "last_evolved_at": "2026-05-21T14:27:11.609804",
   "last_macro_gate": {
+    "checked_at": "2026-05-21T08:49:43.008818+09:00",
+    "hy_chg5": -0.06,
+    "reason": "ARIA위험회피",
     "risk_level": "normal",
     "score_penalty": 5,
     "vix": 17.4,
-    "yield_curve": 0.0,
-    "hy_chg5": -0.06,
-    "reason": "ARIA위험회피",
-    "checked_at": "2026-05-21T08:49:43.008818+09:00"
+    "yield_curve": 0.0
   },
   "swing_type_optimal": {
     "기술적과매도": {
-      "avg_peak_day": 1.0,
-      "avg_peak_gain": -2.1,
+      "avg_peak_day": 2.0,
+      "avg_peak_gain": 7.37,
+      "swing_accuracy": 50.0,
       "day1_accuracy": 0.0,
-      "sample": 2,
-      "swing_accuracy": 0.0
+      "sample": 2
     }
   },
   "system_accuracy": {

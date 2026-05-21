@@ -1,0 +1,7 @@
+{
+  "name": "bb_rsi_combined_caution",
+  "warning": "Do not treat bb_touch and rsi_oversold as independent confirmation signals when both show identical 33.3% accuracy",
+  "reason": "Both signals are firing together but failing together, suggesting correlated false signals rather than independent confirmation",
+  "regime_context": "혼조 (미국 위험선호 표면 유지 / 한국 위험회피 심화·구조적 자금이탈)",
+  "timestamp": "2026-05-21T14:27:11.609045"
+}

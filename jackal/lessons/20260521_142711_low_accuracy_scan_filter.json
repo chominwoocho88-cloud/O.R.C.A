@@ -1,0 +1,7 @@
+{
+  "name": "low_accuracy_scan_filter",
+  "warning": "Avoid issuing signals when overall scan accuracy is below 30% in a mixed regime environment",
+  "reason": "7-day scan accuracy is only 20% (1 correct out of 5), indicating signal conditions are not reliably predictive in current market structure",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-05-21T14:27:11.608800"
+}
