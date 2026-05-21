@@ -70,6 +70,19 @@ def _import_state():
 
 
 class VerificationBehaviorTests(unittest.TestCase):
+    def _accuracy_state(self):
+        return {
+            "total": 0,
+            "correct": 0,
+            "by_category": {},
+            "history": [],
+            "history_by_category": [],
+            "weak_areas": [],
+            "strong_areas": [],
+            "dir_total": 0,
+            "dir_correct": 0,
+        }
+
     def test_verify_price_handles_index_level_targets(self):
         analysis = _import_analysis()
 
@@ -111,6 +124,7 @@ class VerificationBehaviorTests(unittest.TestCase):
         memory = [
             {
                 "analysis_date": "2026-04-21",
+                "mode": "EVENING",
                 "thesis_killers": [
                     {
                         "event": "나스닥",
@@ -120,17 +134,7 @@ class VerificationBehaviorTests(unittest.TestCase):
                 ],
             }
         ]
-        accuracy = {
-            "total": 0,
-            "correct": 0,
-            "by_category": {},
-            "history": [],
-            "history_by_category": [],
-            "weak_areas": [],
-            "strong_areas": [],
-            "dir_total": 0,
-            "dir_correct": 0,
-        }
+        accuracy = self._accuracy_state()
         stdout = io.StringIO()
 
         with patch.dict(sys.modules, {"orca.data": types.SimpleNamespace(load_market_data=lambda: {})}), patch.object(
@@ -155,6 +159,107 @@ class VerificationBehaviorTests(unittest.TestCase):
             analysis.run_verification()
 
         self.assertIn("Done. Today accuracy: N/A", stdout.getvalue())
+
+    def test_run_verification_skips_same_day_evening_report(self):
+        analysis = _import_analysis()
+        memory = [
+            {
+                "analysis_date": "2026-04-22",
+                "mode": "EVENING",
+                "thesis_killers": [{"event": "NASDAQ", "confirms_if": "+1%", "invalidates_if": "-1%"}],
+            }
+        ]
+        accuracy = self._accuracy_state()
+        stdout = io.StringIO()
+
+        with patch.object(analysis, "_load", side_effect=[memory, accuracy]), patch.object(
+            analysis, "_verify_price"
+        ) as verify_price, patch.object(
+            analysis, "resolve_verification_outcomes"
+        ) as resolve, patch.object(
+            analysis, "_today", return_value="2026-04-22"
+        ), contextlib.redirect_stdout(stdout):
+            result = analysis.run_verification()
+
+        self.assertIs(result, accuracy)
+        self.assertIn("No previous EVENING report for verification", stdout.getvalue())
+        verify_price.assert_not_called()
+        resolve.assert_not_called()
+
+    def test_run_verification_skips_previous_morning_without_evening(self):
+        analysis = _import_analysis()
+        memory = [
+            {
+                "analysis_date": "2026-04-21",
+                "mode": "MORNING",
+                "thesis_killers": [{"event": "NASDAQ", "confirms_if": "+1%", "invalidates_if": "-1%"}],
+            }
+        ]
+        accuracy = self._accuracy_state()
+        stdout = io.StringIO()
+
+        with patch.object(analysis, "_load", side_effect=[memory, accuracy]), patch.object(
+            analysis, "_verify_price"
+        ) as verify_price, patch.object(
+            analysis, "resolve_verification_outcomes"
+        ) as resolve, patch.object(
+            analysis, "_today", return_value="2026-04-22"
+        ), contextlib.redirect_stdout(stdout):
+            result = analysis.run_verification()
+
+        self.assertIs(result, accuracy)
+        self.assertIn("No previous EVENING report for verification", stdout.getvalue())
+        verify_price.assert_not_called()
+        resolve.assert_not_called()
+
+    def test_run_verification_uses_latest_previous_evening_report(self):
+        analysis = _import_analysis()
+        memory = [
+            {
+                "analysis_date": "2026-04-20",
+                "mode": "EVENING",
+                "thesis_killers": [{"event": "OLD", "confirms_if": "+1%", "invalidates_if": "-1%"}],
+            },
+            {
+                "analysis_date": "2026-04-21",
+                "mode": "MORNING",
+                "thesis_killers": [{"event": "MORNING", "confirms_if": "+1%", "invalidates_if": "-1%"}],
+            },
+            {
+                "analysis_date": "2026-04-21",
+                "mode": "EVENING",
+                "thesis_killers": [{"event": "EVENING", "confirms_if": "+1%", "invalidates_if": "-1%"}],
+            },
+        ]
+        accuracy = self._accuracy_state()
+        stdout = io.StringIO()
+
+        with patch.dict(sys.modules, {"orca.data": types.SimpleNamespace(load_market_data=lambda: {})}), patch.object(
+            analysis, "_load", side_effect=[memory, accuracy]
+        ), patch.object(
+            analysis,
+            "_verify_price",
+            return_value=[{"event": "EVENING", "verdict": "confirmed", "evidence": "ok", "category": "ok"}],
+        ) as verify_price, patch.object(analysis, "_ai_verify", return_value=[]), patch.object(
+            analysis, "update_weights_from_accuracy", return_value=[]
+        ), patch.object(
+            analysis, "resolve_verification_outcomes", return_value={"matched": 1, "updated": 0, "unmatched": []}
+        ) as resolve, patch.object(
+            analysis, "_save", return_value=None
+        ), patch.object(
+            analysis, "_send_verification_report", return_value=None
+        ), patch.object(
+            analysis, "_today", return_value="2026-04-22"
+        ), patch.object(
+            analysis, "get_orca_flag", return_value=False
+        ), contextlib.redirect_stdout(stdout):
+            analysis.run_verification()
+
+        verify_price.assert_called_once()
+        self.assertEqual(verify_price.call_args.args[0][0]["event"], "EVENING")
+        resolve.assert_called_once()
+        self.assertEqual(resolve.call_args.args[0], "2026-04-21")
+        self.assertEqual(resolve.call_args.kwargs["source_mode"], "EVENING")
 
 
 class StateAliasTests(unittest.TestCase):
@@ -220,6 +325,96 @@ class StateAliasTests(unittest.TestCase):
                     ).fetchone()
                     self.assertIsNotNone(row)
                     self.assertEqual(row["verdict"], "confirmed")
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_resolve_verification_outcomes_filters_by_source_mode(self):
+        state = _import_state()
+        tmpdir = tempfile.mkdtemp()
+        try:
+            state_db = Path(tmpdir) / "orca_state.db"
+            jackal_db = Path(tmpdir) / "jackal_state.db"
+
+            with patch.object(state, "STATE_DB_FILE", state_db), patch.object(state, "JACKAL_DB_FILE", jackal_db):
+                state.init_state_db()
+
+                with state._connect_orca() as conn:
+                    conn.executemany(
+                        """
+                        INSERT INTO runs (run_id, system, mode, analysis_date, started_at, status)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """,
+                        [
+                            ("run_morning", "aria", "MORNING", "2026-04-21", "2026-04-21T07:00:00+09:00", "completed"),
+                            ("run_evening", "aria", "EVENING", "2026-04-21", "2026-04-21T20:00:00+09:00", "completed"),
+                        ],
+                    )
+                    conn.executemany(
+                        """
+                        INSERT INTO predictions (
+                            prediction_id, external_key, run_id, system, analysis_date, mode,
+                            prediction_kind, event_name, created_at, status
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        [
+                            (
+                                "pred_morning",
+                                "aria:2026-04-21:MORNING:thesis:NASDAQ",
+                                "run_morning",
+                                "aria",
+                                "2026-04-21",
+                                "MORNING",
+                                "thesis_killer",
+                                "NASDAQ",
+                                "2026-04-21T07:00:00+09:00",
+                                "open",
+                            ),
+                            (
+                                "pred_evening",
+                                "aria:2026-04-21:EVENING:thesis:NASDAQ",
+                                "run_evening",
+                                "aria",
+                                "2026-04-21",
+                                "EVENING",
+                                "thesis_killer",
+                                "NASDAQ",
+                                "2026-04-21T20:00:00+09:00",
+                                "open",
+                            ),
+                        ],
+                    )
+
+                resolution = state.resolve_verification_outcomes(
+                    "2026-04-21",
+                    [
+                        {
+                            "event": "NASDAQ",
+                            "verdict": "confirmed",
+                            "evidence": "NASDAQ +1%",
+                            "category": "ok",
+                        }
+                    ],
+                    resolved_analysis_date="2026-04-22",
+                    metadata={"verification_date": "2026-04-22"},
+                    source_mode="EVENING",
+                )
+
+                self.assertEqual(resolution["matched"], 1)
+                self.assertEqual(resolution["updated"], 0)
+
+                with state._connect_orca() as conn:
+                    rows = conn.execute(
+                        """
+                        SELECT p.prediction_id, p.mode, o.verdict
+                          FROM predictions p
+                          LEFT JOIN outcomes o ON o.prediction_id = p.prediction_id
+                         ORDER BY p.prediction_id
+                        """
+                    ).fetchall()
+
+                by_prediction = {row["prediction_id"]: dict(row) for row in rows}
+                self.assertIsNone(by_prediction["pred_morning"]["verdict"])
+                self.assertEqual(by_prediction["pred_evening"]["verdict"], "confirmed")
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
 

@@ -894,6 +894,7 @@ def resolve_verification_outcomes(
     *,
     resolved_analysis_date: str,
     metadata: dict | None = None,
+    source_mode: str | None = None,
 ) -> dict[str, Any]:
     init_state_db()
     if not source_analysis_date:
@@ -909,6 +910,7 @@ def resolve_verification_outcomes(
     system_order = " ".join(
         f"WHEN '{name}' THEN {idx}" for idx, name in enumerate(systems)
     )
+    mode_clause = " AND mode = ?" if source_mode else ""
 
     with _connect_orca() as conn:
         for result in results:
@@ -924,10 +926,11 @@ def resolve_verification_outcomes(
                    AND analysis_date = ?
                    AND prediction_kind = 'thesis_killer'
                    AND event_name = ?
+                   {mode_clause}
                  ORDER BY CASE system {system_order} ELSE 99 END, created_at DESC
                  LIMIT 1
                 """,
-                (*systems, source_analysis_date, event_name),
+                (*systems, source_analysis_date, event_name, *([source_mode] if source_mode else [])),
             ).fetchone()
 
             if not prediction:

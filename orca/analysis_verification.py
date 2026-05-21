@@ -144,6 +144,18 @@ def _verify_price(thesis_killers: list, market_data: dict) -> list:
     return results
 
 
+def _select_previous_evening_report(memory: list, today: str) -> dict | None:
+    for item in reversed(memory):
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("mode", "")).upper() != "EVENING":
+            continue
+        analysis_date = str(item.get("analysis_date", "")).strip()
+        if analysis_date and analysis_date < today:
+            return item
+    return None
+
+
 def _ai_verify_impl(
     unclear: list,
     *,
@@ -312,8 +324,12 @@ def run_verification_impl(
         print("No previous analysis")
         return accuracy
 
-    yesterday = memory[-1]
     today = today_fn()
+
+    yesterday = _select_previous_evening_report(memory, today)
+    if not yesterday:
+        print("No previous EVENING report for verification")
+        return accuracy
 
     force_verify = flag_fn("ORCA_FORCE_VERIFY")
     already_done = any(h.get("date") == today for h in accuracy.get("history", []))
@@ -448,6 +464,7 @@ def run_verification_impl(
                 "judged_count": len(judged),
                 "confirmed_count": len(correct),
             },
+            source_mode="EVENING",
         )
         if resolution.get("matched") or resolution.get("updated"):
             print(
