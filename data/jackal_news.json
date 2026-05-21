@@ -1,16 +1,25 @@
 {
-  "collected_at": "2026-05-21 08:12 KST",
+  "collected_at": "2026-05-21 13:54 KST",
   "tickers": [
     "252670.KS",
-    "114800.KS",
-    "252710.KS",
-    "021880.KS",
-    "462330.KS",
-    "900300.KS",
-    "251340.KS",
-    "233740.KS",
-    "530036.KS",
-    "011000.KS",
+    "068270.KS",
+    "035420.KS",
+    "051910.KS",
+    "086520.KS",
+    "373220.KS",
+    "005380.KS",
+    "000270.KS",
+    "042700.KS",
+    "META",
+    "247540.KS",
+    "RIVN",
+    "BA",
+    "NOC",
+    "096770.KS",
+    "BAC",
+    "WFC",
+    "JPM",
+    "PFE",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -21,65 +30,47 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "252670.KS",
-      "headline": "개인투자자들이 KODEX 200선물인버스2X에 5402억원 순매수하며 코스피 하락 베팅",
-      "impact": "bearish",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "Global semiconductor market forecast at $1.29 trillion in 2026 - 52.8% surge driven by AI infrastructure",
+      "source": "IDC Semiconductor Market Forecast 2026",
+      "data_pt": "$1.29T market size forecast; 52.8% YoY growth; HBM primary constraint in AI accelerator supply chain"
     },
     {
-      "ticker": "114800.KS",
-      "headline": "KODEX 인버스 ETF 상승으로 개인의 인버스 투자 수요 증가",
-      "impact": "bearish",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "TSMC Arizona Fab 2 pulled forward to 2027; Intel Ohio production pushed back from 2026 to 2030",
+      "source": "Manufacturing Dive / Omdia SemiDynamics 2026 Q1",
+      "data_pt": "TSMC Fab 2: 2027 start (from 2028); Intel Ohio: 2030 start (from 2026); existing fabs offline for retrofits reducing near-term output"
     },
     {
-      "ticker": "252710.KS",
-      "headline": "TIGER 200선물인버스2X ETF 순자산 374억원으로 인버스 상품 수요 지속",
-      "impact": "bearish",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "Qatar LNG disruptions removed 20% of global LNG supply in March 2026 due to missile/drone strikes",
+      "source": "Manufacturing Dive / Omdia",
+      "data_pt": "March 2026: 20% global LNG supply removed at Ras Laffan hub; affects chipmaker power requirements and broader semiconductor fab operations"
     },
     {
-      "ticker": "021880.KS",
-      "headline": "메이슨캐피탈 보통주 5대 1 무상감자 결정, 결손금 보전 및 재무구조 개선",
-      "impact": "neutral",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "Bank of America delays Fed rate cuts forecast to July-September 2027; no cuts expected in 2026",
+      "source": "TheStreet (May 11, 2026)",
+      "data_pt": "Previous forecast: Sept 2026 cuts; Revised forecast: July & Sept 2027; Reason: core inflation elevated, solid jobs data"
     },
     {
-      "ticker": "462330.KS",
-      "headline": "KODEX 2차전지산업레버리지 52주 최고 3,005원, 2차전지 섹터 강세",
-      "impact": "bullish",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "Middle East war caused largest oil supply disruption in history; Strait of Hormuz handles ~20% of global oil supply",
+      "source": "IEA / World Bank Commodity Outlook (April 28, 2026)",
+      "data_pt": "Oil supply reduction: 10+ million barrels/day; Strait closure: February 28 start, flows restricted; Brent averaged $117/barrel in April"
     },
     {
-      "ticker": "900300.KS",
-      "headline": "오가닉티코스메틱 최대주주 변경, SUNYANE이 지분 5.91% 취득",
-      "impact": "neutral",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "Brent oil forecast at $86/barrel for 2026 average; $115 possible if disruptions extend",
+      "source": "World Bank Commodity Markets Outlook (April 28, 2026)",
+      "data_pt": "2025 average: $69/barrel; 2026 forecast: $86/barrel baseline; Worst case: $115/barrel if acuate disruptions extend; Energy prices projected +24% in 2026"
     },
     {
-      "ticker": "251340.KS",
-      "headline": "KODEX 코스닥150선물인버스 개인 대량 순매수로 코스닥 하락 베팅",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "233740.KS",
-      "headline": "KODEX 코스닥150레버리지 장중 39.74% 급등, 개인투자자 6727억원 순매수",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "530036.KS",
-      "headline": "삼성 인버스 2X WTI원유 선물 ETN 기초지수 롤오버 방식 긴급 변경",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "011000.KS",
-      "headline": "진원생명과학 52주 최고 4,270원에서 현재 916원으로 조정",
-      "impact": "bearish",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "Middle East production shut-ins peaked at 10.8 million barrels/day in May 2026; Strait reopens late May per baseline scenario",
+      "source": "EIA Short-Term Energy Outlook (May 2026)",
+      "data_pt": "April shut-ins: 10.5 Mb/d; May peak forecast: 10.8 Mb/d; Strait reopening: late May baseline (late June upside risk); Recovery: late 2026/early 2027"
     }
   ],
-  "total": 16
+  "total": 7
 }
