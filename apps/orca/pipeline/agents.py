@@ -39,7 +39,7 @@ _TOK = {
     "ANALYST":        5000,   # max_tokens reached 대응
     "DEVIL":          4000,   # max_tokens reached 대응
     "REPORTER_FULL":  9000,   # max_tokens reached 대응 (MORNING)
-    "REPORTER_LITE":  4000,   # max_tokens reached 대응 (EVENING/DAWN)
+    "REPORTER_LITE":  8000,   # max_tokens reached 대응 (EVENING/DAWN)
 }
 
 console = Console()
