@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-21 16:02 KST",
+  "collected_at": "2026-05-22 08:04 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
@@ -8,8 +8,8 @@
     "462330.KS",
     "251340.KS",
     "233740.KS",
-    "021880.KS",
     "530036.KS",
+    "021880.KS",
     "017900.KS",
     "NVDA",
     "000660.KS",
@@ -21,65 +21,59 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "NVDA",
-      "headline": "NVIDIA reports record Q1 revenue of $81.6B, up 85% YoY; provides strong Q2 guidance at $91B",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics faces labor strike threat with wage negotiations breakdown affecting semiconductor production",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix stock rallies on AI memory chip demand; analysts upgrade price targets to 1.85M won",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom receives multiple analyst upgrades; Wells Fargo raises target to $545 citing strong AI infrastructure demand",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
       "ticker": "004870.KS",
-      "headline": "Tway Holdings surges to limit up as subsidiary Trinity Airlines receives domestic license change approval",
+      "headline": "티웨이홀딩스, 계열사 티웨이항공 사명변경 '트리니티항공'으로 상한가 돌파",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "017900.KS",
-      "headline": "Gwangjeon Electronics cleared from investment warning status; faces reinstatement risk if stock continues rising",
-      "impact": "neutral",
+      "headline": "광전자, 투자경고종목 해제되며 17.75% 급등...외국인·기관 매수집중",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "021880.KS",
-      "headline": "Mason Capital announces 5:1 stock split and capital reduction to improve financial structure",
+      "headline": "메이슨캐피탈, 5대1 무상감자 결정으로 재무구조 개선 추진",
       "impact": "neutral",
       "source": "web_search"
     },
     {
-      "ticker": "252670.KS",
-      "headline": "KODEX 200 Futures Inverse 2X ETF sees heavy individual investor buying amid market uncertainty",
-      "impact": "bearish",
+      "ticker": "005930.KS",
+      "headline": "삼성전자, 노사 극적합의로 파업우려 해소...주가 8.51% 상승",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "233740.KS",
-      "headline": "KODEX KOSDAQ150 Leverage ETF records 25.75% gains as KOSDAQ rallies on AI enthusiasm",
+      "ticker": "000660.KS",
+      "headline": "SK하이닉스, 메모리 수급 불균형 장기화로 신한투자증권 목표가 2배 상향",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "엔비디아, 1분기 매출 81.6억달러 신기록 달성...25% 배당 인상 및 800억달러 자사주 매입 승인",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "브로드컴, AI 반도체 매출 30-40% 상향으로 월스트리트 분석가들 가격목표 대폭 인상",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "카카오, 분석가 목표가 70,615원으로 현재가 대비 75.88% 상승여력 평가",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF surpasses 5 trillion won AUM; becomes top inflow product among dividend ETFs",
+      "headline": "SOL 코리아고배당, 순자산 5000억원 돌파하며 고배당 ETF 자금유입 1위 지속",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 11
+  "total": 9
 }
