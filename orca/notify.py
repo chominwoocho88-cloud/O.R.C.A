@@ -423,10 +423,92 @@ def _build_evening(report: dict) -> list:
     def _short(value, limit: int = 140) -> str:
         return _report_line_text(_clean(value), limit=limit)
 
+    def _has_content(value) -> bool:
+        if isinstance(value, dict):
+            return any(_has_content(item) for item in value.values())
+        if isinstance(value, (list, tuple)):
+            return any(_has_content(item) for item in value)
+        return bool(_clean(value))
+
     def _section(header: str) -> None:
         if lines and lines[-1] != "":
             lines.append("")
         lines.append(header)
+
+    korea_open = report.get("tomorrow_korea_open")
+    if _has_content(korea_open):
+        _section("🌅 <b>내일 한국 시장 예상</b>")
+        if isinstance(korea_open, dict):
+            primary = " / ".join(
+                part for part in [
+                    _short(korea_open.get("direction"), 18),
+                    _short(korea_open.get("expected_gap_pct"), 24),
+                    _short(korea_open.get("kospi_open_range"), 46),
+                    _short(korea_open.get("confidence"), 12),
+                ] if part
+            )
+            if primary:
+                lines.append("• " + primary)
+            semis = " / ".join(
+                part for part in [
+                    "SK하이닉스: " + _short(korea_open.get("sk_hynix"), 36) if _short(korea_open.get("sk_hynix"), 36) else "",
+                    "삼성전자: " + _short(korea_open.get("samsung"), 36) if _short(korea_open.get("samsung"), 36) else "",
+                ] if part
+            )
+            if semis:
+                lines.append("  " + semis)
+        else:
+            lines.append("• " + _short(korea_open, 120))
+        lines.append("")
+
+    korea_levels = report.get("tomorrow_korea_levels")
+    if _has_content(korea_levels):
+        _section("📊 <b>KOSPI 레벨</b>")
+        if isinstance(korea_levels, dict):
+            support = _short(korea_levels.get("kospi_support"), 36)
+            resistance = _short(korea_levels.get("kospi_resistance"), 36)
+            watch = _short(korea_levels.get("watch_level"), 36)
+            risk = _short(korea_levels.get("breakdown_risk"), 36)
+            if support or resistance:
+                lines.append("• 지지: " + (support or "-") + " / 저항: " + (resistance or "-"))
+            if watch or risk:
+                lines.append("• 관찰: " + (watch or "-") + " / 리스크: " + (risk or "-"))
+        else:
+            lines.append("• " + _short(korea_levels, 120))
+        lines.append("")
+
+    us_impact = report.get("us_to_korea_impact")
+    if _has_content(us_impact):
+        _section("🇺🇸→🇰🇷 <b>미국 영향</b>")
+        if isinstance(us_impact, dict):
+            us_signal = _short(us_impact.get("us_signal"), 70)
+            korea_impact = _short(us_impact.get("expected_korea_impact"), 70)
+            beta = _short(us_impact.get("sk_hynix_beta_note"), 36)
+            samsung = _short(us_impact.get("samsung_note"), 36)
+            if us_signal:
+                lines.append("• 미국: " + us_signal)
+            if korea_impact:
+                lines.append("• 한국: " + korea_impact)
+            beta_line = " / ".join(part for part in [beta, samsung] if part)
+            if beta_line:
+                lines.append("  " + beta_line)
+        else:
+            lines.append("• " + _short(us_impact, 120))
+        lines.append("")
+
+    catalysts = [item for item in (report.get("tomorrow_korea_catalysts") or []) if _has_content(item)]
+    if catalysts:
+        _section("⚡ <b>내일 catalyst</b>")
+        for item in catalysts[:2]:
+            if isinstance(item, dict):
+                event = _short(item.get("event"), 58)
+                time_kst = _short(item.get("time_kst"), 24)
+                trigger = _short(item.get("directional_trigger") or item.get("why_it_matters"), 56)
+                if event:
+                    lines.append("• " + event + (" [" + time_kst + "]" if time_kst else "") + (" — " + trigger if trigger else ""))
+            else:
+                lines.append("• " + _short(item, 100))
+        lines.append("")
 
     headlines = report.get("top_headlines") or []
     if headlines:

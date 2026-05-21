@@ -464,6 +464,10 @@ Return ONLY valid JSON in Korean. No markdown.
   "neutral_waiting": [{"zone":"","catalyst_needed":""}],
   "hidden_signals": [{"signal":"","implication":"","confidence":""}],
   "korea_focus": {"krw_usd":"","kospi_flow":"","sk_hynix":"","samsung":"","assessment":""},
+  "tomorrow_korea_open": {"direction":"갭업/갭다운/보합","expected_gap_pct":"","kospi_open_range":"","sk_hynix":"","samsung":"","confidence":""},
+  "tomorrow_korea_levels": {"kospi_support":"","kospi_resistance":"","watch_level":"","breakdown_risk":""},
+  "us_to_korea_impact": {"us_signal":"","expected_korea_impact":"","sk_hynix_beta_note":"","samsung_note":""},
+  "tomorrow_korea_catalysts": [{"event":"","time_kst":"","why_it_matters":"","directional_trigger":""}],
   "counterarguments": [{"against":"","because":"","risk_level":""}],
   "thesis_killers": [{"event":"","timeframe":"","confirms_if":"","invalidates_if":""}],
   "tail_risks": [],
@@ -556,6 +560,20 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
             "\n- Analyst 결론을 그대로 따르지 말고 Devil 반론을 우선 반영하세요."
         )
 
+    evening_korea_forecast = ""
+    if mode == "EVENING":
+        evening_korea_forecast = (
+            "\n\n## EVENING REQUIRED: 내일 아침 한국 시장 예측 특화"
+            "\nEVENING mode는 오늘 총정리보다 내일 한국 장 예측을 우선한다."
+            "\n반드시 아래 4개 필드를 모두 JSON schema대로 채워라. prose로 흩뜨리지 말고 필드 밖에 쓰지 말 것."
+            "\n- tomorrow_korea_open: 내일 KOSPI 예상 시가/갭업·갭다운·보합, 예상 갭 범위, SK하이닉스/삼성전자 개장 영향, confidence."
+            "\n- tomorrow_korea_levels: KOSPI 지지선, 저항선, 장중 watch level, 붕괴 리스크."
+            "\n- us_to_korea_impact: 미국 장 종가/선물/엔비디아·나스닥·S&P500·Fed/매크로가 한국 장에 미칠 영향."
+            "\n- tomorrow_korea_catalysts: 내일 한국 장 전에 확인할 catalyst 목록. 한국 발표, 미국 장 결과, FOMC/Fed, 반도체 이벤트를 포함."
+            "\nSK하이닉스는 나스닥 대비 1.36x beta를 반영하고, 삼성전자는 코스피 대형주/메모리 동조성을 따로 적어라."
+            "\ntomorrow_setup은 기존 호환 필드로 유지하되, 핵심 예측은 위 4개 구조 필드에 우선 작성하라."
+        )
+
     # MORNING만 full 토큰, 나머지는 lite
     reporter_model = MODEL_REPORTER_FULL if mode == "MORNING" else MODEL_REPORTER_LITE
     max_tok        = _TOK["REPORTER_FULL"] if mode == "MORNING" else _TOK["REPORTER_LITE"]
@@ -570,6 +588,7 @@ def agent_reporter(hunter: dict, analyst: dict, devil: dict,
         "Mode: " + mode + "\nToday: " + today_str + " " + now_str
         + "\n반드시 analysis_date=" + today_str + " analysis_time=" + now_str + " 로 설정"
         + "\n⚠️ one_line_summary 필수: 오늘 시장 핵심을 30자 이상 한국어 문장으로. 예) '나스닥 +1.2% 반등에도 코스피 외국인 매도 지속, VIX 21로 관망세 유지'"
+        + evening_korea_forecast
         + "\nData:\n" + json.dumps(payload, ensure_ascii=False)
         + past_ctx + acc_ctx + real_data_ctx + devil_override + "\n\nReturn JSON.",
         model=reporter_model, max_tokens=max_tok,

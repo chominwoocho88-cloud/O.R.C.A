@@ -42,18 +42,43 @@ def _install_stub_modules() -> None:
 
     rich = types.ModuleType("rich")
     rich_console = types.ModuleType("rich.console")
+    rich_panel = types.ModuleType("rich.panel")
+    rich_table = types.ModuleType("rich.table")
 
     class DummyConsole:
         def print(self, *args, **kwargs):
             return None
 
+    class DummyPanel:
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+
+    class DummyTable:
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+
+        def add_column(self, *args, **kwargs):
+            return None
+
+        def add_row(self, *args, **kwargs):
+            return None
+
     rich_console.Console = DummyConsole
+    rich_panel.Panel = DummyPanel
+    rich_table.Table = DummyTable
     rich.console = rich_console
+    rich.panel = rich_panel
+    rich.table = rich_table
+    rich.box = types.SimpleNamespace()
 
     sys.modules["anthropic"] = anthropic
     sys.modules["httpx"] = httpx
     sys.modules["rich"] = rich
     sys.modules["rich.console"] = rich_console
+    sys.modules["rich.panel"] = rich_panel
+    sys.modules["rich.table"] = rich_table
 
 
 def _import_module(module_name: str):
@@ -201,6 +226,104 @@ class ReporterFallbackTests(unittest.TestCase):
         self.assertEqual(len(result["thesis_killers"]), 1)
         self.assertEqual(result["thesis_killers"][0]["event"], "나스닥")
         self.assertEqual(result["thesis_killers"][0]["quality"], "ok")
+
+
+class ReporterEveningKoreaForecastSchemaTests(unittest.TestCase):
+    def test_reporter_schema_includes_tomorrow_korea_fields(self):
+        agents = _import_module("apps.orca.pipeline.agents")
+
+        for field in (
+            "tomorrow_korea_open",
+            "tomorrow_korea_levels",
+            "us_to_korea_impact",
+            "tomorrow_korea_catalysts",
+        ):
+            self.assertIn(field, agents.REPORTER_SYSTEM)
+        self.assertIn('"direction":"갭업/갭다운/보합"', agents.REPORTER_SYSTEM)
+        self.assertIn('"kospi_support"', agents.REPORTER_SYSTEM)
+        self.assertIn('"directional_trigger"', agents.REPORTER_SYSTEM)
+
+    def test_evening_reporter_prompt_requires_structured_korea_forecast(self):
+        agents = _import_module("apps.orca.pipeline.agents")
+        captured = {}
+        reporter_payload = {
+            "analysis_date": "2026-05-21",
+            "analysis_time": "20:30 KST",
+            "mode": "EVENING",
+            "mode_label": "저녁 마감",
+            "one_line_summary": "테스트용 저녁 요약 문장입니다. 충분히 길게 작성합니다.",
+            "market_regime": "혼조",
+            "trend_phase": "횡보추세",
+            "trend_strategy": {"recommended": "", "caution": "", "difficulty": "보통"},
+            "confidence_overall": "보통",
+            "consensus_level": "보통",
+            "top_headlines": [],
+            "volatility_index": {"vkospi": "", "vix": "", "fear_greed": "", "level": "", "interpretation": ""},
+            "retail_reversal_signal": {"retail_behavior": "", "contrarian_implication": "", "reliability": ""},
+            "outflows": [],
+            "inflows": [],
+            "neutral_waiting": [],
+            "hidden_signals": [],
+            "korea_focus": {"krw_usd": "", "kospi_flow": "", "sk_hynix": "", "samsung": "", "assessment": ""},
+            "tomorrow_korea_open": {
+                "direction": "갭업",
+                "expected_gap_pct": "+0.5~1.0%",
+                "kospi_open_range": "7,250~7,320",
+                "sk_hynix": "나스닥 대비 1.36x beta 반영",
+                "samsung": "대형주 동조",
+                "confidence": "보통",
+            },
+            "tomorrow_korea_levels": {
+                "kospi_support": "7,180",
+                "kospi_resistance": "7,360",
+                "watch_level": "7,250",
+                "breakdown_risk": "7,180 이탈",
+            },
+            "us_to_korea_impact": {
+                "us_signal": "나스닥 강세",
+                "expected_korea_impact": "반도체 갭업 압력",
+                "sk_hynix_beta_note": "1.36x beta",
+                "samsung_note": "메모리 동조",
+            },
+            "tomorrow_korea_catalysts": [
+                {
+                    "event": "엔비디아 시간외",
+                    "time_kst": "06:00 KST",
+                    "why_it_matters": "한국 반도체 개장 영향",
+                    "directional_trigger": "+5% 이상",
+                }
+            ],
+            "counterarguments": [],
+            "thesis_killers": [],
+            "tail_risks": [],
+            "agent_consensus": {"agreed": [], "disputed": []},
+            "meta_improvement": {"missed_last_time": "", "accuracy_review": "", "reweighting": "", "orca_version": ""},
+            "tomorrow_setup": "",
+            "actionable_watch": [],
+        }
+
+        def fake_call_api(system, prompt, **kwargs):
+            captured["system"] = system
+            captured["prompt"] = prompt
+            captured["kwargs"] = kwargs
+            return json.dumps(reporter_payload, ensure_ascii=False)
+
+        with patch.object(agents, "call_api", side_effect=fake_call_api):
+            result = agents.agent_reporter(
+                hunter={"market_snapshot": {}},
+                analyst={},
+                devil={},
+                memory=[],
+                accuracy={},
+                mode="EVENING",
+            )
+
+        self.assertEqual(result["tomorrow_korea_open"]["direction"], "갭업")
+        self.assertIn("tomorrow_korea_open", captured["system"])
+        self.assertIn("EVENING REQUIRED: 내일 아침 한국 시장 예측 특화", captured["prompt"])
+        self.assertIn("반드시 아래 4개 필드를 모두 JSON schema대로 채워라", captured["prompt"])
+        self.assertIn("1.36x beta", captured["prompt"])
+        self.assertIn("tomorrow_setup은 기존 호환 필드", captured["prompt"])
 
 
 if __name__ == "__main__":
