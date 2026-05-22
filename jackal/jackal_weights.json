@@ -1408,11 +1408,11 @@
   "last_macro_gate": {
     "risk_level": "normal",
     "score_penalty": 0,
-    "vix": 16.8,
+    "vix": 16.7,
     "yield_curve": 0.0,
-    "hy_chg5": 0.06,
+    "hy_chg5": 0.66,
     "reason": "정상",
-    "checked_at": "2026-05-22T08:35:57.748609+09:00"
+    "checked_at": "2026-05-22T22:43:15.901413+09:00"
   },
   "swing_type_optimal": {
     "기술적과매도": {
