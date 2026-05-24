@@ -1,0 +1,7 @@
+{
+  "name": "ticker_high_accuracy_priority",
+  "description": "000990.KS(77.6%, avg_peak_pct 5.37%)처럼 정확도와 평균 피크 수익률이 모두 높은 티커 우선 편입",
+  "trigger": "ticker_accuracy >= 75.0 AND avg_peak_pct >= 4.0 AND sample_count >= 50",
+  "action": "해당 티커 신호 발생 시 다른 티커 대비 알림 우선순위 1단계 상향 및 목표가 여유폭 +0.5% 추가",
+  "created_at": "2026-05-24T23:38:36.689642"
+}

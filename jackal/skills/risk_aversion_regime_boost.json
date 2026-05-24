@@ -1,0 +1,7 @@
+{
+  "name": "risk_aversion_regime_boost",
+  "description": "위험회피 레짐에서 스윙 정확도가 75.6%로 위험선호(69.7%) 대비 우수함을 활용",
+  "trigger": "regime == 위험회피 AND swing_accuracy >= 75.0",
+  "action": "위험회피 레짐 진입 시 포지션 신뢰도 가중치 +0.10 부여 및 손절 기준 소폭 완화",
+  "created_at": "2026-05-24T23:38:36.689381"
+}

@@ -1,14 +1,14 @@
 {
   "signal_weights": {
     "bb_touch": 0.3,
-    "rsi_oversold": 0.31,
+    "rsi_oversold": 0.36,
     "volume_climax": 1.0,
     "ma_support": 1.0,
     "momentum_dip": 1.0,
     "vol_accumulation": 1.0,
     "sector_rebound": 1.0,
     "rsi_divergence": 1.0,
-    "sector_inflow": 0.3,
+    "sector_inflow": 0.35,
     "golden_cross": 1.06,
     "fear_regime": 1.0,
     "bullish_div": 1.0,
@@ -31,7 +31,17 @@
       "correct": 1,
       "total": 3
     },
+    "bb_touch_lower": {
+      "accuracy": 0.0,
+      "correct": 0,
+      "total": 1
+    },
     "bullish_div": {
+      "accuracy": 50.0,
+      "correct": 1,
+      "total": 2
+    },
+    "fundamental_strength_mismatch": {
       "accuracy": 0.0,
       "correct": 0,
       "total": 1
@@ -46,45 +56,45 @@
       "correct": 0,
       "total": 1
     },
-    "rsi_oversold": {
-      "accuracy": 33.3,
+    "regime_headwind": {
+      "accuracy": 100.0,
       "correct": 1,
-      "total": 3
+      "total": 1
+    },
+    "rsi_oversold": {
+      "accuracy": 50.0,
+      "correct": 2,
+      "total": 4
+    },
+    "rsi_oversold_boundary": {
+      "accuracy": 0.0,
+      "correct": 0,
+      "total": 1
     },
     "sector_inflow": {
-      "accuracy": 33.3,
-      "correct": 1,
-      "total": 3
+      "accuracy": 50.0,
+      "correct": 2,
+      "total": 4
+    },
+    "sector_inflow_hbm": {
+      "accuracy": 0.0,
+      "correct": 0,
+      "total": 1
     },
     "volume_climax": {
       "accuracy": 0.0,
       "correct": 0,
       "total": 1
     },
-    "regime_headwind": {
+    "bb_oversold_zone": {
       "correct": 1,
       "total": 1,
       "accuracy": 100.0
     },
-    "rsi_oversold_boundary": {
-      "correct": 0,
+    "volume_recovery_signal": {
+      "correct": 1,
       "total": 1,
-      "accuracy": 0.0
-    },
-    "bb_touch_lower": {
-      "correct": 0,
-      "total": 1,
-      "accuracy": 0.0
-    },
-    "sector_inflow_hbm": {
-      "correct": 0,
-      "total": 1,
-      "accuracy": 0.0
-    },
-    "fundamental_strength_mismatch": {
-      "correct": 0,
-      "total": 1,
-      "accuracy": 0.0
+      "accuracy": 100.0
     }
   },
   "regime_accuracy": {
@@ -149,9 +159,14 @@
       "total": 2
     },
     "혼조 (미국 위험선호 표면 유지 / 한국 위험회피 심화·구조적 자금이탈)": {
+      "accuracy": 50.0,
       "correct": 1,
-      "total": 2,
-      "accuracy": 50.0
+      "total": 2
+    },
+    "혼조 (미국 위험선호 강세 / 한국 수급 약세 디커플링)": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 100.0
     }
   },
   "ticker_accuracy": {
@@ -390,17 +405,17 @@
       "total": 19
     },
     "207940.KS": {
-      "accuracy": 75.0,
+      "accuracy": 75.5,
       "avg_peak_day": 3.9,
       "avg_peak_pct": 4.03,
-      "correct": 39,
+      "correct": 40,
       "generated_at": "2026-04-29T11:14:05.011815+09:00",
       "metric": "swing_accuracy",
       "sample_count": 51,
       "source_session_id": "bt_4d3e7c022cab43feae36c8507714f9df",
       "swing_accuracy": 76.5,
       "swing_correct": 39,
-      "total": 52
+      "total": 53
     },
     "247540.KS": {
       "accuracy": 78.0,
@@ -1228,9 +1243,9 @@
       "total": 0
     },
     "부분동의": {
-      "accuracy": 33.3,
-      "correct": 1,
-      "total": 3
+      "accuracy": 50.0,
+      "correct": 2,
+      "total": 4
     },
     "반대": {
       "accuracy": 100.0,
@@ -1238,7 +1253,7 @@
       "total": 1
     }
   },
-  "last_updated": "2026-05-21T14:27:11.609809",
+  "last_updated": "2026-05-24T23:38:36.690781",
   "rule_registry_status": {
     "sector_rebound_base": {
       "active": true,
@@ -1404,23 +1419,23 @@
     "swing_accuracy": 70.9,
     "total_tracked": 3780
   },
-  "last_evolved_at": "2026-05-21T14:27:11.609804",
+  "last_evolved_at": "2026-05-24T23:38:36.690777",
   "last_macro_gate": {
+    "checked_at": "2026-05-22T22:43:15.901413+09:00",
+    "hy_chg5": 0.66,
+    "reason": "정상",
     "risk_level": "normal",
     "score_penalty": 0,
     "vix": 16.7,
-    "yield_curve": 0.0,
-    "hy_chg5": 0.66,
-    "reason": "정상",
-    "checked_at": "2026-05-22T22:43:15.901413+09:00"
+    "yield_curve": 0.0
   },
   "swing_type_optimal": {
     "기술적과매도": {
-      "avg_peak_day": 2.0,
-      "avg_peak_gain": 7.37,
-      "swing_accuracy": 50.0,
-      "day1_accuracy": 0.0,
-      "sample": 2
+      "avg_peak_day": 1.0,
+      "avg_peak_gain": 1.43,
+      "swing_accuracy": 100.0,
+      "day1_accuracy": 100.0,
+      "sample": 1
     }
   },
   "system_accuracy": {
