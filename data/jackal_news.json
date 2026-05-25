@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-05-25 07:54 KST",
+  "collected_at": "2026-05-26 07:58 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
@@ -21,65 +21,65 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "036540.KS",
-      "headline": "SFA반도체, 후공정 수주 확대와 실적 개선세 힘입어 14.53% 급등",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
       "ticker": "NVDA",
-      "headline": "Nvidia reported record Q1 revenue of $81.6 billion, up 85% YoY, with strong AI demand continuing",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics averted 18-day strike with tentative wage deal allocating 12% of semiconductor profits",
+      "headline": "NVIDIA reports record Q1 FY26 revenue of $81.6 billion, up 85% YoY; announces $80 billion buyback and 25x dividend increase",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix shows strong performance as semiconductor memory demand strengthens amid AI boom",
+      "headline": "SK Hynix trading near 1.94M KRW with analyst Strong Buy rating and +6.19% upside potential",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "900300.KS",
-      "headline": "오가닉티코스메틱 주가 급등, 투자경고종목 지정 예고로 변동성 확대",
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics wage agreement vote at 86%+ participation rate with majority support expected from semiconductor division",
       "impact": "neutral",
       "source": "web_search"
     },
     {
+      "ticker": "AVGO",
+      "headline": "Broadcom benefits from strong AI infrastructure demand; Evercore raises price target to $582 with Outperform rating",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "036540.KS",
+      "headline": "SFA반도체 surges 22.18% as semiconductor equipment demand recovers; Q1 results show 218억 won operating profit",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
       "ticker": "069540.KS",
-      "headline": "빛과전자 100% 자회사 세영기술 흡수합병 결정, 경영 효율성 제고",
+      "headline": "빛과전자 announces 80억 won convertible bond issuance for operations funding; stock at 5,290 won after trading halt",
       "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "049080.KS",
-      "headline": "기가레인 엔비디아 광반도체 발언에 24% 급등, 통신장비주 동반 상승",
+      "headline": "기가레인 secures 25억 won order from Parallel Wireless for telecom equipment; stock reaches 2,870+ won",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "AVGO",
-      "headline": "Broadcom benefiting from AI acceleration with custom AI chip sales up 140% in Q1 2026",
-      "impact": "bullish",
+      "ticker": "900300.KS",
+      "headline": "오가닉티코스메틱 completes 50:1 stock consolidation and new CEO transition; stock highly volatile trading at warning status",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "카카오 Q1 2026 매출 11% 증가, 영업이익 66% 증가로 AI 중심 변화 기대",
+      "headline": "Kakao trades at 41,850 KRW with analyst Strong Buy rating and +75.88% upside potential; AI service expansion anticipated",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "252670.KS",
-      "headline": "KODEX 200선물인버스2X 개인투자자 순매수액 5402억원으로 집계",
-      "impact": "neutral",
+      "ticker": "233740.KS",
+      "headline": "KODEX 코스닥150레버리지 surges 25.75% following market rebound; individual investors pour record capital into leverage ETF",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 16
+  "total": 12
 }
