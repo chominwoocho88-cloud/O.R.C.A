@@ -1,0 +1,7 @@
+{
+  "name": "early_peak_capture_기술적과매도",
+  "description": "기술적과매도 유형에서 avg_peak_day 1.0일로 매우 빠른 피크 도달. 진입 후 1일 이내 익절 전략이 유효",
+  "trigger": "swing_type == 기술적과매도 AND day1_accuracy == 100.0 AND sample >= 1",
+  "action": "진입 익일 장 초반 목표가 50% 익절 실행, 잔여 물량은 2일차 추가 모니터링",
+  "created_at": "2026-05-25T23:45:59.519201"
+}

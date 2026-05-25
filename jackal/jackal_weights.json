@@ -1,14 +1,14 @@
 {
   "signal_weights": {
     "bb_touch": 0.3,
-    "rsi_oversold": 0.36,
+    "rsi_oversold": 0.41,
     "volume_climax": 1.0,
     "ma_support": 1.0,
     "momentum_dip": 1.0,
     "vol_accumulation": 1.0,
     "sector_rebound": 1.0,
     "rsi_divergence": 1.0,
-    "sector_inflow": 0.35,
+    "sector_inflow": 0.4,
     "golden_cross": 1.06,
     "fear_regime": 1.0,
     "bullish_div": 1.0,
@@ -26,6 +26,11 @@
     "반대": 0.6
   },
   "signal_accuracy": {
+    "bb_oversold_zone": {
+      "accuracy": 100.0,
+      "correct": 1,
+      "total": 1
+    },
     "bb_touch": {
       "accuracy": 33.3,
       "correct": 1,
@@ -86,15 +91,10 @@
       "correct": 0,
       "total": 1
     },
-    "bb_oversold_zone": {
-      "correct": 1,
-      "total": 1,
-      "accuracy": 100.0
-    },
     "volume_recovery_signal": {
+      "accuracy": 100.0,
       "correct": 1,
-      "total": 1,
-      "accuracy": 100.0
+      "total": 1
     }
   },
   "regime_accuracy": {
@@ -153,6 +153,11 @@
       "swing_correct": 777,
       "total": 1090
     },
+    "혼조 (미국 위험선호 강세 / 한국 수급 약세 디커플링)": {
+      "accuracy": 100.0,
+      "correct": 1,
+      "total": 1
+    },
     "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)": {
       "accuracy": 0.0,
       "correct": 0,
@@ -162,11 +167,6 @@
       "accuracy": 50.0,
       "correct": 1,
       "total": 2
-    },
-    "혼조 (미국 위험선호 강세 / 한국 수급 약세 디커플링)": {
-      "correct": 1,
-      "total": 1,
-      "accuracy": 100.0
     }
   },
   "ticker_accuracy": {
@@ -1253,7 +1253,7 @@
       "total": 1
     }
   },
-  "last_updated": "2026-05-24T23:38:36.690781",
+  "last_updated": "2026-05-25T23:45:59.522372",
   "rule_registry_status": {
     "sector_rebound_base": {
       "active": true,
@@ -1419,23 +1419,23 @@
     "swing_accuracy": 70.9,
     "total_tracked": 3780
   },
-  "last_evolved_at": "2026-05-24T23:38:36.690777",
+  "last_evolved_at": "2026-05-25T23:45:59.522367",
   "last_macro_gate": {
+    "checked_at": "2026-05-25T23:21:14.266574+09:00",
+    "hy_chg5": 0.57,
+    "reason": "정상",
     "risk_level": "normal",
     "score_penalty": 0,
     "vix": 16.6,
-    "yield_curve": 0.0,
-    "hy_chg5": 0.57,
-    "reason": "정상",
-    "checked_at": "2026-05-25T23:21:14.266574+09:00"
+    "yield_curve": 0.0
   },
   "swing_type_optimal": {
     "기술적과매도": {
       "avg_peak_day": 1.0,
       "avg_peak_gain": 1.43,
-      "swing_accuracy": 100.0,
       "day1_accuracy": 100.0,
-      "sample": 1
+      "sample": 1,
+      "swing_accuracy": 100.0
     }
   },
   "system_accuracy": {
