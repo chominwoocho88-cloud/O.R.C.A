@@ -1,16 +1,16 @@
 {
-  "collected_at": "2026-05-26 07:58 KST",
+  "collected_at": "2026-05-27 08:08 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
-    "251340.KS",
-    "233740.KS",
-    "036540.KS",
-    "252710.KS",
-    "462330.KS",
-    "900300.KS",
+    "230980.KS",
     "069540.KS",
-    "049080.KS",
+    "252710.KS",
+    "001740.KS",
+    "233740.KS",
+    "251340.KS",
+    "530036.KS",
+    "021880.KS",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -21,65 +21,65 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "NVDA",
-      "headline": "NVIDIA reports record Q1 FY26 revenue of $81.6 billion, up 85% YoY; announces $80 billion buyback and 25x dividend increase",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix trading near 1.94M KRW with analyst Strong Buy rating and +6.19% upside potential",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics wage agreement vote at 86%+ participation rate with majority support expected from semiconductor division",
+      "ticker": "252670.KS",
+      "headline": "Individual investors increasingly buying KODEX 200 Futures Inverse 2X as market shows weakness",
       "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom benefits from strong AI infrastructure demand; Evercore raises price target to $582 with Outperform rating",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "036540.KS",
-      "headline": "SFA반도체 surges 22.18% as semiconductor equipment demand recovers; Q1 results show 218억 won operating profit",
-      "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "069540.KS",
-      "headline": "빛과전자 announces 80억 won convertible bond issuance for operations funding; stock at 5,290 won after trading halt",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "049080.KS",
-      "headline": "기가레인 secures 25억 won order from Parallel Wireless for telecom equipment; stock reaches 2,870+ won",
+      "headline": "Bygeulkwa Electronics surges 29.91% as optical transceiver demand rises amid AI chip adoption by NVIDIA",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "900300.KS",
-      "headline": "오가닉티코스메틱 completes 50:1 stock consolidation and new CEO transition; stock highly volatile trading at warning status",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "035720.KS",
-      "headline": "Kakao trades at 41,850 KRW with analyst Strong Buy rating and +75.88% upside potential; AI service expansion anticipated",
+      "ticker": "001740.KS",
+      "headline": "SK Networks stock trading steady with positive dividend yield at 7.87%",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "233740.KS",
-      "headline": "KODEX 코스닥150레버리지 surges 25.75% following market rebound; individual investors pour record capital into leverage ETF",
+      "headline": "KODEX KOSDAQ150 Leverage records 25.75% gains as KOSDAQ index surges 14.1%",
       "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Nvidia reports strong Q1 earnings with 85% sales increase but stock falls after earnings announcement",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK Hynix shares surge 7% following Nvidia statement on parabolic AI chip demand",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics hits record high at 300,500 KRW amid strong wage negotiation progress",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom launches BCM68850 gateway chip with integrated AI and receives multiple analyst upgrades",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "Kakao reports Q1 2026 11% revenue growth and 66% operating profit increase with strong AI initiatives",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "021880.KS",
+      "headline": "Mason Capital stock hits upper limit trading halt due to capital reduction proceedings",
+      "impact": "bearish",
       "source": "web_search"
     }
   ],
-  "total": 12
+  "total": 11
 }

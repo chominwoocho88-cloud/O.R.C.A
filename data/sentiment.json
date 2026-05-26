@@ -849,10 +849,35 @@
       "divergence": false,
       "fred_score": 50,
       "fred_indicators": {}
+    },
+    {
+      "date": "2026-05-27",
+      "score": 61,
+      "level": "탐욕",
+      "emoji": "😏",
+      "components": {
+        "시장레짐": 70,
+        "추세방향": 70,
+        "변동성지수": 72,
+        "자금흐름": 60,
+        "반론강도": 40,
+        "한국시장": 40,
+        "숨은시그널": 46
+      },
+      "regime": "위험선호 (한국 수급 디커플링 경계)",
+      "trend": "상승추세",
+      "vix_level": "중립~탐욕 경계",
+      "vix_val": 17.01,
+      "vkospi_val": 15.0,
+      "fear_greed": 65.0,
+      "internal_raw": 59.40298507462686,
+      "divergence": false,
+      "fred_score": 50,
+      "fred_indicators": {}
     }
   ],
   "current": {
-    "date": "2026-05-26",
+    "date": "2026-05-27",
     "score": 61,
     "level": "탐욕",
     "emoji": "😏",
@@ -860,29 +885,29 @@
       "시장레짐": 70,
       "추세방향": 70,
       "변동성지수": 72,
-      "자금흐름": 50,
+      "자금흐름": 60,
       "반론강도": 40,
-      "한국시장": 48,
-      "숨은시그널": 41
+      "한국시장": 40,
+      "숨은시그널": 46
     },
-    "regime": "위험선호 (단기 과열 경계 구간)",
+    "regime": "위험선호 (한국 수급 디커플링 경계)",
     "trend": "상승추세",
-    "vix_level": "중립~탐욕 구간",
-    "vix_val": 16.85,
+    "vix_level": "중립~탐욕 경계",
+    "vix_val": 17.01,
     "vkospi_val": 15.0,
-    "fear_greed": 66.0,
-    "internal_raw": 58.35820895522388,
+    "fear_greed": 65.0,
+    "internal_raw": 59.40298507462686,
     "divergence": false,
     "fred_score": 50,
     "fred_indicators": {}
   },
   "trend": {
     "direction": "improving",
-    "change": 5.4,
-    "avg_7d": 58.4,
+    "change": 5.6,
+    "avg_7d": 58.9,
     "min_30d": 48,
     "max_30d": 64,
-    "avg_30d": 60.3
+    "avg_30d": 60.4
   },
-  "last_updated": "2026-05-26T23:00:20.689845+09:00"
+  "last_updated": "2026-05-27T08:07:46.323457+09:00"
 }
