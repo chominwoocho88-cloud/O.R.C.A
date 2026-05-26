@@ -1,0 +1,7 @@
+{
+  "name": "avoid_bb_touch_low_accuracy",
+  "warning": "bb_touch 신호 단독 사용 금지 (정확도 33.3%)",
+  "reason": "볼린저밴드 터치 신호는 3건 중 1건만 적중. 단독 사용 시 손실 확률 66.7%. 반드시 rsi_oversold 또는 sector_inflow와 복합 사용 필요",
+  "regime_context": "모든 국면에서 단독 사용 금지. 위험회피 국면에서 복합 조건으로만 허용",
+  "timestamp": "2026-05-26T23:47:09.799388"
+}

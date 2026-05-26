@@ -1,7 +1,7 @@
 {
   "name": "transition_regime_caution",
-  "description": "Apply moderate caution during 전환중 regime as accuracy sits near baseline",
-  "trigger": "regime == 전환중 AND swing_accuracy BETWEEN 70.0 AND 73.0 AND sample_count >= 1000",
-  "action": "Reduce position size by 10% and require additional volume confirmation before entry",
-  "created_at": "2026-05-17T06:21:03.967055"
+  "description": "전환중 국면 정확도 71.3%로 양호하나 샘플 수 1090건으로 가장 많아 신뢰도 높음. 전환 국면에서도 스윙 전략 유효",
+  "trigger": "regime == 전환중 AND sample_count >= 500",
+  "action": "전환중 국면에서 스윙 포지션 유지 허용. 단, 손절선을 기존 대비 0.5% 타이트하게 설정",
+  "created_at": "2026-05-26T23:47:09.799034"
 }

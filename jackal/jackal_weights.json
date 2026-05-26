@@ -1,14 +1,14 @@
 {
   "signal_weights": {
     "bb_touch": 0.3,
-    "rsi_oversold": 0.41,
+    "rsi_oversold": 0.46,
     "volume_climax": 1.0,
     "ma_support": 1.0,
     "momentum_dip": 1.0,
     "vol_accumulation": 1.0,
     "sector_rebound": 1.0,
     "rsi_divergence": 1.0,
-    "sector_inflow": 0.4,
+    "sector_inflow": 0.45,
     "golden_cross": 1.06,
     "fear_regime": 1.0,
     "bullish_div": 1.0,
@@ -1253,7 +1253,7 @@
       "total": 1
     }
   },
-  "last_updated": "2026-05-25T23:45:59.522372",
+  "last_updated": "2026-05-26T23:47:09.800549",
   "rule_registry_status": {
     "sector_rebound_base": {
       "active": true,
@@ -1419,15 +1419,15 @@
     "swing_accuracy": 70.9,
     "total_tracked": 3780
   },
-  "last_evolved_at": "2026-05-25T23:45:59.522367",
+  "last_evolved_at": "2026-05-26T23:47:09.800543",
   "last_macro_gate": {
+    "checked_at": "2026-05-26T23:14:06.585989+09:00",
+    "hy_chg5": 0.7,
+    "reason": "정상",
     "risk_level": "normal",
     "score_penalty": 0,
     "vix": 16.9,
-    "yield_curve": 0.0,
-    "hy_chg5": 0.7,
-    "reason": "정상",
-    "checked_at": "2026-05-26T23:14:06.585989+09:00"
+    "yield_curve": 0.0
   },
   "swing_type_optimal": {
     "기술적과매도": {
