@@ -1253,7 +1253,7 @@
       "total": 1
     }
   },
-  "last_updated": "2026-05-26T23:47:09.800549",
+  "last_updated": "2026-05-27T23:50:36.118627",
   "rule_registry_status": {
     "sector_rebound_base": {
       "active": true,
@@ -1419,15 +1419,15 @@
     "swing_accuracy": 70.9,
     "total_tracked": 3780
   },
-  "last_evolved_at": "2026-05-26T23:47:09.800543",
+  "last_evolved_at": "2026-05-27T23:50:36.118622",
   "last_macro_gate": {
+    "checked_at": "2026-05-27T23:39:03.571011+09:00",
+    "hy_chg5": 1.02,
+    "reason": "정상",
     "risk_level": "normal",
     "score_penalty": 0,
     "vix": 16.9,
-    "yield_curve": 0.0,
-    "hy_chg5": 1.02,
-    "reason": "정상",
-    "checked_at": "2026-05-27T23:39:03.571011+09:00"
+    "yield_curve": 0.0
   },
   "swing_type_optimal": {
     "기술적과매도": {

@@ -1,7 +1,7 @@
 {
   "name": "transition_regime_filter",
-  "description": "Apply moderate confidence filter during 전환중 regime where accuracy is acceptable but not high",
-  "trigger": "regime == 전환중 AND swing_accuracy >= 70.0 AND swing_accuracy < 75.0",
-  "action": "Reduce position sizing by 15% and require confirmation candle before entry",
-  "created_at": "2026-05-17T05:21:56.073183"
+  "description": "전환중 국면에서 71.3% 정확도 유지. 신호 필터링 강화로 품질 향상 가능",
+  "trigger": "regime == 전환중 AND minimum 2 signals confirmed AND sample_count >= 1090",
+  "action": "단일 신호 거래 배제, 복합 신호(2개 이상) 확인 후 진입",
+  "created_at": "2026-05-27T23:50:36.117461"
 }

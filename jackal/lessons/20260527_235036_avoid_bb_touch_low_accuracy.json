@@ -1,0 +1,7 @@
+{
+  "name": "avoid_bb_touch_low_accuracy",
+  "warning": "bb_touch 단독 신호 발생 시 즉각 진입 금지",
+  "reason": "bb_touch 정확도 33.3% (3샘플). 기준선 50% 미달로 단독 사용 시 손실 확률 우세",
+  "regime_context": "전체 국면 공통",
+  "timestamp": "2026-05-27T23:50:36.117975"
+}
