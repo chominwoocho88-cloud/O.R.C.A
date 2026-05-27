@@ -1,16 +1,6 @@
 {
-  "collected_at": "2026-05-27 08:08 KST",
+  "collected_at": "2026-05-28 08:16 KST",
   "tickers": [
-    "252670.KS",
-    "114800.KS",
-    "230980.KS",
-    "069540.KS",
-    "252710.KS",
-    "001740.KS",
-    "233740.KS",
-    "251340.KS",
-    "530036.KS",
-    "021880.KS",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -21,65 +11,41 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "252670.KS",
-      "headline": "Individual investors increasingly buying KODEX 200 Futures Inverse 2X as market shows weakness",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "069540.KS",
-      "headline": "Bygeulkwa Electronics surges 29.91% as optical transceiver demand rises amid AI chip adoption by NVIDIA",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "001740.KS",
-      "headline": "SK Networks stock trading steady with positive dividend yield at 7.87%",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "233740.KS",
-      "headline": "KODEX KOSDAQ150 Leverage records 25.75% gains as KOSDAQ index surges 14.1%",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
       "ticker": "NVDA",
-      "headline": "Nvidia reports strong Q1 earnings with 85% sales increase but stock falls after earnings announcement",
+      "headline": "Nvidia plans to invest $150 billion annually in Taiwan, driven by record revenues of $81.6 billion fueled by booming AI hardware demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660.KS",
-      "headline": "SK Hynix shares surge 7% following Nvidia statement on parabolic AI chip demand",
+      "headline": "SK Hynix joins $1 trillion valuation club as shares jump 9%, benefiting from surging AI memory chip demand",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930.KS",
-      "headline": "Samsung Electronics hits record high at 300,500 KRW amid strong wage negotiation progress",
+      "headline": "Samsung Electronics plans to invest $1.5 billion to build first chip packaging facility, with workers approving wage agreement as shares hit record highs",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom launches BCM68850 gateway chip with integrated AI and receives multiple analyst upgrades",
+      "headline": "Broadcom launches industry's first 50G PON gateway chip with integrated AI acceleration and announces collaboration with Samsung on 5G/Wi-Fi 8 platform",
       "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "466920.KS",
+      "headline": "SOL Korea High Dividend ETF shows neutral technical signal with low dividend yield of 0.13%",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "035720.KS",
-      "headline": "Kakao reports Q1 2026 11% revenue growth and 66% operating profit increase with strong AI initiatives",
+      "headline": "Kakao reports Q1 2026 earnings with 11% YoY revenue growth and 66% YoY operating profit rise, advancing AI initiatives amid strong platform momentum",
       "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "021880.KS",
-      "headline": "Mason Capital stock hits upper limit trading halt due to capital reduction proceedings",
-      "impact": "bearish",
       "source": "web_search"
     }
   ],
-  "total": 11
+  "total": 6
 }

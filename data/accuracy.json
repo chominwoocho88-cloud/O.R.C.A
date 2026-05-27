@@ -1,10 +1,10 @@
 {
-  "total": 64,
-  "correct": 52,
+  "total": 68,
+  "correct": 55,
   "by_category": {
     "ok": {
-      "total": 61,
-      "correct": 51
+      "total": 65,
+      "correct": 54
     },
     "기업": {
       "total": 3,
@@ -281,6 +281,15 @@
       "dir_correct": 3,
       "dir_accuracy": 75.0,
       "full_correct": 1
+    },
+    {
+      "date": "2026-05-28",
+      "total": 4,
+      "correct": 3,
+      "accuracy": 75.0,
+      "dir_correct": 3,
+      "dir_accuracy": 75.0,
+      "full_correct": 3
     }
   ],
   "history_by_category": [
@@ -560,20 +569,29 @@
           "correct": 0
         }
       }
+    },
+    {
+      "date": "2026-05-28",
+      "by_category": {
+        "ok": {
+          "total": 4,
+          "correct": 3
+        }
+      }
     }
   ],
   "weak_areas": [
     "기업 (33%)"
   ],
   "strong_areas": [
-    "ok (84%)"
+    "ok (83%)"
   ],
-  "dir_total": 64,
-  "dir_correct": 52,
-  "dir_accuracy_pct": 81.2,
-  "score_total": 64.0,
-  "score_earned": 49.0,
-  "score_accuracy": 76.6,
+  "dir_total": 68,
+  "dir_correct": 55,
+  "dir_accuracy_pct": 80.9,
+  "score_total": 68.0,
+  "score_earned": 52.0,
+  "score_accuracy": 76.5,
   "_reset_at": "2026-04-16T16:44:01.994399+09:00",
   "_note": "aria_reset.py 실행으로 초기화됨"
 }
