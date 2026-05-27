@@ -1,0 +1,811 @@
+{
+  "analysis_date": "2026-05-27",
+  "analysis_time": "23:32 KST",
+  "mode": "EVENING",
+  "mode_label": "저녁 마감",
+  "one_line_summary": "나스닥 26,570·코스피 8,228 동시 사상 최고치 달성, SK하이닉스 +9.31% 시총 1조달러 돌파했으나 외국인 순매도 흐름 지속 추정(수급 미확인)·내일 PCE 발표로 되돌림 리스크 경계",
+  "market_regime": "위험선호 (단기 과열 경계)",
+  "trend_phase": "상승추세",
+  "trend_strategy": {
+    "recommended": "반도체·AI 섹터 모멘텀 추종 유지, SK하이닉스 갭업 후 지속성 확인 후 진입, KOSPI 기관 주도 상승 단기 참여",
+    "caution": "나스닥 연속 상승 3일+ 진입·PCE 상회 시 즉각 포지션 축소. SK하이닉스 갭업 후 장중 -2% 반락 시 단기 차익실현 신호 대응",
+    "difficulty": "보통"
+  },
+  "confidence_overall": "보통",
+  "consensus_level": "보통",
+  "top_headlines": [
+    {
+      "headline": "나스닥 26,570 사상 최고치 경신(+1.19%), S&P500 7,514 동반 강세",
+      "signal_tag": "강세",
+      "impact": "높음"
+    },
+    {
+      "headline": "마이크론 +19.3% 단일일 폭등, HBM·AI 메모리 수요 폭증 재확인",
+      "signal_tag": "반도체 강세 촉매",
+      "impact": "높음"
+    },
+    {
+      "headline": "SK하이닉스 +9.31% 시총 1조달러 돌파, 한국 2번째 기업 등극",
+      "signal_tag": "한국 반도체 강세",
+      "impact": "높음"
+    },
+    {
+      "headline": "KOSPI 8,228.7 사상 최고치(+2.25%), 기관 155만주 순매수 주도",
+      "signal_tag": "한국 지수 신고가",
+      "impact": "높음"
+    },
+    {
+      "headline": "외국인 코스피 24일 연속 순매도(-274,173주), 누적 45.91조원 이탈 지속",
+      "signal_tag": "수급 경계",
+      "impact": "높음"
+    },
+    {
+      "headline": "5/28 미국 PCE 발표 예정, 전월비 +0.3% 예상치 상회 시 금리 인하 기대 후퇴 리스크",
+      "signal_tag": "매크로 리스크",
+      "impact": "높음"
+    },
+    {
+      "headline": "엔비디아 -0.2%, MS -0.6%, 아마존 -0.4% 빅테크 일부 차익실현 분화",
+      "signal_tag": "경계",
+      "impact": "보통"
+    },
+    {
+      "headline": "엑손모빌 -3.3%, 유가 불안(호르무즈 해협) 에너지 섹터 하락",
+      "signal_tag": "지정학 리스크",
+      "impact": "보통"
+    }
+  ],
+  "volatility_index": {
+    "vkospi": "데이터 미제공",
+    "vix": "16.92",
+    "fear_greed": "64 (Greed)",
+    "level": "중립~탐욕",
+    "interpretation": "VIX 16.92는 안정적 저변동 구간으로 시장이 공포 없이 상승 중임을 시사. 공포탐욕 64(탐욕) 구간은 과열 경계선 진입. 사상 최고치 달성 직후 PCE 쇼크 시 VIX 급등 가능성 모니터링 필요. VIX 단독 방향 예측 신뢰도 32%로 보조 지표로만 활용."
+  },
+  "retail_reversal_signal": {
+    "retail_behavior": "KOSPI 개인 -1,105,685주 순매도. 12거래일(5/7~5/22) 누적 외국인 순매도 45.91조원을 개인이 44.31조원 매수로 흡수해왔으나 오늘 신고가 구간에서 오히려 대규모 매도 전환.",
+    "contrarian_implication": "개인이 사상 최고치에서 매도 지속 = 전통적 역발상 신호로 '개인 매도=추가 상승' 구조 유지 중. 단, 기관 순매수 1,550,904주가 시장 주도하며 개인 매도를 흡수. 개인의 고점 인식이 강할수록 역발상 신뢰도 상승하나, PCE 쇼크 시 역발상 신호 무력화 위험.",
+    "reliability": "보통"
+  },
+  "outflows": [
+    {
+      "zone": "KOSPI 외국인",
+      "reason": "외국인 순매도 흐름 지속 추정(수급 미확인) 지속. KOSPI 사상 최고치에서도 차익실현 및 글로벌 자금 재배치 지속.",
+      "severity": "높음",
+      "data_point": "외국인 순매도 274,173주 (5/27), 누적 45.91조원 (5/7~5/22)"
+    },
+    {
+      "zone": "에너지·소비재 (미국)",
+      "reason": "엑손모빌 -3.3%, 월마트 -1.4%. 호르무즈 해협 분쟁에 따른 유가 불안·소비 둔화 우려로 자금 이탈.",
+      "severity": "보통",
+      "data_point": "Exxon Mobil -3.3%, Walmart -1.4%, S&P 11개 섹터 중 에너지·소비재 최대 하락"
+    },
+    {
+      "zone": "마이크로소프트·아마존 (빅테크 일부)",
+      "reason": "나스닥 상승에도 개별 차익실현. 반도체 집중으로 빅테크 로테이션 발생.",
+      "severity": "낮음",
+      "data_point": "Microsoft -0.6%, Amazon -0.4%, Nvidia -0.2%"
+    }
+  ],
+  "inflows": [
+    {
+      "zone": "반도체·AI (미국·한국)",
+      "reason": "마이크론 +19.3% 촉매, 2026년 반도체 시장 975B달러(+26%), AI칩 500B달러 전망. HBM 수요 폭증 재확인.",
+      "momentum": "강함",
+      "data_point": "Micron +19.3%, SK Hynix +9.31% (시총 1조달러), Broadcom +1.9%, Samsung +2.68%"
+    },
+    {
+      "zone": "KOSPI 기관 (ETF·연기금)",
+      "reason": "외국인 매도를 ETF·연기금·기관이 흡수하며 KOSPI 사상 최고치 견인. 패시브 인덱스 수요가 새로운 수급 주체로 부상.",
+      "momentum": "강함",
+      "data_point": "기관 순매수 1,550,904주, ETF·패시브 인덱스 수요가 외국인 매도 상쇄"
+    },
+    {
+      "zone": "나스닥 AI인프라·기술주",
+      "reason": "알파벳 +1.4%, 테슬라 +1.8%. AI서버 지출 +45%, 엔비디아 데이터센터 수주잔고 2,750억달러로 섹터 프리미엄 확대.",
+      "momentum": "강함",
+      "data_point": "Nasdaq 26,570.19 사상 최고치, Alphabet +1.4%, Tesla +1.8%"
+    }
+  ],
+  "neutral_waiting": [
+    {
+      "zone": "엔비디아",
+      "catalyst_needed": "오늘 -0.2% 소폭 하락. 데이터센터 수주잔고 2,750억달러 불구 단기 과열 조정 중. 다음 실적발표 또는 PCE 이후 금리 기대 안정 확인이 재가속 촉매."
+    },
+    {
+      "zone": "미국 빅테크 (MS·아마존)",
+      "catalyst_needed": "5/28 PCE 4월 데이터 확인 후 금리 경로 재평가. Core PCE 전월비 +0.3% 이내 확인 시 재상승, 상회 시 하방 압력."
+    }
+  ],
+  "hidden_signals": [
+    {
+      "signal": "KOSPI 사상 최고치 8,228.7 + 외국인 순매도 흐름 지속 추정(수급 미확인) 동시 발생",
+      "implication": "외국인 없이 기관·패시브로만 신고가 달성은 구조적 취약성. 외국인 복귀 없이는 지속성 한계. 코스피 8,000pt가 단기 심리적 지지선이자 수급 붕괴 임계점.",
+      "confidence": "보통"
+    },
+    {
+      "signal": "마이크론 +19.3% 단일일 폭등",
+      "implication": "HBM·AI메모리 수요 폭증 재확인. SK하이닉스·삼성전자에 1~2일 지연 반영 패턴. 내일 한국 반도체주 추가 상승 모멘텀 유효하나 '재료 소진' 가능성도 병존.",
+      "confidence": "높음"
+    },
+    {
+      "signal": "나스닥 사상 최고치 + S&P 이틀 누적 +3% 이상 구간 진입",
+      "implication": "백테스트: FG>=40 구간 S&P 이틀 합산 +3% 이상 시 다음날 반전 확률 유의미하게 상승. 나스닥 연속 상승 3일+ 진입 시 블랙스완 리스크 대비 포지션 조절 필요.",
+      "confidence": "보통"
+    },
+    {
+      "signal": "전일 예측 적중 + 위험선호 지속",
+      "implication": "백테스트 규칙: 전날 예측 100% 적중 + 위험선호 → 다음날 급반전 7/60일(11.7%) 패턴. 현재 정확히 이 조건 충족. 강세 시나리오 지속 확신 금지, 되돌림 리스크 반드시 헤지.",
+      "confidence": "보통"
+    }
+  ],
+  "korea_focus": {
+    "krw_usd": "1495.98",
+    "kospi_flow": "기관 +1,550,904주 vs 외국인 -274,173주 vs 개인 -1,105,685주. 기관 압도적 주도. 외국인 24일 연속 매도에도 KOSPI 신고가 8,228.7 달성. ETF·연기금 패시브가 새로운 수급 중심으로 부상 중이나 외국인 복귀 없이는 지속성 한계.",
+    "sk_hynix": "SK하이닉스 +9.31%, 시총 1조달러 돌파(한국 2번째 기업). 마이크론 +19.3% 촉매 + HBM AI수요 폭증. 내일 추가 상승 모멘텀 유효하나 단일일 9%+ 급등 후 단기 차익실현 가능성 병존. 베타 1.36x 적용 시 나스닥 -2% 충격 시 -2.8% 낙폭 현실화.",
+    "samsung": "삼성전자 +2.68%. SK하이닉스 대비 상승폭 제한적. HBM 격차 우려 잔존하나 전반적 반도체 업황 개선 수혜. 내일 반도체 섹터 동조 상승 기대되나 SK하이닉스 대비 모멘텀 열위.",
+    "assessment": "오늘 아침 분석 적중: 반도체 섹터 주도 KOSPI 상승 예측 정확. SK하이닉스 강세 확인. 미확인: 나스닥 신고가 속 엔비디아·MS·아마존 소폭 하락 분화. 내일 핵심 체크: PCE 데이터(예상치 상회 여부), SK하이닉스 갭업 후 지속성, 외국인 순매도 흐름 지속 추정(수급 미확인) vs 복귀 신호."
+  },
+  "tomorrow_korea_open": {
+    "direction": "갭업",
+    "expected_gap_pct": "+0.5%~+1.2%",
+    "kospi_open_range": "8,270~8,330pt (기준: 8,228.7 대비)",
+    "sk_hynix": "마이크론 +19.3% 지연 반영 + 오늘 +9.31% 기저 효과로 갭업 +3~6% 예상. 단, 갭상승 후 차익실현 매물 출회 가능성 높음. 장중 지속성 확인 필수. 베타 1.36x 적용 시 나스닥 방향이 핵심 변수.",
+    "samsung": "반도체 섹터 동조 상승으로 +1~2% 갭업 예상. SK하이닉스 대비 모멘텀 열위 유지. HBM 격차 이슈 잔존하나 업황 개선 수혜로 완만한 상승.",
+    "confidence": "보통"
+  },
+  "tomorrow_korea_levels": {
+    "kospi_support": "8,100pt (1차), 8,000pt (심리적 핵심 지지·수급 붕괴 임계점)",
+    "kospi_resistance": "8,350pt (1차), 8,400pt (단기 과열 구간)",
+    "watch_level": "8,228.7pt (오늘 종가·신고가 유지 여부), 8,050pt (기관 수급 방어선)",
+    "breakdown_risk": "코스피 7,950pt 이하 이탈 시 외국인 순매도 흐름 지속 추정(수급 미확인) + 기관 수급 공백 노출 → 단기 수급 붕괴 시나리오 전환. PCE 쇼크 시 촉매 역할 가능."
+  },
+  "us_to_korea_impact": {
+    "us_signal": "나스닥 26,570 사상 최고치(+1.19%), S&P500 7,514(+0.52%). 마이크론 +19.3%, 필라델피아 반도체지수 강세. VIX 16.92 안정. 단, 엔비디아 -0.2%, MS -0.6% 일부 분화. 5/28 PCE 발표 대기 중.",
+    "expected_korea_impact": "나스닥 사상 최고치 및 마이크론 폭등이 한국 반도체주(SK하이닉스·삼성전자)에 1~2일 지연 반영 패턴 적용 시 내일 코스피 갭업 유력. 단, PCE 예상 상회 시 나스닥 선물 하락 → 코스피 상승폭 축소 또는 되돌림 전환 가능.",
+    "sk_hynix_beta_note": "SK하이닉스 나스닥 대비 베타 1.36x. 나스닥 +1% 시 SK하이닉스 +1.36% 추가 반영 기대. 나스닥 -2% 충격 시 -2.72% 낙폭. 마이크론 +19.3% 단일일 급등의 지연 반영으로 내일 +3~6% 갭업 시나리오가 기본값이나, 재료 소진 후 차익실현 매물이 핵심 리스크.",
+    "samsung_note": "삼성전자는 코스피 대형주 동조성 + 메모리 업황 개선 수혜로 반도체 섹터 흐름 추종. SK하이닉스 대비 HBM 격차로 상대적 모멘텀 열위. 코스피 지수 방향성에 더 민감하게 반응할 전망."
+  },
+  "tomorrow_korea_catalysts": [
+    {
+      "event": "미국 PCE 4월 데이터 발표",
+      "time_kst": "5/28 21:30 KST (미국 동부시간 08:30)",
+      "why_it_matters": "핵심 인플레이션 지표. 전월비 +0.3% 예상치 상회(+0.4% 이상) 시 연준 금리 인하 기대 급격 후퇴 → 나스닥 선물 즉각 하락 → 5/29 한국 장 영향. 예상치 이내 시 위험선호 지속.",
+      "directional_trigger": "PCE +0.3% 이내 = 강세 유지 / PCE +0.4% 이상 = 되돌림 촉매"
+    },
+    {
+      "event": "SK하이닉스 갭업 후 장중 지속성 확인",
+      "time_kst": "5/28 09:00~10:30 KST",
+      "why_it_matters": "마이크론 +19.3% 지연 반영으로 갭업 예상. 갭업 후 장중 -2% 이하 반락 시 재료 소진 + 차익실현 신호. +3% 이상 유지 시 추가 상승 모멘텀 확인.",
+      "directional_trigger": "장중 270,000원 이상 유지 = 강세 확인 / 갭상승 후 -2% 반락 = 단기 고점 신호"
+    },
+    {
+      "event": "외국인 KOSPI 순매매 방향 (25일 연속 순매도 여부)",
+      "time_kst": "5/28 장중~16:00 KST",
+      "why_it_matters": "외국인 순매도 흐름 지속 추정(수급 미확인) 이후 복귀 여부가 KOSPI 신고가 지속성 핵심 변수. 25일 연속 순매도 지속 시 수급 우려 심화. 외국인 순매수 전환 시 강력한 추가 상승 신호.",
+      "directional_trigger": "외국인 순매수 전환 = 강세 확인 / 25일 연속 순매도 = 수급 경계 지속"
+    },
+    {
+      "event": "나스닥 선물 (5/28 한국 장 개장 전 동향)",
+      "time_kst": "5/28 07:00~08:30 KST (나스닥 선물 동향)",
+      "why_it_matters": "한국 장 개장 전 나스닥 선물 방향이 코스피·SK하이닉스 갭 방향 결정. 나스닥 선물 +0.3% 이상 시 갭업 강화, -0.5% 이하 시 갭상승 축소 또는 갭다운.",
+      "directional_trigger": "나스닥 선물 +0.3% 이상 = 갭업 강화 / -0.5% 이하 = 갭상승 약화"
+    },
+    {
+      "event": "엔비디아 5/28 주가 방향",
+      "time_kst": "5/28 미국 장 (한국시간 23:30~)",
+      "why_it_matters": "오늘 -0.2% 소폭 하락. 반도체 섹터 전반 차익실현 여부의 선행 지표. 엔비디아 +2% 이상 시 AI인프라 수요 재확인, -1.5% 이하 시 삼성전자·SK하이닉스 5/29 동반 하락 촉매.",
+      "directional_trigger": "엔비디아 +2% 이상 = 반도체 강세 지속 / -1.5% 이하 = 섹터 차익실현 경고"
+    },
+    {
+      "event": "코스피 기관 순매수 규모 확인",
+      "time_kst": "5/28 장중~장마감",
+      "why_it_matters": "외국인 매도 지속 시 기관 1,000,000주 이상 순매수 여부가 KOSPI 8,050pt 방어선 유지 핵심. 기관 수급 공백 발생 시 하방 리스크 현실화.",
+      "directional_trigger": "기관 100만주 이상 순매수 = 지지선 유지 / 기관 수급 급감 = 8,000pt 붕괴 리스크"
+    }
+  ],
+  "counterarguments": [
+    {
+      "against": "SK하이닉스 +9.31% 상승 모멘텀 지속 기대",
+      "because": "백테스트: 연속 상승 3일+ 이후 블랙스완 충격 패턴 6회 확인. 마이크론 +19.3% 단일일 급등은 '재료 소진' 신호일 가능성. 베타 1.36x 적용 시 나스닥 -2% 충격 → SK하이닉스 -2.8% 낙폭 현실화.",
+      "risk_level": "높음"
+    },
+    {
+      "against": "기관·ETF 순매수가 외국인 순매도 흐름 지속 추정(수급 미확인)를 구조적으로 대체",
+      "because": "외국인 누적 순매도 45.91조원 vs 기관 단일일 순매수 금액 환산 약 2,500억원. 규모 비대칭 극단적. 외국인 복귀 없이 코스피 신고가 지속 사례는 60거래일 내 극히 드묾.",
+      "risk_level": "높음"
+    },
+    {
+      "against": "나스닥 사상 최고치 = 위험선호 지속 단정",
+      "because": "FG>=20 구간 방향 예측 정확도 17%로 관망 권고. PCE 상회 시 즉각 되돌림 촉매 가능. S&P 이틀 누적 +3% 이상 구간에서 다음날 반전 확률 유의미하게 상승.",
+      "risk_level": "높음"
+    },
+    {
+      "against": "전일 예측 적중 + 위험선호 → 상승 지속 예측",
+      "because": "백테스트: 전날 예측 100% 적중 + 위험선호 → 다음날 급반전 7/60일(11.7%). 현재 정확히 이 조건 충족. 상승 확신 시 급반전 리스크 과소평가 위험.",
+      "risk_level": "높음"
+    }
+  ],
+  "thesis_killers": [
+    {
+      "event": "나스닥 5/28 종가",
+      "timeframe": "5/28 종가",
+      "confirms_if": "나스닥 26,400pt 이상 유지 (사상 최고치 대비 -0.6% 이내 방어)",
+      "invalidates_if": "나스닥 26,000pt 이하 이탈 (PCE 쇼크 또는 차익실현 -2.1% 이상)",
+      "quality": "ok"
+    },
+    {
+      "event": "SK하이닉스 5/28 장중",
+      "timeframe": "5/28 장중",
+      "confirms_if": "SK하이닉스 +3% 이상 유지 (270,000원 이상, 마이크론 급등 지연 반영 확인)",
+      "invalidates_if": "갭상승 후 장중 -2% 이하 반락 (재료 소진 + 차익실현 신호)",
+      "quality": "ok"
+    },
+    {
+      "event": "코스피 5/28 종가",
+      "timeframe": "5/28 종가",
+      "confirms_if": "코스피 8,050pt 이상 유지 (기관 순매수 100만주 이상 병행)",
+      "invalidates_if": "코스피 7,950pt 이하 이탈 (외국인 순매도 흐름 지속 추정(수급 미확인) + 기관 수급 공백 노출)",
+      "quality": "ok"
+    },
+    {
+      "event": "엔비디아 5/28",
+      "timeframe": "5/28 프리마켓~종가",
+      "confirms_if": "엔비디아 +2% 이상 (AI인프라 수요 재확인, 데이터센터 수주 모멘텀 유효)",
+      "invalidates_if": "엔비디아 -1.5% 이하 (반도체 섹터 전반 차익실현 → 삼성전자·SK하이닉스 동반 하락 촉매)",
+      "quality": "ok"
+    }
+  ],
+  "historical_context": {
+    "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+    "cluster_label": "medium_vix_bullish_riskon_growth",
+    "cluster_size": 287,
+    "top_lessons": [
+      {
+        "lesson_id": "lesson_f946434146b24a70bc90e515fce9d549",
+        "ticker": "LUNR",
+        "analysis_date": "2024-02-07",
+        "signal_family": "divergence",
+        "lesson_value": 109.14,
+        "peak_pct": 109.14,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7470921031439189,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_df0e9750270d4c6f8946deaafcb3188d",
+        "ticker": "RKLB",
+        "analysis_date": "2024-02-07",
+        "signal_family": "divergence",
+        "lesson_value": 14.52,
+        "peak_pct": 14.52,
+        "peak_day": 6,
+        "quality_tier": "high",
+        "relevance_score": 0.738171091269887,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_491f339a659d4b39aae2c433e9b08388",
+        "ticker": "373220.KS",
+        "analysis_date": "2023-11-02",
+        "signal_family": "oversold_rebound",
+        "lesson_value": 26.05,
+        "peak_pct": 26.05,
+        "peak_day": 2,
+        "quality_tier": "high",
+        "relevance_score": 0.7280991462865641,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_52d513c666b94512a984c0a304a5a90f",
+        "ticker": "000990.KS",
+        "analysis_date": "2024-06-13",
+        "signal_family": "rotation",
+        "lesson_value": 40.64,
+        "peak_pct": 40.64,
+        "peak_day": 5,
+        "quality_tier": "high",
+        "relevance_score": 0.7271138970760537,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_3800c3bfd0914cfb8b66c9bcac4dd151",
+        "ticker": "047810.KS",
+        "analysis_date": "2024-02-07",
+        "signal_family": "momentum_pullback",
+        "lesson_value": 9.2,
+        "peak_pct": 9.2,
+        "peak_day": 6,
+        "quality_tier": "high",
+        "relevance_score": 0.7238279531962879,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_86a9168e38224fc7bd0061765f392748",
+        "ticker": "010950.KS",
+        "analysis_date": "2025-06-26",
+        "signal_family": "rotation",
+        "lesson_value": 8.08,
+        "peak_pct": 8.08,
+        "peak_day": 5,
+        "quality_tier": "high",
+        "relevance_score": 0.7236650124062972,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_9c5149680d8442e5adc8cf83b151a607",
+        "ticker": "SLB",
+        "analysis_date": "2025-06-26",
+        "signal_family": "rotation",
+        "lesson_value": 8.01,
+        "peak_pct": 8.01,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7232003763711914,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_54b48c8b3bc746f3963f6d1230a2a2ba",
+        "ticker": "PFE",
+        "analysis_date": "2023-05-18",
+        "signal_family": "oversold_rebound",
+        "lesson_value": 8.66,
+        "peak_pct": 8.66,
+        "peak_day": 3,
+        "quality_tier": "high",
+        "relevance_score": 0.7171685348816452,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_468e38c3d7704c00b91a9b9df8339777",
+        "ticker": "SLB",
+        "analysis_date": "2024-06-14",
+        "signal_family": "divergence",
+        "lesson_value": 10.51,
+        "peak_pct": 10.51,
+        "peak_day": 6,
+        "quality_tier": "high",
+        "relevance_score": 0.7168567377084091,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_efafec7884a24fa89a99648792d6ad0e",
+        "ticker": "086520.KS",
+        "analysis_date": "2023-12-14",
+        "signal_family": "rotation",
+        "lesson_value": 20.16,
+        "peak_pct": 20.16,
+        "peak_day": 3,
+        "quality_tier": "high",
+        "relevance_score": 0.7151404410563992,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_4dfe1e3c49a14c63a0eb33de9576d190",
+        "ticker": "042700.KS",
+        "analysis_date": "2025-05-02",
+        "signal_family": "rotation",
+        "lesson_value": 9.83,
+        "peak_pct": 9.83,
+        "peak_day": 6,
+        "quality_tier": "high",
+        "relevance_score": 0.7149359522676199,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_8115bd4adef540f0baeaaec91e450d78",
+        "ticker": "SLB",
+        "analysis_date": "2025-06-02",
+        "signal_family": "oversold_rebound",
+        "lesson_value": 7.95,
+        "peak_pct": 7.95,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7142814173032269,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_284ff1ba312142e6bca1929faac4aec5",
+        "ticker": "051910.KS",
+        "analysis_date": "2024-01-24",
+        "signal_family": "divergence",
+        "lesson_value": 15.11,
+        "peak_pct": 15.11,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7133675814105253,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_aa8a3a0bffeb42cf935ef4b23bec4459",
+        "ticker": "PSX",
+        "analysis_date": "2025-09-19",
+        "signal_family": "panic_rebound",
+        "lesson_value": 7.51,
+        "peak_pct": 7.51,
+        "peak_day": 5,
+        "quality_tier": "high",
+        "relevance_score": 0.7126412984499535,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_6d26658d782c4cc1b0a6b01956767fdf",
+        "ticker": "047810.KS",
+        "analysis_date": "2024-02-08",
+        "signal_family": "ma_reclaim",
+        "lesson_value": 8.76,
+        "peak_pct": 8.76,
+        "peak_day": 5,
+        "quality_tier": "high",
+        "relevance_score": 0.7097959844640694,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_51a951f271064d1da857f102b260e38d",
+        "ticker": "PFE",
+        "analysis_date": "2023-05-19",
+        "signal_family": "panic_rebound",
+        "lesson_value": 7.81,
+        "peak_pct": 7.81,
+        "peak_day": 2,
+        "quality_tier": "high",
+        "relevance_score": 0.7089679381682173,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_895b624d71d54c958e05605446ad1cab",
+        "ticker": "373220.KS",
+        "analysis_date": "2023-07-17",
+        "signal_family": "oversold_rebound",
+        "lesson_value": 10.97,
+        "peak_pct": 10.97,
+        "peak_day": 5,
+        "quality_tier": "high",
+        "relevance_score": 0.7084396902683788,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_867229bee98c47ecbfcaef205b5b2889",
+        "ticker": "373220.KS",
+        "analysis_date": "2023-07-14",
+        "signal_family": "momentum_pullback",
+        "lesson_value": 10.15,
+        "peak_pct": 10.15,
+        "peak_day": 6,
+        "quality_tier": "high",
+        "relevance_score": 0.707460231160914,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_b721e008de1146b2b448f399ac5f7765",
+        "ticker": "JNJ",
+        "analysis_date": "2023-07-18",
+        "signal_family": "ma_reclaim",
+        "lesson_value": 9.2,
+        "peak_pct": 9.2,
+        "peak_day": 7,
+        "quality_tier": "high",
+        "relevance_score": 0.7062289045895681,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      },
+      {
+        "lesson_id": "lesson_1f7ad689e1fd4a90b93723d8585cebeb",
+        "ticker": "105560.KS",
+        "analysis_date": "2023-11-02",
+        "signal_family": "momentum_pullback",
+        "lesson_value": 9.22,
+        "peak_pct": 9.22,
+        "peak_day": 2,
+        "quality_tier": "high",
+        "relevance_score": 0.7055748859772323,
+        "cluster_id": "cluster_run_20260430054416_7a7547cb_c02",
+        "cluster_label": "medium_vix_bullish_riskon_growth"
+      }
+    ],
+    "win_rate": 1.0,
+    "avg_value": 17.574,
+    "high_quality_count": 20
+  },
+  "data_quality": "ok",
+  "jackal_candidate_review": {
+    "analysis_date": "2026-05-27",
+    "market_bias": "risk_on",
+    "market_bias_label": "위험선호",
+    "reviewed_count": 0,
+    "aligned_count": 0,
+    "neutral_count": 0,
+    "opposed_count": 0,
+    "follow_count": 0,
+    "watch_count": 0,
+    "avoid_count": 0,
+    "review_verdict_breakdown": {
+      "strong_aligned": 0,
+      "aligned": 0,
+      "neutral": 0,
+      "opposed": 0,
+      "strong_opposed": 0
+    },
+    "average_review_confidence": "low",
+    "reason_code_frequency": {},
+    "highlights": []
+  },
+  "jackal_probability_summary": {
+    "window_days": 90,
+    "min_samples": 5,
+    "raw_rows": 314,
+    "deduped_rows": 314,
+    "duplicates_skipped": 0,
+    "overall": {
+      "wins": 226,
+      "losses": 88,
+      "total": 314,
+      "avg_return": 4.484,
+      "win_rate": 72.0,
+      "effective_win_rate": 71.7,
+      "qualified": true
+    },
+    "trusted_families": [
+      {
+        "signal_family": "panic_rebound",
+        "signal_family_label": "패닉셀반등",
+        "wins": 52,
+        "losses": 14,
+        "total": 66,
+        "avg_return": 5.957,
+        "source_event_type": "backtest",
+        "win_rate": 78.8,
+        "effective_win_rate": 77.1,
+        "qualified": true
+      },
+      {
+        "signal_family": "momentum_pullback",
+        "signal_family_label": "모멘텀눌림목",
+        "wins": 136,
+        "losses": 50,
+        "total": 186,
+        "avg_return": 4.427,
+        "source_event_type": "backtest",
+        "win_rate": 73.1,
+        "effective_win_rate": 72.6,
+        "qualified": true
+      },
+      {
+        "signal_family": "oversold_rebound",
+        "signal_family_label": "기술적과매도",
+        "wins": 9,
+        "losses": 4,
+        "total": 13,
+        "avg_return": 3.456,
+        "source_event_type": "backtest",
+        "win_rate": 69.2,
+        "effective_win_rate": 64.7,
+        "qualified": true
+      },
+      {
+        "signal_family": "divergence",
+        "signal_family_label": "강세다이버전스",
+        "wins": 17,
+        "losses": 9,
+        "total": 26,
+        "avg_return": 2.482,
+        "source_event_type": "backtest",
+        "win_rate": 65.4,
+        "effective_win_rate": 63.3,
+        "qualified": true
+      },
+      {
+        "signal_family": "rotation",
+        "signal_family_label": "섹터로테이션",
+        "wins": 10,
+        "losses": 10,
+        "total": 20,
+        "avg_return": 3.991,
+        "source_event_type": "backtest",
+        "win_rate": 50.0,
+        "effective_win_rate": 50.0,
+        "qualified": true
+      }
+    ],
+    "cautious_families": [
+      {
+        "signal_family": "rotation",
+        "signal_family_label": "섹터로테이션",
+        "wins": 10,
+        "losses": 10,
+        "total": 20,
+        "avg_return": 3.991,
+        "source_event_type": "backtest",
+        "win_rate": 50.0,
+        "effective_win_rate": 50.0,
+        "qualified": true
+      },
+      {
+        "signal_family": "divergence",
+        "signal_family_label": "강세다이버전스",
+        "wins": 17,
+        "losses": 9,
+        "total": 26,
+        "avg_return": 2.482,
+        "source_event_type": "backtest",
+        "win_rate": 65.4,
+        "effective_win_rate": 63.3,
+        "qualified": true
+      },
+      {
+        "signal_family": "oversold_rebound",
+        "signal_family_label": "기술적과매도",
+        "wins": 9,
+        "losses": 4,
+        "total": 13,
+        "avg_return": 3.456,
+        "source_event_type": "backtest",
+        "win_rate": 69.2,
+        "effective_win_rate": 64.7,
+        "qualified": true
+      },
+      {
+        "signal_family": "momentum_pullback",
+        "signal_family_label": "모멘텀눌림목",
+        "wins": 136,
+        "losses": 50,
+        "total": 186,
+        "avg_return": 4.427,
+        "source_event_type": "backtest",
+        "win_rate": 73.1,
+        "effective_win_rate": 72.6,
+        "qualified": true
+      },
+      {
+        "signal_family": "panic_rebound",
+        "signal_family_label": "패닉셀반등",
+        "wins": 52,
+        "losses": 14,
+        "total": 66,
+        "avg_return": 5.957,
+        "source_event_type": "backtest",
+        "win_rate": 78.8,
+        "effective_win_rate": 77.1,
+        "qualified": true
+      }
+    ],
+    "alignment_summary": {
+      "backtest": {
+        "wins": 226,
+        "losses": 88,
+        "total": 314,
+        "avg_return": 4.484,
+        "win_rate": 72.0,
+        "effective_win_rate": 71.7,
+        "qualified": true
+      }
+    },
+    "best_aligned_families": [],
+    "best_opposed_families": []
+  },
+  "portfolio_analysis": {
+    "assessments": [],
+    "holdings": [],
+    "source": "none",
+    "holdings_count": 0,
+    "summary": {},
+    "timestamp": ""
+  },
+  "learning_policy": {
+    "version": "v1",
+    "policy_source": "orca/learning_policy.py",
+    "min_samples": 5,
+    "prior_wins": 2,
+    "prior_total": 4,
+    "trusted_threshold": 0.58,
+    "cautious_threshold": 0.46,
+    "weight_adjustment_ladder": [
+      {
+        "threshold": 0.7,
+        "delta": 0.05
+      },
+      {
+        "threshold": 0.4,
+        "delta": -0.05
+      }
+    ],
+    "probability_score_adjustment_ladder": [
+      {
+        "min_samples": 12,
+        "threshold": 0.68,
+        "delta": 4.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.62,
+        "delta": 2.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.58,
+        "delta": 1.0
+      },
+      {
+        "min_samples": 12,
+        "threshold": 0.38,
+        "delta": -5.0
+      },
+      {
+        "min_samples": 8,
+        "threshold": 0.43,
+        "delta": -3.0
+      },
+      {
+        "min_samples": 5,
+        "threshold": 0.46,
+        "delta": -1.5
+      }
+    ]
+  },
+  "health": {
+    "status": "ok",
+    "degraded_reasons": [],
+    "counters": {
+      "warnings": 0,
+      "soft_fails": 0
+    },
+    "details": []
+  },
+  "failed_sources": [
+    {
+      "source": "KOREA_NEWS",
+      "error": "no_headlines",
+      "category": "secondary"
+    }
+  ],
+  "dual_db_state": {
+    "orca_state_db": {
+      "path": "data/orca_state.db",
+      "exists": true,
+      "size_bytes": 22790144,
+      "mtime_iso": "2026-05-27T23:27:48.438805+09:00"
+    },
+    "jackal_state_db": {
+      "path": "data/jackal_state.db",
+      "exists": true,
+      "size_bytes": 8409088,
+      "mtime_iso": "2026-05-27T23:30:26.726689+09:00",
+      "tables": {
+        "jackal_shadow_signals": 18,
+        "jackal_live_events": 362,
+        "jackal_shadow_batches": 5,
+        "jackal_weight_snapshots": 47,
+        "jackal_recommendations": 0,
+        "jackal_accuracy_projection": 4648,
+        "jackal_cooldowns": 2,
+        "contract_shadow_audit": 2074
+      },
+      "contract_shadow_audit": {
+        "row_count": 2074,
+        "by_validation_status": {
+          "pass": 2074
+        },
+        "latest_timestamp": "2026-05-27T14:30:26.723618Z"
+      }
+    }
+  }
+}
