@@ -1,0 +1,7 @@
+{
+  "name": "sector_rsi_combo_signal",
+  "description": "rsi_oversold + sector_inflow 동시 발생 시 정확도 60% 이상 유지",
+  "trigger": "rsi_oversold accuracy >= 60% AND sector_inflow accuracy >= 60% 동시 충족",
+  "action": "두 신호 동시 발생 종목 우선 선정, 신호 가중치 합산 적용",
+  "created_at": "2026-05-28T23:56:59.377237"
+}

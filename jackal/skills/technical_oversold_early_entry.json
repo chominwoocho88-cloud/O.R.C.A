@@ -1,0 +1,7 @@
+{
+  "name": "technical_oversold_early_entry",
+  "description": "기술적 과매도 신호 발생 시 1일 내 최고점 도달 패턴 활용",
+  "trigger": "swing_type 기술적과매도 + avg_peak_day <= 1.0 + swing_accuracy >= 100%",
+  "action": "당일 또는 익일 조기 진입 우선, 목표 수익률 5.5% 설정",
+  "created_at": "2026-05-28T23:56:59.376590"
+}

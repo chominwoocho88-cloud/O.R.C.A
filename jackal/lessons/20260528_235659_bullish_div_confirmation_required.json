@@ -1,0 +1,7 @@
+{
+  "name": "bullish_div_confirmation_required",
+  "warning": "bullish_div 신호 단독 진입 금지",
+  "reason": "샘플 2건 정확도 50%, 통계적 신뢰 부족 및 단독 발산 신호 오류 가능성",
+  "regime_context": "전환중 및 혼조 레짐에서 특히 주의",
+  "timestamp": "2026-05-28T23:56:59.377761"
+}

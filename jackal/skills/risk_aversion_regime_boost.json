@@ -1,7 +1,7 @@
 {
   "name": "risk_aversion_regime_boost",
-  "description": "위험회피 국면에서 스윙 정확도가 75.6%로 위험선호(69.7%) 대비 높음. 위험회피 국면 진입 시 신호 신뢰도를 상향 조정",
-  "trigger": "regime == 위험회피 AND swing_accuracy >= 75.0",
-  "action": "신호 필터 기준을 완화하고 진입 우선순위를 상향. 목표가 달성 전 조기 청산 자제",
-  "created_at": "2026-05-26T23:47:09.798710"
+  "description": "위험회피 레짐에서 스윙 정확도가 위험선호보다 높은 역설적 패턴",
+  "trigger": "regime == 위험회피 AND swing_accuracy >= 75%",
+  "action": "위험회피 레짐에서도 기술적 과매도 신호는 적극 대응, 포지션 축소 불필요",
+  "created_at": "2026-05-28T23:56:59.376861"
 }

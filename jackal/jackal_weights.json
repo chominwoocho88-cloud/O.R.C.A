@@ -1,14 +1,14 @@
 {
   "signal_weights": {
     "bb_touch": 0.3,
-    "rsi_oversold": 0.46,
+    "rsi_oversold": 0.54,
     "volume_climax": 1.0,
     "ma_support": 1.0,
     "momentum_dip": 1.0,
     "vol_accumulation": 1.0,
     "sector_rebound": 1.0,
     "rsi_divergence": 1.0,
-    "sector_inflow": 0.45,
+    "sector_inflow": 0.53,
     "golden_cross": 1.06,
     "fear_regime": 1.0,
     "bullish_div": 1.0,
@@ -32,9 +32,9 @@
       "total": 1
     },
     "bb_touch": {
-      "accuracy": 33.3,
-      "correct": 1,
-      "total": 3
+      "accuracy": 50.0,
+      "correct": 2,
+      "total": 4
     },
     "bb_touch_lower": {
       "accuracy": 0.0,
@@ -67,9 +67,9 @@
       "total": 1
     },
     "rsi_oversold": {
-      "accuracy": 50.0,
-      "correct": 2,
-      "total": 4
+      "accuracy": 60.0,
+      "correct": 3,
+      "total": 5
     },
     "rsi_oversold_boundary": {
       "accuracy": 0.0,
@@ -77,9 +77,9 @@
       "total": 1
     },
     "sector_inflow": {
-      "accuracy": 50.0,
-      "correct": 2,
-      "total": 4
+      "accuracy": 60.0,
+      "correct": 3,
+      "total": 5
     },
     "sector_inflow_hbm": {
       "accuracy": 0.0,
@@ -167,6 +167,11 @@
       "accuracy": 50.0,
       "correct": 1,
       "total": 2
+    },
+    "위험선호 (한국 수급 디커플링 경계)": {
+      "correct": 1,
+      "total": 1,
+      "accuracy": 100.0
     }
   },
   "ticker_accuracy": {
@@ -951,17 +956,17 @@
       "total": 55
     },
     "NIO": {
-      "accuracy": 71.2,
+      "accuracy": 71.6,
       "avg_peak_day": 3.9,
       "avg_peak_pct": 4.74,
-      "correct": 57,
+      "correct": 58,
       "generated_at": "2026-04-29T11:14:05.011815+09:00",
       "metric": "swing_accuracy",
       "sample_count": 80,
       "source_session_id": "bt_4d3e7c022cab43feae36c8507714f9df",
       "swing_accuracy": 71.2,
       "swing_correct": 57,
-      "total": 80
+      "total": 81
     },
     "NOC": {
       "accuracy": 73.2,
@@ -1243,9 +1248,9 @@
       "total": 0
     },
     "부분동의": {
-      "accuracy": 50.0,
-      "correct": 2,
-      "total": 4
+      "accuracy": 60.0,
+      "correct": 3,
+      "total": 5
     },
     "반대": {
       "accuracy": 100.0,
@@ -1253,7 +1258,7 @@
       "total": 1
     }
   },
-  "last_updated": "2026-05-27T23:50:36.118627",
+  "last_updated": "2026-05-28T23:56:59.379000",
   "rule_registry_status": {
     "sector_rebound_base": {
       "active": true,
@@ -1419,23 +1424,23 @@
     "swing_accuracy": 70.9,
     "total_tracked": 3780
   },
-  "last_evolved_at": "2026-05-27T23:50:36.118622",
+  "last_evolved_at": "2026-05-28T23:56:59.378995",
   "last_macro_gate": {
+    "checked_at": "2026-05-28T23:49:23.251077+09:00",
+    "hy_chg5": 0.42,
+    "reason": "정상",
     "risk_level": "normal",
     "score_penalty": 0,
     "vix": 16.0,
-    "yield_curve": 0.0,
-    "hy_chg5": 0.42,
-    "reason": "정상",
-    "checked_at": "2026-05-28T23:49:23.251077+09:00"
+    "yield_curve": 0.0
   },
   "swing_type_optimal": {
     "기술적과매도": {
       "avg_peak_day": 1.0,
-      "avg_peak_gain": 1.43,
+      "avg_peak_gain": 5.51,
+      "swing_accuracy": 100.0,
       "day1_accuracy": 100.0,
-      "sample": 1,
-      "swing_accuracy": 100.0
+      "sample": 1
     }
   },
   "system_accuracy": {

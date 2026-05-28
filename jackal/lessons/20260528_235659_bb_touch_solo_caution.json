@@ -1,0 +1,7 @@
+{
+  "name": "bb_touch_solo_caution",
+  "warning": "bb_touch 단독 신호만 존재할 때 진입 자제",
+  "reason": "bb_touch 단독 정확도 50%로 랜덤 수준, 다른 신호 미동반 시 기대값 없음",
+  "regime_context": "모든 레짐 공통 적용",
+  "timestamp": "2026-05-28T23:56:59.377506"
+}
