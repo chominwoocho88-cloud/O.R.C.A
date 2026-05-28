@@ -1,6 +1,16 @@
 {
-  "collected_at": "2026-05-28 08:16 KST",
+  "collected_at": "2026-05-29 08:13 KST",
   "tickers": [
+    "252670.KS",
+    "114800.KS",
+    "252710.KS",
+    "0193T0",
+    "003280.KS",
+    "462330.KS",
+    "0195S0",
+    "0193W0",
+    "233740.KS",
+    "251340.KS",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -11,41 +21,65 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "NVDA",
-      "headline": "Nvidia plans to invest $150 billion annually in Taiwan, driven by record revenues of $81.6 billion fueled by booming AI hardware demand",
+      "ticker": "252670.KS",
+      "headline": "KODEX 200 Futures Inverse 2X ETF saw individual investors netbuy 540.2 billion won amid KOSPI index weakness expectations",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix joins $1 trillion valuation club as shares jump 9%, benefiting from surging AI memory chip demand",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics plans to invest $1.5 billion to build first chip packaging facility, with workers approving wage agreement as shares hit record highs",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom launches industry's first 50G PON gateway chip with integrated AI acceleration and announces collaboration with Samsung on 5G/Wi-Fi 8 platform",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF shows neutral technical signal with low dividend yield of 0.13%",
+      "ticker": "114800.KS",
+      "headline": "KODEX Inverse ETF tracking F-KOSPI200 Inverse Index for hedging against market declines",
       "impact": "neutral",
       "source": "web_search"
     },
     {
-      "ticker": "035720.KS",
-      "headline": "Kakao reports Q1 2026 earnings with 11% YoY revenue growth and 66% YoY operating profit rise, advancing AI initiatives amid strong platform momentum",
+      "ticker": "252710.KS",
+      "headline": "TIGER 200 Futures Inverse 2X ETF trading down 6.36% recently with negative 3-month returns of -64.05%",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "0193T0",
+      "headline": "KODEX SK Hynix Single Stock Leverage ETF surged 18.44% on debut, attracting record retail investor participation with 1.6 trillion won inflow",
       "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "003280.KS",
+      "headline": "Heung-A Shipping stock surged 10.42% to 2,490 won amid geopolitical tensions near Hormuz Strait",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "462330.KS",
+      "headline": "KODEX Secondary Battery Industry Leverage ETF with technical strong buy signal but moderate risk profile",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "0195S0",
+      "headline": "TIGER SK Hynix Single Stock Leverage ETF achieved record individual investor netbuy of 690.9 billion won on debut day",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "0193W0",
+      "headline": "KODEX Samsung Electronics Single Stock Leverage ETF attracted 1.15 trillion won on debut amid semiconductor rally",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "233740.KS",
+      "headline": "KODEX KOSDAQ150 Leverage ETF surged 25.75% with record individual investor netbuys of 672.7 billion won on market recovery",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "251340.KS",
+      "headline": "KODEX KOSDAQ150 Inverse ETF experiences declining interest as market rallies continue",
+      "impact": "bearish",
       "source": "web_search"
     }
   ],
-  "total": 6
+  "total": 16
 }
