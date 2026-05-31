@@ -1,16 +1,16 @@
 {
-  "collected_at": "2026-05-29 08:13 KST",
+  "collected_at": "2026-06-01 07:57 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
-    "252710.KS",
     "0193T0",
-    "003280.KS",
-    "462330.KS",
-    "0195S0",
+    "018880.KS",
+    "252710.KS",
     "0193W0",
+    "0195S0",
+    "0167A0",
     "233740.KS",
-    "251340.KS",
+    "034220.KS",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -21,65 +21,65 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "252670.KS",
-      "headline": "KODEX 200 Futures Inverse 2X ETF saw individual investors netbuy 540.2 billion won amid KOSPI index weakness expectations",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "114800.KS",
-      "headline": "KODEX Inverse ETF tracking F-KOSPI200 Inverse Index for hedging against market declines",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "252710.KS",
-      "headline": "TIGER 200 Futures Inverse 2X ETF trading down 6.36% recently with negative 3-month returns of -64.05%",
-      "impact": "bearish",
-      "source": "web_search"
+      "ticker": "NVDA",
+      "headline": "AVGO outperforming NVDA and S&P 500 in 2026 year-to-date",
+      "source": "Kiplinger",
+      "data_pt": "Broadcom +22.1% YTD vs NVDA +14% vs SPX +10.4% through May 27, 2026"
     },
     {
       "ticker": "0193T0",
-      "headline": "KODEX SK Hynix Single Stock Leverage ETF surged 18.44% on debut, attracting record retail investor participation with 1.6 trillion won inflow",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "003280.KS",
-      "headline": "Heung-A Shipping stock surged 10.42% to 2,490 won amid geopolitical tensions near Hormuz Strait",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "462330.KS",
-      "headline": "KODEX Secondary Battery Industry Leverage ETF with technical strong buy signal but moderate risk profile",
+      "headline": "KODEX SK하이닉스단일종목레버리지 상장 첫날 외국인·기관 동반 매수, SK하이닉스 9% 급등에 연동하여 18% 수익률 기록",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "0195S0",
-      "headline": "TIGER SK Hynix Single Stock Leverage ETF achieved record individual investor netbuy of 690.9 billion won on debut day",
+      "headline": "TIGER SK하이닉스단일종목레버리지 상장, 외국인 3290억원 규모 초기 설정으로 TIGER ETF 역대 최대 외국인 자금 유치",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "0193W0",
-      "headline": "KODEX Samsung Electronics Single Stock Leverage ETF attracted 1.15 trillion won on debut amid semiconductor rally",
+      "ticker": "018880.KS",
+      "headline": "한온시스템 2Q26 Preview: 유럽 전기차 수요 회복에 기반한 매출 3.0조원(+4.0% YoY), 영업이익 1,186억원(+84.5% YoY) 전망, 목표가 6,500원으로 상향",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "233740.KS",
-      "headline": "KODEX KOSDAQ150 Leverage ETF surged 25.75% with record individual investor netbuys of 672.7 billion won on market recovery",
+      "ticker": "034220.KS",
+      "headline": "LG디스플레이, 고해상도 사무 작업과 게이밍 최적화 240Hz RGB 스트라이프 OLED 패널 양산 성공, 프리미엄 모니터 시장 주도 추진",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "251340.KS",
-      "headline": "KODEX KOSDAQ150 Inverse ETF experiences declining interest as market rallies continue",
-      "impact": "bearish",
+      "ticker": "0167A0",
+      "headline": "SOL AI반도체TOP2플러스 7.81% 급등, SK하이닉스 26.18%, 삼성전기 25.60% 비중으로 AI 반도체 TOP2에 집중 투자",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Nvidia continues to gain traction among investors with strong earnings and strategic investments, viewed as key player in AI sector with significant growth potential",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK하이닉스 목표주가 3,800,000원으로 27% 상향, 2Q26 고객사 메모리 수요 충족률 50%에 불과하고 DRAM·NAND 가격 시장 기대치 상회 전망",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics started shipping HBM samples, with strong AI chip demand supporting memory business profitability exceeding Amazon, Meta, and Microsoft individually",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom solidifies AI infrastructure position with $36 billion financing deal linked to Anthropic and Google, custom AI chips gaining traction with strong projected revenue growth",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 16
+  "total": 11
 }
