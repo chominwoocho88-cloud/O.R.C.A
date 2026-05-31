@@ -1,0 +1,7 @@
+{
+  "name": "mixed_regime_korean_decoupling_caution",
+  "warning": "Avoid high-confidence long signals when regime is labeled as mixed with Korean risk-aversion deepening (혼조 / 한국 위험회피 심화); accuracy drops to 0%",
+  "reason": "Surface US risk-on does not translate to Korean market inflow; structural capital outflow negates technical oversold signals",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-05-31T23:45:16.461927"
+}

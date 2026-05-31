@@ -1,14 +1,14 @@
 {
   "signal_weights": {
     "bb_touch": 0.3,
-    "rsi_oversold": 0.54,
+    "rsi_oversold": 0.59,
     "volume_climax": 1.0,
     "ma_support": 1.0,
     "momentum_dip": 1.0,
     "vol_accumulation": 1.0,
     "sector_rebound": 1.0,
     "rsi_divergence": 1.0,
-    "sector_inflow": 0.53,
+    "sector_inflow": 0.58,
     "golden_cross": 1.06,
     "fear_regime": 1.0,
     "bullish_div": 1.0,
@@ -109,6 +109,11 @@
       "swing_correct": 1550,
       "total": 2225
     },
+    "위험선호 (한국 수급 디커플링 경계)": {
+      "accuracy": 100.0,
+      "correct": 1,
+      "total": 1
+    },
     "위험선호(전환 경계)": {
       "accuracy": 100.0,
       "correct": 5,
@@ -167,11 +172,6 @@
       "accuracy": 50.0,
       "correct": 1,
       "total": 2
-    },
-    "위험선호 (한국 수급 디커플링 경계)": {
-      "correct": 1,
-      "total": 1,
-      "accuracy": 100.0
     }
   },
   "ticker_accuracy": {
@@ -1258,7 +1258,7 @@
       "total": 1
     }
   },
-  "last_updated": "2026-05-28T23:56:59.379000",
+  "last_updated": "2026-05-31T23:45:16.462689",
   "rule_registry_status": {
     "sector_rebound_base": {
       "active": true,
@@ -1424,23 +1424,23 @@
     "swing_accuracy": 70.9,
     "total_tracked": 3780
   },
-  "last_evolved_at": "2026-05-28T23:56:59.378995",
+  "last_evolved_at": "2026-05-31T23:45:16.462684",
   "last_macro_gate": {
+    "checked_at": "2026-05-29T23:19:01.458391+09:00",
+    "hy_chg5": 0.39,
+    "reason": "정상",
     "risk_level": "normal",
     "score_penalty": 0,
     "vix": 15.6,
-    "yield_curve": 0.0,
-    "hy_chg5": 0.39,
-    "reason": "정상",
-    "checked_at": "2026-05-29T23:19:01.458391+09:00"
+    "yield_curve": 0.0
   },
   "swing_type_optimal": {
     "기술적과매도": {
       "avg_peak_day": 1.0,
       "avg_peak_gain": 5.51,
-      "swing_accuracy": 100.0,
       "day1_accuracy": 100.0,
-      "sample": 1
+      "sample": 1,
+      "swing_accuracy": 100.0
     }
   },
   "system_accuracy": {
