@@ -1,7 +1,7 @@
 {
   "name": "risk_aversion_swing_boost",
-  "description": "위험회피 국면에서 스윙 정확도가 75.6%로 위험선호(69.7%)보다 높음. 역발상 매수 신호 강화",
-  "trigger": "regime == 위험회피 AND rsi_oversold signal present AND swing_accuracy >= 75",
-  "action": "포지션 사이즈 +10% 확대, 목표가 상향 조정",
-  "created_at": "2026-05-27T23:50:36.117012"
+  "description": "위험회피 국면에서 스윙 정확도가 75.6%로 위험선호(69.7%)보다 높음. 역설적으로 위험회피 국면에서 기술적 과매도 신호의 반등 포착 정확도가 더 높음",
+  "trigger": "regime=위험회피 AND rsi_oversold=true AND swing_accuracy_historical >= 75.0",
+  "action": "위험회피 국면에서 rsi_oversold 신호 가중치를 +0.10 추가 부여하여 진입 신뢰도 상향",
+  "created_at": "2026-06-01T23:57:24.544540"
 }
