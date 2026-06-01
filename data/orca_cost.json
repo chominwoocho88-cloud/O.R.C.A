@@ -1,5 +1,5 @@
 {
-  "total_runs": 145,
+  "total_runs": 146,
   "monthly_runs": {
     "2026-04": {
       "runs": 68,
@@ -10,12 +10,12 @@
       "estimated_usd": 77.9
     },
     "2026-06": {
-      "runs": 1,
-      "estimated_usd": 1.2
+      "runs": 2,
+      "estimated_usd": 1.7
     }
   },
-  "estimated_cost_usd": 154.4,
-  "last_run": "2026-06-01 07:52 KST",
+  "estimated_cost_usd": 154.9,
+  "last_run": "2026-06-02 01:40 KST",
   "monthly_actual_usage": {
     "2026-05": {
       "call_count": 145,
@@ -26,12 +26,12 @@
       "web_search_requests": 386
     },
     "2026-06": {
-      "call_count": 6,
-      "input_tokens": 253737,
-      "output_tokens": 21209,
+      "call_count": 10,
+      "input_tokens": 331038,
+      "output_tokens": 37631,
       "cache_read_tokens": 0,
       "cache_creation_tokens": 0,
-      "web_search_requests": 25
+      "web_search_requests": 31
     }
   }
 }
