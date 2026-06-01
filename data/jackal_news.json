@@ -1,15 +1,15 @@
 {
-  "collected_at": "2026-06-01 07:57 KST",
+  "collected_at": "2026-06-02 08:27 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
     "0193T0",
-    "018880.KS",
-    "252710.KS",
     "0193W0",
-    "0195S0",
-    "0167A0",
     "233740.KS",
+    "0195S0",
+    "252710.KS",
+    "0167A0",
+    "0195R0",
     "034220.KS",
     "NVDA",
     "000660.KS",
@@ -21,65 +21,65 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "NVDA",
-      "headline": "AVGO outperforming NVDA and S&P 500 in 2026 year-to-date",
-      "source": "Kiplinger",
-      "data_pt": "Broadcom +22.1% YTD vs NVDA +14% vs SPX +10.4% through May 27, 2026"
+      "ticker": "0193T0",
+      "headline": "KODEX SK하이닉스단일종목레버리지 상장 첫날 거래대금 4조3872억원, 전체 상품 중 가장 높음",
+      "impact": "bullish",
+      "source": "web_search"
     },
     {
-      "ticker": "0193T0",
-      "headline": "KODEX SK하이닉스단일종목레버리지 상장 첫날 외국인·기관 동반 매수, SK하이닉스 9% 급등에 연동하여 18% 수익률 기록",
+      "ticker": "0193W0",
+      "headline": "KODEX 삼성전자단일종목레버리지 상장, 개인투자자 대규모 순매수 기록",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "0195S0",
-      "headline": "TIGER SK하이닉스단일종목레버리지 상장, 외국인 3290억원 규모 초기 설정으로 TIGER ETF 역대 최대 외국인 자금 유치",
+      "headline": "TIGER SK하이닉스단일종목레버리지 상장 첫날 개인 순매수 1위, 약 6909억원",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "018880.KS",
-      "headline": "한온시스템 2Q26 Preview: 유럽 전기차 수요 회복에 기반한 매출 3.0조원(+4.0% YoY), 영업이익 1,186억원(+84.5% YoY) 전망, 목표가 6,500원으로 상향",
+      "ticker": "0195R0",
+      "headline": "TIGER 삼성전자단일종목레버리지 상장, 외국인 투자자 대규모 참여",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "034220.KS",
-      "headline": "LG디스플레이, 고해상도 사무 작업과 게이밍 최적화 240Hz RGB 스트라이프 OLED 패널 양산 성공, 프리미엄 모니터 시장 주도 추진",
+      "ticker": "000660",
+      "headline": "SK하이닉스 시가총액 1조달러 돌파, AI 메모리칩 시장 성장 수혜",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "0167A0",
-      "headline": "SOL AI반도체TOP2플러스 7.81% 급등, SK하이닉스 26.18%, 삼성전기 25.60% 비중으로 AI 반도체 TOP2에 집중 투자",
+      "ticker": "005930",
+      "headline": "삼성전자 노사 잠정 합의로 코스피 급등, 주가 사상 최고가 경신",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "034220",
+      "headline": "LG디스플레이, 대만 게이밍 OLED 로드쇼 개최, 차세대 OLED 제품 공개",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "NVDA",
-      "headline": "Nvidia continues to gain traction among investors with strong earnings and strategic investments, viewed as key player in AI sector with significant growth potential",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK하이닉스 목표주가 3,800,000원으로 27% 상향, 2Q26 고객사 메모리 수요 충족률 50%에 불과하고 DRAM·NAND 가격 시장 기대치 상회 전망",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics started shipping HBM samples, with strong AI chip demand supporting memory business profitability exceeding Amazon, Meta, and Microsoft individually",
+      "headline": "NVIDIA CEO 코엠펙스에서 RTX Spark 및 Vera Rubin 발표, 주가 4.99% 상승",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom solidifies AI infrastructure position with $36 billion financing deal linked to Anthropic and Google, custom AI chips gaining traction with strong projected revenue growth",
+      "headline": "브로드컴, 50G PON 게이트웨이 및 WiFi 8 제품 공개, 주가 3.5% 상승",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "0167A0",
+      "headline": "SOL AI반도체TOP2플러스 7.81% 급등, 외국인·기관 동반 매수",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 11
+  "total": 14
 }
