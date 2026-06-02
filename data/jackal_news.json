@@ -1,16 +1,16 @@
 {
-  "collected_at": "2026-06-02 08:27 KST",
+  "collected_at": "2026-06-03 08:33 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
-    "0193T0",
     "0193W0",
-    "233740.KS",
-    "0195S0",
+    "0193T0",
     "252710.KS",
-    "0167A0",
     "0195R0",
-    "034220.KS",
+    "462330.KS",
+    "233740.KS",
+    "037560.KS",
+    "0195S0",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -22,64 +22,64 @@
   "news_items": [
     {
       "ticker": "0193T0",
-      "headline": "KODEX SK하이닉스단일종목레버리지 상장 첫날 거래대금 4조3872억원, 전체 상품 중 가장 높음",
+      "headline": "KODEX SK하이닉스단일종목레버리지 상장 첫날 +18.44%, 개인순매수 1위 기록",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "0193W0",
-      "headline": "KODEX 삼성전자단일종목레버리지 상장, 개인투자자 대규모 순매수 기록",
-      "impact": "bullish",
+      "headline": "KODEX 삼성전자단일종목레버리지 상장, SK하이닉스 레버리지보다 약세",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "0195S0",
-      "headline": "TIGER SK하이닉스단일종목레버리지 상장 첫날 개인 순매수 1위, 약 6909억원",
+      "headline": "TIGER SK하이닉스단일종목레버리지 상장 첫날 개인순매수 1위, 690억원 순매수",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "0195R0",
-      "headline": "TIGER 삼성전자단일종목레버리지 상장, 외국인 투자자 대규모 참여",
-      "impact": "bullish",
+      "headline": "TIGER 삼성전자단일종목레버리지 상장, 상장 첫날 개인순매수 2위 기록",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
       "ticker": "000660",
-      "headline": "SK하이닉스 시가총액 1조달러 돌파, AI 메모리칩 시장 성장 수혜",
+      "headline": "SK하이닉스 AI HBM 수요 증가로 강세, 최근 개인순매수 2주만에 최대",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930",
-      "headline": "삼성전자 노사 잠정 합의로 코스피 급등, 주가 사상 최고가 경신",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "034220",
-      "headline": "LG디스플레이, 대만 게이밍 OLED 로드쇼 개최, 차세대 OLED 제품 공개",
+      "headline": "삼성전자 HBM4E 샘플 첫 공급, +2.29% 상승으로 36만전자 달성",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA CEO 코엠펙스에서 RTX Spark 및 Vera Rubin 발표, 주가 4.99% 상승",
+      "headline": "NVIDIA 젠슨 황 CEO 한국 방문 예정, AI 협력사 주가 상승 기대감",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "브로드컴, 50G PON 게이트웨이 및 WiFi 8 제품 공개, 주가 3.5% 상승",
+      "headline": "Broadcom 6월 3일 실적 발표 앞두고 +5.2% 상승, AI 칩 수요 강세",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "0167A0",
-      "headline": "SOL AI반도체TOP2플러스 7.81% 급등, 외국인·기관 동반 매수",
+      "ticker": "035720",
+      "headline": "카카오, AI 중심 변화 기대하며 투자의견 매수 유지",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "466920",
+      "headline": "SOL 코리아고배당 순자산 5000억원 돌파, 고배당 ETF 개인순매수 1위",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 14
+  "total": 16
 }
