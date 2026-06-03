@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-06-03 08:33 KST",
+  "collected_at": "2026-06-04 08:33 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
@@ -21,65 +21,65 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "0193T0",
-      "headline": "KODEX SK하이닉스단일종목레버리지 상장 첫날 +18.44%, 개인순매수 1위 기록",
+      "ticker": "AVGO",
+      "headline": "Broadcom (AVGO) surged 40% YTD, $2T+ market cap; options market pricing 8% volatility post-earnings",
+      "source": "CNBC",
+      "data_pt": "AVGO: +40% YTD, 88% 1-year gain vs 29% Mag-7 ETF; expected 8% earnings move"
+    },
+    {
+      "ticker": "0193W0",
+      "headline": "KODEX 삼성전자단일종목레버리지 상장 첫날 개인투자자 6000억원대 순매수, 상장 초기 강세",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "0193W0",
-      "headline": "KODEX 삼성전자단일종목레버리지 상장, SK하이닉스 레버리지보다 약세",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "0195S0",
-      "headline": "TIGER SK하이닉스단일종목레버리지 상장 첫날 개인순매수 1위, 690억원 순매수",
+      "ticker": "0193T0",
+      "headline": "KODEX SK하이닉스단일종목레버리지 상장 첫날 개인투자자 1조4000억원 순매수로 관련 레버리지 ETF 중 최대, SK하이닉스 9% 급등",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "0195R0",
-      "headline": "TIGER 삼성전자단일종목레버리지 상장, 상장 첫날 개인순매수 2위 기록",
-      "impact": "neutral",
+      "headline": "TIGER 삼성전자단일종목레버리지 상장 첫날 개인 순매수 2784억원, 외국인 초기 설정 3290억원 참여",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "000660",
-      "headline": "SK하이닉스 AI HBM 수요 증가로 강세, 최근 개인순매수 2주만에 최대",
+      "ticker": "0195S0",
+      "headline": "TIGER SK하이닉스단일종목레버리지 상장 첫날 개인 순매수 1위(6909억원), TIGER ETF 역대 최대 외국인 자금 유치",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "005930",
-      "headline": "삼성전자 HBM4E 샘플 첫 공급, +2.29% 상승으로 36만전자 달성",
+      "headline": "삼성전자 HBM4E 샘플 공급 소식 이후 매수세 증가, 3.3% 상승으로 36만원 수준 달성",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660",
+      "headline": "SK하이닉스 개인투자자 8조2802억원 순매수, 2주 만에 최대 규모, AI 메모리 수요 낙관",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "NVDA",
-      "headline": "NVIDIA 젠슨 황 CEO 한국 방문 예정, AI 협력사 주가 상승 기대감",
-      "impact": "bullish",
+      "headline": "NVIDIA 주가 3.07% 하락, 젠슨 황 CEO 방한에도 불구하고 수익성 우려로 기술주 약세",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom 6월 3일 실적 발표 앞두고 +5.2% 상승, AI 칩 수요 강세",
-      "impact": "bullish",
+      "headline": "Broadcom Q2 실적 EPS 2.44 (예상 2.32 상회)하지만 Q3 가이던스 부진으로 애프터아워스 6% 급락",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
-      "ticker": "035720",
-      "headline": "카카오, AI 중심 변화 기대하며 투자의견 매수 유지",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "466920",
-      "headline": "SOL 코리아고배당 순자산 5000억원 돌파, 고배당 ETF 개인순매수 1위",
+      "ticker": "037560",
+      "headline": "LG헬로비전 KB증권 목표가 3800원으로 상향(+8.5%), 재무구조 정상화와 신성장 기대",
       "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 16
+  "total": 11
 }
