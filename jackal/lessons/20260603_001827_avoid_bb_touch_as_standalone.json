@@ -1,0 +1,7 @@
+{
+  "name": "avoid_bb_touch_as_standalone",
+  "warning": "bb_touch signal used as sole entry trigger with only 50% accuracy across 4 samples",
+  "reason": "Bollinger Band touch without regime or volume confirmation fails 50% of the time, producing coin-flip outcomes",
+  "regime_context": "All regimes, especially 혼조 variants",
+  "timestamp": "2026-06-03T00:18:27.967237"
+}

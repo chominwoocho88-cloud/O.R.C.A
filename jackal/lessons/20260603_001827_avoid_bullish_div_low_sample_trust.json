@@ -1,0 +1,7 @@
+{
+  "name": "avoid_bullish_div_low_sample_trust",
+  "warning": "bullish_div showing 50% accuracy with only 2 samples is statistically unreliable",
+  "reason": "Sample size of 2 is insufficient to establish signal validity; 50% accuracy equals random chance",
+  "regime_context": "All regimes until sample count exceeds 10",
+  "timestamp": "2026-06-03T00:18:27.967499"
+}

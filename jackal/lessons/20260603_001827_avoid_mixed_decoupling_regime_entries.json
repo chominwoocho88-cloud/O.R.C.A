@@ -1,0 +1,7 @@
+{
+  "name": "avoid_mixed_decoupling_regime_entries",
+  "warning": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화) shows 0% accuracy across 2 samples",
+  "reason": "Korea-US decoupling in risk sentiment creates false breakout conditions; Korean supply fundamentals override US macro signals",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-06-03T00:18:27.967738"
+}

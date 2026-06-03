@@ -1,0 +1,7 @@
+{
+  "name": "sector_inflow_confirmation_layer",
+  "description": "sector_inflow at 60% accuracy with 5 samples suggests moderate reliability when combined with regime confirmation",
+  "trigger": "sector_inflow accuracy >= 60% AND regime is 위험선호 or 위험회피",
+  "action": "Use sector_inflow as secondary confirmation signal rather than primary trigger, combine with rsi_oversold for higher conviction",
+  "created_at": "2026-06-03T00:18:27.965795"
+}

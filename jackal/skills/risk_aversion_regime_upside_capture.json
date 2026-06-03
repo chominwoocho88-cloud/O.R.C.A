@@ -1,0 +1,7 @@
+{
+  "name": "risk_aversion_regime_upside_capture",
+  "description": "위험회피 regime shows 75.6% swing accuracy across 455 samples, outperforming base 위험선호 regime of 69.7%",
+  "trigger": "regime classified as 위험회피 AND swing signal generated",
+  "action": "Apply 위험회피 regime multiplier to swing targets, expect higher hit rate than 위험선호 baseline",
+  "created_at": "2026-06-03T00:18:27.966017"
+}
