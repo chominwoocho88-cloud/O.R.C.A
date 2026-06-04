@@ -1,16 +1,16 @@
 {
-  "collected_at": "2026-06-04 08:33 KST",
+  "collected_at": "2026-06-05 08:17 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
-    "0193W0",
-    "0193T0",
-    "252710.KS",
-    "0195R0",
-    "462330.KS",
     "233740.KS",
-    "037560.KS",
-    "0195S0",
+    "530036.KS",
+    "0193W0",
+    "462330.KS",
+    "229200.KS",
+    "0193T0",
+    "0195R0",
+    "251340.KS",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -22,64 +22,64 @@
   "news_items": [
     {
       "ticker": "AVGO",
-      "headline": "Broadcom (AVGO) surged 40% YTD, $2T+ market cap; options market pricing 8% volatility post-earnings",
-      "source": "CNBC",
-      "data_pt": "AVGO: +40% YTD, 88% 1-year gain vs 29% Mag-7 ETF; expected 8% earnings move"
+      "headline": "Broadcom (AVGO) posted disappointing Q2 earnings; guided lower amid Anthropic deal restructuring",
+      "source": "Bloomberg, Kiplinger, Schwab",
+      "data_pt": "Expected $2.39 EPS (+51.3% YoY), $22.08B revenue (+47.2% YoY); stock plunged double-digits June 3-4"
     },
     {
-      "ticker": "0193W0",
-      "headline": "KODEX 삼성전자단일종목레버리지 상장 첫날 개인투자자 6000억원대 순매수, 상장 초기 강세",
+      "ticker": "NVDA",
+      "headline": "Nvidia launching RTX Spark laptop chip to offload AI tasks from cloud to local devices",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "0193T0",
-      "headline": "KODEX SK하이닉스단일종목레버리지 상장 첫날 개인투자자 1조4000억원 순매수로 관련 레버리지 ETF 중 최대, SK하이닉스 9% 급등",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "0195R0",
-      "headline": "TIGER 삼성전자단일종목레버리지 상장 첫날 개인 순매수 2784억원, 외국인 초기 설정 3290억원 참여",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "0195S0",
-      "headline": "TIGER SK하이닉스단일종목레버리지 상장 첫날 개인 순매수 1위(6909억원), TIGER ETF 역대 최대 외국인 자금 유치",
-      "impact": "bullish",
+      "ticker": "AVGO",
+      "headline": "Broadcom stock plunged 13.36% after disappointing AI chip sales forecasts, did not raise full-year $100B AI target",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "005930",
-      "headline": "삼성전자 HBM4E 샘플 공급 소식 이후 매수세 증가, 3.3% 상승으로 36만원 수준 달성",
+      "headline": "Samsung Electronics up 3.30%, Nvidia CEO Jensen Huang visiting Korea to meet with Samsung, SK Group and other conglomerates",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "000660",
-      "headline": "SK하이닉스 개인투자자 8조2802억원 순매수, 2주 만에 최대 규모, AI 메모리 수요 낙관",
+      "headline": "SK Hynix down 0.13%, achieved historic 2 million won milestone as AI memory demand remains strong",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "NVDA",
-      "headline": "NVIDIA 주가 3.07% 하락, 젠슨 황 CEO 방한에도 불구하고 수익성 우려로 기술주 약세",
-      "impact": "bearish",
+      "ticker": "0193W0",
+      "headline": "KODEX Samsung Electronics single stock leverage listed May 27, 2026 with 2X daily return tracking",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
-      "ticker": "AVGO",
-      "headline": "Broadcom Q2 실적 EPS 2.44 (예상 2.32 상회)하지만 Q3 가이던스 부진으로 애프터아워스 6% 급락",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "037560",
-      "headline": "LG헬로비전 KB증권 목표가 3800원으로 상향(+8.5%), 재무구조 정상화와 신성장 기대",
+      "ticker": "0193T0",
+      "headline": "KODEX SK Hynix single stock leverage listed May 27, 2026, up 18.44% on first trading day",
       "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "0195R0",
+      "headline": "TIGER Samsung Electronics single stock leverage listed May 27, 2026 with record 329B won foreign investment",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "233740",
+      "headline": "KODEX KOSDAQ150 Leverage ETF up 4.61%, seeing net outflows as investors shift to semiconductor single-stock leverages",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "229200",
+      "headline": "KODEX KOSDAQ150 seeing individual investor outflows of 568B won amid semiconductor rally concentration",
+      "impact": "bearish",
       "source": "web_search"
     }
   ],
-  "total": 11
+  "total": 15
 }
