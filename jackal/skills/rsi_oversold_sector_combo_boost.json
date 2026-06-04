@@ -1,0 +1,7 @@
+{
+  "name": "rsi_oversold_sector_combo_boost",
+  "description": "RSI oversold combined with sector inflow shows 60% accuracy each, suggesting confluence increases signal reliability",
+  "trigger": "rsi_oversold accuracy >= 60% AND sector_inflow accuracy >= 60% simultaneously on same ticker",
+  "action": "Increase position confidence by 10% when both rsi_oversold and sector_inflow signals fire on same ticker within same session",
+  "created_at": "2026-06-04T00:19:41.914241"
+}

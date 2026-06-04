@@ -1,0 +1,8 @@
+{
+  "name": "avoid_low_accuracy_tickers_in_transition",
+  "description": "003550.KS shows only 56.1% accuracy in 전환중 regime conditions with avg peak of 2.29%",
+  "warning": "Reduce or skip signals on tickers with accuracy below 58% when regime is 전환중",
+  "reason": "Transition regimes amplify ticker-specific weakness; low-accuracy tickers fail more frequently during regime uncertainty",
+  "regime_context": "전환중",
+  "timestamp": "2026-06-04T00:19:41.915444"
+}

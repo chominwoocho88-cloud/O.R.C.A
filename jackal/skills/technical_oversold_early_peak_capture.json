@@ -1,0 +1,7 @@
+{
+  "name": "technical_oversold_early_peak_capture",
+  "description": "기술적과매도 swing type shows 100% accuracy with avg peak on day 1 and 5.51% avg peak gain from single sample",
+  "trigger": "swing_type = 기술적과매도 AND day1_accuracy = 100%",
+  "action": "Set day-1 profit target at 5% and exit aggressively at open of day 2 to capture early peak before reversion",
+  "created_at": "2026-06-04T00:19:41.914875"
+}

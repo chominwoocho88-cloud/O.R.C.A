@@ -1,0 +1,7 @@
+{
+  "name": "risk_aversion_regime_swing_optimizer",
+  "description": "위험회피 regime shows 75.6% swing accuracy across 455 samples, outperforming 위험선호 regime at 69.7%",
+  "trigger": "Regime classified as 위험회피 AND sample_count >= 100",
+  "action": "Prioritize swing trade entries in 위험회피 regime with tighter stop-loss and faster profit-taking target around day 3-4",
+  "created_at": "2026-06-04T00:19:41.914564"
+}
