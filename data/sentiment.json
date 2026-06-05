@@ -1027,25 +1027,25 @@
     },
     {
       "date": "2026-06-05",
-      "score": 61,
-      "level": "탐욕",
-      "emoji": "😏",
+      "score": 51,
+      "level": "중립",
+      "emoji": "😐",
       "components": {
-        "시장레짐": 70,
-        "추세방향": 70,
+        "시장레짐": 30,
+        "추세방향": 30,
         "변동성지수": 72,
-        "자금흐름": 50,
+        "자금흐름": 40,
         "반론강도": 40,
         "한국시장": 40,
-        "숨은시그널": 46
+        "숨은시그널": 35
       },
-      "regime": "위험선호 (급반전 취약 구간 내재)",
-      "trend": "상승추세",
-      "vix_level": "탐욕",
-      "vix_val": 15.4,
+      "regime": "위험회피",
+      "trend": "하락추세",
+      "vix_level": "극단공포(한국) / 탐욕(미국) 극심한 디커플링",
+      "vix_val": 16.07,
       "vkospi_val": 15.0,
-      "fear_greed": 69.0,
-      "internal_raw": 57.91044776119403,
+      "fear_greed": 65.0,
+      "internal_raw": 42.83582089552239,
       "divergence": false,
       "fred_score": 50,
       "fred_indicators": {}
@@ -1053,36 +1053,36 @@
   ],
   "current": {
     "date": "2026-06-05",
-    "score": 61,
-    "level": "탐욕",
-    "emoji": "😏",
+    "score": 51,
+    "level": "중립",
+    "emoji": "😐",
     "components": {
-      "시장레짐": 70,
-      "추세방향": 70,
+      "시장레짐": 30,
+      "추세방향": 30,
       "변동성지수": 72,
-      "자금흐름": 50,
+      "자금흐름": 40,
       "반론강도": 40,
       "한국시장": 40,
-      "숨은시그널": 46
+      "숨은시그널": 35
     },
-    "regime": "위험선호 (급반전 취약 구간 내재)",
-    "trend": "상승추세",
-    "vix_level": "탐욕",
-    "vix_val": 15.4,
+    "regime": "위험회피",
+    "trend": "하락추세",
+    "vix_level": "극단공포(한국) / 탐욕(미국) 극심한 디커플링",
+    "vix_val": 16.07,
     "vkospi_val": 15.0,
-    "fear_greed": 69.0,
-    "internal_raw": 57.91044776119403,
+    "fear_greed": 65.0,
+    "internal_raw": 42.83582089552239,
     "divergence": false,
     "fred_score": 50,
     "fred_indicators": {}
   },
   "trend": {
     "direction": "stable",
-    "change": 1.2,
-    "avg_7d": 61.7,
+    "change": -1.2,
+    "avg_7d": 60.3,
     "min_30d": 48,
     "max_30d": 64,
-    "avg_30d": 60.6
+    "avg_30d": 60.2
   },
-  "last_updated": "2026-06-05T08:16:47.302670+09:00"
+  "last_updated": "2026-06-05T22:57:57.483673+09:00"
 }
