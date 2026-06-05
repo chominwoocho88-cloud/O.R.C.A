@@ -23325,6 +23325,7 @@
     "outcome_1d_hit": true,
     "outcome_1d_pct": 3.3,
     "outcome_checked": true,
+    "outcome_correct": true,
     "outcome_swing_hit": true,
     "peak_day": 1,
     "peak_pct": 3.3,
@@ -23352,8 +23353,7 @@
     "thesis_killer_hit": false,
     "ticker": "GOOGL",
     "timestamp": "2026-06-04T09:19:08.709087+09:00",
-    "vol_ratio": 1.54,
-    "outcome_correct": true
+    "vol_ratio": 1.54
   },
   {
     "alerted": false,
@@ -24002,13 +24002,13 @@
       "에너지 인프라 / GE Vernova 관련 섹터"
     ],
     "orca_regime": "위험선호 (급반전 취약 구간 내재)",
-    "outcome_1d_hit": null,
-    "outcome_1d_pct": null,
+    "outcome_1d_hit": false,
+    "outcome_1d_pct": 0.439,
     "outcome_checked": false,
     "outcome_swing_hit": null,
     "peak_day": null,
     "peak_pct": null,
-    "price_1d_later": null,
+    "price_1d_later": 368.53,
     "price_at_hunt": 366.92,
     "price_peak": null,
     "probability_adjustment": 4.0,
