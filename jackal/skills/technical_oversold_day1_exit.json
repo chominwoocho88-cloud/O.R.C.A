@@ -1,0 +1,7 @@
+{
+  "name": "technical_oversold_day1_exit",
+  "description": "For 기술적과매도 swing type, target peak exit on Day 1 with 3.3% gain expectation",
+  "trigger": "swing_type = 기술적과매도 AND day1_accuracy = 100% AND avg_peak_day = 1.0",
+  "action": "Set intraday exit target at +3.3% on Day 1 for 기술적과매도 classified signals",
+  "created_at": "2026-06-05T14:11:58.601424"
+}

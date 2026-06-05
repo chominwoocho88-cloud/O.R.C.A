@@ -1,0 +1,7 @@
+{
+  "name": "risk_on_regime_filter",
+  "description": "Apply regime-adjusted confidence scaling for 위험선호 regime signals",
+  "trigger": "regime = 위험선호 AND sample_count >= 2225 AND swing_accuracy >= 69.7%",
+  "action": "Accept signals with base accuracy >= 65% in 위험선호 regime without additional confirmation",
+  "created_at": "2026-06-05T14:11:58.601192"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "caution_low_accuracy_signals",
+  "warning": "Avoid relying on bullish_div, ma_support, or volume_climax as sole entry triggers when each has accuracy = 50% on only 2 samples",
+  "reason": "Small sample size at 50% accuracy provides no statistical edge and increases false entry risk",
+  "regime_context": "all regimes",
+  "timestamp": "2026-06-05T14:11:58.601853"
+}

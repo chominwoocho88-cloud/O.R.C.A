@@ -1,0 +1,7 @@
+{
+  "name": "avoid_mixed_us_korea_decoupling",
+  "warning": "Do not enter when regime is 혼조 (미국 위험선호 표면 / 한국 위험회피 심화) with accuracy = 0% over 2 samples",
+  "reason": "US surface risk-on masked by deep Korean risk-off leads to consistent signal failure",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-06-05T14:11:58.601649"
+}
