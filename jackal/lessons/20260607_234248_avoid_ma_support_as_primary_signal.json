@@ -1,0 +1,7 @@
+{
+  "name": "avoid_ma_support_as_primary_signal",
+  "warning": "Do not use ma_support as sole entry trigger - accuracy only 33.3% across 3 samples",
+  "reason": "MA support signals are failing below 40% threshold, likely due to regime-driven breakdowns overriding technical levels",
+  "regime_context": "전반적 - 특히 혼조 및 위험회피 전환 구간",
+  "timestamp": "2026-06-07T23:42:48.442853"
+}

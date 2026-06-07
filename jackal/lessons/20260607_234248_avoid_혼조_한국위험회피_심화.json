@@ -1,0 +1,7 @@
+{
+  "name": "avoid_혼조_한국위험회피_심화",
+  "warning": "Do not enter when regime is 혼조 (미국 위험선호 표면 / 한국 위험회피 심화) - 0% accuracy over 2 samples",
+  "reason": "US surface risk-on masked underlying Korean market deterioration, leading to 0 correct calls",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-06-07T23:42:48.442632"
+}
