@@ -1,16 +1,16 @@
 {
-  "collected_at": "2026-06-05 08:17 KST",
+  "collected_at": "2026-06-08 08:00 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
-    "233740.KS",
+    "0134X0",
     "530036.KS",
-    "0193W0",
-    "462330.KS",
-    "229200.KS",
+    "252710.KS",
     "0193T0",
-    "0195R0",
-    "251340.KS",
+    "0193W0",
+    "233740.KS",
+    "462330.KS",
+    "0195S0",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -21,65 +21,65 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "AVGO",
-      "headline": "Broadcom (AVGO) posted disappointing Q2 earnings; guided lower amid Anthropic deal restructuring",
-      "source": "Bloomberg, Kiplinger, Schwab",
-      "data_pt": "Expected $2.39 EPS (+51.3% YoY), $22.08B revenue (+47.2% YoY); stock plunged double-digits June 3-4"
-    },
-    {
-      "ticker": "NVDA",
-      "headline": "Nvidia launching RTX Spark laptop chip to offload AI tasks from cloud to local devices",
+      "ticker": "0134X0",
+      "headline": "Daishin Balance SPAC 20 surges 213% on debut with strong investor interest",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "AVGO",
-      "headline": "Broadcom stock plunged 13.36% after disappointing AI chip sales forecasts, did not raise full-year $100B AI target",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930",
-      "headline": "Samsung Electronics up 3.30%, Nvidia CEO Jensen Huang visiting Korea to meet with Samsung, SK Group and other conglomerates",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660",
-      "headline": "SK Hynix down 0.13%, achieved historic 2 million won milestone as AI memory demand remains strong",
+      "ticker": "0193T0",
+      "headline": "KODEX SK Hynix single-stock leverage ETF receives major inflows with 1.36 trillion won assets",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "0193W0",
-      "headline": "KODEX Samsung Electronics single stock leverage listed May 27, 2026 with 2X daily return tracking",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "0193T0",
-      "headline": "KODEX SK Hynix single stock leverage listed May 27, 2026, up 18.44% on first trading day",
+      "headline": "KODEX Samsung Electronics single-stock leverage ETF launched with strong opening",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "0195R0",
-      "headline": "TIGER Samsung Electronics single stock leverage listed May 27, 2026 with record 329B won foreign investment",
+      "ticker": "0195S0",
+      "headline": "TIGER SK Hynix leverage ETF records record individual investor purchases on debut",
       "impact": "bullish",
       "source": "web_search"
     },
     {
       "ticker": "233740",
-      "headline": "KODEX KOSDAQ150 Leverage ETF up 4.61%, seeing net outflows as investors shift to semiconductor single-stock leverages",
+      "headline": "KODEX KOSDAQ 150 Leverage experiences 25.75% rally amid market bounce",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660",
+      "headline": "SK Hynix falls 9.92% on Broadcom guidance disappointment amid semiconductor selloff",
       "impact": "bearish",
       "source": "web_search"
     },
     {
-      "ticker": "229200",
-      "headline": "KODEX KOSDAQ150 seeing individual investor outflows of 568B won amid semiconductor rally concentration",
+      "ticker": "005930",
+      "headline": "Samsung Electronics drops 6.4% as Broadcom warning triggers semiconductor sector decline",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Nvidia CEO confirms SK Hynix and Samsung for HBM4 supply; stock faces macro headwinds",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom shares plunge 13% after disappointing Q3 AI revenue guidance",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720",
+      "headline": "Kakao falls 4.17% amid broader tech sector weakness",
       "impact": "bearish",
       "source": "web_search"
     }
   ],
-  "total": 15
+  "total": 10
 }

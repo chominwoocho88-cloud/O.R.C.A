@@ -1049,40 +1049,65 @@
       "divergence": false,
       "fred_score": 50,
       "fred_indicators": {}
+    },
+    {
+      "date": "2026-06-08",
+      "score": 47,
+      "level": "중립",
+      "emoji": "😐",
+      "components": {
+        "시장레짐": 50,
+        "추세방향": 50,
+        "변동성지수": 54,
+        "자금흐름": 60,
+        "반론강도": 40,
+        "한국시장": 40,
+        "숨은시그널": 35
+      },
+      "regime": "혼조 (미국 반도체 쇼크 vs 펀더멘털 낙관론 충돌, 한국 수급 구조적 취약)",
+      "trend": "횡보추세",
+      "vix_level": "중립-경계 경계권",
+      "vix_val": 21.51,
+      "vkospi_val": 15.0,
+      "fear_greed": 41.0,
+      "internal_raw": 49.1044776119403,
+      "divergence": false,
+      "fred_score": 50,
+      "fred_indicators": {}
     }
   ],
   "current": {
-    "date": "2026-06-05",
-    "score": 51,
+    "date": "2026-06-08",
+    "score": 47,
     "level": "중립",
     "emoji": "😐",
     "components": {
-      "시장레짐": 30,
-      "추세방향": 30,
-      "변동성지수": 72,
-      "자금흐름": 40,
+      "시장레짐": 50,
+      "추세방향": 50,
+      "변동성지수": 54,
+      "자금흐름": 60,
       "반론강도": 40,
       "한국시장": 40,
       "숨은시그널": 35
     },
-    "regime": "위험회피",
-    "trend": "하락추세",
-    "vix_level": "극단공포(한국) / 탐욕(미국) 극심한 디커플링",
-    "vix_val": 16.07,
+    "regime": "혼조 (미국 반도체 쇼크 vs 펀더멘털 낙관론 충돌, 한국 수급 구조적 취약)",
+    "trend": "횡보추세",
+    "vix_level": "중립-경계 경계권",
+    "vix_val": 21.51,
     "vkospi_val": 15.0,
-    "fear_greed": 65.0,
-    "internal_raw": 42.83582089552239,
+    "fear_greed": 41.0,
+    "internal_raw": 49.1044776119403,
     "divergence": false,
     "fred_score": 50,
     "fred_indicators": {}
   },
   "trend": {
-    "direction": "stable",
-    "change": -1.2,
-    "avg_7d": 60.3,
-    "min_30d": 48,
+    "direction": "deteriorating",
+    "change": -6.2,
+    "avg_7d": 58.4,
+    "min_30d": 47,
     "max_30d": 64,
-    "avg_30d": 60.2
+    "avg_30d": 59.7
   },
-  "last_updated": "2026-06-05T22:57:57.483673+09:00"
+  "last_updated": "2026-06-08T08:00:31.105609+09:00"
 }
