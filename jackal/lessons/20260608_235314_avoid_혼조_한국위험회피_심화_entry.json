@@ -1,0 +1,7 @@
+{
+  "name": "avoid_혼조_한국위험회피_심화_entry",
+  "warning": "entering trades when regime is 혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "reason": "0% accuracy across 2 samples; Korean liquidity divergence from US risk-on creates systematic false positives",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-06-08T23:53:14.413773"
+}

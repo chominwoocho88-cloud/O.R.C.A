@@ -1,0 +1,7 @@
+{
+  "name": "avoid_ma_support_low_conviction",
+  "warning": "ma_support signal alone with no confirming signals in mixed or risk-off regime",
+  "reason": "ma_support has lowest accuracy at 33.3% across 3 samples, indicating structural weakness as standalone trigger",
+  "regime_context": "모든 레짐 (특히 혼조 및 위험회피 전환 구간)",
+  "timestamp": "2026-06-08T23:53:14.412704"
+}

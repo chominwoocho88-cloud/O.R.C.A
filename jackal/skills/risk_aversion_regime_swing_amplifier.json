@@ -1,0 +1,7 @@
+{
+  "name": "risk_aversion_regime_swing_amplifier",
+  "description": "위험회피 regime shows 75.6% swing accuracy across 455 samples, outperforming 위험선호 at 69.7%",
+  "trigger": "regime == 위험회피 AND swing signal triggered AND sample_count >= 100",
+  "action": "apply +0.10 confidence multiplier to swing trade entry; extend hold window by 1 day",
+  "created_at": "2026-06-08T23:53:14.412119"
+}

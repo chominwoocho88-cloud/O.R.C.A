@@ -1,0 +1,7 @@
+{
+  "name": "scan_accuracy_caution_under_50pct",
+  "warning": "acting on scan alerts when 7-day scan accuracy is below 50%",
+  "reason": "current scan_summary shows 33.3% accuracy with only 3 scans; small sample with majority wrong signals indicates unstable detection phase",
+  "regime_context": "전체 레짐 (샘플 수 3 이하 단기 구간)",
+  "timestamp": "2026-06-08T23:53:14.414023"
+}

@@ -1,7 +1,7 @@
 {
   "name": "high_yield_ticker_filter",
-  "description": "000990.KS shows 77.6% swing accuracy with avg peak gain of 5.37% over 3.8 days - prioritize similar high-yield tickers",
-  "trigger": "ticker historical swing_accuracy >= 75% AND avg_peak_pct >= 5.0 AND avg_peak_day <= 4",
-  "action": "Flag as Tier-1 candidate and apply tighter entry timing around day 1-2 of signal",
-  "created_at": "2026-06-07T23:42:48.442127"
+  "description": "000990.KS shows 77.6% accuracy with avg peak gain 5.37% over 76 samples, marking it as a high-yield ticker",
+  "trigger": "ticker == 000990.KS AND any signal triggered AND regime != 혼조",
+  "action": "prioritize entry; set peak target to day 3-4; flag as top-tier candidate in scan output",
+  "created_at": "2026-06-08T23:53:14.412404"
 }
