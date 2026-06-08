@@ -1,16 +1,6 @@
 {
-  "collected_at": "2026-06-08 08:00 KST",
+  "collected_at": "2026-06-09 08:13 KST",
   "tickers": [
-    "252670.KS",
-    "114800.KS",
-    "0134X0",
-    "530036.KS",
-    "252710.KS",
-    "0193T0",
-    "0193W0",
-    "233740.KS",
-    "462330.KS",
-    "0195S0",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -21,65 +11,41 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "0134X0",
-      "headline": "Daishin Balance SPAC 20 surges 213% on debut with strong investor interest",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "0193T0",
-      "headline": "KODEX SK Hynix single-stock leverage ETF receives major inflows with 1.36 trillion won assets",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "0193W0",
-      "headline": "KODEX Samsung Electronics single-stock leverage ETF launched with strong opening",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "0195S0",
-      "headline": "TIGER SK Hynix leverage ETF records record individual investor purchases on debut",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "233740",
-      "headline": "KODEX KOSDAQ 150 Leverage experiences 25.75% rally amid market bounce",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660",
-      "headline": "SK Hynix falls 9.92% on Broadcom guidance disappointment amid semiconductor selloff",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930",
-      "headline": "Samsung Electronics drops 6.4% as Broadcom warning triggers semiconductor sector decline",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
       "ticker": "NVDA",
-      "headline": "Nvidia CEO confirms SK Hynix and Samsung for HBM4 supply; stock faces macro headwinds",
-      "impact": "neutral",
+      "headline": "NVIDIA stock down 6.20% amid semiconductor sector sell-off following disappointing AI guidance concerns",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "000660.KS",
+      "headline": "SK Hynix down 9.92% on June 5 as Broadcom's disappointing Q3 AI guidance triggers semiconductor sector sell-off",
+      "impact": "bearish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics down 10.18% on June 8 amid KOSPI market-wide decline and semiconductor weakness",
+      "impact": "bearish",
       "source": "web_search"
     },
     {
       "ticker": "AVGO",
-      "headline": "Broadcom shares plunge 13% after disappointing Q3 AI revenue guidance",
+      "headline": "Broadcom stock down 7.92% after disappointing Q3 AI revenue forecast, sparking semiconductor sector selloff",
       "impact": "bearish",
       "source": "web_search"
     },
     {
-      "ticker": "035720",
-      "headline": "Kakao falls 4.17% amid broader tech sector weakness",
+      "ticker": "466920.KS",
+      "headline": "SOL Korea High Dividend ETF experiences gains from financial sector strength and government valuap policy support",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "035720.KS",
+      "headline": "Kakao stock down 4.17% as KOSPI decline impacts market; company faces labor disputes with union",
       "impact": "bearish",
       "source": "web_search"
     }
   ],
-  "total": 10
+  "total": 6
 }

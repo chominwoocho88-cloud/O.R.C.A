@@ -1074,40 +1074,65 @@
       "divergence": false,
       "fred_score": 50,
       "fred_indicators": {}
+    },
+    {
+      "date": "2026-06-09",
+      "score": 50,
+      "level": "중립",
+      "emoji": "😐",
+      "components": {
+        "시장레짐": 50,
+        "추세방향": 70,
+        "변동성지수": 72,
+        "자금흐름": 50,
+        "반론강도": 40,
+        "한국시장": 40,
+        "숨은시그널": 41
+      },
+      "regime": "혼조",
+      "trend": "상승추세",
+      "vix_level": "중립",
+      "vix_val": 18.92,
+      "vkospi_val": 15.0,
+      "fear_greed": 39.0,
+      "internal_raw": 54.179104477611936,
+      "divergence": false,
+      "fred_score": 50,
+      "fred_indicators": {}
     }
   ],
   "current": {
-    "date": "2026-06-08",
-    "score": 45,
+    "date": "2026-06-09",
+    "score": 50,
     "level": "중립",
     "emoji": "😐",
     "components": {
       "시장레짐": 50,
-      "추세방향": 30,
+      "추세방향": 70,
       "변동성지수": 72,
       "자금흐름": 50,
       "반론강도": 40,
       "한국시장": 40,
       "숨은시그널": 41
     },
-    "regime": "혼조 (반도체 쇼크 패닉셀 vs AI 인프라 선별 수요 분화, 한국 수급 구조적 취약)",
-    "trend": "하락추세",
-    "vix_level": "공포",
-    "vix_val": 18.51,
+    "regime": "혼조",
+    "trend": "상승추세",
+    "vix_level": "중립",
+    "vix_val": 18.92,
     "vkospi_val": 15.0,
     "fear_greed": 39.0,
-    "internal_raw": 48.208955223880594,
+    "internal_raw": 54.179104477611936,
     "divergence": false,
     "fred_score": 50,
     "fred_indicators": {}
   },
   "trend": {
     "direction": "deteriorating",
-    "change": -6.8,
-    "avg_7d": 58.1,
+    "change": -10.7,
+    "avg_7d": 56.6,
     "min_30d": 45,
     "max_30d": 64,
-    "avg_30d": 59.7
+    "avg_30d": 59.3
   },
-  "last_updated": "2026-06-08T23:54:53.283391+09:00"
+  "last_updated": "2026-06-09T08:13:47.406573+09:00"
 }
