@@ -1052,25 +1052,25 @@
     },
     {
       "date": "2026-06-08",
-      "score": 47,
+      "score": 45,
       "level": "중립",
       "emoji": "😐",
       "components": {
         "시장레짐": 50,
-        "추세방향": 50,
-        "변동성지수": 54,
-        "자금흐름": 60,
+        "추세방향": 30,
+        "변동성지수": 72,
+        "자금흐름": 50,
         "반론강도": 40,
         "한국시장": 40,
-        "숨은시그널": 35
+        "숨은시그널": 41
       },
-      "regime": "혼조 (미국 반도체 쇼크 vs 펀더멘털 낙관론 충돌, 한국 수급 구조적 취약)",
-      "trend": "횡보추세",
-      "vix_level": "중립-경계 경계권",
-      "vix_val": 21.51,
+      "regime": "혼조 (반도체 쇼크 패닉셀 vs AI 인프라 선별 수요 분화, 한국 수급 구조적 취약)",
+      "trend": "하락추세",
+      "vix_level": "공포",
+      "vix_val": 18.51,
       "vkospi_val": 15.0,
-      "fear_greed": 41.0,
-      "internal_raw": 49.1044776119403,
+      "fear_greed": 39.0,
+      "internal_raw": 48.208955223880594,
       "divergence": false,
       "fred_score": 50,
       "fred_indicators": {}
@@ -1078,36 +1078,36 @@
   ],
   "current": {
     "date": "2026-06-08",
-    "score": 47,
+    "score": 45,
     "level": "중립",
     "emoji": "😐",
     "components": {
       "시장레짐": 50,
-      "추세방향": 50,
-      "변동성지수": 54,
-      "자금흐름": 60,
+      "추세방향": 30,
+      "변동성지수": 72,
+      "자금흐름": 50,
       "반론강도": 40,
       "한국시장": 40,
-      "숨은시그널": 35
+      "숨은시그널": 41
     },
-    "regime": "혼조 (미국 반도체 쇼크 vs 펀더멘털 낙관론 충돌, 한국 수급 구조적 취약)",
-    "trend": "횡보추세",
-    "vix_level": "중립-경계 경계권",
-    "vix_val": 21.51,
+    "regime": "혼조 (반도체 쇼크 패닉셀 vs AI 인프라 선별 수요 분화, 한국 수급 구조적 취약)",
+    "trend": "하락추세",
+    "vix_level": "공포",
+    "vix_val": 18.51,
     "vkospi_val": 15.0,
-    "fear_greed": 41.0,
-    "internal_raw": 49.1044776119403,
+    "fear_greed": 39.0,
+    "internal_raw": 48.208955223880594,
     "divergence": false,
     "fred_score": 50,
     "fred_indicators": {}
   },
   "trend": {
     "direction": "deteriorating",
-    "change": -6.2,
-    "avg_7d": 58.4,
-    "min_30d": 47,
+    "change": -6.8,
+    "avg_7d": 58.1,
+    "min_30d": 45,
     "max_30d": 64,
     "avg_30d": 59.7
   },
-  "last_updated": "2026-06-08T08:00:31.105609+09:00"
+  "last_updated": "2026-06-08T23:54:53.283391+09:00"
 }
