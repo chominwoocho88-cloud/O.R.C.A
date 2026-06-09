@@ -1,6 +1,16 @@
 {
-  "collected_at": "2026-06-09 08:13 KST",
+  "collected_at": "2026-06-10 08:18 KST",
   "tickers": [
+    "252670.KS",
+    "114800.KS",
+    "0193T0",
+    "252710.KS",
+    "233740.KS",
+    "0197X0",
+    "0195S0",
+    "0193W0",
+    "251340.KS",
+    "001740.KS",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -11,41 +21,47 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "NVDA",
-      "headline": "NVIDIA stock down 6.20% amid semiconductor sector sell-off following disappointing AI guidance concerns",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
       "ticker": "000660.KS",
-      "headline": "SK Hynix down 9.92% on June 5 as Broadcom's disappointing Q3 AI guidance triggers semiconductor sector sell-off",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics down 10.18% on June 8 amid KOSPI market-wide decline and semiconductor weakness",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "AVGO",
-      "headline": "Broadcom stock down 7.92% after disappointing Q3 AI revenue forecast, sparking semiconductor sector selloff",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "466920.KS",
-      "headline": "SOL Korea High Dividend ETF experiences gains from financial sector strength and government valuap policy support",
+      "headline": "SK Hynix partners with Nvidia to co-develop next-generation memory for AI data centers",
       "impact": "bullish",
       "source": "web_search"
     },
     {
+      "ticker": "005930.KS",
+      "headline": "Samsung Electronics planning new packaging facility investment; co-CEO meets with Nvidia CEO",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "NVDA",
+      "headline": "Nvidia secures Apple as major AI customer for chips; establishes multiyear partnership",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "AVGO",
+      "headline": "Broadcom releases Private Cloud Outlook 2026 showing enterprise shift to private cloud for AI; shares fell 14% after guidance maintained at $100B+ AI revenue",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
       "ticker": "035720.KS",
-      "headline": "Kakao stock down 4.17% as KOSPI decline impacts market; company faces labor disputes with union",
-      "impact": "bearish",
+      "headline": "Kakao Q1 2026 shows 11% YoY revenue growth, 66% YoY operating profit rise; AI initiatives advancing",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "0195S0",
+      "headline": "TIGER SK하이닉스단일종목레버리지 surges with 3 trillion won+ inflow on first week; AI HBM demand driving investor interest",
+      "impact": "bullish",
+      "source": "web_search"
+    },
+    {
+      "ticker": "466920.KS",
+      "headline": "SOL 코리아고배당 ETF crosses 400B won in assets; highest inflow among Korean dividend ETFs with 6% yield",
+      "impact": "bullish",
       "source": "web_search"
     }
   ],
-  "total": 6
+  "total": 7
 }

@@ -1,13 +1,13 @@
 {
-  "total": 96,
-  "correct": 74,
+  "total": 100,
+  "correct": 77,
   "by_category": {
     "ok": {
-      "total": 92,
-      "correct": 72
+      "total": 95,
+      "correct": 75
     },
     "기업": {
-      "total": 3,
+      "total": 4,
       "correct": 1
     },
     "기타": {
@@ -366,6 +366,15 @@
       "dir_correct": 2,
       "dir_accuracy": 66.7,
       "full_correct": 2
+    },
+    {
+      "date": "2026-06-10",
+      "total": 4,
+      "correct": 3,
+      "accuracy": 75.0,
+      "dir_correct": 3,
+      "dir_accuracy": 75.0,
+      "full_correct": 3
     }
   ],
   "history_by_category": [
@@ -730,20 +739,33 @@
           "correct": 2
         }
       }
+    },
+    {
+      "date": "2026-06-10",
+      "by_category": {
+        "ok": {
+          "total": 3,
+          "correct": 3
+        },
+        "기업": {
+          "total": 1,
+          "correct": 0
+        }
+      }
     }
   ],
   "weak_areas": [
-    "기업 (33%)"
+    "기업 (25%)"
   ],
   "strong_areas": [
-    "ok (78%)"
+    "ok (79%)"
   ],
-  "dir_total": 96,
-  "dir_correct": 74,
-  "dir_accuracy_pct": 77.1,
-  "score_total": 96.0,
-  "score_earned": 70.0,
-  "score_accuracy": 72.9,
+  "dir_total": 100,
+  "dir_correct": 77,
+  "dir_accuracy_pct": 77.0,
+  "score_total": 100.0,
+  "score_earned": 73.0,
+  "score_accuracy": 73.0,
   "_reset_at": "2026-04-16T16:44:01.994399+09:00",
   "_note": "aria_reset.py 실행으로 초기화됨"
 }
