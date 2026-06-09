@@ -1,0 +1,7 @@
+{
+  "name": "기술적과매도_day1_full_capture",
+  "description": "기술적과매도 스윙 타입은 평균 피크가 1일차에 발생하며 정확도 100%로 단기 즉시 매도 전략이 최적",
+  "trigger": "swing_type == 기술적과매도 AND avg_peak_day == 1.0 AND accuracy == 100%",
+  "action": "진입 다음날 장 초반 익일 +3.5% 수익 구간에서 전량 익절 실행",
+  "created_at": "2026-06-09T23:58:51.245605"
+}
