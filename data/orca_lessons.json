@@ -6,7 +6,7 @@
       "category": "monthly_strength",
       "lesson": "Monthly review 2026-05: accuracy reached 78.9%. Keep the regime filters that worked, but do not treat one good month as a permanent edge.",
       "severity": "low",
-      "applied": 21,
+      "applied": 22,
       "reinforced": 0
     },
     {
@@ -15,7 +15,7 @@
       "category": "monthly_weakness",
       "lesson": "Monthly review 2026-05: category '기업' produced only 33% accuracy across 3 checks. Treat it as weak evidence until new validation improves it.",
       "severity": "high",
-      "applied": 21,
+      "applied": 22,
       "reinforced": 0
     },
     {
