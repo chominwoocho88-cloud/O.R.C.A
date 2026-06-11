@@ -1,6 +1,16 @@
 {
-  "collected_at": "2026-06-11 08:25 KST",
+  "collected_at": "2026-06-12 08:20 KST",
   "tickers": [
+    "252670.KS",
+    "114800.KS",
+    "0193T0",
+    "0195S0",
+    "252710.KS",
+    "0197X0",
+    "0193W0",
+    "233740.KS",
+    "251340.KS",
+    "462330.KS",
     "NVDA",
     "000660.KS",
     "005930.KS",
@@ -11,65 +21,65 @@
   "regime": "",
   "news_items": [
     {
-      "ticker": "NVDA",
-      "headline": "NVIDIA stock down 3.38% amid broad semiconductor sector volatility and geopolitical tensions",
+      "ticker": "252670.KS",
+      "headline": "KODEX 200선물인버스2X ETF - Individual investors bet on KOSPI decline with 540 billion won net purchases",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "114800.KS",
+      "headline": "KODEX 인버스 ETF trading at 1,052 KRW, up 7.57% - inverse positioning continues",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "0193T0",
+      "headline": "SK하이닉스 단일종목레버리지 ETF - Market volatility concerns with 2배 leverage structure risks",
       "impact": "bearish",
       "source": "web_search"
     },
     {
-      "ticker": "NVDA",
-      "headline": "Apple confirms AI services to run on NVIDIA hardware in strategic partnership",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix executive sells 2.3 billion won worth of stock at record highs, raising market concerns",
+      "ticker": "0195S0",
+      "headline": "TIGER SK하이닉스단일종목레버리지 - High volatility amid price distortion issues on Korean exchange",
       "impact": "bearish",
       "source": "web_search"
     },
     {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix plans U.S. listing (ADR) by August 2026 to attract global AI-focused investors",
-      "impact": "bullish",
+      "ticker": "252710.KS",
+      "headline": "TIGER 200선물인버스2X ETF - KOSPI inverse 2X tracking product with 306 KRW price level",
+      "impact": "neutral",
       "source": "web_search"
     },
     {
-      "ticker": "000660.KS",
-      "headline": "SK Hynix surges 15.91% to 2,215,000 won on AI semiconductor demand strength",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics evaluates advanced chip packaging facility in Gwangju targeting AI market",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "005930.KS",
-      "headline": "Samsung Electronics down 4.35% on broad semiconductor selloff and market corrections",
+      "ticker": "0197X0",
+      "headline": "SOL SK하이닉스선물단일종목인버스2X - Inverse positioning on SK Hynix declining amid semiconductor strength",
       "impact": "bearish",
       "source": "web_search"
     },
     {
-      "ticker": "AVGO",
-      "headline": "Broadcom establishes $35 billion AI XPV Platform with Apollo Global and Blackstone",
+      "ticker": "0193W0",
+      "headline": "KODEX 삼성전자단일종목레버리지 - 4 trillion won net inflows to single-stock leverage ETFs",
       "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "AVGO",
-      "headline": "Broadcom down 1.75% as geopolitical tensions renew concerns in semiconductor sector",
-      "impact": "bearish",
+      "ticker": "233740.KS",
+      "headline": "KODEX 코스닥150레버리지 - Received massive 672.7 billion won net purchases during market crash recovery",
+      "impact": "bullish",
       "source": "web_search"
     },
     {
-      "ticker": "466920.KS",
-      "headline": "SOL 코리아고배당 ETF surpasses 6.9 trillion won in assets with strong dividend yield performance",
-      "impact": "bullish",
+      "ticker": "251340.KS",
+      "headline": "KODEX 코스닥150선물인버스 - Inverse positioning on KOSDAQ 150 index with 2,125 KRW trading",
+      "impact": "neutral",
+      "source": "web_search"
+    },
+    {
+      "ticker": "462330.KS",
+      "headline": "KODEX 2차전지산업레버리지 - Secondary battery industry leverage ETF trading at 1,839 KRW",
+      "impact": "neutral",
       "source": "web_search"
     }
   ],
-  "total": 12
+  "total": 16
 }
