@@ -105,54 +105,6 @@ def fetch_fred() -> dict:
     return result
 
 
-def fetch_krx() -> dict:
-    """
-    Fetch a light KRX snapshot.
-
-    The scanner currently does not depend on this payload, so failures should
-    degrade quietly instead of blocking the JACKAL pipeline.
-    """
-    result = {
-        "kospi": None,
-        "kosdaq": None,
-        "source": False,
-    }
-    api_key = os.environ.get("KRX_API_KEY", "").strip()
-    if not api_key:
-        log.info("KRX_API_KEY missing; skipping KRX snapshot")
-        return result
-
-    base_url = "https://data-dbg.krx.co.kr/svc/apis/idx/krx_dd_trd"
-    success = 0
-    for code, key in (("1001", "kospi"), ("2001", "kosdaq")):
-        try:
-            response = httpx.get(
-                base_url,
-                params={"basDd": _latest_business_day(), "idxIndCd": code},
-                headers={"AUTH_KEY": api_key},
-                timeout=8,
-            )
-            if response.status_code != 200:
-                continue
-            payload = response.json()
-            data = payload.get("OutBlock_1") or payload.get("output") or {}
-            value = _to_float(
-                data.get("clpr")
-                or data.get("close")
-                or data.get("idx_clpr")
-                or data.get("IDX_CLPR")
-            )
-            if value is None:
-                continue
-            result[key] = value
-            success += 1
-        except Exception as exc:
-            log.warning("KRX %s fetch failed: %s", key, exc)
-
-    result["source"] = success >= 1
-    return result
-
-
 def fetch_fsc() -> dict:
     """Fetch a few public Korean reference prices from the data.go.kr feed."""
     result = {
@@ -462,21 +414,19 @@ def fetch_technicals(ticker: str) -> dict | None:
 def fetch_all() -> dict:
     """Fetch the shared macro/context bundle used by the scanner."""
     fred = fetch_fred()
-    krx = fetch_krx()
     fsc = fetch_fsc()
     sentiment = load_sentiment()
 
     log.info(
-        "Macro bundle | FRED:%s KRX:%s FSC:%s Sentiment:%s",
+        "Macro bundle | FRED:%s FSC:%s Sentiment:%s",
         "ok" if fred.get("source") else "fallback",
-        "ok" if krx.get("source") else "fallback",
         "ok" if fsc.get("source") else "fallback",
         sentiment.get("score", 50),
     )
 
+    # KRX 스냅샷은 2026-06-11 제거 — 소비처 없음 (KIS 이행 완료, KRX_API_KEY 폐기)
     return {
         "fred": fred,
-        "krx": krx,
         "fsc": fsc,
         "sentiment": sentiment,
     }

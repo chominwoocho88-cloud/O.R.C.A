@@ -197,7 +197,6 @@ jobs:
           JACKAL_DAILY_BUDGET: "500000"
           JACKAL_AUTOCOMPACT: "true"
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
           # Phase 8i-1: KIS env for JACKAL realtime watchlist
           KIS_CMW_APP_KEY_PAPER: ${{ secrets.KIS_CMW_APP_KEY_PAPER }}
@@ -225,7 +224,6 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           SUBAGENT_MODEL: "claude-haiku-4-5-20251001"
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
           # Phase 8i-1: KIS env for JACKAL realtime watchlist
           KIS_CMW_APP_KEY_PAPER: ${{ secrets.KIS_CMW_APP_KEY_PAPER }}

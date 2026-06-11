@@ -283,7 +283,6 @@ jobs:
           PYTHONIOENCODING: utf-8
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
           ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"
@@ -297,7 +296,6 @@ jobs:
           PYTHONIOENCODING: utf-8
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
           FSCAPI_KEY: ${{ secrets.FSCAPI_KEY }}
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
           ALPHA_VANTAGE_SLEEP_SECONDS: "0.8"

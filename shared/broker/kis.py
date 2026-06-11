@@ -40,8 +40,36 @@ class KisAuthError(KisError):
 
 
 def _is_paper_mode() -> bool:
-    """Return True when KIS paper-trading mode is enabled."""
-    return os.environ.get("KIS_IS_PAPER", "true").lower() == "true"
+    """Return True when KIS paper-trading mode is enabled.
+
+    KIS_IS_PAPER가 있으면 그대로(GHA가 명시 주입 — 레거시 오버라이드), 없으면
+    공용 .env의 KIS_ENV(ATLAS와 단일 소스: prod/paper)를 따르고, 둘 다 없으면 paper.
+    """
+    legacy = os.environ.get("KIS_IS_PAPER", "").strip()
+    if legacy:
+        return legacy.lower() == "true"
+    # 빈 문자열은 미설정으로 취급 (docker-compose의 ${VAR:-}가 ""를 주입함)
+    return os.environ.get("KIS_ENV", "paper").strip().lower() != "prod"
+
+
+def _atlas_credential() -> dict:
+    """공용 .env의 ATLAS 표기 KIS 자격증명(JSON)을 읽는다 — 단일 소스 폴백.
+
+    같은 값을 KIS_CMW_*와 KIS_PROD_CREDENTIALS/KIS_PAPER_CREDENTIAL 두 표기로
+    중복 관리하지 않기 위해, KIS_CMW_*가 없으면 ATLAS 쪽 JSON에서 가져온다.
+    GHA에서는 KIS_CMW_* secrets가 주입되므로 동작 불변; 로컬 실행 시에만 폴백.
+    """
+    name = "KIS_PAPER_CREDENTIAL" if _is_paper_mode() else "KIS_PROD_CREDENTIALS"
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return {}
+    try:
+        parsed = json.loads(raw)
+    except (ValueError, TypeError):
+        return {}
+    if isinstance(parsed, list):
+        parsed = parsed[0] if parsed else {}
+    return parsed if isinstance(parsed, dict) else {}
 
 
 def get_kis_base_url() -> str:
@@ -57,22 +85,35 @@ def _get_user_agent() -> str:
 def _get_app_key() -> str:
     """Read the KIS app key from environment variables."""
     if _is_paper_mode():
-        return os.environ.get("KIS_CMW_APP_KEY_PAPER", "")
-    return os.environ.get("KIS_CMW_APP_KEY", "")
+        override = os.environ.get("KIS_CMW_APP_KEY_PAPER", "")
+    else:
+        override = os.environ.get("KIS_CMW_APP_KEY", "")
+    return override or str(_atlas_credential().get("app_key", ""))
 
 
 def _get_app_secret() -> str:
     """Read the KIS app secret from environment variables."""
     if _is_paper_mode():
-        return os.environ.get("KIS_CMW_APP_SECRET_PAPER", "")
-    return os.environ.get("KIS_CMW_APP_SECRET", "")
+        override = os.environ.get("KIS_CMW_APP_SECRET_PAPER", "")
+    else:
+        override = os.environ.get("KIS_CMW_APP_SECRET", "")
+    return override or str(_atlas_credential().get("app_secret", ""))
 
 
 def _get_account_number() -> str:
     """Read the KIS account number from environment variables."""
     if _is_paper_mode():
-        return os.environ.get("KIS_CMW_ACCOUNT_NUMBER_PAPER", "")
-    return os.environ.get("KIS_CMW_ACCOUNT_NUMBER", "")
+        override = os.environ.get("KIS_CMW_ACCOUNT_NUMBER_PAPER", "")
+    else:
+        override = os.environ.get("KIS_CMW_ACCOUNT_NUMBER", "")
+    if override:
+        return override
+    credential = _atlas_credential()
+    cano = str(credential.get("account_cano", "")).strip()
+    if not cano:
+        return ""
+    prdt = str(credential.get("account_prdt", "01")).strip() or "01"
+    return f"{cano}-{prdt}"
 
 
 @dataclass
