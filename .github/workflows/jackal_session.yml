@@ -380,6 +380,17 @@ jobs:
               print(f"WARNING: finish_jackal_session failed: {exc}")
           PY
 
+      - name: Export candidate snapshot for ORCA
+        if: always()
+        shell: bash
+        run: |
+          # Ownership-boundary fix for the cross-DB candidate loss:
+          # orca_state.db is not committed here (ORCA truth), so candidates
+          # registered by sync_jackal_live_events were lost every persist
+          # since 2026-05-15. Export a JACKAL-owned snapshot instead; the
+          # ORCA daily job imports it into its own DB. One committer per file.
+          python scripts/export_jackal_candidates.py --days 45
+
       - name: Commit and push
         id: commit_push
         if: always()
@@ -433,6 +444,7 @@ jobs:
             "data/llm_log.jsonl"
             "data/jackal_watchlist.json"
             "data/jackal_state.db"
+            "data/jackal_candidate_export.jsonl"
             "data/stock_name_cache.json"
           )
 

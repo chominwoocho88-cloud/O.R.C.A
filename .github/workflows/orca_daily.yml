@@ -135,6 +135,15 @@ jobs:
           conn.close()
           PY
 
+      - name: Import JACKAL candidate snapshot
+        shell: bash
+        run: |
+          # Counterpart of jackal_session's "Export candidate snapshot":
+          # registers JACKAL-discovered candidates into candidate_registry
+          # (orca_state.db, ORCA-owned) so the MORNING review loop sees them.
+          # Idempotent upsert by external key.
+          python scripts/import_jackal_candidates.py
+
       - name: Run ORCA report
         env:
           ORCA_MODE: ${{ env.ORCA_RUN_MODE }}
