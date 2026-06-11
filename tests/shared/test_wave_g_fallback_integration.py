@@ -339,10 +339,10 @@ class WaveGMigrationGuardTests(unittest.TestCase):
         }
         offenders: list[str] = []
         for path in ROOT.rglob("*.py"):
-            text_path = str(path)
-            if "\\tests\\" in text_path or "\\__pycache__\\" in text_path:
+            # 경로 필터는 OS 구분자 무관하게 — tests/캐시/로컬 가상환경은 가드 대상 아님
+            if {"tests", "__pycache__", ".venv"} & set(path.parts):
                 continue
-            if text_path in allowed:
+            if str(path) in allowed:
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
             if "import yfinance" in text or "yf.Ticker" in text or "yf.download" in text or "_yf." in text:
