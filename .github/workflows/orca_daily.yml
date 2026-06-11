@@ -43,6 +43,8 @@ jobs:
       KIS_CMW_APP_SECRET_PAPER: ${{ secrets.KIS_CMW_APP_SECRET_PAPER }}
       KIS_CMW_ACCOUNT_NUMBER_PAPER: ${{ secrets.KIS_CMW_ACCOUNT_NUMBER_PAPER }}
       KIS_IS_PAPER: "true"
+      # 2026-06-12 A2: KIS 수급 실가동 확인(KIS: success) → 수급 문구 완화 해제
+      KIS_CONNECTED: "true"
     permissions:
       contents: write
 
