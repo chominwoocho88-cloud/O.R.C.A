@@ -427,5 +427,16 @@
     "response_tokens": 454,
     "total_api_tokens": 2416,
     "cost_usd": 0.003386
+  },
+  {
+    "timestamp": "2026-06-11T15:07:38.011718",
+    "forced": false,
+    "tokens_before": 147450,
+    "estimated_saved": 103215,
+    "summary_chars": 581,
+    "prompt_tokens": 1962,
+    "response_tokens": 490,
+    "total_api_tokens": 2452,
+    "cost_usd": 0.00353
   }
 ]
