@@ -1,0 +1,7 @@
+{
+  "name": "ma_support_low_reliability_warning",
+  "warning": "Avoid over-relying on ma_support as sole entry signal when regime is mixed or risk-off",
+  "reason": "ma_support accuracy is only 33.3% across 3 samples, lowest among all tracked signals",
+  "regime_context": "혼조 or 위험회피 regime where structural outflows weaken MA support validity",
+  "timestamp": "2026-06-11T00:01:57.621492"
+}

@@ -1,7 +1,7 @@
 {
   "name": "rsi_oversold_priority_boost",
-  "description": "RSI 과매도 신호는 현재 가장 높은 정확도(57.1%)를 보이므로 우선 가중치를 부여한다",
-  "trigger": "rsi_oversold 신호 정확도 >= 55% AND sample >= 7",
-  "action": "rsi_oversold 신호 발생 시 진입 우선순위를 상향하고 목표가를 +3~5%로 설정",
-  "created_at": "2026-06-09T23:58:51.245060"
+  "description": "RSI oversold signal shows highest accuracy among all signals at 57.1%, prioritize in signal stacking",
+  "trigger": "rsi_oversold signal present with accuracy >= 57% and sample >= 7",
+  "action": "Increase position sizing weight by 10% when rsi_oversold is primary signal trigger",
+  "created_at": "2026-06-11T00:01:57.621051"
 }

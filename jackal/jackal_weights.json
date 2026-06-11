@@ -1,7 +1,7 @@
 {
   "signal_weights": {
     "bb_touch": 0.35,
-    "rsi_oversold": 1.14,
+    "rsi_oversold": 1.19,
     "volume_climax": 1.0,
     "ma_support": 1.0,
     "momentum_dip": 1.0,
@@ -36,6 +36,11 @@
       "correct": 3,
       "total": 6
     },
+    "bb_touch(-8%_밴드하단)": {
+      "accuracy": 100.0,
+      "correct": 1,
+      "total": 1
+    },
     "bb_touch_lower": {
       "accuracy": 0.0,
       "correct": 0,
@@ -61,6 +66,11 @@
       "correct": 1,
       "total": 3
     },
+    "ma_support(50MA_+3.2%_근처)": {
+      "accuracy": 100.0,
+      "correct": 1,
+      "total": 1
+    },
     "ma_support_test": {
       "accuracy": 0.0,
       "correct": 0,
@@ -81,6 +91,11 @@
       "correct": 0,
       "total": 1
     },
+    "rsi_oversold_boundary(42.1_접근)": {
+      "accuracy": 100.0,
+      "correct": 1,
+      "total": 1
+    },
     "sector_inflow": {
       "accuracy": 50.0,
       "correct": 3,
@@ -91,40 +106,25 @@
       "correct": 0,
       "total": 1
     },
+    "sector_inflow_감지(ARIA_미반영)": {
+      "accuracy": 100.0,
+      "correct": 1,
+      "total": 1
+    },
     "volume_climax": {
       "accuracy": 50.0,
       "correct": 1,
       "total": 2
     },
-    "volume_recovery_signal": {
+    "volume_climax(1.8x_정도_중립)": {
       "accuracy": 100.0,
       "correct": 1,
       "total": 1
     },
-    "rsi_oversold_boundary(42.1_접근)": {
+    "volume_recovery_signal": {
+      "accuracy": 100.0,
       "correct": 1,
-      "total": 1,
-      "accuracy": 100.0
-    },
-    "bb_touch(-8%_밴드하단)": {
-      "correct": 1,
-      "total": 1,
-      "accuracy": 100.0
-    },
-    "volume_climax(1.8x_정도_중립)": {
-      "correct": 1,
-      "total": 1,
-      "accuracy": 100.0
-    },
-    "ma_support(50MA_+3.2%_근처)": {
-      "correct": 1,
-      "total": 1,
-      "accuracy": 100.0
-    },
-    "sector_inflow_감지(ARIA_미반영)": {
-      "correct": 1,
-      "total": 1,
-      "accuracy": 100.0
+      "total": 1
     }
   },
   "regime_accuracy": {
@@ -193,6 +193,11 @@
       "swing_correct": 777,
       "total": 1090
     },
+    "혼조 (미국 반도체 쇼크 vs 펀더멘털 낙관론 충돌, 한국 수급 구조적 취약)": {
+      "accuracy": 100.0,
+      "correct": 1,
+      "total": 1
+    },
     "혼조 (미국 위험선호 강세 / 한국 수급 약세 디커플링)": {
       "accuracy": 100.0,
       "correct": 1,
@@ -207,11 +212,6 @@
       "accuracy": 50.0,
       "correct": 1,
       "total": 2
-    },
-    "혼조 (미국 반도체 쇼크 vs 펀더멘털 낙관론 충돌, 한국 수급 구조적 취약)": {
-      "correct": 1,
-      "total": 1,
-      "accuracy": 100.0
     }
   },
   "ticker_accuracy": {
@@ -1298,7 +1298,7 @@
       "total": 3
     }
   },
-  "last_updated": "2026-06-09T23:58:51.247099",
+  "last_updated": "2026-06-11T00:01:57.622408",
   "rule_registry_status": {
     "sector_rebound_base": {
       "active": true,
@@ -1464,23 +1464,23 @@
     "swing_accuracy": 70.9,
     "total_tracked": 3780
   },
-  "last_evolved_at": "2026-06-09T23:58:51.247095",
+  "last_evolved_at": "2026-06-11T00:01:57.622405",
   "last_macro_gate": {
+    "checked_at": "2026-06-10T23:36:22.986789+09:00",
+    "hy_chg5": -0.09,
+    "reason": "정상",
     "risk_level": "normal",
     "score_penalty": 0,
     "vix": 20.3,
-    "yield_curve": 0.0,
-    "hy_chg5": -0.09,
-    "reason": "정상",
-    "checked_at": "2026-06-10T23:36:22.986789+09:00"
+    "yield_curve": 0.0
   },
   "swing_type_optimal": {
     "기술적과매도": {
       "avg_peak_day": 1.0,
       "avg_peak_gain": 3.54,
-      "swing_accuracy": 100.0,
       "day1_accuracy": 100.0,
-      "sample": 1
+      "sample": 1,
+      "swing_accuracy": 100.0
     }
   },
   "system_accuracy": {
