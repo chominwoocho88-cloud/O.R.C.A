@@ -347,17 +347,63 @@ def fetch_put_call_ratio(
         return None
 
 
+_CBOE_OPTIONS_URL = "https://cdn.cboe.com/api/global/delayed_quotes/options/{ticker}.json"
+_CBOE_OPTION_RE = re.compile(r"^[A-Z]+\d{6}([CP])\d+$")
+
+
+def _cboe_put_call_volume(ticker: str, *, timeout: float = 10.0) -> float | None:
+    """CBOE delayed-quotes 옵션 체인에서 거래량 기준 PCR을 계산한다.
+
+    yfinance 옵션 경로가 rate limit/공급자 장애로 자주 실패해(2026-06 진단)
+    무료 CBOE 공식 API를 1차 소스로 쓴다. 실패 시 None — 호출측이 yfinance로
+    폴백한다. 스키마: data.options[].option = "SPY260612C00500000", .volume.
+    """
+    try:
+        import httpx
+
+        response = httpx.get(
+            _CBOE_OPTIONS_URL.format(ticker=ticker.upper()),
+            timeout=timeout,
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
+        if response.status_code != 200:
+            sys.stderr.write(f"WARN: CBOE PCR {ticker} HTTP {response.status_code}\n")
+            return None
+        options = (response.json().get("data") or {}).get("options") or []
+        volumes = {"C": 0.0, "P": 0.0}
+        for record in options:
+            match = _CBOE_OPTION_RE.match(str(record.get("option", "")))
+            if match:
+                volumes[match.group(1)] += float(record.get("volume") or 0.0)
+        if volumes["C"] <= 0:
+            sys.stderr.write(f"WARN: CBOE PCR {ticker} has no call volume\n")
+            return None
+        return round(volumes["P"] / volumes["C"], 3)
+    except Exception as exc:
+        sys.stderr.write(f"WARN: CBOE PCR {ticker} failed: {exc}\n")
+        return None
+
+
 def fetch_put_call_ratio_summary(
     tickers: tuple[str, ...] = ("SPY", "QQQ"),
     expiries: int = 2,
     sleep_seconds: float = 1.0,
     use_yfinance: bool = True,
 ) -> dict[str, Any]:
-    """Return the legacy ORCA PCR summary while keeping yfinance isolated here."""
+    """Return the legacy ORCA PCR summary while keeping yfinance isolated here.
+
+    소스 순서(2026-06-12 A3): ① CBOE 공식 무료 API(전체 체인 거래량 PCR)
+    ② 기존 yfinance 만기별 경로(폴백). 결과 스키마는 불변.
+    """
     result: dict[str, Any] = {"pcr_spy": None, "pcr_qqq": None, "pcr_avg": None, "pcr_signal": "N/A"}
     pcrs: list[float] = []
 
     for ticker in tickers:
+        cboe_pcr = _cboe_put_call_volume(ticker)
+        if cboe_pcr is not None:
+            pcrs.append(cboe_pcr)
+            result["pcr_" + ticker.lower()] = cboe_pcr
+            continue
         pcr_values: list[float] = []
         try:
             available_expiries = _option_expiries(ticker, use_yfinance=use_yfinance)
