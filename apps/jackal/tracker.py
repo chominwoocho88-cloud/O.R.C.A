@@ -42,6 +42,8 @@ from datetime import datetime, timezone, timedelta
 
 import pandas as pd
 from shared.build_info import get_build_info
+from shared.contracts.signals import normalize_regime_label, normalize_signal_label
+from jackal import reward as reward_math
 from shared.paths import (
     JACKAL_HUNT_LOG_FILE,
     JACKAL_LEGACY_DIR,
@@ -210,6 +212,15 @@ def _calc_outcomes(entry: dict, closes: pd.Series) -> dict:
         p5d          = float(closes.iloc[p5d_idx])
         pct5d        = round((p5d / price_at_hunt - 1) * 100, 3)
 
+        # 보상 학습 관측 필드 (additive — 기존 소비자 영향 없음)
+        trough_val = float(swing_window.min())
+        trough_pct = round((trough_val / price_at_hunt - 1) * 100, 3)
+        realized_vol_d = reward_math.realized_volatility(list(closes.values))
+        reward = reward_math.compute_reward(
+            swing_hit=swing_hit, peak_pct=peak_pct, outcome_pct=pct5d,
+            vol_d=realized_vol_d, peak_day=peak_idx, trough_pct=trough_pct,
+        )
+
         result.update({
             "price_peak":         round(peak_val, 4),
             "peak_day":           peak_idx,
@@ -221,6 +232,9 @@ def _calc_outcomes(entry: dict, closes: pd.Series) -> dict:
             "outcome_checked":    True,
             "confirmed":          True,
             "partial":            False,
+            "trough_pct":         trough_pct,
+            "realized_vol_d":     realized_vol_d,
+            "reward":             reward,
         })
 
     return result
@@ -229,6 +243,30 @@ def _calc_outcomes(entry: dict, closes: pd.Series) -> dict:
 # ══════════════════════════════════════════════════════════════════
 # 가중치 업데이트
 # ══════════════════════════════════════════════════════════════════
+
+def _record_signal_reward(weights: dict, sig: str, entry: dict,
+                          *, alerted: bool, in_live: bool) -> None:
+    """보상 관측(J.A.C.K.A.L 이식) — signal_reward 통계 + shadow_weights.
+
+    실가중치는 건드리지 않는다. 이 레포에선 항상 관측 전용 — 전환 판단은
+    J.A.C.K.A.L 로컬에서 한다 (REWARD_SYSTEM_ROADMAP R2).
+    """
+    reward_value = entry.get("reward")
+    if reward_value is None:
+        return
+    reward_value = float(reward_value)
+    stats = weights.setdefault("signal_reward", {}).setdefault(
+        sig, {"ema_r": None, "n": 0, "last_r": 0.0, "sum_r": 0.0})
+    stats["n"] += 1
+    stats["last_r"] = round(reward_value, 4)
+    stats["sum_r"] = round(stats["sum_r"] + reward_value, 4)
+    stats["ema_r"] = reward_math.update_ema(stats["ema_r"], reward_value)
+
+    if alerted and in_live:
+        shadow = weights.setdefault("shadow_weights", {})
+        base = shadow.get(sig, weights.get("signal_weights", {}).get(sig, 1.0))
+        shadow[sig] = reward_math.next_weight(float(base), reward_value, stats["n"])
+
 
 def _update_weights(weights: dict, entry: dict) -> list[str]:
     """
@@ -258,6 +296,7 @@ def _update_weights(weights: dict, entry: dict) -> list[str]:
         # 길이 >40 또는 빈 신호 (런타임 잡신호) 무시
         if not sig or len(sig) > 40:
             continue
+        sig = normalize_signal_label(sig)  # L2 — 파편 버킷 생성 금지
         rec = sig_acc.setdefault(sig, {
             "total": 0, "swing_correct": 0, "swing_accuracy": 0.0,
             "d1_correct": 0, "d1_accuracy": 0.0,
@@ -268,6 +307,9 @@ def _update_weights(weights: dict, entry: dict) -> list[str]:
         n = rec["total"]
         rec["swing_accuracy"] = round(rec["swing_correct"] / n * 100, 1)
         rec["d1_accuracy"]    = round(rec["d1_correct"]    / n * 100, 1)
+
+        # 보상 관측 (J.A.C.K.A.L 이식) — 실가중치 무간섭, 통계만 누적
+        _record_signal_reward(weights, sig, entry, alerted=alerted, in_live=sig in sw)
 
         # 가중치 조정 (alerted 신호 + 최소 샘플 이상)
         if alerted and n >= MIN_SAMPLES_ADJ and sig in sw:
@@ -315,6 +357,18 @@ def _update_weights(weights: dict, entry: dict) -> list[str]:
         })
         rec = dev.setdefault(verdict, {"correct": 0, "total": 0})
         rec["total"] += 1
+
+        # Devil 상벌 관측 (J.A.C.K.A.L 이식) — 신호 보상의 관점 변환
+        entry_reward = entry.get("reward")
+        if entry_reward is not None:
+            devil_r = reward_math.devil_reward(float(entry_reward), verdict)
+            if devil_r is not None:
+                stats = weights.setdefault("devil_reward", {}).setdefault(
+                    verdict, {"ema_r": None, "n": 0, "last_r": 0.0, "sum_r": 0.0})
+                stats["n"] += 1
+                stats["last_r"] = round(devil_r, 4)
+                stats["sum_r"] = round(stats["sum_r"] + devil_r, 4)
+                stats["ema_r"] = reward_math.update_ema(stats["ema_r"], devil_r)
         # Devil 정확도:
         #   "동의/부분동의" → 실제 성공이면 correct (Devil이 맞음)
         #   "반대"          → 실제 실패이면 correct (Devil의 반론이 맞음)
@@ -328,8 +382,8 @@ def _update_weights(weights: dict, entry: dict) -> list[str]:
     # ── 4. regime_accuracy ──────────────────────────────────────
     if regime:
         reg = weights.setdefault("regime_accuracy", {})
-        # 레짐 문자열이 길면 키 압축 (앞 25자)
-        reg_key = regime[:25].strip()
+        # 수식어 제거(정규화) 후 길면 키 압축 (앞 25자) — 파편 버킷 방지
+        reg_key = normalize_regime_label(regime)[:25].strip()
         rec = reg.setdefault(reg_key, {
             "total": 0, "correct": 0, "accuracy": 0.0, "avg_peak": 0.0,
         })

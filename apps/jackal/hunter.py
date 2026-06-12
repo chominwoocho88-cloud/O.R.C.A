@@ -1258,6 +1258,36 @@ day1 vs swing 구분:
                 "target_1d": "", "target_5d": "", "stop_loss": "", "expected_days": 3}
 
 
+def _devil_calibration_hint() -> str:
+    """Devil 자기 보정 힌트 (J.A.C.K.A.L 이식) — 판정별 성적을 본인에게 환류.
+
+    표본 5건 미만 판정은 표시하지 않는다 (소표본 과신 방지).
+    """
+    try:
+        weights = json.loads(JACKAL_WEIGHTS_FILE.read_text(encoding="utf-8"))
+        dev_acc = weights.get("devil_accuracy") or {}
+        dev_reward = weights.get("devil_reward") or {}
+    except Exception:
+        return ""
+    parts = []
+    for verdict in ("반대", "부분동의", "동의"):
+        rec = dev_acc.get(verdict) or {}
+        total = int(rec.get("total") or 0)
+        if total < 5:
+            continue
+        accuracy = (rec.get("correct") or 0) / total * 100
+        fragment = f"{verdict} 적중 {accuracy:.0f}% (n={total})"
+        ema = (dev_reward.get(verdict) or {}).get("ema_r")
+        if ema is not None:
+            fragment += f"·보상EMA {ema:+.2f}"
+        parts.append(fragment)
+    if not parts:
+        return ""
+    return ("\n[자기 보정 — 과거 판정 성적]\n" + " | ".join(parts)
+            + "\n반대 적중률이 50% 미만이면 과차단 경향이다 — 명확한 증거 없는"
+            " 반대/차단 플래그를 자제하라. 반대 적중률이 높다면 소신을 유지하라.\n")
+
+
 def _devil_swing(ticker: str, tech: dict, analyst: dict, aria: dict, cur: str) -> dict:
     price_str  = f"{tech['price']:,.2f}" if cur == "$" else f"{tech['price']:,.0f}"
     swing_type = analyst.get("swing_type", "기술적과매도")
@@ -1326,7 +1356,7 @@ Thesis Killers:{tk_details or ' 없음'}
 RSI: {tech['rsi']} (과매도라도 구조적 하락 중엔 더 낮아질 수 있음)
 BB: {tech['bb_pos']:.0f}% (하단 터치가 반등 보장 아님)
 5일: {tech['change_5d']:+.1f}% (이유가 구조적이면 반등 없음)
-
+{_devil_calibration_hint()}
 중요: 회의적 의견은 devil_score/main_risk로 표현하고, 차단 플래그는 명확한 증거가 있을 때만 true.
 {{"devil_score": 0~100 (높을수록 회의적),
   "verdict": "동의 또는 부분동의 또는 반대",
@@ -1797,6 +1827,23 @@ def _build_alert(item: dict, aria: dict) -> str:
     return "\n".join(lines)
 
 
+def _summary_reason_line(item: dict) -> str:
+    """'타점 없음' 요약에 점수의 이유 한 줄 (J.A.C.K.A.L 이식)."""
+    final   = item.get("final") or {}
+    devil   = item.get("devil") or {}
+    analyst = item.get("analyst") or {}
+    if final.get("mode") == "차단":
+        head = str(final.get("label", "차단")).strip()
+    else:
+        head = f"1일 {final.get('day1_score', '?')}점·스윙 {final.get('swing_score', '?')}점"
+        verdict = str(devil.get("verdict", "")).strip()
+        if verdict:
+            head += f" · Devil {verdict}"
+    risk = str(devil.get("main_risk") or analyst.get("main_risk") or "").strip()
+    tail = f" — {risk[:55]}" if risk else ""
+    return f"   └ {head}{tail}"
+
+
 def _build_summary(top5: list, aria: dict) -> str:
     now_str  = datetime.now(KST).strftime("%m/%d %H:%M")
     best     = top5[0] if top5 else None
@@ -1820,6 +1867,7 @@ def _build_summary(top5: list, aria: dict) -> str:
             f"{f['final_score']:.0f}점{block_badge} | RSI {tech['rsi']} | "
             f"5일 {tech['change_5d']:+.1f}% | {setup}"
         )
+        lines.append(_summary_reason_line(x))
     if any(x.get("tech", {}).get("bullish_div") for x in top5):
         lines.append("★ = RSI 강세다이버전스")
     lines += [

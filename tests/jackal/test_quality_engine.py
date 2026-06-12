@@ -346,6 +346,21 @@ EXPECTED_REGISTRY = {
             "low_accuracy_cutoff": 0.40,
             "change_log_min_delta": 0.001,
         },
+        # 보상 학습 관측 (J.A.C.K.A.L 이식, 2026-06-12) — 이 레포에선
+        # 항상 관측 전용: 실가중치 조정은 기존 규칙 그대로
+        "reward": {
+            "enabled": False,
+            "eta": 0.06,
+            "kappa": 0.02,
+            "alpha_ema": 0.15,
+            "loss_aversion": 1.5,
+            "tanh_scale": 1.5,
+            "vol_floor": 0.5,
+            "drawdown_penalty": 0.0,
+            "warmup_samples": 5,
+            "weight_min": 0.3,
+            "weight_max": 2.5,
+        },
     },
 }
 
