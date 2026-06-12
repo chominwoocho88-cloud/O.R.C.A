@@ -1466,13 +1466,13 @@
   },
   "last_evolved_at": "2026-06-12T00:09:48.911441",
   "last_macro_gate": {
-    "checked_at": "2026-06-12T00:03:25.514779+09:00",
-    "hy_chg5": -0.29,
-    "reason": "ARIA위험회피",
     "risk_level": "normal",
-    "score_penalty": 5,
-    "vix": 21.4,
-    "yield_curve": 0.0
+    "score_penalty": 0,
+    "vix": 19.1,
+    "yield_curve": 0.0,
+    "hy_chg5": 0.14,
+    "reason": "정상",
+    "checked_at": "2026-06-12T21:32:23.282984+09:00"
   },
   "swing_type_optimal": {
     "기술적과매도": {
