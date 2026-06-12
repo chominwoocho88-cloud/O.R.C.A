@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-12T23:25:13.945605+09:00",
+  "generated_at": "2026-06-13T03:05:00.364671+09:00",
   "tickers": [
     "252670.KS",
     "114800.KS",
@@ -11,11 +11,6 @@
     "0195S0",
     "0195R0",
     "233740.KS",
-    "MS",
-    "TXN",
-    "MU",
-    "ASML",
-    "KLAC",
     "XOM",
     "TSM",
     "AAPL",
@@ -226,96 +221,6 @@
       "portfolio": false,
       "asset_type": "stock"
     },
-    "MS": {
-      "ticker": "MS",
-      "name": "MS",
-      "market": "US",
-      "currency": "$",
-      "portfolio": false,
-      "asset_type": "stock",
-      "source": "candidate:hunt",
-      "status": "open",
-      "detected_at": "2026-06-12T23:24:43.335256+09:00",
-      "candidate_id": "cand_190c567850a54438a9b5f8524d7440cc",
-      "source_system": "jackal",
-      "source_event_type": "hunt",
-      "signal_family": "oversold_rebound",
-      "quality_label": null,
-      "quality_score": 53.5,
-      "reason": "oversold_rebound"
-    },
-    "TXN": {
-      "ticker": "TXN",
-      "name": "TXN",
-      "market": "US",
-      "currency": "$",
-      "portfolio": false,
-      "asset_type": "stock",
-      "source": "candidate:hunt",
-      "status": "tracking",
-      "detected_at": "2026-06-12T23:24:42.627656+09:00",
-      "candidate_id": "cand_4832eb705b434403a4925302dba64892",
-      "source_system": "jackal",
-      "source_event_type": "hunt",
-      "signal_family": "oversold_rebound",
-      "quality_label": null,
-      "quality_score": 57.0,
-      "reason": "oversold_rebound"
-    },
-    "MU": {
-      "ticker": "MU",
-      "name": "MU",
-      "market": "US",
-      "currency": "$",
-      "portfolio": false,
-      "asset_type": "stock",
-      "source": "candidate:hunt",
-      "status": "tracking",
-      "detected_at": "2026-06-12T23:24:41.431218+09:00",
-      "candidate_id": "cand_d2415ff3b483479390141e345921bb8e",
-      "source_system": "jackal",
-      "source_event_type": "hunt",
-      "signal_family": "oversold_rebound",
-      "quality_label": null,
-      "quality_score": 66.1,
-      "reason": "oversold_rebound"
-    },
-    "ASML": {
-      "ticker": "ASML",
-      "name": "ASML",
-      "market": "US",
-      "currency": "$",
-      "portfolio": false,
-      "asset_type": "stock",
-      "source": "candidate:hunt",
-      "status": "tracking",
-      "detected_at": "2026-06-12T23:24:40.243673+09:00",
-      "candidate_id": "cand_9f45958cfafb481bb002a3e4b379ac9d",
-      "source_system": "jackal",
-      "source_event_type": "hunt",
-      "signal_family": "oversold_rebound",
-      "quality_label": null,
-      "quality_score": 67.6,
-      "reason": "oversold_rebound"
-    },
-    "KLAC": {
-      "ticker": "KLAC",
-      "name": "KLAC",
-      "market": "US",
-      "currency": "$",
-      "portfolio": false,
-      "asset_type": "stock",
-      "source": "candidate:hunt",
-      "status": "tracking",
-      "detected_at": "2026-06-12T23:24:39.057310+09:00",
-      "candidate_id": "cand_fc107e3e357c446f948d3f442347396f",
-      "source_system": "jackal",
-      "source_event_type": "hunt",
-      "signal_family": "oversold_rebound",
-      "quality_label": null,
-      "quality_score": 69.5,
-      "reason": "oversold_rebound"
-    },
     "XOM": {
       "ticker": "XOM",
       "name": "XOM",
@@ -357,7 +262,7 @@
       "currency": "$",
       "portfolio": false,
       "asset_type": "stock",
-      "source": "candidate_registry",
+      "source": "candidate:scan",
       "status": "open",
       "detected_at": "2026-06-12T21:37:24.250854+09:00",
       "candidate_id": "cand_fa449f328e8a451ebb21660171bba588",
@@ -365,7 +270,8 @@
       "source_event_type": "scan",
       "signal_family": "oversold_rebound",
       "quality_label": "보통",
-      "quality_score": 59.0
+      "quality_score": 59.0,
+      "reason": "RSI 41.5로 과매도 영역 진입 및 거래량 증가(84% 매집신호) 기 | ⚠️ RSI 41.5는 과매도 신호이지만, 현재 혼조 레짐에"
     },
     "003280.KS": {
       "ticker": "003280.KS",
@@ -587,7 +493,7 @@
       "currency": "$",
       "portfolio": false,
       "asset_type": "stock",
-      "source": "candidate_registry",
+      "source": "candidate:scan",
       "status": "open",
       "detected_at": "2026-06-12T21:37:24.250854+09:00",
       "candidate_id": "cand_1181a2822e8c42b59374337cefe92b18",
@@ -595,7 +501,8 @@
       "source_event_type": "scan",
       "signal_family": "oversold_rebound",
       "quality_label": "보통",
-      "quality_score": 60.0
+      "quality_score": 60.0,
+      "reason": "RSI 30.2로 과매도 영역 진입하여 단기 반등 가능성 존재. 볼린저밴 | ⚠️ RSI 30.2 과매도는 추가 하락 신호일 수 있음. "
     },
     "AMZN": {
       "ticker": "AMZN",
@@ -604,7 +511,7 @@
       "currency": "$",
       "portfolio": false,
       "asset_type": "stock",
-      "source": "candidate_registry",
+      "source": "candidate:scan",
       "status": "open",
       "detected_at": "2026-06-12T21:37:24.250854+09:00",
       "candidate_id": "cand_10a03a9f736947f987f5aad603515f5d",
@@ -612,7 +519,8 @@
       "source_event_type": "scan",
       "signal_family": "oversold_rebound",
       "quality_label": "강",
-      "quality_score": 65.0
+      "quality_score": 65.0,
+      "reason": "RSI 27.1로 과매도 구간 진입하였으며, 볼린저밴드 하단(11.1%) | ⚠️ RSI 과매도 신호는 추가 하락 가능성을 암시하는 것이"
     },
     "MCHP": {
       "ticker": "MCHP",
@@ -621,7 +529,7 @@
       "currency": "$",
       "portfolio": false,
       "asset_type": "stock",
-      "source": "candidate_registry",
+      "source": "candidate:scan",
       "status": "open",
       "detected_at": "2026-06-12T21:37:24.250854+09:00",
       "candidate_id": "cand_af1232214d0d4de3bc5967242a7b66ee",
@@ -629,7 +537,8 @@
       "source_event_type": "scan",
       "signal_family": "general_rebound",
       "quality_label": "약",
-      "quality_score": 47.0
+      "quality_score": 47.0,
+      "reason": "RSI 강세 다이버전스와 매집신호가 동시 발생하며, 반도체 장비·첨단 공 | ⚠️ RSI 52.3은 중립 영역으로, '강세 다이버전스'라"
     },
     "TSLA": {
       "ticker": "TSLA",
@@ -655,7 +564,7 @@
       "currency": "$",
       "portfolio": false,
       "asset_type": "stock",
-      "source": "candidate_registry",
+      "source": "candidate:scan",
       "status": "open",
       "detected_at": "2026-06-12T21:37:24.250854+09:00",
       "candidate_id": "cand_1ca2431d150d48a99b3884336c8ffcfa",
@@ -663,7 +572,8 @@
       "source_event_type": "scan",
       "signal_family": "oversold_rebound",
       "quality_label": "보통",
-      "quality_score": 55.0
+      "quality_score": 55.0,
+      "reason": "RSI 39.8으로 과매도 영역 진입하며 반등 가능성 존재. 에너지 섹터 | ⚠️ RSI 39.8 과매도는 반등 신호가 아닌 약세 지속의"
     },
     "NFLX": {
       "ticker": "NFLX",
@@ -1314,7 +1224,7 @@
     }
   },
   "counts": {
-    "total": 73,
+    "total": 68,
     "portfolio": 0,
     "candidate": 20,
     "recommendation": 0
