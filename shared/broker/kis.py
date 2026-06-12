@@ -13,10 +13,11 @@ import os
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Optional
 
 import httpx
+
+from shared.paths import DATA_DIR
 
 
 PAPER_BASE_URL = "https://openapivts.koreainvestment.com:29443"
@@ -24,7 +25,10 @@ PROD_BASE_URL = "https://openapi.koreainvestment.com:9443"
 
 DEFAULT_TIMEOUT = 10.0
 TOKEN_REFRESH_MARGIN_SECONDS = 300
-TOKEN_CACHE_PATH = Path("data/kis_token.json")
+# JACKAL과 동일 규약: ORCA_REPO_ROOT(공용 데이터 루트) 기반 — cwd 무관.
+# 세 시스템이 같은 앱키(ATLAS 단일 소스)를 쓰므로 캐시도 한 파일을 공유해
+# 불필요한 토큰 재발급(상호 무효화 위험)을 줄인다 (2026-06-12 통일).
+TOKEN_CACHE_PATH = DATA_DIR / "kis_token.json"
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
