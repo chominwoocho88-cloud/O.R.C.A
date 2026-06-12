@@ -44,6 +44,7 @@ import pandas as pd
 from shared.build_info import get_build_info
 from shared.contracts.signals import normalize_regime_label, normalize_signal_label
 from jackal import reward as reward_math
+from jackal.calibration import record_calibration
 from shared.paths import (
     JACKAL_HUNT_LOG_FILE,
     JACKAL_LEGACY_DIR,
@@ -278,6 +279,7 @@ def _update_weights(weights: dict, entry: dict) -> list[str]:
     Returns: 변경 로그 (문자열 리스트)
     """
     changes: list[str] = []
+    record_calibration(weights, entry)  # 점수 신뢰도 — entry당 1회, 관측 전용
     correct    = bool(entry.get("outcome_correct"))
     d1_correct = bool(entry.get("outcome_1d_hit"))
     alerted    = bool(entry.get("alerted"))

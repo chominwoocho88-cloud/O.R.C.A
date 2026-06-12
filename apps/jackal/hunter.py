@@ -1188,6 +1188,7 @@ RSI(14): {tech['rsi']} | 볼린저 위치: {tech['bb_pos']:.0f}% | 거래량: {t
 ━━ 시장 레짐 ━━
 레짐: {aria['regime']}
 유입: {', '.join(aria.get('key_inflows', [])) or '없음'}
+{_analyst_calibration_hint()}
 유출: {', '.join(aria.get('key_outflows', [])) or '없음'}
 Thesis Killer: {', '.join(tk_events) or '없음'}
 
@@ -1256,6 +1257,16 @@ day1 vs swing 구분:
                 "swing_setup": "중립", "signals_fired": [],
                 "swing_type": swing_type, "bull_case": "", "entry_zone": "",
                 "target_1d": "", "target_5d": "", "stop_loss": "", "expected_days": 3}
+
+
+def _analyst_calibration_hint() -> str:
+    """Analyst 자기 보정 — 점수대별 실현 성적 환류 (jackal.calibration)."""
+    try:
+        weights = json.loads(JACKAL_WEIGHTS_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return ""
+    from jackal.calibration import calibration_hint
+    return calibration_hint(weights)
 
 
 def _devil_calibration_hint() -> str:

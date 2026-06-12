@@ -23,6 +23,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from jackal import reward as reward_math  # noqa: E402
+from jackal.calibration import record_calibration  # noqa: E402
 from shared.contracts.signals import normalize_signal_label  # noqa: E402
 
 DEFAULT_VOL = 1.5  # 과거분 vol 결측 가정 (설계 §6)
@@ -33,6 +34,7 @@ def replay(entries: list[dict], signal_weights: dict) -> tuple[dict, dict, dict]
     stats: dict[str, dict] = {}
     shadow: dict[str, float] = {}
     devil_stats: dict[str, dict] = {}
+    calibration_holder: dict = {}
     confirmed = sorted(
         (e for e in entries if e.get("outcome_checked")),
         key=lambda e: str(e.get("timestamp", "")),
@@ -59,6 +61,7 @@ def replay(entries: list[dict], signal_weights: dict) -> tuple[dict, dict, dict]
             if entry.get("alerted") and sig in signal_weights:
                 base = shadow.get(sig, float(signal_weights.get(sig, 1.0)))
                 shadow[sig] = reward_math.next_weight(base, reward_value, rec["n"])
+        record_calibration(calibration_holder, dict(entry, reward=reward_value))
         devil_r = reward_math.devil_reward(reward_value, entry.get("devil_verdict", ""))
         if devil_r is not None:
             rec = devil_stats.setdefault(
@@ -68,7 +71,7 @@ def replay(entries: list[dict], signal_weights: dict) -> tuple[dict, dict, dict]
             rec["last_r"] = round(devil_r, 4)
             rec["sum_r"] = round(rec["sum_r"] + devil_r, 4)
             rec["ema_r"] = reward_math.update_ema(rec["ema_r"], devil_r)
-    return stats, shadow, devil_stats
+    return stats, shadow, devil_stats, calibration_holder.get("score_calibration", {})
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -85,7 +88,7 @@ def main(argv: list[str] | None = None) -> int:
     weights = json.loads(weights_path.read_text(encoding="utf-8"))
     live = weights.get("signal_weights") or {}
 
-    stats, shadow, devil_stats = replay(entries, live)
+    stats, shadow, devil_stats, calibration = replay(entries, live)
 
     print(f"hunt_log: {hunt_path} (확정 {sum(1 for e in entries if e.get('outcome_checked'))}건)")
     print(f"{'신호':24s} {'n':>3s} {'ema_r':>7s} {'shadow_w':>8s} {'live_w':>7s}")
@@ -99,6 +102,14 @@ def main(argv: list[str] | None = None) -> int:
         print("Devil 상벌 (관점 변환):")
         for verdict, rec in devil_stats.items():
             print(f"  {verdict:6s} n={rec['n']:3d} ema_r={rec['ema_r']:+.3f}")
+    if calibration:
+        from jackal.calibration import calibration_rows
+        rows = calibration_rows({"score_calibration": calibration}, min_samples=3)
+        if rows:
+            print("점수 신뢰도:")
+            for row in rows:
+                print(f"  {row['bin']:6s} n={row['n']:3d} 평균점수 {row['avg_score']:5.1f}"
+                      f" -> 실현 {row['hit_pct']:5.1f}% ({row['verdict']})")
     if not args.apply:
         print("[dry-run] 변경 없음 — 적용하려면 --apply")
         return 0
@@ -108,6 +119,7 @@ def main(argv: list[str] | None = None) -> int:
     weights["signal_reward"] = stats
     weights["shadow_weights"] = shadow
     weights["devil_reward"] = devil_stats
+    weights["score_calibration"] = calibration
     weights_path.write_text(json.dumps(weights, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"적용 완료 (백업: {backup.name})")
     return 0

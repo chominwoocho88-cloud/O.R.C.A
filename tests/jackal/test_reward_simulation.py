@@ -48,7 +48,7 @@ class BackfillReplayTestCase(unittest.TestCase):
             {"outcome_checked": False, "signals_fired": ["rsi_oversold"]},  # 미확정 제외
         ]
 
-        stats, shadow, devil_stats = replay(entries, {"rsi_oversold": 1.0})
+        stats, shadow, devil_stats, calibration = replay(entries, {"rsi_oversold": 1.0})
 
         self.assertEqual(set(stats), {"rsi_oversold"})  # canonical 합산
         self.assertEqual(stats["rsi_oversold"]["n"], 2)
