@@ -1188,7 +1188,7 @@ RSI(14): {tech['rsi']} | 볼린저 위치: {tech['bb_pos']:.0f}% | 거래량: {t
 ━━ 시장 레짐 ━━
 레짐: {aria['regime']}
 유입: {', '.join(aria.get('key_inflows', [])) or '없음'}
-{_analyst_calibration_hint()}
+{_analyst_calibration_hint()}{_skills_hint()}
 유출: {', '.join(aria.get('key_outflows', [])) or '없음'}
 Thesis Killer: {', '.join(tk_events) or '없음'}
 
@@ -1257,6 +1257,28 @@ day1 vs swing 구분:
                 "swing_setup": "중립", "signals_fired": [],
                 "swing_type": swing_type, "bull_case": "", "entry_zone": "",
                 "target_1d": "", "target_5d": "", "stop_loss": "", "expected_days": 3}
+
+
+def _skills_hint() -> str:
+    """Evolution 스킬(트리거→액션)을 Analyst에 직접 주입 (J.A.C.K.A.L 이식)."""
+    skills_dir = _BASE / "skills"
+    try:
+        paths = sorted(skills_dir.glob("*.json"))[-5:]
+    except OSError:
+        return ""
+    lines = []
+    for p in paths:
+        try:
+            s = json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        trigger = str(s.get("trigger", "")).strip()[:70]
+        action = str(s.get("action", "")).strip()[:70]
+        if trigger and action:
+            lines.append(f"- {trigger} → {action}")
+    if not lines:
+        return ""
+    return "\n[학습된 스킬 — 해당 조건이면 반영하라]\n" + "\n".join(lines) + "\n"
 
 
 def _analyst_calibration_hint() -> str:

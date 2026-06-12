@@ -141,6 +141,18 @@ class JackalCompact:
         skills_dir = _BASE / "skills"
         if skills_dir.exists():
             data["skill_names"] = [p.stem for p in skills_dir.glob("*.json")]
+            # 스킬 내용 포함 — 파일명만 넣으면 trigger/action이 버려진다 (이식)
+            skills = []
+            for p in sorted(skills_dir.glob("*.json"))[-8:]:
+                try:
+                    s = json.loads(p.read_text(encoding="utf-8"))
+                except Exception:
+                    continue
+                skills.append({"name": s.get("name", p.stem),
+                               "trigger": str(s.get("trigger", ""))[:100],
+                               "action": str(s.get("action", ""))[:100]})
+            if skills:
+                data["skills"] = skills
 
         if self.cache_path.exists():
             try:
