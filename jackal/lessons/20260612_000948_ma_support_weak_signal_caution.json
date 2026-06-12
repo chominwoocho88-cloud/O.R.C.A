@@ -1,0 +1,7 @@
+{
+  "name": "ma_support_weak_signal_caution",
+  "warning": "Avoid high-confidence entries based solely on ma_support signal",
+  "reason": "ma_support shows only 33.3% accuracy across 3 samples, below random chance threshold",
+  "regime_context": "All regimes - especially 위험회피 where false support breaks are more common",
+  "timestamp": "2026-06-12T00:09:48.910122"
+}

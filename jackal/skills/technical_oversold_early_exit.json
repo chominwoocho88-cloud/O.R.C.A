@@ -1,0 +1,7 @@
+{
+  "name": "technical_oversold_early_exit",
+  "description": "기술적과매도 swing type shows peak gain of 3.54% occurring on day 1 with 100% accuracy",
+  "trigger": "swing_type is 기술적과매도 and day1 gain target >= 3.0%",
+  "action": "Set profit target at day 1 close rather than holding for multi-day swing to capture peak gain efficiently",
+  "created_at": "2026-06-12T00:09:48.909855"
+}

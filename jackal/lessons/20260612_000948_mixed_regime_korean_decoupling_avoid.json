@@ -1,0 +1,7 @@
+{
+  "name": "mixed_regime_korean_decoupling_avoid",
+  "warning": "Avoid new long entries in 혼조 (미국 위험선호 표면 / 한국 위험회피 심화) regime",
+  "reason": "This specific mixed regime shows 0.0% accuracy across 2 samples indicating structural Korean market divergence overwhelms US risk-on signals",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-06-12T00:09:48.910404"
+}
