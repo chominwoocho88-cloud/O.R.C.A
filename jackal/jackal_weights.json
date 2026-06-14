@@ -1,7 +1,7 @@
 {
   "signal_weights": {
     "bb_touch": 0.35,
-    "rsi_oversold": 1.24,
+    "rsi_oversold": 1.29,
     "volume_climax": 1.0,
     "ma_support": 1.0,
     "momentum_dip": 1.0,
@@ -1298,7 +1298,7 @@
       "total": 3
     }
   },
-  "last_updated": "2026-06-12T00:09:48.911445",
+  "last_updated": "2026-06-14T23:52:04.927217",
   "rule_registry_status": {
     "sector_rebound_base": {
       "active": true,
@@ -1464,15 +1464,15 @@
     "swing_accuracy": 70.9,
     "total_tracked": 3780
   },
-  "last_evolved_at": "2026-06-12T00:09:48.911441",
+  "last_evolved_at": "2026-06-14T23:52:04.927212",
   "last_macro_gate": {
+    "checked_at": "2026-06-12T23:19:51.310283+09:00",
+    "hy_chg5": 0.6,
+    "reason": "정상",
     "risk_level": "normal",
     "score_penalty": 0,
     "vix": 18.9,
-    "yield_curve": 0.0,
-    "hy_chg5": 0.6,
-    "reason": "정상",
-    "checked_at": "2026-06-12T23:19:51.310283+09:00"
+    "yield_curve": 0.0
   },
   "swing_type_optimal": {
     "기술적과매도": {

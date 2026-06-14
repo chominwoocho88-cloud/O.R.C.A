@@ -1,7 +1,7 @@
 {
   "name": "rsi_oversold_priority_boost",
-  "description": "RSI oversold signal shows highest accuracy among all signals at 57.1% with largest sample size of 7",
-  "trigger": "rsi_oversold signal fires with sample >= 5 and accuracy > 55%",
+  "description": "RSI oversold signal shows highest accuracy among all signals at 57.1% with 7 samples",
+  "trigger": "rsi_oversold signal fired with accuracy >= 57% and sample_count >= 7",
   "action": "Increase position confidence weight for rsi_oversold by +0.10 relative to other signals in same scan",
-  "created_at": "2026-06-12T00:09:48.909464"
+  "created_at": "2026-06-14T23:52:04.925527"
 }

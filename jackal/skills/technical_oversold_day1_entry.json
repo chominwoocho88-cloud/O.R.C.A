@@ -1,0 +1,7 @@
+{
+  "name": "technical_oversold_day1_entry",
+  "description": "기술적과매도 swing type achieves 100% day1 accuracy with avg peak gain of 3.54% on day 1",
+  "trigger": "swing_type == 기술적과매도 and day1 entry condition met",
+  "action": "Execute entry on day 1 without waiting for confirmation, target 3.5% gain within 1 day",
+  "created_at": "2026-06-14T23:52:04.925896"
+}

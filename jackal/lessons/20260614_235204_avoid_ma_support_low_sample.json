@@ -1,0 +1,7 @@
+{
+  "name": "avoid_ma_support_low_sample",
+  "warning": "ma_support signal firing with accuracy at 33.3% across 3 samples",
+  "reason": "MA support signals are failing 2 out of 3 times, indicating price is breaking through support rather than bouncing",
+  "regime_context": "혼조 (미국 위험선호 표면 / 한국 위험회피 심화)",
+  "timestamp": "2026-06-14T23:52:04.926206"
+}
