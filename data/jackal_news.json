@@ -1,85 +1,101 @@
 {
-  "collected_at": "2026-06-12 08:20 KST",
+  "collected_at": "2026-06-15 08:05 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
-    "0193T0",
-    "0195S0",
     "252710.KS",
-    "0197X0",
     "0193W0",
-    "233740.KS",
-    "251340.KS",
+    "0193T0",
+    "530036.KS",
     "462330.KS",
+    "0195S0",
+    "0195R0",
+    "233740.KS",
+    "XOM",
+    "TSM",
+    "AAPL",
+    "003280.KS",
+    "251340.KS",
+    "024060.KS",
+    "207940.KS",
+    "096770.KS",
+    "035720.KS",
+    "069540.KS",
+    "021880.KS",
+    "900300.KS",
+    "OXY",
+    "MSFT",
+    "META",
+    "GOOGL",
+    "AMZN",
+    "MCHP",
+    "TSLA",
+    "COP",
+    "NFLX",
+    "005380.KS",
+    "009150.KS",
+    "AMD",
+    "010170.KS",
+    "003550.KS",
+    "066570.KS",
+    "MRVL",
+    "ARM",
     "NVDA",
+    "AVGO",
+    "QCOM",
+    "INTC",
+    "BA",
+    "JNJ",
+    "NOC",
+    "NIO",
+    "CVX",
+    "JPM",
+    "AMAT",
+    "RIVN",
+    "BAC",
+    "WFC",
+    "PFE",
+    "042700.KS",
+    "086520.KS",
+    "247540.KS",
+    "051910.KS",
+    "068270.KS",
+    "000990.KS",
+    "373220.KS",
+    "010950.KS",
+    "035420.KS",
+    "000270.KS",
     "000660.KS",
     "005930.KS",
-    "AVGO",
     "466920.KS",
-    "035720.KS"
+    "018880.KS"
   ],
   "regime": "",
   "news_items": [
     {
-      "ticker": "252670.KS",
-      "headline": "KODEX 200선물인버스2X ETF - Individual investors bet on KOSPI decline with 540 billion won net purchases",
-      "impact": "neutral",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "Fed June 16-17 FOMC meeting: 99.5% market probability of no rate change",
+      "source": "Polymarket / CME FedWatch (Updated Jun 14, 2026)",
+      "data_pt": "Target range: 3.5-3.75% (unchanged) | Market probability of hold: 99.5% | May CPI: 4.2% YoY"
     },
     {
-      "ticker": "114800.KS",
-      "headline": "KODEX 인버스 ETF trading at 1,052 KRW, up 7.57% - inverse positioning continues",
-      "impact": "neutral",
-      "source": "web_search"
+      "ticker": "TSM",
+      "headline": "TSMC CEO: Global chip supply will fall short of AI demand for years",
+      "source": "Bloomberg (Jun 4, 2026)",
+      "data_pt": "June 4, 2026: C.C. Wei stated supply inadequacy persists | Production capacity remains key bottleneck | Will avoid price hikes seen in memory sector"
     },
     {
-      "ticker": "0193T0",
-      "headline": "SK하이닉스 단일종목레버리지 ETF - Market volatility concerns with 2배 leverage structure risks",
-      "impact": "bearish",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "HBM (High-Bandwidth Memory) capacity pre-committed through 2026-2027",
+      "source": "IDC Semiconductor Market Forecast 2026",
+      "data_pt": "IDC: Most HBM capacity already allocated through 2026-2027 | Concentrated in NVIDIA/AMD GPUs + hyperscaler custom silicon | New supply won't arrive until late 2026"
     },
     {
-      "ticker": "0195S0",
-      "headline": "TIGER SK하이닉스단일종목레버리지 - High volatility amid price distortion issues on Korean exchange",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "252710.KS",
-      "headline": "TIGER 200선물인버스2X ETF - KOSPI inverse 2X tracking product with 306 KRW price level",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "0197X0",
-      "headline": "SOL SK하이닉스선물단일종목인버스2X - Inverse positioning on SK Hynix declining amid semiconductor strength",
-      "impact": "bearish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "0193W0",
-      "headline": "KODEX 삼성전자단일종목레버리지 - 4 trillion won net inflows to single-stock leverage ETFs",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "233740.KS",
-      "headline": "KODEX 코스닥150레버리지 - Received massive 672.7 billion won net purchases during market crash recovery",
-      "impact": "bullish",
-      "source": "web_search"
-    },
-    {
-      "ticker": "251340.KS",
-      "headline": "KODEX 코스닥150선물인버스 - Inverse positioning on KOSDAQ 150 index with 2,125 KRW trading",
-      "impact": "neutral",
-      "source": "web_search"
-    },
-    {
-      "ticker": "462330.KS",
-      "headline": "KODEX 2차전지산업레버리지 - Secondary battery industry leverage ETF trading at 1,839 KRW",
-      "impact": "neutral",
-      "source": "web_search"
+      "ticker": "BA",
+      "headline": "Global semiconductor market forecast to reach $1.29T in 2026 (+52.8% YoY)",
+      "source": "IDC",
+      "data_pt": "IDC 2026 forecast: $1.29 trillion (+52.8%) | AI infrastructure + memory + hyperscaler CapEx drive growth | Market shifting from cyclical recovery to structurally constrained"
     }
   ],
-  "total": 16
+  "total": 4
 }
