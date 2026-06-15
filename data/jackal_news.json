@@ -1,19 +1,33 @@
 {
-  "collected_at": "2026-06-15 08:05 KST",
+  "collected_at": "2026-06-16 08:34 KST",
   "tickers": [
     "252670.KS",
     "114800.KS",
+    "018880.KS",
+    "530036.KS",
+    "0193T0",
     "252710.KS",
     "0193W0",
-    "0193T0",
-    "530036.KS",
-    "462330.KS",
     "0195S0",
-    "0195R0",
-    "233740.KS",
+    "360750.KS",
+    "462330.KS",
+    "GS",
+    "MRK",
+    "LMT",
+    "LLY",
+    "LRCX",
+    "AAPL",
+    "MSFT",
+    "META",
+    "AMZN",
+    "NFLX",
+    "MS",
+    "TXN",
+    "MU",
+    "ASML",
+    "KLAC",
     "XOM",
     "TSM",
-    "AAPL",
     "003280.KS",
     "251340.KS",
     "024060.KS",
@@ -24,14 +38,10 @@
     "021880.KS",
     "900300.KS",
     "OXY",
-    "MSFT",
-    "META",
     "GOOGL",
-    "AMZN",
     "MCHP",
     "TSLA",
     "COP",
-    "NFLX",
     "005380.KS",
     "009150.KS",
     "AMD",
@@ -55,6 +65,7 @@
     "BAC",
     "WFC",
     "PFE",
+    "233740.KS",
     "042700.KS",
     "086520.KS",
     "247540.KS",
@@ -67,35 +78,70 @@
     "000270.KS",
     "000660.KS",
     "005930.KS",
-    "466920.KS",
-    "018880.KS"
+    "466920.KS"
   ],
   "regime": "",
   "news_items": [
     {
+      "ticker": "GS",
+      "headline": "S&P 500 positive earnings guidance at highest levels since 2015 - 62 out of 109 companies issued positive EPS guidance for Q2 2026",
+      "source": "FactSet Research Q2 2026 Earnings Insight",
+      "data_pt": "109 companies issued EPS guidance for Q2 2026; 62 positive, 47 negative. 62 above 5-yr avg of 44, 10-yr avg of 41"
+    },
+    {
+      "ticker": "GS",
+      "headline": "S&P 500 Q2 2026 earnings estimates revised upward by 2.7% since March 31",
+      "source": "FactSet / LSEG",
+      "data_pt": "Analyst estimates for Q2 2026 per-share earnings increased 2.7% since March 31, 2026"
+    },
+    {
+      "ticker": "GS",
+      "headline": "Tech sector earnings growth projections for 2026: 15%+ growth expected; mega-cap 'Magnificent Seven' posted 37% growth in 2024 vs 7% for rest of index",
+      "source": "LSEG / iTiger",
+      "data_pt": "S&P 500 2026 earnings projected 15%+ growth per LSEG Head Tajinder Dhillon. Magnificent Seven (NVDA, AAPL, AMZN et al) had 37% earnings growth 2024 vs 7% rest of index"
+    },
+    {
+      "ticker": "AMD",
+      "headline": "Broadcom weak AI chip outlook in early June sparked semiconductor selloff; Intel, AMD, Micron impacted",
+      "source": "CNBC June 4, 2026",
+      "data_pt": "Broadcom earnings reported June 4, 2026 with weaker-than-expected AI chip outlook, triggering broader chip sector decline"
+    },
+    {
+      "ticker": "MU",
+      "headline": "Foreign investor reversal after 24-day selling streak: June 12 saw 2.12 trillion won net purchases after 75.6 trillion won cumulative outflow",
+      "source": "Korea Times / Korea Exchange",
+      "data_pt": "June 12, 2026: Foreigners snapped 24-day selling streak with 2.12 trillion won net purchases ($1.4 billion) after 75.6 trillion won cumulative outflow"
+    },
+    {
+      "ticker": "MU",
+      "headline": "US-Iran peace deal reduces war risk premium on crude oil; Trump declared 'full reopening of Hormuz'",
+      "source": "Bloomberg Bit / Yonhap",
+      "data_pt": "June 15, 2026: US-Iran 106-day conflict effectively ended per market sentiment. Trump announced 'full reopening' of Strait of Hormuz"
+    },
+    {
       "ticker": "BA",
-      "headline": "Fed June 16-17 FOMC meeting: 99.5% market probability of no rate change",
-      "source": "Polymarket / CME FedWatch (Updated Jun 14, 2026)",
-      "data_pt": "Target range: 3.5-3.75% (unchanged) | Market probability of hold: 99.5% | May CPI: 4.2% YoY"
+      "headline": "Federal Reserve holding rates steady at 3.50%-3.75% at June 16-17 meeting with 99% market probability",
+      "source": "Polymarket / Federal Reserve",
+      "data_pt": "Fed funds rate steady at 3.50%-3.75%. June 16-17 FOMC meeting expected 0 bps change per 99% market probability"
+    },
+    {
+      "ticker": "BA",
+      "headline": "Oil demand forecast downward: Global oil demand now expected to fall 1.1 million barrels/day in 2026 vs prior projection of 0.2 million b/d growth",
+      "source": "EIA June 2026 Short-Term Energy Outlook",
+      "data_pt": "June 2026 EIA STEO: Global oil demand forecast revised down to -1.1 million b/d decline vs prior +0.2 million b/d growth due to Middle East closure impact"
     },
     {
       "ticker": "TSM",
-      "headline": "TSMC CEO: Global chip supply will fall short of AI demand for years",
-      "source": "Bloomberg (Jun 4, 2026)",
-      "data_pt": "June 4, 2026: C.C. Wei stated supply inadequacy persists | Production capacity remains key bottleneck | Will avoid price hikes seen in memory sector"
+      "headline": "TSMC CEO warns chip supply will fall short of AI-fueled demand for years; production capacity remains bottleneck",
+      "source": "Bloomberg / TSMC",
+      "data_pt": "June 4, 2026: TSMC CEO C.C. Wei stated global chip supply won't meet AI demand for years; US capacity expansion insufficient"
     },
     {
       "ticker": "BA",
-      "headline": "HBM (High-Bandwidth Memory) capacity pre-committed through 2026-2027",
-      "source": "IDC Semiconductor Market Forecast 2026",
-      "data_pt": "IDC: Most HBM capacity already allocated through 2026-2027 | Concentrated in NVIDIA/AMD GPUs + hyperscaler custom silicon | New supply won't arrive until late 2026"
-    },
-    {
-      "ticker": "BA",
-      "headline": "Global semiconductor market forecast to reach $1.29T in 2026 (+52.8% YoY)",
-      "source": "IDC",
-      "data_pt": "IDC 2026 forecast: $1.29 trillion (+52.8%) | AI infrastructure + memory + hyperscaler CapEx drive growth | Market shifting from cyclical recovery to structurally constrained"
+      "headline": "Global interposer market projected to grow from $1.43B (2025) to $4.12B (2035) at 11.2% CAGR due to AI/HPC demand",
+      "source": "Reports & Data / June 11, 2026",
+      "data_pt": "Global Interposer market: $1.43B (2025) → $4.12B (2035) at 11.2% CAGR, driven by AI/HPC/5G infrastructure demand"
     }
   ],
-  "total": 4
+  "total": 12
 }
