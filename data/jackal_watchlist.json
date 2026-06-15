@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-16T01:28:46.301880+09:00",
+  "generated_at": "2026-06-16T04:46:37.765980+09:00",
   "tickers": [
     "252670.KS",
     "114800.KS",
@@ -11,10 +11,6 @@
     "0195S0",
     "360750.KS",
     "462330.KS",
-    "ABBV",
-    "SLB",
-    "GD",
-    "RTX",
     "GS",
     "MRK",
     "LMT",
@@ -224,78 +220,6 @@
       "currency": "KRW",
       "portfolio": false,
       "asset_type": "stock"
-    },
-    "ABBV": {
-      "ticker": "ABBV",
-      "name": "ABBV",
-      "market": "US",
-      "currency": "$",
-      "portfolio": false,
-      "asset_type": "stock",
-      "source": "candidate:hunt",
-      "status": "open",
-      "detected_at": "2026-06-16T01:28:19.579537+09:00",
-      "candidate_id": "cand_1ea2a41c468c48409031bb5099f2e815",
-      "source_system": "jackal",
-      "source_event_type": "hunt",
-      "signal_family": "oversold_rebound",
-      "quality_label": null,
-      "quality_score": 24.0,
-      "reason": "oversold_rebound"
-    },
-    "SLB": {
-      "ticker": "SLB",
-      "name": "SLB",
-      "market": "US",
-      "currency": "$",
-      "portfolio": false,
-      "asset_type": "stock",
-      "source": "candidate:hunt",
-      "status": "open",
-      "detected_at": "2026-06-16T01:28:18.875182+09:00",
-      "candidate_id": "cand_aea8d5e8c40b451ba6f8f2dea681faae",
-      "source_system": "jackal",
-      "source_event_type": "hunt",
-      "signal_family": "ma_reclaim",
-      "quality_label": null,
-      "quality_score": 24.0,
-      "reason": "ma_reclaim"
-    },
-    "GD": {
-      "ticker": "GD",
-      "name": "GD",
-      "market": "US",
-      "currency": "$",
-      "portfolio": false,
-      "asset_type": "stock",
-      "source": "candidate:hunt",
-      "status": "open",
-      "detected_at": "2026-06-16T01:28:18.175941+09:00",
-      "candidate_id": "cand_19823067e55e4d8984095dc05ca50ccb",
-      "source_system": "jackal",
-      "source_event_type": "hunt",
-      "signal_family": "oversold_rebound",
-      "quality_label": null,
-      "quality_score": 29.0,
-      "reason": "oversold_rebound"
-    },
-    "RTX": {
-      "ticker": "RTX",
-      "name": "RTX",
-      "market": "US",
-      "currency": "$",
-      "portfolio": false,
-      "asset_type": "stock",
-      "source": "candidate:hunt",
-      "status": "open",
-      "detected_at": "2026-06-16T01:28:17.478005+09:00",
-      "candidate_id": "cand_36e264b7e081428181f2e76eca3a2b55",
-      "source_system": "jackal",
-      "source_event_type": "hunt",
-      "signal_family": "oversold_rebound",
-      "quality_label": null,
-      "quality_score": 49.5,
-      "reason": "oversold_rebound"
     },
     "GS": {
       "ticker": "GS",
@@ -640,10 +564,10 @@
       "ticker": "024060.KS",
       "name": "흥구석유",
       "market": "KR",
-      "currency": "KRW",
+      "currency": "₩",
       "portfolio": false,
       "asset_type": "stock",
-      "source": "candidate_registry",
+      "source": "candidate:scan",
       "status": "open",
       "detected_at": "2026-06-12T21:37:24.250854+09:00",
       "candidate_id": "cand_aeefc2cf11064f4189d37fb3589e044f",
@@ -651,7 +575,8 @@
       "source_event_type": "scan",
       "signal_family": "oversold_rebound",
       "quality_label": "강",
-      "quality_score": 77.0
+      "quality_score": 77.0,
+      "reason": "RSI 30.1 과매도 상태에서 강세 다이버전스 + 매집신호 동시 발생으 | ⚠️ RSI 과매도 신호는 신뢰도 낮음: 현재 혼조 레짐에서"
     },
     "207940.KS": {
       "ticker": "207940.KS",
@@ -691,10 +616,10 @@
       "ticker": "035720.KS",
       "name": "카카오",
       "market": "KR",
-      "currency": "KRW",
+      "currency": "₩",
       "portfolio": false,
       "asset_type": "stock",
-      "source": "candidate_registry",
+      "source": "candidate:scan",
       "status": "open",
       "detected_at": "2026-06-12T21:37:24.250854+09:00",
       "candidate_id": "cand_76ddc61051fc4369aa7262718bbf81d2",
@@ -702,7 +627,8 @@
       "source_event_type": "scan",
       "signal_family": "general_rebound",
       "quality_label": "약",
-      "quality_score": 47.0
+      "quality_score": 47.0,
+      "reason": "단기 모멘텀 회복(5일比 +3.1%, 거래량 1.9배)과 반도체 섹터 유 | ⚠️ RSI 48.9는 순수 중립 영역으로 상승 모멘텀의 객"
     },
     "069540.KS": {
       "ticker": "069540.KS",
@@ -725,10 +651,10 @@
       "ticker": "021880.KS",
       "name": "메이슨캐피탈",
       "market": "KR",
-      "currency": "KRW",
+      "currency": "₩",
       "portfolio": false,
       "asset_type": "stock",
-      "source": "candidate_registry",
+      "source": "candidate:scan",
       "status": "open",
       "detected_at": "2026-06-12T21:37:24.250854+09:00",
       "candidate_id": "cand_cf6c221112634769af4dc5690d7ebfb0",
@@ -736,7 +662,8 @@
       "source_event_type": "scan",
       "signal_family": "oversold_rebound",
       "quality_label": "보통",
-      "quality_score": 62.0
+      "quality_score": 62.0,
+      "reason": "RSI 26.7의 극도 과매도 상태에서 52주 저점 근처(0.0%)에 위 | ⚠️ RSI 26.7 극도 과매도는 기술적 반발 신호이지만,"
     },
     "900300.KS": {
       "ticker": "900300.KS",
@@ -844,10 +771,10 @@
       "ticker": "005380.KS",
       "name": "005380.KS",
       "market": "KR",
-      "currency": "KRW",
+      "currency": "₩",
       "portfolio": false,
       "asset_type": "stock",
-      "source": "candidate_registry",
+      "source": "candidate:scan",
       "status": "open",
       "detected_at": "2026-06-12T21:37:24.250854+09:00",
       "candidate_id": "cand_9ff64892e69e44b3af4c75d2b04217e7",
@@ -855,7 +782,8 @@
       "source_event_type": "scan",
       "signal_family": "oversold_rebound",
       "quality_label": "강",
-      "quality_score": 65.0
+      "quality_score": 65.0,
+      "reason": "반도체 장비·첨단 공정 섹터 강세 유입과 한국 반도체 수출 회복 기조 속 | ⚠️ RSI 39.9 과매도는 반등 신호가 아닌 추가 하락 "
     },
     "009150.KS": {
       "ticker": "009150.KS",
@@ -1471,7 +1399,7 @@
     }
   },
   "counts": {
-    "total": 82,
+    "total": 78,
     "portfolio": 0,
     "candidate": 20,
     "recommendation": 0
