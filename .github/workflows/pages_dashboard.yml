@@ -1,14 +1,6 @@
 name: ORCA Dashboard Pages
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "reports/**"
-      - "data/**"
-      - "orca/**"
-      - ".github/workflows/pages_dashboard.yml"
   workflow_dispatch:
 
 permissions:

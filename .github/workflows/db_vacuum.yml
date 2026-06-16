@@ -14,9 +14,6 @@ on:
         description: "Archive runs to keep in hot DB"
         type: string
         default: "1"
-  schedule:
-    # KST monthly 1st 03:00 = UTC previous day 18:00.
-    - cron: "0 18 1 * *"
 
 concurrency:
   group: orca-repo-state
